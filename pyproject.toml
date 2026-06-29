@@ -1,0 +1,16 @@
+[project]
+name = "jarvis-os"
+version = "0.1.0"
+description = "JARVIS-OS - Intelligent Personal AI Assistant"
+readme = "README.md"
+requires-python = ">=3.12"
+
+authors = [
+    { name = "OlsanTech" }
+]
+
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
