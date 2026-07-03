@@ -1,5 +1,14 @@
+from app.tools.windows import WindowsTool
+
+
 class ToolManager:
 
-    def execute(self, tool_name: str):
+    def __init__(self):
+        self.windows = WindowsTool()
 
-        return f"Herramienta seleccionada: {tool_name}"
+    def execute(self, tool_name: str, command: str = ""):
+
+        if tool_name == "windows":
+            return self.windows.open_application(command)
+
+        return f"Herramienta desconocida: {tool_name}"

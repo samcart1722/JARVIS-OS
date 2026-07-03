@@ -18,7 +18,22 @@ class Brain:
             return self.ollama.chat(user_input)
 
         if task == TaskType.TOOL:
-            return self.tools.execute("general")
+
+            text = user_input.lower()
+
+            if "visual studio" in text or "vscode" in text:
+                return self.tools.execute("windows", "vscode")
+
+            if "bloc" in text or "notepad" in text:
+                return self.tools.execute("windows", "notepad")
+
+            if "calculadora" in text or "calculator" in text:
+                return self.tools.execute("windows", "calculator")
+
+            if "explorador" in text or "explorer" in text:
+                return self.tools.execute("windows", "explorer")
+
+            return "No sé qué aplicación deseas abrir."
 
         if task == TaskType.MEMORY:
             return "Necesito consultar la memoria."
