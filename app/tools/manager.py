@@ -1,14 +1,23 @@
+from app.tools.registry import ToolRegistry
 from app.tools.windows import WindowsTool
 
 
 class ToolManager:
 
     def __init__(self):
-        self.windows = WindowsTool()
 
-    def execute(self, tool_name: str, command: str = ""):
+        self.registry = ToolRegistry()
 
-        if tool_name == "windows":
-            return self.windows.open_application(command)
+        self.registry.register(
+            "windows",
+            WindowsTool(),
+        )
 
-        return f"Herramienta desconocida: {tool_name}"
+    def execute(self, tool_name: str, command: str):
+
+        tool = self.registry.get(tool_name)
+
+        if tool is None:
+            return f"Herramienta '{tool_name}' no encontrada."
+
+        return tool.open_application(command)
