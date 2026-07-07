@@ -1,22 +1,26 @@
 from enum import Enum
 
+from app.brain.intent_classifier import IntentClassifier
+
 
 class TaskType(str, Enum):
-    CHAT = "chat"
-    TOOL = "tool"
-    MEMORY = "memory"
-    AGENT = "agent"
+    CHAT = "CHAT"
+    TOOL = "TOOL"
+    MEMORY = "MEMORY"
+    AGENT = "AGENT"
 
 
 class Planner:
 
+    def __init__(self):
+        self.classifier = IntentClassifier()
+
     def plan(self, user_input: str) -> TaskType:
-        text = user_input.lower()
 
-        if any(word in text for word in ["abre", "ejecuta", "busca"]):
-            return TaskType.TOOL
+        intent = self.classifier.classify(user_input)
 
-        if any(word in text for word in ["recuerda", "memoria"]):
-            return TaskType.MEMORY
+        try:
+            return TaskType(intent)
 
-        return TaskType.CHAT
+        except ValueError:
+            return TaskType.CHAT
