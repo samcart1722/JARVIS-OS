@@ -1,46 +1,7 @@
-import json
-
-from app.models.ollama_client import OllamaClient
-
-
-class IntentClassifier:
-
-    def __init__(self):
-        self.model = OllamaClient()
-
-    def classify(self, text: str) -> str:
-
-        prompt = f"""
-You are an intent classifier.
-
-Return ONLY valid JSON.
-
-Example:
-
-{{
-  "intent":"CHAT"
-}}
-
-Valid intents:
-
-CHAT
-TOOL
-MEMORY
-AGENT
-
-User:
-
-{text}
 """
+Implementación experimental.
 
-        response = self.model.chat(prompt)
-
-        try:
-
-            data = json.loads(response)
-
-            return data["intent"].upper()
-
-        except Exception:
-
-            return "CHAT"
+Se volverá a utilizar cuando el ModelManager disponga
+de modelos especializados para clasificación de intenciones.
+Actualmente no está en uso.
+"""

@@ -1,29 +1,28 @@
-from app.brain.planner import Planner, TaskType
-from app.brain.memory_rules import MemoryRules
+from app.core.container import container
 
-from app.models.manager import ModelManager
+from app.brain.planner import TaskType
 
-from app.tools.manager import ToolManager
-
-from app.memory.manager import MemoryManager
-from app.memory.extractor import MemoryExtractor
+from app.handlers.chat_handler import ChatHandler
+from app.handlers.tool_handler import ToolHandler
+from app.handlers.memory_handler import MemoryHandler
+from app.handlers.profile_handler import ProfileHandler
 
 
 class Orchestrator:
 
     def __init__(self):
 
-        self.planner = Planner()
+        self.planner = container.planner
 
-        self.model = ModelManager()
+        self.memory = container.memory
 
-        self.tools = ToolManager()
+        self.chat = ChatHandler()
 
-        self.memory = MemoryManager()
+        self.tools = ToolHandler()
 
-        self.memory_rules = MemoryRules()
+        self.memory_handler = MemoryHandler()
 
-        self.extractor = MemoryExtractor()
+        self.profile = ProfileHandler()
 
     def process(self, user_input: str):
 
@@ -33,83 +32,38 @@ class Orchestrator:
             user_input,
         )
 
-        # Guardar memoria importante
-        if self.memory_rules.should_store(user_input):
+        # Consultas del perfil
+        if "que proyectos tengo" in user_input.lower():
 
-            item = self.extractor.extract(user_input)
+            return self.profile.handle()
 
-            if item is not None:
-
-                self.memory.remember(
-                    item.key,
-                    item.value,
-                )
-
-                return (
-    f"Entendido. Recordaré que tu "
-    f"{item.label} es {item.value}."
-)
-
-        # Consultar memoria
-
+        # Consultas de memoria
         if "cual es mi proyecto principal" in user_input.lower():
 
             project = self.memory.recall("project")
 
             if project:
 
-                return (
-                    f"Tu proyecto principal es {project}."
-                )
+                return f"Tu proyecto principal es {project}."
 
-            return (
-                "Todavía no conozco tu proyecto principal."
-            )
+            return "Todavía no conozco tu proyecto principal."
 
+        # Guardado de memoria
+        memory_response = self.memory_handler.handle(user_input)
+
+        if memory_response:
+
+            return memory_response
+
+        # Planificación
         task = self.planner.plan(user_input)
 
         if task == TaskType.CHAT:
 
-            response = self.model.chat(user_input)
-
-            self.memory.remember_conversation(
-                "assistant",
-                response,
-            )
-
-            return response
+            return self.chat.handle(user_input)
 
         if task == TaskType.TOOL:
 
-            text = user_input.lower()
-
-            if "visual studio" in text or "vscode" in text:
-                return self.tools.execute(
-                    "windows",
-                    "vscode",
-                )
-
-            if "calculadora" in text:
-                return self.tools.execute(
-                    "windows",
-                    "calculator",
-                )
-
-            if "bloc" in text or "notepad" in text:
-                return self.tools.execute(
-                    "windows",
-                    "notepad",
-                )
-
-            if "explorador" in text:
-                return self.tools.execute(
-                    "windows",
-                    "explorer",
-                )
-
-            return "No sé qué aplicación deseas abrir."
-
-        if task == TaskType.MEMORY:
-            return "La memoria todavía no está implementada."
+            return self.tools.handle(user_input)
 
         return "No puedo procesar esa solicitud."
