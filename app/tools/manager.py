@@ -1,5 +1,5 @@
-from app.tools.windows import WindowsTool
 from app.tools.browser import BrowserTool
+from app.tools.windows import WindowsTool
 
 
 class ToolManager:

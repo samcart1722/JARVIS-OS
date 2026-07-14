@@ -1,12 +1,11 @@
-from app.core.container import container
-
 from app.brain.planner import TaskType
-
+from app.core.container import container
+from app.handlers.browser_handler import BrowserHandler
 from app.handlers.chat_handler import ChatHandler
-from app.handlers.tool_handler import ToolHandler
 from app.handlers.memory_handler import MemoryHandler
 from app.handlers.profile_handler import ProfileHandler
-from app.handlers.browser_handler import BrowserHandler
+from app.handlers.tool_handler import ToolHandler
+from app.reasoning.engine import ReasoningEngine
 
 
 class Orchestrator:
@@ -27,6 +26,8 @@ class Orchestrator:
 
         self.browser = BrowserHandler()
 
+        self.reasoning = ReasoningEngine()
+        
     def process(self, user_input: str):
 
         # Guardar conversación del usuario
