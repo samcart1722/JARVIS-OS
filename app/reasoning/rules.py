@@ -1,3 +1,6 @@
+from app.language.intents import Intent
+from app.language.matcher import IntentMatcher
+from app.language.normalizer import TextNormalizer
 from app.reasoning.models import (
     ActionType,
     Decision,
@@ -6,71 +9,86 @@ from app.reasoning.models import (
 
 class ReasoningRules:
 
+    def __init__(self):
+
+        self.normalizer = TextNormalizer()
+
+        self.matcher = IntentMatcher()
+
     def decide(
         self,
         user_input: str,
     ) -> Decision:
 
-        text = user_input.lower()
+        text = self.normalizer.normalize(user_input)
 
-        if any(
-            phrase in text
-            for phrase in [
-                "mi proyecto",
-                "mi empresa",
-                "mi nombre",
-            ]
+        intent = self.matcher.match(text)
+
+        print()
+        print("========== LANGUAGE ==========")
+        print(f"NORMALIZED: {text}")
+        print(f"INTENT    : {intent}")
+        print("==============================")
+        print()
+
+        # ==========================
+        # Memory
+        # ==========================
+
+        if intent in (
+            Intent.PERSONAL_MEMORY,
+            Intent.PROJECT_QUERY,
+            Intent.PROJECT_LIST,
         ):
 
             return Decision(
                 action=ActionType.MEMORY,
-                reason="Stored personal knowledge.",
+                reason="Memory request.",
+                intent=intent.value,
             )
 
-        if any(
-            phrase in text
-            for phrase in [
-                "que sabes sobre",
-                "que conozco sobre",
-                "muéstrame",
-            ]
-        ):
+        # ==========================
+        # Knowledge
+        # ==========================
+
+        if intent == Intent.KNOWLEDGE_QUERY:
 
             return Decision(
                 action=ActionType.KNOWLEDGE,
                 reason="Knowledge lookup.",
+                intent=intent.value,
             )
 
-        if any(
-            phrase in text
-            for phrase in [
-                "abre",
-                "ejecuta",
-                "inicia",
-            ]
-        ):
+        # ==========================
+        # Browser
+        # ==========================
+
+        if intent == Intent.WEB_SEARCH:
+
+            return Decision(
+                action=ActionType.BROWSER,
+                reason="Internet search.",
+                intent=intent.value,
+            )
+
+        # ==========================
+        # Tools
+        # ==========================
+
+        if intent == Intent.TOOL_EXECUTION:
 
             return Decision(
                 action=ActionType.TOOL,
                 reason="Tool execution.",
+                intent=intent.value,
             )
 
-        if any(
-            phrase in text
-            for phrase in [
-                "busca",
-                "investiga",
-                "últimas noticias",
-                "novedades",
-            ]
-        ):
-
-            return Decision(
-                action=ActionType.BROWSER,
-                reason="Internet search required.",
-            )
+        # ==========================
+        # Default
+        # ==========================
 
         return Decision(
             action=ActionType.MODEL,
-            reason="General reasoning.",
+            reason="General conversation.",
+            intent=Intent.GENERAL_CHAT.value,
         )

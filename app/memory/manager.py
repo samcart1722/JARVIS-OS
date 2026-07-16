@@ -43,3 +43,33 @@ class MemoryManager:
     def clear_memory(self):
 
         self.long_term.clear()
+
+    # ==========================
+    # High Level Queries
+    # ==========================
+
+    def answer(self, user_input: str):
+
+        text = user_input.lower()
+
+        if "proyecto principal" in text:
+
+            project = self.recall("project")
+
+            if project:
+
+                return f"Tu proyecto principal es {project}."
+
+            return "Todavía no conozco tu proyecto principal."
+
+        if "que proyectos tengo" in text:
+
+            project = self.recall("project")
+
+            if project:
+
+                return project
+
+            return "No conozco ningún proyecto registrado."
+
+        return None

@@ -3,12 +3,27 @@ from typing import List
 
 class BrowserTool:
 
+    def answer(self, question: str) -> str:
+        """
+        Punto de entrada público del Browser.
+
+        En versiones futuras decidirá automáticamente
+        si usar búsqueda web, caché o índice local.
+        """
+
+        results = self.search(question)
+
+        if results:
+
+            return results[0]
+
+        return "No encontré información."
+
     def search(self, query: str) -> List[str]:
         """
-        Realiza una búsqueda.
+        Implementación actual (stub).
 
-        Actualmente es un stub.
-        En el siguiente paso conectaremos un proveedor real.
+        Más adelante será reemplazada por un proveedor real.
         """
 
         return [

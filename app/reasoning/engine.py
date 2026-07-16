@@ -30,11 +30,11 @@ class ReasoningEngine:
 
         if decision.action == ActionType.MEMORY:
 
-            project = self.memory.recall("project")
+            response = self.memory.answer(user_input)
 
-            if project:
+            if response:
 
-                return project
+                return response
 
             return "No encontré información en la memoria."
 

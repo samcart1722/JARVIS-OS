@@ -7,19 +7,9 @@ class BrowserHandler:
 
         self.tools = container.tools
 
-        self.model = container.model
-
     def handle(self, query: str):
 
-        results = self.tools.execute(
+        return self.tools.execute(
             "browser",
             query,
         )
-
-        prompt = (
-            "Resume la siguiente información obtenida "
-            "de una búsqueda web:\n\n"
-            f"{results}"
-        )
-
-        return self.model.chat(prompt)

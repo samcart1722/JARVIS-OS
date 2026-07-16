@@ -16,6 +16,24 @@ class KnowledgeManager:
 
         self.storage = KnowledgeStorage()
 
+    # =====================================================
+    # Public API
+    # =====================================================
+
+    def answer(self, question: str):
+
+        """
+        Punto único de entrada para consultas al Knowledge Engine.
+        """
+
+        related = self.related(question)
+
+        if related:
+
+            return related
+
+        return "No encontré conocimiento relacionado."
+
     def learn(
         self,
         title: str,
@@ -46,9 +64,12 @@ class KnowledgeManager:
 
         return unit
 
-    def related_to(
-        self,
-        concept: str,
-    ):
+    def related(self, concept: str):
 
         return self.graph.related_to(concept)
+
+    # Compatibilidad temporal
+
+    def related_to(self, concept: str):
+
+        return self.related(concept)
