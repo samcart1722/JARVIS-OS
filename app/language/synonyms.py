@@ -4,7 +4,6 @@ INTENT_SYNONYMS = {
 
     Intent.PROJECT_QUERY: [
 
-        "mi proyecto",
         "cual es mi proyecto",
         "cual es mi proyecto principal",
         "proyecto principal",

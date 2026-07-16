@@ -1,5 +1,6 @@
 from app.brain.memory_rules import MemoryRules
 from app.brain.planner import Planner
+from app.context.manager import ContextManager
 from app.knowledge.manager import KnowledgeManager
 from app.memory.extractor import MemoryExtractor
 from app.memory.manager import MemoryManager
@@ -12,24 +13,50 @@ class ServiceContainer:
 
     def __init__(self):
 
+        # ==========================
         # Brain
+        # ==========================
+
         self.planner = Planner()
 
+        # ==========================
         # Model
+        # ==========================
+
         self.model = ModelManager()
 
+        # ==========================
         # Memory
+        # ==========================
+
         self.memory = MemoryManager()
         self.memory_extractor = MemoryExtractor()
         self.memory_rules = MemoryRules()
 
+        # ==========================
+        # Context
+        # ==========================
+
+        self.context = ContextManager(
+            self.memory,
+        )
+
+        # ==========================
         # Knowledge
+        # ==========================
+
         self.knowledge = KnowledgeManager()
 
+        # ==========================
         # Profile
+        # ==========================
+
         self.profile = ProfileManager()
 
+        # ==========================
         # Tools
+        # ==========================
+
         self.tools = ToolManager()
 
 

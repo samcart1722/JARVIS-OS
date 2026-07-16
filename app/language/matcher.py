@@ -3,7 +3,6 @@ from app.language.synonyms import INTENT_SYNONYMS
 
 
 class IntentMatcher:
-
     """
     Convierte lenguaje natural
     en Intents internos.
@@ -14,12 +13,20 @@ class IntentMatcher:
         text: str,
     ) -> Intent:
 
+        best_intent = Intent.GENERAL_CHAT
+
+        best_length = 0
+
         for intent, phrases in INTENT_SYNONYMS.items():
 
             for phrase in phrases:
 
                 if phrase in text:
 
-                    return intent
+                    if len(phrase) > best_length:
 
-        return Intent.GENERAL_CHAT
+                        best_intent = intent
+
+                        best_length = len(phrase)
+
+        return best_intent
