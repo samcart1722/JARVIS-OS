@@ -2,7 +2,6 @@ from app.knowledge.models import KnowledgeUnit
 
 
 class KnowledgeSerializer:
-
     def to_markdown(
         self,
         unit: KnowledgeUnit,

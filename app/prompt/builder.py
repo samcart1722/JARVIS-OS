@@ -21,20 +21,11 @@ class PromptBuilder:
             PROMPT_TEMPLATES[PromptType.GENERAL],
         )
 
-        conversation = "\n".join(
-            str(item)
-            for item in context.conversation
-        )
+        conversation = "\n".join(str(item) for item in context.conversation)
 
-        memories = "\n".join(
-            str(item)
-            for item in context.memories
-        )
+        memories = "\n".join(str(item) for item in context.memories)
 
-        knowledge = "\n".join(
-            str(item)
-            for item in context.knowledge
-        )
+        knowledge = "\n".join(str(item) for item in context.knowledge)
 
         profile = str(context.profile)
 

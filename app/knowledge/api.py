@@ -12,7 +12,6 @@ manager = KnowledgeManager()
 
 
 class LearnRequest(BaseModel):
-
     title: str
 
     content: str

@@ -4,7 +4,6 @@ from app.knowledge.models import KnowledgeUnit
 
 
 class KnowledgeStorage:
-
     def __init__(self):
 
         self.base_path = Path("knowledge")
@@ -27,11 +26,7 @@ class KnowledgeStorage:
             exist_ok=True,
         )
 
-        filename = (
-            unit.title.lower()
-            .replace(" ", "_")
-            .replace("/", "_")
-        )
+        filename = unit.title.lower().replace(" ", "_").replace("/", "_")
 
         filepath = folder / f"{filename}.md"
 

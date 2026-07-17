@@ -2,7 +2,6 @@ from collections import defaultdict
 
 
 class KnowledgeGraph:
-
     def __init__(self):
 
         self.graph = defaultdict(set)
@@ -31,6 +30,4 @@ class KnowledgeGraph:
 
     def all_concepts(self):
 
-        return sorted(
-            self.graph.keys()
-        )
+        return sorted(self.graph.keys())

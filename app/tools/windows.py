@@ -2,7 +2,6 @@ import subprocess
 
 
 class WindowsTool:
-
     def open_application(self, app: str) -> str:
 
         app = app.lower()

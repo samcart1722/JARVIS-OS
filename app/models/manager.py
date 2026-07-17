@@ -2,7 +2,6 @@ from app.models.ollama_client import OllamaClient
 
 
 class ModelManager:
-
     def __init__(self):
         self.ollama = OllamaClient()
 

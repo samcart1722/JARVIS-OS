@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from app.conversation.manager import ConversationManager
 from app.memory.manager import MemoryManager
 
 
@@ -18,7 +19,6 @@ class ContextProvider(ABC):
 
 
 class MemoryProvider(ContextProvider):
-
     def __init__(
         self,
         memory: MemoryManager,
@@ -32,9 +32,29 @@ class MemoryProvider(ContextProvider):
     ):
 
         return {
-
-            "conversation": self.memory.conversation(),
-
             "memory": self.memory.knowledge(),
+        }
 
+
+class ConversationProvider(ContextProvider):
+    def __init__(
+        self,
+        conversation: ConversationManager,
+    ):
+
+        self.conversation = conversation
+
+    def provide(
+        self,
+        user_input: str,
+    ):
+
+        return {
+            "conversation": [
+                {
+                    "role": message.role.value,
+                    "content": message.content,
+                }
+                for message in self.conversation.messages()
+            ],
         }

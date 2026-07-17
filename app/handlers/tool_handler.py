@@ -2,7 +2,6 @@ from app.core.container import container
 
 
 class ToolHandler:
-
     def __init__(self):
 
         self.tools = container.tools

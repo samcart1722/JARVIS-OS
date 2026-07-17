@@ -6,7 +6,6 @@ from app.handlers.tool_handler import ToolHandler
 
 
 class HandlerRegistry:
-
     def __init__(self):
 
         self.handlers = {

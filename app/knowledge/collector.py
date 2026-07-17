@@ -2,7 +2,6 @@ from app.knowledge.models import KnowledgeUnit
 
 
 class KnowledgeCollector:
-
     def create(
         self,
         title: str,

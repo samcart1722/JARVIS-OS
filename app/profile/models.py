@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Identity:
-
     name: str = ""
 
     profession: str = ""
@@ -13,7 +12,6 @@ class Identity:
 
 @dataclass
 class UserProfile:
-
     identity: Identity = field(default_factory=Identity)
 
     projects: list[str] = field(default_factory=list)

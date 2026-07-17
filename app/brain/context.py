@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Context:
-
     user_input: str
 
     conversation: list = field(default_factory=list)

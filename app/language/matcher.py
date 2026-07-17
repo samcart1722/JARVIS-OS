@@ -18,13 +18,9 @@ class IntentMatcher:
         best_length = 0
 
         for intent, phrases in INTENT_SYNONYMS.items():
-
             for phrase in phrases:
-
                 if phrase in text:
-
                     if len(phrase) > best_length:
-
                         best_intent = intent
 
                         best_length = len(phrase)

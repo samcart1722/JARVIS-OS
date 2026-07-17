@@ -2,7 +2,6 @@ from app.brain.orchestrator import Orchestrator
 
 
 class Brain:
-
     def __init__(self):
         self.orchestrator = Orchestrator()
 

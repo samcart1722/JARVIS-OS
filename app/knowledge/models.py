@@ -6,7 +6,6 @@ from typing import List
 
 @dataclass
 class KnowledgeUnit:
-
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
     title: str = ""

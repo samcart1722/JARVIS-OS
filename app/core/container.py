@@ -1,6 +1,7 @@
 from app.brain.memory_rules import MemoryRules
 from app.brain.planner import Planner
 from app.context.manager import ContextManager
+from app.conversation.manager import ConversationManager
 from app.knowledge.manager import KnowledgeManager
 from app.memory.extractor import MemoryExtractor
 from app.memory.manager import MemoryManager
@@ -12,7 +13,6 @@ from app.tools.manager import ToolManager
 
 
 class ServiceContainer:
-
     def __init__(self):
 
         # ==========================
@@ -36,11 +36,18 @@ class ServiceContainer:
         self.memory_rules = MemoryRules()
 
         # ==========================
+        # Conversation
+        # ==========================
+
+        self.conversation = ConversationManager()
+
+        # ==========================
         # Context
         # ==========================
 
         self.context = ContextManager(
-            self.memory,
+            memory=self.memory,
+            conversation=self.conversation,
         )
 
         # ==========================

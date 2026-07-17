@@ -4,7 +4,6 @@ from app.memory.short_term import ShortTermMemory
 
 
 class MemoryManager:
-
     def __init__(self):
 
         self.short_term = ShortTermMemory()
@@ -84,13 +83,11 @@ class MemoryManager:
         # --------------------------
 
         if "proyecto principal" in text:
-
             project = self.recall(
                 "project",
             )
 
             if project:
-
                 return f"Tu proyecto principal es {project}."
 
             return "Todavía no conozco tu proyecto principal."
@@ -100,13 +97,11 @@ class MemoryManager:
         # --------------------------
 
         if "que proyectos tengo" in text:
-
             project = self.recall(
                 "project",
             )
 
             if project:
-
                 return project
 
             return "No conozco ningún proyecto registrado."

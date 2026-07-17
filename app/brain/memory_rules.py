@@ -1,5 +1,4 @@
 class MemoryRules:
-
     def should_store(self, text: str) -> bool:
 
         text = text.lower()

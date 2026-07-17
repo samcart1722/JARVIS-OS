@@ -10,7 +10,6 @@ class TaskType(str, Enum):
 
 
 class Planner:
-
     def plan(self, user_input: str) -> TaskType:
 
         text = user_input.lower()

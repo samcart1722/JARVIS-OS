@@ -3,7 +3,6 @@ from app.tools.windows import WindowsTool
 
 
 class ToolManager:
-
     def __init__(self):
 
         self.windows = WindowsTool()

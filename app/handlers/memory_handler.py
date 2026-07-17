@@ -2,7 +2,6 @@ from app.core.container import container
 
 
 class MemoryHandler:
-
     def __init__(self):
 
         self.memory = container.memory
@@ -30,7 +29,4 @@ class MemoryHandler:
 
         self.profile.update_from_memory(item)
 
-        return (
-            f"Entendido. Recordaré que tu "
-            f"{item.label} es {item.value}."
-        )
+        return f"Entendido. Recordaré que tu {item.label} es {item.value}."

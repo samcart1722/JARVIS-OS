@@ -3,7 +3,6 @@ import unicodedata
 
 
 class TextNormalizer:
-
     """
     Convierte cualquier texto de entrada
     a una representación consistente.
@@ -23,11 +22,7 @@ class TextNormalizer:
             text,
         )
 
-        text = "".join(
-            c
-            for c in text
-            if unicodedata.category(c) != "Mn"
-        )
+        text = "".join(c for c in text if unicodedata.category(c) != "Mn")
 
         # Eliminar signos
         text = re.sub(

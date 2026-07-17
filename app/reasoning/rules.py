@@ -8,7 +8,6 @@ from app.reasoning.models import (
 
 
 class ReasoningRules:
-
     def __init__(self):
 
         self.normalizer = TextNormalizer()
@@ -40,7 +39,6 @@ class ReasoningRules:
             Intent.PROJECT_QUERY,
             Intent.PROJECT_LIST,
         ):
-
             return Decision(
                 action=ActionType.MEMORY,
                 reason="Memory request.",
@@ -52,7 +50,6 @@ class ReasoningRules:
         # ==========================
 
         if intent == Intent.KNOWLEDGE_QUERY:
-
             return Decision(
                 action=ActionType.KNOWLEDGE,
                 reason="Knowledge lookup.",
@@ -64,7 +61,6 @@ class ReasoningRules:
         # ==========================
 
         if intent == Intent.WEB_SEARCH:
-
             return Decision(
                 action=ActionType.BROWSER,
                 reason="Internet search.",
@@ -76,7 +72,6 @@ class ReasoningRules:
         # ==========================
 
         if intent == Intent.TOOL_EXECUTION:
-
             return Decision(
                 action=ActionType.TOOL,
                 reason="Tool execution.",

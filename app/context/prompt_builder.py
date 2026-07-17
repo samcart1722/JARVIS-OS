@@ -20,38 +20,26 @@ class PromptBuilder:
         # ==========================
 
         if context.conversation:
-
-            sections.append(
-                "=== Conversación reciente ==="
-            )
+            sections.append("=== Conversación reciente ===")
 
             for message in context.conversation[-10:]:
-
-                sections.append(
-                    f"{message['role']}: {message['content']}"
-                )
+                sections.append(f"{message['role']}: {message['content']}")
 
         # ==========================
         # Memoria
         # ==========================
 
         if context.memories:
-
-            sections.append(
-                "\n=== Memoria ==="
-            )
+            sections.append("\n=== Memoria ===")
 
             for memory in context.memories:
-
                 sections.append(str(memory))
 
         # ==========================
         # Pregunta
         # ==========================
 
-        sections.append(
-            "\n=== Solicitud ==="
-        )
+        sections.append("\n=== Solicitud ===")
 
         sections.append(user_input)
 

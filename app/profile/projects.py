@@ -1,5 +1,4 @@
 class Projects:
-
     def __init__(self):
 
         self.items = []

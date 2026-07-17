@@ -4,7 +4,6 @@ from app.knowledge.models import KnowledgeUnit
 
 
 class KnowledgeExtractor:
-
     """
     Primera versión del extractor.
 
@@ -33,7 +32,6 @@ class KnowledgeExtractor:
         concepts = []
 
         for word in words:
-
             if len(word) < 4:
                 continue
 

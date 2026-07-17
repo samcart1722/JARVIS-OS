@@ -3,7 +3,6 @@ from app.profile.projects import Projects
 
 
 class ProfileManager:
-
     def __init__(self):
 
         self.profile = UserProfile()

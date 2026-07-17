@@ -3,7 +3,6 @@ from enum import Enum
 
 
 class ActionType(str, Enum):
-
     MEMORY = "MEMORY"
 
     KNOWLEDGE = "KNOWLEDGE"
@@ -17,7 +16,6 @@ class ActionType(str, Enum):
 
 @dataclass
 class Decision:
-
     # Qué módulo debe actuar
     action: ActionType
 

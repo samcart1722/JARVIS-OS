@@ -4,7 +4,6 @@ from app.reasoning.engine import ReasoningEngine
 
 
 class Orchestrator:
-
     def __init__(self):
 
         self.memory = container.memory
@@ -36,7 +35,6 @@ class Orchestrator:
         )
 
         if memory_response:
-
             return memory_response
 
         # ==========================================

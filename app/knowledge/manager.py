@@ -5,7 +5,6 @@ from app.knowledge.storage import KnowledgeStorage
 
 
 class KnowledgeManager:
-
     def __init__(self):
 
         self.collector = KnowledgeCollector()
@@ -21,7 +20,6 @@ class KnowledgeManager:
     # =====================================================
 
     def answer(self, question: str):
-
         """
         Punto único de entrada para consultas al Knowledge Engine.
         """
@@ -29,7 +27,6 @@ class KnowledgeManager:
         related = self.related(question)
 
         if related:
-
             return related
 
         return "No encontré conocimiento relacionado."
@@ -54,7 +51,6 @@ class KnowledgeManager:
         concepts = self.extractor.extract(unit)
 
         for concept in concepts:
-
             self.graph.connect(
                 unit.title,
                 concept,

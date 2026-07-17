@@ -5,7 +5,6 @@ from app.response.models import Response, ResponseType
 
 
 class ReasoningEngine:
-
     def __init__(self):
 
         self.rules = ReasoningRules()
@@ -13,6 +12,8 @@ class ReasoningEngine:
         self.memory = container.memory
 
         self.context = container.context
+
+        self.conversation = container.conversation
 
         self.prompt = container.prompt
 
@@ -33,6 +34,10 @@ class ReasoningEngine:
         user_input: str,
     ):
 
+        self.conversation.add_user_message(
+            user_input,
+        )
+
         decision = self.rules.decide(
             user_input,
         )
@@ -42,40 +47,63 @@ class ReasoningEngine:
         # ==========================================
 
         if decision.action == ActionType.MEMORY:
-
             response = self.memory.answer(
                 user_input,
             )
 
             if response:
+                self.conversation.add_assistant_message(
+                    response,
+                )
 
                 return response
 
-            return "No encontré información en la memoria."
+            response = "No encontré información en la memoria."
+
+            self.conversation.add_assistant_message(
+                response,
+            )
+
+            return response
 
         # ==========================================
         # KNOWLEDGE
         # ==========================================
 
         if decision.action == ActionType.KNOWLEDGE:
-
             if self.knowledge:
-
-                return self.knowledge.answer(
+                response = self.knowledge.answer(
                     user_input,
                 )
 
-            return "Knowledge Engine no disponible."
+                self.conversation.add_assistant_message(
+                    response,
+                )
+
+                return response
+
+            response = "Knowledge Engine no disponible."
+
+            self.conversation.add_assistant_message(
+                response,
+            )
+
+            return response
 
         # ==========================================
         # TOOLS
         # ==========================================
 
         if decision.action == ActionType.TOOL:
-
-            return self.tools.execute(
+            response = self.tools.execute(
                 user_input,
             )
+
+            self.conversation.add_tool_message(
+                str(response),
+            )
+
+            return response
 
         # ==========================================
         # CONTEXTO
@@ -110,6 +138,10 @@ class ReasoningEngine:
 
         processed = self.response.process(
             response,
+        )
+
+        self.conversation.add_assistant_message(
+            processed.content,
         )
 
         return processed.content
