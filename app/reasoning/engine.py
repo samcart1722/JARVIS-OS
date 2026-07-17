@@ -1,6 +1,7 @@
 from app.core.container import container
 from app.reasoning.models import ActionType
 from app.reasoning.rules import ReasoningRules
+from app.response.models import Response, ResponseType
 
 
 class ReasoningEngine:
@@ -14,6 +15,8 @@ class ReasoningEngine:
         self.context = container.context
 
         self.prompt = container.prompt
+
+        self.response = container.response
 
         self.knowledge = getattr(
             container,
@@ -96,6 +99,17 @@ class ReasoningEngine:
         # MODEL
         # ==========================================
 
-        return self.model.chat(
+        model_response = self.model.chat(
             prompt,
         )
+
+        response = Response(
+            content=model_response,
+            response_type=ResponseType.TEXT,
+        )
+
+        processed = self.response.process(
+            response,
+        )
+
+        return processed.content

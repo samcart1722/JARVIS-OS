@@ -7,6 +7,7 @@ from app.memory.manager import MemoryManager
 from app.models.manager import ModelManager
 from app.profile.manager import ProfileManager
 from app.prompt.manager import PromptManager
+from app.response.manager import ResponseManager
 from app.tools.manager import ToolManager
 
 
@@ -47,6 +48,12 @@ class ServiceContainer:
         # ==========================
 
         self.prompt = PromptManager()
+
+        # ==========================
+        # Response
+        # ==========================
+
+        self.response = ResponseManager()
 
         # ==========================
         # Knowledge
