@@ -13,6 +13,8 @@ class ReasoningEngine:
 
         self.context = container.context
 
+        self.prompt = container.prompt
+
         self.knowledge = getattr(
             container,
             "knowledge",
@@ -28,7 +30,9 @@ class ReasoningEngine:
         user_input: str,
     ):
 
-        decision = self.rules.decide(user_input)
+        decision = self.rules.decide(
+            user_input,
+        )
 
         # ==========================================
         # MEMORY
@@ -71,23 +75,27 @@ class ReasoningEngine:
             )
 
         # ==========================================
-        # BROWSER
+        # CONTEXTO
         # ==========================================
 
-        if decision.action == ActionType.BROWSER:
+        context = self.context.build_context(
+            user_input,
+        )
 
-            prompt = self.context.build_prompt(
-                user_input,
-            )
+        # ==========================================
+        # PROMPT FINAL
+        # ==========================================
 
-            return self.model.chat(prompt)
+        prompt = self.prompt.build_prompt(
+            intent=decision.intent,
+            context=context,
+            user_input=user_input,
+        )
 
         # ==========================================
         # MODEL
         # ==========================================
 
-        prompt = self.context.build_prompt(
-            user_input,
+        return self.model.chat(
+            prompt,
         )
-
-        return self.model.chat(prompt)

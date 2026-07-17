@@ -6,6 +6,7 @@ from app.memory.extractor import MemoryExtractor
 from app.memory.manager import MemoryManager
 from app.models.manager import ModelManager
 from app.profile.manager import ProfileManager
+from app.prompt.manager import PromptManager
 from app.tools.manager import ToolManager
 
 
@@ -40,6 +41,12 @@ class ServiceContainer:
         self.context = ContextManager(
             self.memory,
         )
+
+        # ==========================
+        # Prompt
+        # ==========================
+
+        self.prompt = PromptManager()
 
         # ==========================
         # Knowledge

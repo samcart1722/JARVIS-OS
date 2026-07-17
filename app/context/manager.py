@@ -1,12 +1,12 @@
 from app.context.builder import ContextBuilder
-from app.context.prompt_builder import PromptBuilder
+from app.context.models import Context
 from app.memory.manager import MemoryManager
 
 
 class ContextManager:
     """
-    Coordina la construcción del contexto
-    y del prompt final.
+    Coordina únicamente la construcción
+    del contexto utilizado por JARVIS.
     """
 
     def __init__(
@@ -18,18 +18,11 @@ class ContextManager:
             memory,
         )
 
-        self.prompt_builder = PromptBuilder()
-
-    def build_prompt(
+    def build_context(
         self,
         user_input: str,
-    ) -> str:
+    ) -> Context:
 
-        context = self.builder.build(
-            user_input,
-        )
-
-        return self.prompt_builder.build(
-            context,
+        return self.builder.build(
             user_input,
         )
