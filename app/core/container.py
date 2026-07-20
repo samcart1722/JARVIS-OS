@@ -1,84 +1,55 @@
-from app.brain.memory_rules import MemoryRules
-from app.brain.planner import Planner
 from app.context.manager import ContextManager
 from app.conversation.manager import ConversationManager
 from app.knowledge.manager import KnowledgeManager
-from app.memory.extractor import MemoryExtractor
 from app.memory.manager import MemoryManager
 from app.models.manager import ModelManager
-from app.profile.manager import ProfileManager
 from app.prompt.manager import PromptManager
+from app.reasoning.rules import ReasoningRules
+from app.reflection.engine import ReflectionEngine
 from app.response.manager import ResponseManager
 from app.tools.manager import ToolManager
 
 
 class ServiceContainer:
+    """
+    Contenedor principal de servicios
+    de JARVIS.
+    """
+
     def __init__(self):
 
-        # ==========================
-        # Brain
-        # ==========================
-
-        self.planner = Planner()
-
-        # ==========================
-        # Model
-        # ==========================
-
-        self.model = ModelManager()
-
-        # ==========================
-        # Memory
-        # ==========================
-
-        self.memory = MemoryManager()
-        self.memory_extractor = MemoryExtractor()
-        self.memory_rules = MemoryRules()
-
-        # ==========================
         # Conversation
-        # ==========================
-
         self.conversation = ConversationManager()
 
-        # ==========================
-        # Context
-        # ==========================
+        # Memory
+        self.memory = MemoryManager()
 
+        # Knowledge
+        self.knowledge = KnowledgeManager()
+
+        # Context
         self.context = ContextManager(
             memory=self.memory,
             conversation=self.conversation,
         )
 
-        # ==========================
         # Prompt
-        # ==========================
-
         self.prompt = PromptManager()
 
-        # ==========================
-        # Response
-        # ==========================
+        # Tools
+        self.tools = ToolManager()
 
+        # Models
+        self.models = ModelManager()
+
+        # Reflection
+        self.reflection = ReflectionEngine()
+
+        # Response
         self.response = ResponseManager()
 
-        # ==========================
-        # Knowledge
-        # ==========================
-
-        self.knowledge = KnowledgeManager()
-
-        # ==========================
-        # Profile
-        # ==========================
-
-        self.profile = ProfileManager()
-
-        # ==========================
-        # Tools
-        # ==========================
-
-        self.tools = ToolManager()
+        # Rules
+        self.rules = ReasoningRules()
 
 
 container = ServiceContainer()

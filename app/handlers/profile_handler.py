@@ -1,16 +1,17 @@
-from app.core.container import container
+from app.reasoning.engine import ReasoningEngine
 
 
 class ProfileHandler:
+    """
+    Adaptador temporal hacia la nueva arquitectura.
+
+    La gestión del perfil del usuario será absorbida por
+    el ReasoningEngine y los componentes de memoria
+    durante la consolidación del Core.
+    """
+
     def __init__(self):
+        self.reasoning = ReasoningEngine()
 
-        self.profile = container.profile
-
-    def handle(self):
-
-        profile = self.profile.get_profile()
-
-        if profile.projects:
-            return "\n".join(profile.projects)
-
-        return "Todavía no tienes proyectos registrados."
+    def handle(self, user_input: str):
+        return self.reasoning.process(user_input)

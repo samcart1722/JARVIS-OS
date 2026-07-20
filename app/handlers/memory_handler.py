@@ -1,32 +1,17 @@
-from app.core.container import container
+from app.reasoning.engine import ReasoningEngine
 
 
 class MemoryHandler:
+    """
+    Adaptador temporal hacia la nueva arquitectura.
+
+    La extracción y almacenamiento de memoria ya no se
+    realiza desde este handler, sino desde el
+    ReasoningEngine.
+    """
+
     def __init__(self):
-
-        self.memory = container.memory
-
-        self.extractor = container.memory_extractor
-
-        self.rules = container.memory_rules
-
-        self.profile = container.profile
+        self.reasoning = ReasoningEngine()
 
     def handle(self, user_input: str):
-
-        if not self.rules.should_store(user_input):
-            return None
-
-        item = self.extractor.extract(user_input)
-
-        if item is None:
-            return None
-
-        self.memory.remember(
-            item.key,
-            item.value,
-        )
-
-        self.profile.update_from_memory(item)
-
-        return f"Entendido. Recordaré que tu {item.label} es {item.value}."
+        return self.reasoning.process(user_input)

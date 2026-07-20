@@ -1,11 +1,14 @@
 from app.core.container import container
 from app.reasoning.models import ActionType
 from app.reasoning.rules import ReasoningRules
+from app.reflection.models import ReflectionStatus
 from app.response.models import Response, ResponseType
 
 
 class ReasoningEngine:
-    def __init__(self):
+    def __init__(
+        self,
+    ):
 
         self.rules = ReasoningRules()
 
@@ -19,6 +22,8 @@ class ReasoningEngine:
 
         self.response = container.response
 
+        self.reflection = container.reflection
+
         self.knowledge = getattr(
             container,
             "knowledge",
@@ -27,7 +32,7 @@ class ReasoningEngine:
 
         self.tools = container.tools
 
-        self.model = container.model
+        self.models = container.models
 
     def process(
         self,
@@ -114,7 +119,7 @@ class ReasoningEngine:
         )
 
         # ==========================================
-        # PROMPT FINAL
+        # PROMPT
         # ==========================================
 
         prompt = self.prompt.build_prompt(
@@ -124,10 +129,10 @@ class ReasoningEngine:
         )
 
         # ==========================================
-        # MODEL
+        # MODELO
         # ==========================================
 
-        model_response = self.model.chat(
+        model_response = self.models.chat(
             prompt,
         )
 
@@ -139,6 +144,18 @@ class ReasoningEngine:
         processed = self.response.process(
             response,
         )
+
+        # ==========================================
+        # REFLECTION
+        # ==========================================
+
+        reflection = self.reflection.reflect(
+            question=user_input,
+            answer=processed.content,
+        )
+
+        if reflection.status == ReflectionStatus.REJECTED:
+            processed.content = "No pude generar una respuesta confiable."
 
         self.conversation.add_assistant_message(
             processed.content,

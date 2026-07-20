@@ -1,20 +1,16 @@
-from app.core.container import container
+from app.reasoning.engine import ReasoningEngine
 
 
 class ChatHandler:
+    """
+    Adaptador temporal hacia la nueva arquitectura.
+
+    Será eliminado cuando desaparezca definitivamente
+    la capa de handlers.
+    """
+
     def __init__(self):
-
-        self.model = container.model
-
-        self.memory = container.memory
+        self.reasoning = ReasoningEngine()
 
     def handle(self, user_input: str):
-
-        response = self.model.chat(user_input)
-
-        self.memory.remember_conversation(
-            "assistant",
-            response,
-        )
-
-        return response
+        return self.reasoning.process(user_input)
