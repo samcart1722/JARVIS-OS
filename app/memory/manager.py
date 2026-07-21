@@ -45,6 +45,8 @@ class MemoryManager:
         value: str,
     ):
 
+        value = value.strip().rstrip(".,;:!?")
+
         self.long_term.save(
             key,
             value,
@@ -82,7 +84,7 @@ class MemoryManager:
         # Proyecto principal
         # --------------------------
 
-        if "proyecto principal" in text:
+        if "proyecto principal" in text or "cual es mi proyecto" in text:
             project = self.recall(
                 "project",
             )
@@ -93,17 +95,17 @@ class MemoryManager:
             return "Todavía no conozco tu proyecto principal."
 
         # --------------------------
-        # Lista de proyectos
+        # Profesión
         # --------------------------
 
-        if "que proyectos tengo" in text:
-            project = self.recall(
-                "project",
+        if "profesion" in text or "cual es mi profesion" in text:
+            profession = self.recall(
+                "profession",
             )
 
-            if project:
-                return project
+            if profession:
+                return f"Tu profesión es {profession}."
 
-            return "No conozco ningún proyecto registrado."
+            return "Todavía no conozco tu profesión."
 
         return None

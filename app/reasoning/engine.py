@@ -1,4 +1,5 @@
 from app.core.container import container
+from app.memory.intelligence import MemoryIntelligence
 from app.reasoning.models import ActionType
 from app.reasoning.rules import ReasoningRules
 from app.reflection.models import ReflectionStatus
@@ -13,6 +14,8 @@ class ReasoningEngine:
         self.rules = ReasoningRules()
 
         self.memory = container.memory
+
+        self.memory_ai = MemoryIntelligence()
 
         self.context = container.context
 
@@ -42,6 +45,24 @@ class ReasoningEngine:
         self.conversation.add_user_message(
             user_input,
         )
+
+        # ==========================================
+        # MEMORY INTELLIGENCE
+        # ==========================================
+
+        facts = self.memory_ai.analyze(
+            user_input,
+        )
+
+        for fact in facts:
+            self.memory.remember(
+                fact.key,
+                fact.value,
+            )
+
+        # ==========================================
+        # DECISION
+        # ==========================================
 
         decision = self.rules.decide(
             user_input,
