@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.conversation.manager import ConversationManager
 from app.memory.manager import MemoryManager
+from app.memory.retriever import MemoryRetriever
 
 
 class ContextProvider(ABC):
@@ -24,15 +25,27 @@ class MemoryProvider(ContextProvider):
         memory: MemoryManager,
     ):
 
-        self.memory = memory
+        self.retriever = MemoryRetriever(
+            memory,
+        )
 
     def provide(
         self,
         user_input: str,
     ):
 
+        memories = self.retriever.retrieve(
+            user_input,
+        )
+
         return {
-            "memory": self.memory.knowledge(),
+            "memory": [
+                {
+                    "key": key,
+                    "value": value,
+                }
+                for key, value in memories.items()
+            ],
         }
 
 

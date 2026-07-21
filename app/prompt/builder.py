@@ -1,4 +1,6 @@
 from app.context.models import Context
+from app.prompt.sections.conversation import ConversationSection
+from app.prompt.sections.memory import MemorySection
 from app.prompt.templates import PROMPT_TEMPLATES
 from app.prompt.types import PromptType
 
@@ -8,6 +10,15 @@ class PromptBuilder:
     Construye el prompt final que será enviado
     al modelo de lenguaje.
     """
+
+    def __init__(
+        self,
+    ) -> None:
+
+        self.sections = [
+            ConversationSection(),
+            MemorySection(),
+        ]
 
     def build(
         self,
@@ -21,53 +32,62 @@ class PromptBuilder:
             PROMPT_TEMPLATES[PromptType.GENERAL],
         )
 
-        conversation = "\n".join(str(item) for item in context.conversation)
+        parts: list[str] = []
 
-        memories = "\n".join(str(item) for item in context.memories)
+        for section in self.sections:
+            block = section.build(
+                context,
+            )
+
+            if block:
+                parts.append(
+                    block,
+                )
 
         knowledge = "\n".join(str(item) for item in context.knowledge)
 
-        profile = str(context.profile)
-
-        metadata = str(context.metadata)
-
-        return f"""{template}
-
-==============================
-CONVERSACIÓN
-==============================
-
-{conversation}
-
-==============================
-MEMORIAS
-==============================
-
-{memories}
-
-==============================
+        if knowledge:
+            parts.append(
+                f"""==============================
 CONOCIMIENTO
 ==============================
 
-{knowledge}
+{knowledge}"""
+            )
 
-==============================
+        if context.profile:
+            parts.append(
+                f"""==============================
 PERFIL
 ==============================
 
-{profile}
+{context.profile}"""
+            )
 
-==============================
+        if context.metadata:
+            parts.append(
+                f"""==============================
 METADATOS
 ==============================
 
-{metadata}
+{context.metadata}"""
+            )
 
-==============================
+        parts.append(
+            f"""==============================
 SOLICITUD DEL USUARIO
 ==============================
 
-{user_input}
+{user_input}"""
+        )
+
+        body = "\n\n".join(
+            parts,
+        )
+
+        return f"""{template}
+
+{body}
 
 ==============================
 RESPUESTA
