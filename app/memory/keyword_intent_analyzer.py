@@ -1,3 +1,4 @@
+from app.language.normalizer import TextNormalizer
 from app.memory.intent import Intent
 from app.memory.intent_analyzer import IntentAnalyzer
 
@@ -30,19 +31,40 @@ class KeywordIntentAnalyzer(IntentAnalyzer):
             "consulta",
             "clínica",
         ),
+        "profile": (
+            "hablame sobre mi",
+            "que sabes de mi",
+            "quien soy",
+            "como soy",
+            "cuentame sobre mi",
+            "recuerdame",
+        ),
     }
+
+    def __init__(
+        self,
+    ) -> None:
+        self.normalizer = TextNormalizer()
 
     def analyze(
         self,
         user_input: str,
     ) -> Intent:
 
-        text = user_input.lower()
+        text = self.normalizer.normalize(
+            user_input,
+        )
 
         topics: list[str] = []
 
         for topic, keywords in self.TOPIC_KEYWORDS.items():
-            if any(keyword in text for keyword in keywords):
+            if any(
+                self.normalizer.normalize(
+                    keyword,
+                )
+                in text
+                for keyword in keywords
+            ):
                 topics.append(
                     topic,
                 )

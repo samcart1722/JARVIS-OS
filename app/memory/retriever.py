@@ -57,4 +57,15 @@ class MemoryRetriever:
                     )
                 )
 
+        if "profile" in intent.topics:
+            for fact in self.memory.knowledge():
+                if any(memory.memory.key == fact.key for memory in memories):
+                    continue
+
+                memories.append(
+                    RetrievedMemory(
+                        memory=fact,
+                    )
+                )
+
         return memories
