@@ -1,4 +1,5 @@
 from app.core.container import container
+from app.core.logger import logger
 from app.memory.intelligence import MemoryIntelligence
 from app.reasoning.models import ActionType
 from app.reasoning.rules import ReasoningRules
@@ -53,12 +54,30 @@ class ReasoningEngine:
         facts = self.memory_ai.analyze(
             user_input,
         )
+        logger.info(
+            "==================================================\n"
+            "MEMORY INTELLIGENCE\n"
+            "==================================================\n\n"
+            "Facts encontrados: {}\n\n{}",
+            len(facts),
+            "\n".join(f"{fact.key} = {fact.value}" for fact in facts),
+        )
 
         for fact in facts:
             self.memory.remember(
                 fact.key,
                 fact.value,
             )
+
+        logger.info(
+            "==================================================\n"
+            "LONG TERM MEMORY\n"
+            "==================================================\n\n{}",
+            "\n".join(
+                f"{memory.key} = {memory.value}" for memory in self.memory.knowledge()
+            )
+            or "<sin memorias>",
+        )
 
         # ==========================================
         # DECISION
@@ -135,24 +154,57 @@ class ReasoningEngine:
         # CONTEXTO
         # ==========================================
 
+        logger.info(
+            "==================================================\n"
+            "BUILDING CONTEXT\n"
+            "==================================================",
+        )
         context = self.context.build_context(
             user_input,
+        )
+        logger.info(
+            "==================================================\n"
+            "CONTEXT CREATED\n"
+            "==================================================\n\n"
+            "Conversation:\n{}\n\n"
+            "Memories:\n{}\n\n"
+            "Knowledge:\n{}",
+            len(context.conversation),
+            len(context.memories),
+            len(context.knowledge),
         )
 
         # ==========================================
         # PROMPT
         # ==========================================
 
+        logger.info(
+            "==================================================\n"
+            "BUILDING PROMPT\n"
+            "==================================================",
+        )
         prompt = self.prompt.build_prompt(
             intent=decision.intent,
             context=context,
             user_input=user_input,
+        )
+        logger.info(
+            "==================================================\n"
+            "PROMPT READY\n"
+            "==================================================\n\n"
+            "Longitud del prompt: {} caracteres.",
+            len(prompt),
         )
 
         # ==========================================
         # MODELO
         # ==========================================
 
+        logger.info(
+            "==================================================\n"
+            "CALLING LLM\n"
+            "==================================================",
+        )
         model_response = self.models.chat(
             prompt,
         )

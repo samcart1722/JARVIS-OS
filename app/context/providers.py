@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.conversation.manager import ConversationManager
 from app.memory.manager import MemoryManager
-from app.memory.retriever import MemoryRetriever
+from app.memory.pipeline import MemoryPipeline
 
 
 class ContextProvider(ABC):
@@ -20,11 +20,19 @@ class ContextProvider(ABC):
 
 
 class MemoryProvider(ContextProvider):
+    """
+    Proveedor de contexto basado en memoria.
+
+    Utiliza el MemoryPipeline para recuperar,
+    rankear, ordenar y seleccionar las memorias
+    que formarán parte del contexto.
+    """
+
     def __init__(
         self,
         memory: MemoryManager,
     ) -> None:
-        self.retriever = MemoryRetriever(
+        self.pipeline = MemoryPipeline(
             memory,
         )
 
@@ -33,22 +41,26 @@ class MemoryProvider(ContextProvider):
         user_input: str,
     ) -> dict[str, list[dict[str, str]]]:
 
-        memories = self.retriever.retrieve(
+        facts = self.pipeline.retrieve(
             user_input,
         )
 
         return {
             "memory": [
                 {
-                    "key": memory.memory.key,
-                    "value": memory.memory.value,
+                    "key": fact.key,
+                    "value": fact.value,
                 }
-                for memory in memories
+                for fact in facts
             ],
         }
 
 
 class ConversationProvider(ContextProvider):
+    """
+    Proveedor del historial de conversación.
+    """
+
     def __init__(
         self,
         conversation: ConversationManager,

@@ -1,6 +1,7 @@
 from app.context.models import Context
 from app.context.providers import ConversationProvider, MemoryProvider
 from app.conversation.manager import ConversationManager
+from app.core.logger import logger
 from app.memory.manager import MemoryManager
 
 
@@ -75,5 +76,21 @@ class ContextBuilder:
                 context.metadata.update(
                     metadata,
                 )
+
+        logger.info(
+            "----------------------------------------\n"
+            "ContextBuilder\n"
+            "Conversation: {}\n"
+            "Memories: {}\n"
+            "Knowledge: {}\n"
+            "Profile: {}\n"
+            "Metadata: {}\n"
+            "----------------------------------------",
+            context.conversation,
+            context.memories,
+            context.knowledge,
+            context.profile,
+            context.metadata,
+        )
 
         return context
