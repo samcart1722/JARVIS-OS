@@ -15,7 +15,6 @@ class MemoryRetriever:
         memory: MemoryManager,
         analyzer: IntentAnalyzer | None = None,
     ) -> None:
-
         self.memory = memory
         self.analyzer = analyzer or KeywordIntentAnalyzer()
 
@@ -35,28 +34,26 @@ class MemoryRetriever:
         memories: list[RetrievedMemory] = []
 
         if "project" in intent.topics:
-            project = self.memory.recall(
+            fact = self.memory.recall(
                 "project",
             )
 
-            if project:
+            if fact:
                 memories.append(
                     RetrievedMemory(
-                        key="project",
-                        value=project,
+                        memory=fact,
                     )
                 )
 
         if "medical" in intent.topics:
-            profession = self.memory.recall(
+            fact = self.memory.recall(
                 "profession",
             )
 
-            if profession:
+            if fact:
                 memories.append(
                     RetrievedMemory(
-                        key="profession",
-                        value=profession,
+                        memory=fact,
                     )
                 )
 

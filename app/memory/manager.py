@@ -1,10 +1,11 @@
 from app.language.normalizer import TextNormalizer
+from app.memory.facts import MemoryFact
 from app.memory.long_term import LongTermMemory
 from app.memory.short_term import ShortTermMemory
 
 
 class MemoryManager:
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.short_term = ShortTermMemory()
 
@@ -20,7 +21,7 @@ class MemoryManager:
         self,
         role: str,
         content: str,
-    ):
+    ) -> None:
 
         self.short_term.add(
             role,
@@ -31,7 +32,9 @@ class MemoryManager:
 
         return self.short_term.get_history()
 
-    def clear_conversation(self):
+    def clear_conversation(
+        self,
+    ) -> None:
 
         self.short_term.clear()
 
@@ -43,19 +46,21 @@ class MemoryManager:
         self,
         key: str,
         value: str,
-    ):
+    ) -> None:
 
         value = value.strip().rstrip(".,;:!?")
 
         self.long_term.save(
-            key,
-            value,
+            MemoryFact(
+                key=key,
+                value=value,
+            )
         )
 
     def recall(
         self,
         key: str,
-    ):
+    ) -> MemoryFact | None:
 
         return self.long_term.get(key)
 
@@ -63,7 +68,9 @@ class MemoryManager:
 
         return self.long_term.all()
 
-    def clear_memory(self):
+    def clear_memory(
+        self,
+    ) -> None:
 
         self.long_term.clear()
 
@@ -90,7 +97,7 @@ class MemoryManager:
             )
 
             if project:
-                return f"Tu proyecto principal es {project}."
+                return f"Tu proyecto principal es {project.value}."
 
             return "Todavía no conozco tu proyecto principal."
 
@@ -104,7 +111,7 @@ class MemoryManager:
             )
 
             if profession:
-                return f"Tu profesión es {profession}."
+                return f"Tu profesión es {profession.value}."
 
             return "Todavía no conozco tu profesión."
 

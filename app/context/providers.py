@@ -40,8 +40,8 @@ class MemoryProvider(ContextProvider):
         return {
             "memory": [
                 {
-                    "key": memory.key,
-                    "value": memory.value,
+                    "key": memory.memory.key,
+                    "value": memory.memory.value,
                 }
                 for memory in memories
             ],
