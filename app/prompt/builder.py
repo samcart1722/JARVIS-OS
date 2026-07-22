@@ -1,4 +1,5 @@
 from app.context.models import Context
+from app.core.logger import logger
 from app.prompt.sections.conversation import ConversationSection
 from app.prompt.sections.memory import MemorySection
 from app.prompt.templates import PROMPT_TEMPLATES
@@ -85,7 +86,7 @@ SOLICITUD DEL USUARIO
             parts,
         )
 
-        return f"""{template}
+        prompt = f"""{template}
 
 {body}
 
@@ -93,3 +94,12 @@ SOLICITUD DEL USUARIO
 RESPUESTA
 ==============================
 """
+        logger.info(
+            "----------------------------------------\n"
+            "PROMPT ENVIADO AL LLM\n"
+            "{}\n"
+            "----------------------------------------",
+            prompt,
+        )
+
+        return prompt
