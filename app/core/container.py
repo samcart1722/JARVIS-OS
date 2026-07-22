@@ -1,55 +1,103 @@
-from app.context.manager import ContextManager
-from app.conversation.manager import ConversationManager
-from app.knowledge.manager import KnowledgeManager
-from app.memory.manager import MemoryManager
-from app.models.manager import ModelManager
-from app.prompt.manager import PromptManager
-from app.reasoning.rules import ReasoningRules
-from app.reflection.engine import ReflectionEngine
-from app.response.manager import ResponseManager
-from app.tools.manager import ToolManager
+"""
+Application Composition Root.
+
+This module is responsible for constructing and wiring the
+application services.
+
+It is intentionally simple and framework-independent.
+"""
+
+from __future__ import annotations
+
+from app.cognition.memory.extractors.default_extractor import DefaultExtractor
+from app.cognition.memory.intelligence.default_classifier import (
+    DefaultClassifier,
+)
+from app.cognition.memory.pipeline.default_memory_pipeline import (
+    DefaultMemoryPipeline,
+)
+from app.cognition.memory.persistence.in_memory_repository import (
+    InMemoryRepository,
+)
+from app.cognition.memory.ranking.default_ranker import DefaultRanker
+from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
+from app.cognition.memory.validation.default_validator import (
+    DefaultValidator,
+)
 
 
-class ServiceContainer:
+class Container:
     """
-    Contenedor principal de servicios
-    de JARVIS.
+    Central application composition root.
+
+    This class creates and owns long-lived application services.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        self._build_memory()
+        self._build_reasoning()
+        self._build_context()
+        self._build_prompt()
+        self._build_models()
+        self._build_reflection()
+        self._build_learning()
+        self._build_tools()
+        self._build_vision()
+        self._build_speech()
 
-        # Conversation
-        self.conversation = ConversationManager()
+    def _build_memory(self) -> None:
+        """Compose Cognitive Memory Engine services."""
+        self._memory_repository = InMemoryRepository()
+        self._memory_extractor = DefaultExtractor()
+        self._memory_validator = DefaultValidator()
+        self._memory_classifier = DefaultClassifier()
+        self._memory_retriever = DefaultRetriever()
+        self._memory_ranker = DefaultRanker()
 
-        # Memory
-        self.memory = MemoryManager()
-
-        # Knowledge
-        self.knowledge = KnowledgeManager()
-
-        # Context
-        self.context = ContextManager(
-            memory=self.memory,
-            conversation=self.conversation,
+        self.memory_pipeline = DefaultMemoryPipeline(
+            repository=self._memory_repository,
+            extractor=self._memory_extractor,
+            validator=self._memory_validator,
+            classifier=self._memory_classifier,
+            retriever=self._memory_retriever,
+            ranker=self._memory_ranker,
         )
 
-        # Prompt
-        self.prompt = PromptManager()
+    def _build_reasoning(self) -> None:
+        """Compose reasoning services."""
+        pass
 
-        # Tools
-        self.tools = ToolManager()
+    def _build_context(self) -> None:
+        """Compose context services."""
+        pass
 
-        # Models
-        self.models = ModelManager()
+    def _build_prompt(self) -> None:
+        """Compose prompt services."""
+        pass
 
-        # Reflection
-        self.reflection = ReflectionEngine()
+    def _build_models(self) -> None:
+        """Compose model services."""
+        pass
 
-        # Response
-        self.response = ResponseManager()
+    def _build_reflection(self) -> None:
+        """Compose reflection services."""
+        pass
 
-        # Rules
-        self.rules = ReasoningRules()
+    def _build_learning(self) -> None:
+        """Compose learning services."""
+        pass
+
+    def _build_tools(self) -> None:
+        """Compose tool services."""
+        pass
+
+    def _build_vision(self) -> None:
+        """Compose vision services."""
+        pass
+
+    def _build_speech(self) -> None:
+        """Compose speech services."""
+        pass
 
 
-container = ServiceContainer()
+container = Container()
