@@ -1,6 +1,7 @@
 from app.memory.intent_analyzer import IntentAnalyzer
 from app.memory.keyword_intent_analyzer import KeywordIntentAnalyzer
 from app.memory.manager import MemoryManager
+from app.memory.models.retrieved_memory import RetrievedMemory
 
 
 class MemoryRetriever:
@@ -21,7 +22,7 @@ class MemoryRetriever:
     def retrieve(
         self,
         user_input: str,
-    ) -> dict[str, str]:
+    ) -> list[RetrievedMemory]:
         """
         Devuelve únicamente los recuerdos
         relevantes para el mensaje del usuario.
@@ -31,7 +32,7 @@ class MemoryRetriever:
             user_input,
         )
 
-        memories: dict[str, str] = {}
+        memories: list[RetrievedMemory] = []
 
         if "project" in intent.topics:
             project = self.memory.recall(
@@ -39,7 +40,12 @@ class MemoryRetriever:
             )
 
             if project:
-                memories["project"] = project
+                memories.append(
+                    RetrievedMemory(
+                        key="project",
+                        value=project,
+                    )
+                )
 
         if "medical" in intent.topics:
             profession = self.memory.recall(
@@ -47,6 +53,11 @@ class MemoryRetriever:
             )
 
             if profession:
-                memories["profession"] = profession
+                memories.append(
+                    RetrievedMemory(
+                        key="profession",
+                        value=profession,
+                    )
+                )
 
         return memories

@@ -23,8 +23,7 @@ class MemoryProvider(ContextProvider):
     def __init__(
         self,
         memory: MemoryManager,
-    ):
-
+    ) -> None:
         self.retriever = MemoryRetriever(
             memory,
         )
@@ -32,7 +31,7 @@ class MemoryProvider(ContextProvider):
     def provide(
         self,
         user_input: str,
-    ):
+    ) -> dict[str, list[dict[str, str]]]:
 
         memories = self.retriever.retrieve(
             user_input,
@@ -41,10 +40,10 @@ class MemoryProvider(ContextProvider):
         return {
             "memory": [
                 {
-                    "key": key,
-                    "value": value,
+                    "key": memory.key,
+                    "value": memory.value,
                 }
-                for key, value in memories.items()
+                for memory in memories
             ],
         }
 
@@ -53,14 +52,13 @@ class ConversationProvider(ContextProvider):
     def __init__(
         self,
         conversation: ConversationManager,
-    ):
-
+    ) -> None:
         self.conversation = conversation
 
     def provide(
         self,
         user_input: str,
-    ):
+    ) -> dict[str, list[dict[str, str]]]:
 
         return {
             "conversation": [
