@@ -8,11 +8,11 @@ from app.cognition.memory.extractors.default_extractor import DefaultExtractor
 from app.cognition.memory.intelligence.default_classifier import (
     DefaultClassifier,
 )
-from app.cognition.memory.pipeline.default_memory_pipeline import (
-    DefaultMemoryPipeline,
-)
 from app.cognition.memory.persistence.in_memory_repository import (
     InMemoryRepository,
+)
+from app.cognition.memory.pipeline.default_memory_pipeline import (
+    DefaultMemoryPipeline,
 )
 from app.cognition.memory.ranking.default_ranker import DefaultRanker
 from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
@@ -39,9 +39,7 @@ class TestContainerMemoryPipeline:
         assert isinstance(container._memory_repository, InMemoryRepository)
         assert isinstance(container._memory_retriever, DefaultRetriever)
         assert isinstance(container._memory_ranker, DefaultRanker)
-        assert (
-            container.memory_pipeline._repository is container._memory_repository
-        )
+        assert container.memory_pipeline._repository is container._memory_repository
         assert container.memory_pipeline._extractor is container._memory_extractor
         assert container.memory_pipeline._validator is container._memory_validator
         assert container.memory_pipeline._classifier is container._memory_classifier

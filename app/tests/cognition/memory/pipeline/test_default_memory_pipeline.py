@@ -203,16 +203,13 @@ class TestRecall:
         assert collaborators.retriever.last_query is query
         assert collaborators.retriever.last_memories is not None
         assert tuple(
-            retrieved.memory
-            for retrieved in collaborators.retriever.last_memories
+            retrieved.memory for retrieved in collaborators.retriever.last_memories
         ) == (memory,)
 
     @pytest.mark.asyncio
     async def test_calls_ranker(self) -> None:
         memory = _create_memory()
-        transformed_memories = (
-            RetrievedMemory(memory=memory, relevance_score=0.8),
-        )
+        transformed_memories = (RetrievedMemory(memory=memory, relevance_score=0.8),)
         collaborators = _create_pipeline()
         collaborators.retriever.result_override = transformed_memories
         query = _create_query("Rank the memory.")
@@ -223,8 +220,7 @@ class TestRecall:
         assert collaborators.ranker.last_query is query
         assert collaborators.ranker.last_memories is not None
         assert tuple(
-            retrieved.memory
-            for retrieved in collaborators.ranker.last_memories
+            retrieved.memory for retrieved in collaborators.ranker.last_memories
         ) == (memory,)
 
     @pytest.mark.asyncio
@@ -242,9 +238,7 @@ class TestRecall:
     @pytest.mark.asyncio
     async def test_returns_new_memory_result(self) -> None:
         memory = _create_memory()
-        ranked_memories = (
-            RetrievedMemory(memory=memory, relevance_score=0.9),
-        )
+        ranked_memories = (RetrievedMemory(memory=memory, relevance_score=0.9),)
         collaborators = _create_pipeline()
         collaborators.ranker.result_override = ranked_memories
         query = _create_query("Return ranked memories.")

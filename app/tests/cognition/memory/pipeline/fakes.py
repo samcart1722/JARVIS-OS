@@ -154,9 +154,7 @@ class FakeClassifier(MemoryClassifier):
     ) -> None:
         self.classified: list[MemoryId] = []
         self.classification_overrides = (
-            classification_overrides
-            if classification_overrides is not None
-            else {}
+            classification_overrides if classification_overrides is not None else {}
         )
 
     async def classify(

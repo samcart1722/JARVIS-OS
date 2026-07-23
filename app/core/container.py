@@ -13,11 +13,11 @@ from app.cognition.memory.extractors.default_extractor import DefaultExtractor
 from app.cognition.memory.intelligence.default_classifier import (
     DefaultClassifier,
 )
-from app.cognition.memory.pipeline.default_memory_pipeline import (
-    DefaultMemoryPipeline,
-)
 from app.cognition.memory.persistence.in_memory_repository import (
     InMemoryRepository,
+)
+from app.cognition.memory.pipeline.default_memory_pipeline import (
+    DefaultMemoryPipeline,
 )
 from app.cognition.memory.ranking.default_ranker import DefaultRanker
 from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
