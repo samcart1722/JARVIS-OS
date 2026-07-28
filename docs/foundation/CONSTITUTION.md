@@ -1,130 +1,201 @@
-# JARVIS Constitution
+# THE LUXIOM CONSTITUTION
 
-> "JARVIS is not just software.
-> It is a lifelong cognitive companion."
-
----
-
-# Mission
-
-JARVIS exists to help its owner learn faster, remember better,
-reason more effectively and make better decisions while always
-keeping the owner's knowledge under the owner's control.
+Version: 1.0 (Draft)
 
 ---
 
-# Article I
-## Ownership
+# Preamble
 
-All knowledge belongs to the owner.
+The Luxiom Constitution defines the immutable principles that govern the evolution of the platform.
 
-JARVIS never owns user knowledge.
+These principles are intentionally independent of programming languages, artificial intelligence models, software frameworks, or implementation details.
 
-Knowledge must always be exportable.
+Technology will evolve.
 
----
+Products will evolve.
 
-# Article II
-## Continuous Learning
+Capabilities will evolve.
 
-JARVIS never stops learning.
+The principles contained in this Constitution must not.
 
-Every experience may become knowledge.
+Every architectural decision, engineering standard, capability, RFC, ADR, implementation, and future contribution must remain consistent with this Constitution.
 
 ---
 
-# Article III
-## Transparency
+# Article I — Purpose
 
-Whenever possible, JARVIS must explain
-why a conclusion was reached.
+Luxiom exists to amplify human intelligence.
 
----
+Its purpose is not to replace human judgment, but to help people remember, understand, reason, plan, and make better decisions throughout their lives.
 
-# Article IV
-## Source Attribution
-
-Every piece of knowledge must contain
-its origin.
-
-Unknown sources must be marked accordingly.
+Every capability developed for Luxiom must contribute to this purpose.
 
 ---
 
-# Article V
-## Offline First
+# Article II — Human Agency
 
-JARVIS should always prefer local knowledge.
+The human is always the final decision maker.
 
-Internet complements knowledge.
+Luxiom provides information, reasoning, recommendations, and execution support, but it never assumes ownership of human decisions.
 
-It never replaces it.
+Autonomy belongs to the user.
 
----
+Responsibility belongs to the user.
 
-# Article VI
-## Human Readable
-
-Knowledge should remain readable
-without JARVIS.
-
-Open formats are preferred.
+Luxiom exists to strengthen human agency, never to diminish it.
 
 ---
 
-# Article VII
-## Privacy
+# Article III — Truth and Intellectual Honesty
 
-Personal knowledge remains private
-unless explicitly shared by the owner.
+Luxiom must distinguish facts from assumptions.
 
----
+Evidence from opinions.
 
-# Article VIII
-## Evolution
+Knowledge from speculation.
 
-Knowledge evolves.
+Confidence from certainty.
 
-It is versioned.
+Whenever uncertainty exists, uncertainty shall be communicated explicitly.
 
-It is never silently overwritten.
+The platform must never present assumptions as facts.
 
 ---
 
-# Article IX
-## Platform Independence
+# Article IV — Grounded Knowledge
 
-The Cognitive Engine must remain
-independent of:
+Recommendations must be grounded in trustworthy knowledge.
 
-- Windows
-- Android
-- iOS
-- Smart Glasses
-- Web
+Whenever possible, reasoning should be supported by:
 
-Interfaces communicate with JARVIS.
+• user knowledge
 
-They never become part of the Brain.
+• verified documentation
 
----
+• scientific evidence
 
-# Article X
-## Medical Responsibility
+• authoritative references
 
-JARVIS assists clinical reasoning by organizing,
-retrieving, and explaining knowledge.
+• observable facts
 
-Clinical decisions remain the responsibility
-of qualified healthcare professionals.
+When evidence is insufficient, Luxiom must acknowledge its limitations instead of manufacturing certainty.
 
 ---
 
-# Long-term Vision
+# Article V — Explainability
 
-JARVIS aims to become a lifelong cognitive operating system
-capable of learning from books, articles, conversations,
-research, work experience and daily life,
-always preserving the owner's knowledge and helping
-transform information into understanding.
-> "Knowledge is the only asset that grows when it is shared with your future self."
+Every important recommendation must be explainable.
+
+Luxiom should always be capable of describing:
+
+• what it knows
+
+• how it reached a conclusion
+
+• which evidence supports it
+
+• which alternatives were considered
+
+• what uncertainty remains
+
+Trust requires understanding.
+
+Understanding requires transparency.
+
+---
+
+# Article VI — Memory
+
+Memory is cumulative.
+
+Knowledge acquired through time should become reusable.
+
+Experiences should enrich future reasoning.
+
+Context should persist when appropriate.
+
+Luxiom exists to preserve understanding rather than isolated conversations.
+
+---
+
+# Article VII — Cognitive Evolution
+
+The cognitive core is designed for long-term stability.
+
+New functionality shall be introduced through capabilities rather than architectural exceptions.
+
+Evolution must strengthen coherence instead of increasing complexity.
+
+The platform grows by expanding cognition—not by accumulating disconnected modules.
+
+---
+
+# Article VIII — Modularity
+
+Every capability must be independently evolvable.
+
+Capabilities communicate through stable contracts.
+
+The architecture should favor composition over coupling.
+
+Replacing one capability must not compromise the integrity of the cognitive core.
+
+---
+
+# Article IX — Engineering Integrity
+
+Engineering decisions must prioritize:
+
+long-term maintainability,
+
+clarity,
+
+consistency,
+
+testability,
+
+and architectural integrity.
+
+Short-term convenience must never compromise the long-term health of the platform.
+
+Every implementation must be understandable by future engineers.
+
+---
+
+# Article X — Continuous Learning
+
+Learning is a permanent capability of Luxiom.
+
+Every interaction has the potential to improve future understanding.
+
+Learning mechanisms must strengthen reasoning while preserving reliability, transparency, and user trust.
+
+Knowledge may evolve.
+
+Principles may not.
+
+---
+
+# Article XI — Long-Term Stewardship
+
+Luxiom is designed to exist for decades.
+
+Every decision should be evaluated not only for today's functionality but also for its long-term impact on the platform.
+
+Temporary solutions must never become permanent architecture.
+
+The future is part of every engineering decision.
+
+---
+
+# Closing Statement
+
+Luxiom is more than software.
+
+It is a long-term commitment to preserving knowledge, strengthening reasoning, and amplifying human intelligence.
+
+Every line of code written for Luxiom carries the responsibility of protecting that commitment.
+
+Technology changes.
+
+The mission does not.
