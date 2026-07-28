@@ -46,4 +46,4 @@ def test_should_be_immutable() -> None:
     )
 
     with pytest.raises(FrozenInstanceError):
-        object.__setattr__(request, "content", "Modified")
+        request.content = "Modified"

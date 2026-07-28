@@ -1,9 +1,9 @@
-from app.reasoning.engine import ReasoningEngine
+from app.core.container import container
 
 
 class Orchestrator:
     def __init__(self):
-        self.reasoning = ReasoningEngine()
+        self.cognitive_engine = container.cognitive_engine
 
     def process(self, user_input: str):
-        return self.reasoning.process(user_input)
+        return self.cognitive_engine.process(user_input)

@@ -24,6 +24,8 @@ from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
 from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
+from app.cognition.engine import CognitiveEngine
+from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 
 
 class Container:
@@ -62,10 +64,11 @@ class Container:
             retriever=self._memory_retriever,
             ranker=self._memory_ranker,
         )
+        self.memory = LegacyMemoryAdapter(self.memory_pipeline)
 
     def _build_reasoning(self) -> None:
-        """Compose reasoning services."""
-        pass
+        """Compose the Cognitive Engine entry point."""
+        self.cognitive_engine = CognitiveEngine()
 
     def _build_context(self) -> None:
         """Compose context services."""
