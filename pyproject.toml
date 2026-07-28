@@ -9,7 +9,12 @@ authors = [
     { name = "OlsanTech" }
 ]
 
-dependencies = []
+dependencies = [
+    "fastapi",
+    "loguru",
+    "pydantic",
+    "pydantic-settings",
+]
 
 [project.optional-dependencies]
 dev = [
