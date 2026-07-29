@@ -1,19 +1,15 @@
 from fastapi import APIRouter
 
-from app.brain.brain import Brain
+from app.core.container import container
 
 router = APIRouter(
     prefix="/brain",
     tags=["Brain"],
 )
 
-brain = Brain()
-
-
 @router.post("/think")
 def think(prompt: str):
-
-    response = brain.think(prompt)
+    response = container.cognitive_engine.process(prompt)
 
     return {
         "input": prompt,

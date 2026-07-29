@@ -11,10 +11,7 @@ POST /brain/think?prompt=...
 app.api.routes.brain:think
         |
         v
-legacy Brain -> legacy Orchestrator
-        |
-        v
-Container.cognitive_engine
+module-level Container instance -> CognitiveEngine
         |
         v
 user_input
@@ -34,7 +31,6 @@ point is `CognitiveEngine.process(user_input: str) -> str`.
 
 | Stage | Runtime responsibility |
 |---|---|
-| `Brain` / `Orchestrator` | Legacy compatibility path from API to the composed engine. |
 | `CognitiveEngine` | Owns sequencing; directly constructs goal/context and coordinates dependencies. |
 | `DefaultGoalClassifier` | Discards context and returns the fallback domain. |
 | `SpecialistRouter` | Resolves all domains to the same default specialist. |
@@ -47,13 +43,15 @@ point is `CognitiveEngine.process(user_input: str) -> str`.
 `app/core/container.py` is the Composition Root. `_build_reasoning()` constructs
 `DefaultGoalClassifier`, `SpecialistRouter`, `CapabilityExecutor`, and
 `ResponseStage`, injects them into `CognitiveEngine`, and exposes the engine.
-The module creates a global `container`. `_build_memory()` separately composes
+The module creates a module-level `container`; the FastAPI route consumes its
+`cognitive_engine` without rebuilding dependencies. `_build_memory()` separately composes
 the cognitive memory pipeline and a `LegacyMemoryAdapter`.
 
 ## Core boundaries
 
 The active Core path is primarily `app/cognition`, with composition in
-`app/core/container.py`. FastAPI and legacy `app/brain` are outside that Core.
+`app/core/container.py`. FastAPI is outside that Core. Legacy `app/brain` is
+also outside the Core and no longer participates in the public cognitive path.
 The engine depends on classifier/specialist contracts and concrete executor and
 response-stage classes. No product-specific HealthBridge logic appears in this
 path.
@@ -73,7 +71,8 @@ described as active stages.
 
 ## Legacy and alternative modules
 
-- `app/brain` remains the live HTTP bridge.
+- `app/brain` remains in the repository but its `Brain` and `Orchestrator`
+  classes are disconnected from the public cognitive operation.
 - `app/memory`, `app/reasoning`, `app/context`, `app/prompt`, and related
   managers predate or sit outside the current `app/cognition` boundary.
 - `app/tests` contains an older test suite not collected by the configured
