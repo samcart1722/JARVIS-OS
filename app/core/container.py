@@ -9,8 +9,12 @@ It is intentionally simple and framework-independent.
 
 from __future__ import annotations
 
-from app.cognition.capabilities.ids import NORMALIZED_INPUT_CAPABILITY_ID
+from app.cognition.capabilities.ids import (
+    NORMALIZED_INPUT_CAPABILITY_ID,
+    REASONING_CAPABILITY_ID,
+)
 from app.cognition.capabilities.normalized_input import NormalizedInputCapability
+from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.capabilities.registry import CapabilityRegistry
 from app.cognition.classification.default_goal_classifier import (
     DefaultGoalClassifier,
@@ -31,8 +35,10 @@ from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
 from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
+from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
+from app.cognition.providers.ollama_provider import OllamaProvider
 from app.cognition.specialists.specialist_router import SpecialistRouter
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 
@@ -80,10 +86,17 @@ class Container:
         self.goal_classifier = DefaultGoalClassifier()
         self.specialist_router = SpecialistRouter()
         self.normalized_input_capability = NormalizedInputCapability()
+        self.reasoning_provider = OllamaProvider()
+        self.reasoning_stage = ReasoningStage(self.reasoning_provider)
+        self.reasoning_capability = ReasoningCapability(self.reasoning_stage)
         self.capability_registry = CapabilityRegistry()
         self.capability_registry.register(
             NORMALIZED_INPUT_CAPABILITY_ID,
             self.normalized_input_capability,
+        )
+        self.capability_registry.register(
+            REASONING_CAPABILITY_ID,
+            self.reasoning_capability,
         )
         self.capability_executor = CapabilityExecutor(self.capability_registry)
         self.response_stage = ResponseStage()

@@ -45,6 +45,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 3 | Completed/tagged | Executable classification → specialist → plan → execution → response flow wired in `Container` and tested. |
 | 4 | Completed in working tree | Public cognitive input now calls the Container-composed `CognitiveEngine` directly; behavioral API tests verify the boundary. |
 | 5 | Completed in working tree | Capability Runtime v1 resolves and executes a registered deterministic capability and exposes its output. |
+| 6 | Completed in working tree | Provider-backed `ReasoningCapability` is registered and executable on demand without changing the default public policy. |
 
 ## Executable components and status
 
@@ -58,6 +59,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `CapabilityRegistry` | Integrated v1 | Maps stable logical identifiers to injected implementations and detects duplicate or missing identifiers. |
 | `CapabilityExecutor` | Integrated v1 | Executes registered capabilities sequentially with context and fail-fast behavior. |
 | `NormalizedInputCapability` | Integrated bootstrap capability | Deterministically returns normalized context input; performs no reasoning and uses no external service. |
+| `ReasoningCapability` | Integrated, opt-in | Uses `ReasoningStage` and the `ReasoningProvider` port; registered but not selected by `DefaultSpecialist`. |
+| `OllamaProvider` | Composed, not publicly activated | Construction performs no network call; generation would use the existing hard-coded Ollama client configuration. |
 | `ResponseStage` | Integrated with execution output | Returns usable capability output on success and safe fixed text on failure. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
 | `Capability` contract | Implemented contract only | No concrete capability integration found. |
@@ -83,18 +86,20 @@ Sprint 4 baseline: **9 passed, 1 warning in 0.14s**.
 
 Sprint 5 baseline: **12 passed, 1 warning in 0.96s**.
 
-Sprint 5 final result: **24 passed, 1 warning in 0.85s**. The warning remains a
+Sprint 6 baseline: **24 passed, 1 warning in 0.86s**.
+
+Sprint 6 final result: **34 passed, 1 warning in 1.10s**. The warning remains a
 `PytestCacheWarning` because pytest cannot create its cache node-id path. The
-configured suite covers the registry, executor policy, deterministic
-capability, engine handoff, and public route. Tests under `app/tests/` remain
-excluded by `testpaths = ["tests"]`.
+configured suite now also covers reasoning translation, runtime dispatch,
+composition without network calls, and preservation of the deterministic
+default policy. Tests under `app/tests/` remain excluded by
+`testpaths = ["tests"]`.
 
 ## Next logical work and undecided items
 
-Sprint 5 establishes Capability Runtime v1. Candidate later topics include
-memory, useful concrete capabilities, reasoning, files, and web. Unresolved
-decisions include how memory joins the lifecycle, how richer responses represent
-evidence, and how/when legacy modules are retired.
+Sprint 6 integrates reasoning as an opt-in capability. Activating model-backed
+reasoning as the default public policy remains pending, along with configuration
+externalization, memory, evidence, files, web, and legacy retirement.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under
