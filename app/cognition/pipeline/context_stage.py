@@ -1,5 +1,7 @@
 """Context stage for the cognitive pipeline."""
 
+from app.cognition.domain.cognitive_context import CognitiveContext
+
 
 class ContextStage:
     """Prepare the currently available context for the request.
@@ -8,6 +10,6 @@ class ContextStage:
     unchanged.
     """
 
-    def process(self, user_input: str) -> str:
-        """Return the request with the currently available context."""
-        return user_input
+    def process(self, context: CognitiveContext) -> CognitiveContext:
+        """Return the context without adding external information."""
+        return context

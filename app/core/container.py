@@ -25,6 +25,8 @@ from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
 from app.cognition.engine import CognitiveEngine
+from app.cognition.pipeline import ReasoningStage
+from app.cognition.providers.ollama_provider import OllamaProvider
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 
 
@@ -68,7 +70,9 @@ class Container:
 
     def _build_reasoning(self) -> None:
         """Compose the Cognitive Engine entry point."""
-        self.cognitive_engine = CognitiveEngine()
+        self.reasoning_provider = OllamaProvider()
+        self.reasoning_stage = ReasoningStage(self.reasoning_provider)
+        self.cognitive_engine = CognitiveEngine(self.reasoning_stage)
 
     def _build_context(self) -> None:
         """Compose context services."""
