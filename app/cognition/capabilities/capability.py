@@ -1,10 +1,15 @@
 """Base contract for reusable cognitive capabilities."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from app.cognition.capabilities.capability_result import CapabilityResult
-from app.cognition.domain.cognitive_context import CognitiveContext
-from app.cognition.planning.plan_step import PlanStep
+
+if TYPE_CHECKING:
+    from app.cognition.domain.cognitive_context import CognitiveContext
+    from app.cognition.planning.plan_step import PlanStep
 
 
 class Capability(ABC):

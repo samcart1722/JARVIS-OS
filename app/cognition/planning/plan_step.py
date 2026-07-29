@@ -9,3 +9,4 @@ class PlanStep:
 
     id: str
     description: str
+    capability_id: str = ""

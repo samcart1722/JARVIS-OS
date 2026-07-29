@@ -11,3 +11,4 @@ class ExecutionResult:
     completed_steps: tuple[str, ...]
     outputs: tuple[str, ...] = ()
     errors: tuple[str, ...] = ()
+    metadata: tuple[dict[str, object], ...] = ()
