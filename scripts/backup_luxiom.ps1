@@ -48,9 +48,9 @@ try {
         Select-Object -First 1)
     $commit = (Invoke-Git -Arguments @("rev-parse", "HEAD") |
         Select-Object -First 1)
-    $tags = Invoke-Git -Arguments @("tag", "--points-at", "HEAD")
-    $status = Invoke-Git -Arguments @("status", "--short", "--branch")
-    $dirtyStatus = Invoke-Git -Arguments @("status", "--porcelain")
+    $tags = @(Invoke-Git -Arguments @("tag", "--points-at", "HEAD"))
+    $status = @(Invoke-Git -Arguments @("status", "--short", "--branch"))
+    $dirtyStatus = @(Invoke-Git -Arguments @("status", "--porcelain"))
     $pythonVersion = & python --version 2>&1
     if ($LASTEXITCODE -ne 0) {
         $pythonVersion = "Python not available on PATH"
@@ -64,7 +64,7 @@ try {
     Write-Host "Snapshot exclusions: .git, virtual environments, caches, backups,"
     Write-Host "  .env variants, credentials/keys/certificates, logs, and temp artifacts."
 
-    if ($dirtyStatus.Count -gt 0) {
+    if (@($dirtyStatus).Count -gt 0) {
         Write-Warning "The working tree has uncommitted changes. The Git bundle only contains committed history; the source snapshot will include non-secret working files."
     }
 
@@ -92,7 +92,7 @@ try {
     )
     $secretNamePattern = '(?i)(credential|credentials|secret|secrets|token|private[_-]?key)'
 
-    $snapshotFiles = Get-ChildItem -LiteralPath $repositoryRoot -Recurse -File -Force |
+    $snapshotFiles = @(Get-ChildItem -LiteralPath $repositoryRoot -Recurse -File -Force |
         Where-Object {
             $file = $_
             $relativePath = $file.FullName.Substring($repositoryRoot.Length).TrimStart(
@@ -107,9 +107,7 @@ try {
             $isExcludedDirectory = @($segments | Where-Object {
                 $excludedDirectoryNames -contains $_
             }).Count -gt 0
-            $isEnvFile = $file.Name -eq ".env" -or (
-                $file.Name -like ".env.*" -and $file.Name -ne ".env.example"
-            )
+            $isEnvFile = $file.Name -eq ".env" -or $file.Name -like ".env.*"
             $isSecretName = $file.Name -match $secretNamePattern
             $isExcludedExtension = $excludedExtensions -contains $file.Extension.ToLowerInvariant()
 
@@ -120,9 +118,9 @@ try {
                 $isSecretName -or
                 $isExcludedExtension
             )
-        }
+        })
 
-    if ($snapshotFiles.Count -eq 0) {
+    if (@($snapshotFiles).Count -eq 0) {
         throw "No safe files were found for the source snapshot."
     }
 
@@ -153,7 +151,7 @@ try {
         }
     }
 
-    $tagText = if ($tags.Count -gt 0) { $tags -join ", " } else { "None at HEAD" }
+    $tagText = if (@($tags).Count -gt 0) { $tags -join ", " } else { "None at HEAD" }
     $manifestLines = @(
         "LUXIOM PORTABLE BACKUP MANIFEST",
         "Generated: $((Get-Date).ToString('o'))",
