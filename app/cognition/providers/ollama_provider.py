@@ -9,8 +9,8 @@ from app.models.ollama_client import OllamaClient
 class OllamaProvider(ReasoningProvider):
     """Generate reasoning results through the existing Ollama client."""
 
-    def __init__(self) -> None:
-        self._client = OllamaClient()
+    def __init__(self, client: OllamaClient) -> None:
+        self._client = client
 
     def generate(self, context: CognitiveContext) -> ReasoningResult:
         """Generate a response from the normalized user input."""

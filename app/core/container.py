@@ -41,6 +41,8 @@ from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.providers.ollama_provider import OllamaProvider
 from app.cognition.specialists.specialist_router import SpecialistRouter
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
+from app.core.config import Settings, settings
+from app.models.ollama_client import OllamaClient
 
 
 class Container:
@@ -50,7 +52,8 @@ class Container:
     This class creates and owns long-lived application services.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, app_settings: Settings = settings) -> None:
+        self._settings = app_settings
         self._build_memory()
         self._build_reasoning()
         self._build_context()
@@ -86,7 +89,12 @@ class Container:
         self.goal_classifier = DefaultGoalClassifier()
         self.specialist_router = SpecialistRouter()
         self.normalized_input_capability = NormalizedInputCapability()
-        self.reasoning_provider = OllamaProvider()
+        self.ollama_client = OllamaClient(
+            base_url=self._settings.OLLAMA_BASE_URL,
+            model=self._settings.OLLAMA_MODEL,
+            timeout_seconds=self._settings.OLLAMA_TIMEOUT_SECONDS,
+        )
+        self.reasoning_provider = OllamaProvider(self.ollama_client)
         self.reasoning_stage = ReasoningStage(self.reasoning_provider)
         self.reasoning_capability = ReasoningCapability(self.reasoning_stage)
         self.capability_registry = CapabilityRegistry()

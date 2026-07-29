@@ -46,6 +46,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 4 | Completed in working tree | Public cognitive input now calls the Container-composed `CognitiveEngine` directly; behavioral API tests verify the boundary. |
 | 5 | Completed in working tree | Capability Runtime v1 resolves and executes a registered deterministic capability and exposes its output. |
 | 6 | Completed in working tree | Provider-backed `ReasoningCapability` is registered and executable on demand without changing the default public policy. |
+| 7 | Completed in working tree | Ollama URL, model, and timeout now come from official validated application settings and are injected by `Container`. |
 
 ## Executable components and status
 
@@ -60,7 +61,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `CapabilityExecutor` | Integrated v1 | Executes registered capabilities sequentially with context and fail-fast behavior. |
 | `NormalizedInputCapability` | Integrated bootstrap capability | Deterministically returns normalized context input; performs no reasoning and uses no external service. |
 | `ReasoningCapability` | Integrated, opt-in | Uses `ReasoningStage` and the `ReasoningProvider` port; registered but not selected by `DefaultSpecialist`. |
-| `OllamaProvider` | Composed, not publicly activated | Construction performs no network call; generation would use the existing hard-coded Ollama client configuration. |
+| `OllamaProvider` | Composed, not publicly activated | Receives a configured `OllamaClient`; construction performs no network call. |
+| Ollama settings | Integrated | `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, and positive `OLLAMA_TIMEOUT_SECONDS` support environment overrides. |
 | `ResponseStage` | Integrated with execution output | Returns usable capability output on success and safe fixed text on failure. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
 | `Capability` contract | Implemented contract only | No concrete capability integration found. |
@@ -88,18 +90,20 @@ Sprint 5 baseline: **12 passed, 1 warning in 0.96s**.
 
 Sprint 6 baseline: **24 passed, 1 warning in 0.86s**.
 
-Sprint 6 final result: **34 passed, 1 warning in 1.10s**. The warning remains a
-`PytestCacheWarning` because pytest cannot create its cache node-id path. The
-configured suite now also covers reasoning translation, runtime dispatch,
-composition without network calls, and preservation of the deterministic
-default policy. Tests under `app/tests/` remain excluded by
-`testpaths = ["tests"]`.
+Sprint 7 baseline: **34 passed, 1 warning in 1.05s**.
+
+Sprint 7 final result: **45 passed, 1 warning in 1.23s** with the documented
+`DEBUG=true` setting. The warning remains a `PytestCacheWarning` because pytest
+cannot create its cache node-id path. The configured suite now also covers
+settings overrides and validation, explicit client/provider injection, and
+configured composition without network calls. Tests under `app/tests/` remain
+excluded by `testpaths = ["tests"]`.
 
 ## Next logical work and undecided items
 
-Sprint 6 integrates reasoning as an opt-in capability. Activating model-backed
-reasoning as the default public policy remains pending, along with configuration
-externalization, memory, evidence, files, web, and legacy retirement.
+Sprint 7 externalizes the current Ollama operational values. Activating
+model-backed reasoning as the default public policy remains pending, along with
+provider selection, memory, evidence, files, web, and legacy retirement.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under
