@@ -1,0 +1,25 @@
+# Decisions and Guardrails
+
+No approved ADR records were found in the repository. The ADR standard itself
+is a draft and `docs/adr/` does not exist. The following consolidation therefore
+preserves the status and source of each statement rather than inventing ADRs.
+
+| Decision / guardrail | Reason | Impact | Source | Status |
+|---|---|---|---|---|
+| The LLM is not the Core; models are replaceable reasoning providers. | Preserve platform ownership, memory continuity, and provider independence. | Provider changes must not redesign the Core. | `docs/00_Product_North_Star.md`; `docs/01_Cognitive_Lifecycle.md`; `app/cognition/providers/base_provider.py` | Vigente |
+| The Core is domain-independent. | One reusable platform must govern multiple products. | Client/domain logic stays outside the Core. | `docs/00_Product_North_Star.md`; `docs/01_Cognitive_Lifecycle.md` | Vigente |
+| HealthBridge consumes Luxiom; it is not part of the Core. | It is the first validation of the multi-product architecture. | No HealthBridge exception or coupling in Core code. | `docs/00_Product_North_Star.md` | Vigente |
+| New skills are reusable capabilities. | Capabilities persist while tools and technologies change. | Avoid isolated client features in the Core. | `docs/00_Product_North_Star.md`; `docs/foundation/PRINCIPLES.md` | Vigente |
+| Specialists create plans and do not execute tools. | Separate domain planning from reusable execution. | Specialists depend on capability concepts, not infrastructure. | `docs/01_Cognitive_Lifecycle.md`; `app/cognition/specialists/specialist.py` | Vigente |
+| `CognitiveEngine` orchestrates rather than owning business logic. | Keep stages independently evolvable and testable. | Domain/execution policy belongs behind collaborators. | `docs/01_Cognitive_Lifecycle.md`; `app/cognition/engine.py`; `docs/architecture/Architectural_Invariants.md` (Draft) | Vigente in current runtime |
+| `Container` is the Composition Root. | Centralize construction and dependency wiring. | Long-lived services are assembled in `app/core/container.py`. | `app/core/container.py` | Vigente |
+| Documentation and executable architecture must stay aligned. | Prevent false architectural claims and recovery errors. | Record mismatches and update operational documents with runtime changes. | `docs/Documentation_Structure.md`; repository recovery requirements | Vigente |
+| Material architecture changes require an ADR. | Preserve rationale and consequences over time. | Do not treat implementation or chat as architectural approval. | `docs/Documentation_Structure.md`; `docs/architecture/Architecture_Decision_Record_Standard.md` (Draft) | Pendiente de ADR governance approval |
+| A new abstraction should not remain isolated across multiple sprints. | Avoid accumulating unused architectural scaffolding. | Integrate, formally defer, or reconsider abstractions during planning. | Architecture review context supplied for this recovery pack; no approved ADR found | Provisional / pendiente de ADR |
+
+## Application rule
+
+When a source marked Draft conflicts with approved product documents or
+executable/tests, do not silently promote the draft. Follow
+[Source of Truth](09_SOURCE_OF_TRUTH.md), record the discrepancy, and seek a
+formal decision where architecture would change.
