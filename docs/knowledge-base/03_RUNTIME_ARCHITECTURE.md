@@ -42,15 +42,16 @@ point is `CognitiveEngine.process(user_input: str) -> str`.
 | `NormalizedInputCapability` | Returns normalized context input deterministically; it performs no reasoning. |
 | `ReasoningCapability` | Converts the canonical provider-backed `ReasoningStage` result into `CapabilityResult`; available only when a plan requests `reasoning`. |
 | `ReasoningStage` | Canonical single invocation boundary from `CognitiveContext` to `ReasoningProvider.generate`. |
-| `OllamaProvider` | Current composed provider implementation; it performs network I/O only when reasoning executes. |
+| `OllamaProvider` | Receives an explicitly configured `OllamaClient`; it performs network I/O only when reasoning executes. |
 | `ResponseStage` | Returns aggregated output on success or safe fixed failure text. |
 
 ## Dependencies and composition
 
 `app/core/container.py` is the Composition Root. `_build_reasoning()` constructs
-and registers `NormalizedInputCapability` and `ReasoningCapability`. The latter
-receives a `ReasoningStage` backed by `OllamaProvider`. Provider construction
-does not perform network I/O. The Container constructs `CapabilityExecutor`
+and registers `NormalizedInputCapability` and `ReasoningCapability`. `Container`
+reads official `Settings`, constructs `OllamaClient` with the configured URL,
+model, and timeout, and injects it into `OllamaProvider`. Construction does not
+perform network I/O. The Container constructs `CapabilityExecutor`
 with the shared registry, then injects it and the other stages into
 `CognitiveEngine`.
 The module creates a module-level `container`; the FastAPI route consumes its
@@ -87,6 +88,21 @@ whitespace-only text becomes a controlled failure. Unexpected provider
 exceptions propagate through the executor to existing HTTP error handling.
 `DefaultSpecialist` still requests `normalized_input`, so the public default
 path remains deterministic and does not call Ollama.
+
+## Provider configuration boundary
+
+`Settings → Container → OllamaClient(base_url, model, timeout_seconds) →
+OllamaProvider(client) → ReasoningStage → ReasoningCapability`
+
+Defaults preserve prior behavior:
+
+- `OLLAMA_BASE_URL=http://localhost:11434/api/generate`
+- `OLLAMA_MODEL=llama3.2:3b`
+- `OLLAMA_TIMEOUT_SECONDS=120`
+
+Pydantic Settings provides environment overrides and rejects timeout values
+less than one. Cognitive Core contracts and capabilities do not import Settings
+or read environment variables.
 
 ## Documented versus executable lifecycle
 

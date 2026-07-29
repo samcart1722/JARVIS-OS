@@ -10,6 +10,7 @@ from app.cognition.capabilities.normalized_input import NormalizedInputCapabilit
 from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.planning.goal import Goal
 from app.cognition.specialists.default_specialist import DefaultSpecialist
+from app.core.config import Settings
 from app.core.container import Container
 
 
@@ -40,3 +41,20 @@ def test_default_specialist_keeps_deterministic_capability_policy() -> None:
 
     assert len(plan.steps) == 1
     assert plan.steps[0].capability_id == NORMALIZED_INPUT_CAPABILITY_ID
+
+
+def test_container_injects_official_settings_into_ollama_client() -> None:
+    configured = Settings(
+        OLLAMA_BASE_URL="http://configured.test/api/generate",
+        OLLAMA_MODEL="configured-model",
+        OLLAMA_TIMEOUT_SECONDS=30,
+        _env_file=None,
+    )
+
+    container = Container(configured)
+
+    assert container.ollama_client.url == (
+        "http://configured.test/api/generate"
+    )
+    assert container.ollama_client.model == "configured-model"
+    assert container.ollama_client.timeout_seconds == 30
