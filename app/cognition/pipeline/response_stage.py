@@ -1,11 +1,14 @@
 """Response stage for the cognitive pipeline."""
 
-from app.cognition.domain.reasoning_result import ReasoningResult
+from app.cognition.planning.execution_result import ExecutionResult
 
 
 class ResponseStage:
-    """Convert the reasoning result into the current public response."""
+    """Convert an execution result into the public response."""
 
-    def process(self, reasoning_result: ReasoningResult) -> str:
-        """Return the response produced by the reasoning stage."""
-        return reasoning_result.response
+    def process(self, execution_result: ExecutionResult) -> str:
+        """Return the minimal public representation of an execution result."""
+        if execution_result.success:
+            return "Plan executed successfully."
+
+        return "Plan execution failed."

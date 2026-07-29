@@ -24,9 +24,13 @@ from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
 from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
+from app.cognition.classification.default_goal_classifier import (
+    DefaultGoalClassifier,
+)
 from app.cognition.engine import CognitiveEngine
-from app.cognition.pipeline import ReasoningStage
-from app.cognition.providers.ollama_provider import OllamaProvider
+from app.cognition.planning.capability_executor import CapabilityExecutor
+from app.cognition.pipeline.response_stage import ResponseStage
+from app.cognition.specialists.specialist_router import SpecialistRouter
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 
 
@@ -70,9 +74,16 @@ class Container:
 
     def _build_reasoning(self) -> None:
         """Compose the Cognitive Engine entry point."""
-        self.reasoning_provider = OllamaProvider()
-        self.reasoning_stage = ReasoningStage(self.reasoning_provider)
-        self.cognitive_engine = CognitiveEngine(self.reasoning_stage)
+        self.goal_classifier = DefaultGoalClassifier()
+        self.specialist_router = SpecialistRouter()
+        self.capability_executor = CapabilityExecutor()
+        self.response_stage = ResponseStage()
+        self.cognitive_engine = CognitiveEngine(
+            goal_classifier=self.goal_classifier,
+            specialist_router=self.specialist_router,
+            capability_executor=self.capability_executor,
+            response_stage=self.response_stage,
+        )
 
     def _build_context(self) -> None:
         """Compose context services."""
