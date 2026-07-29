@@ -1,5 +1,6 @@
 """Default specialist implementation."""
 
+from app.cognition.capabilities.ids import NORMALIZED_INPUT_CAPABILITY_ID
 from app.cognition.planning.goal import Goal
 from app.cognition.planning.plan import Plan
 from app.cognition.planning.plan_step import PlanStep
@@ -21,6 +22,7 @@ class DefaultSpecialist(Specialist):
                 PlanStep(
                     id="default-step-1",
                     description=f"Address the goal: {goal.description}",
+                    capability_id=NORMALIZED_INPUT_CAPABILITY_ID,
                 ),
             )
         )

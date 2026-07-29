@@ -9,18 +9,19 @@
 | 2 | Define fundamental Cognitive Core domain/contracts and normative product/lifecycle documents. | `a53c1df`, tag `sprint-2-complete` |
 | 3 | Wire the goal-classifier/specialist/plan/executor/response path into the engine and Container, with an integration test. | `74637ab`, tag `sprint-3-complete` |
 | 4 | Make the Container-composed `CognitiveEngine` the sole public cognitive runtime and disconnect the legacy HTTP bridge. | Working-tree implementation and `history/sprints/SPRINT_4_SUMMARY.md` |
+| 5 | Establish Capability Runtime v1 with logical identifiers, direct registry, fail-fast execution, and deterministic public output. | Working-tree implementation and `history/sprints/SPRINT_5_SUMMARY.md` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 4 is complete in the working tree. `POST /brain/think` now calls the
-Container-composed `CognitiveEngine` directly and returns the result of
-`ResponseStage`. The structure executes end to end through `ResponseStage`,
-but classifier, specialist, plan, executor, and response behavior remain
-minimal. No concrete capability and no memory update participate in that cycle.
+Sprint 5 is complete in the working tree. `POST /brain/think` reaches a real,
+registered capability and returns its deterministic output through
+`ResponseStage`. Classification and specialist behavior remain provisional.
+The included capability only returns normalized input; it does not reason.
+No memory update participates in the cycle.
 
-## Candidate scope after Sprint 4
+## Candidate scope after Sprint 5
 
 The following remain candidates, not commitments:
 
@@ -28,7 +29,7 @@ The following remain candidates, not commitments:
 - model Reasoning as a reusable capability;
 - add a Files capability;
 - add a Web capability;
-- implement actual capability registration/orchestration.
+- add capabilities that perform useful work through separately approved scope.
 
 Before selecting scope, resolve the executor/context contract, determine which
 existing pipeline abstractions remain valid, define test boundaries, and record

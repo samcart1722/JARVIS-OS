@@ -18,9 +18,11 @@ user_input
   -> Goal + CognitiveContext
   -> DefaultGoalClassifier -> Domain.UNKNOWN
   -> SpecialistRouter -> DefaultSpecialist
-  -> Plan(one descriptive PlanStep)
-  -> CapabilityExecutor -> ExecutionResult
-  -> ResponseStage -> "Plan executed successfully."
+  -> Plan(one PlanStep requiring "normalized_input")
+  -> CapabilityExecutor(context, plan)
+  -> CapabilityRegistry -> NormalizedInputCapability
+  -> CapabilityResult -> ExecutionResult
+  -> ResponseStage -> normalized request input
 ```
 
 The public HTTP input is a `prompt` query parameter and the HTTP output is a
@@ -34,15 +36,18 @@ point is `CognitiveEngine.process(user_input: str) -> str`.
 | `CognitiveEngine` | Owns sequencing; directly constructs goal/context and coordinates dependencies. |
 | `DefaultGoalClassifier` | Discards context and returns the fallback domain. |
 | `SpecialistRouter` | Resolves all domains to the same default specialist. |
-| `DefaultSpecialist` | Builds a one-step high-level plan from the goal. |
-| `CapabilityExecutor` | Marks descriptions completed; it does not dispatch capabilities or tools. |
-| `ResponseStage` | Maps execution success to a fixed public string. |
+| `DefaultSpecialist` | Builds a provisional one-step plan requesting `normalized_input`. |
+| `CapabilityRegistry` | Resolves logical identifiers to implementations composed by `Container`. |
+| `CapabilityExecutor` | Runs steps sequentially, passes context and step to capabilities, aggregates results, and fails fast. |
+| `NormalizedInputCapability` | Returns normalized context input deterministically; it performs no reasoning. |
+| `ResponseStage` | Returns aggregated output on success or safe fixed failure text. |
 
 ## Dependencies and composition
 
 `app/core/container.py` is the Composition Root. `_build_reasoning()` constructs
-`DefaultGoalClassifier`, `SpecialistRouter`, `CapabilityExecutor`, and
-`ResponseStage`, injects them into `CognitiveEngine`, and exposes the engine.
+and registers `NormalizedInputCapability`, constructs `CapabilityExecutor`
+with the registry, then injects the executor and other stages into
+`CognitiveEngine`.
 The module creates a module-level `container`; the FastAPI route consumes its
 `cognitive_engine` without rebuilding dependencies. `_build_memory()` separately composes
 the cognitive memory pipeline and a `LegacyMemoryAdapter`.
@@ -53,17 +58,24 @@ The active Core path is primarily `app/cognition`, with composition in
 `app/core/container.py`. FastAPI is outside that Core. Legacy `app/brain` is
 also outside the Core and no longer participates in the public cognitive path.
 The engine depends on classifier/specialist contracts and concrete executor and
-response-stage classes. No product-specific HealthBridge logic appears in this
-path.
+response-stage classes. Plans reference only stable logical capability
+identifiers. No product-specific HealthBridge logic appears in this path.
+
+## Execution policy v1
+
+Execution is sequential and ordered. A step is completed only after its
+capability returns `success=True`. Outputs and metadata are aggregated. Missing
+capabilities produce a failed `ExecutionResult`; controlled failure preserves
+prior successful work and stops the plan. Unexpected exceptions propagate to
+the existing HTTP 500 handling. An empty plan succeeds with no completed work
+or output.
 
 ## Documented versus executable lifecycle
 
 The normative Cognitive Lifecycle includes Task Builder, Task, Workspace,
 capabilities, evidence, reasoning/tools during execution, replanning, and Memory
-Update. These are not active in the Sprint 3 path. The runtime instead creates
-`Goal` and `CognitiveContext` directly, has no Task Builder, invokes no
-capability, produces no evidence, performs no memory update, and returns a
-fixed response.
+Update. Sprint 5 activates one deterministic capability but still has no Task
+Builder, evidence model, reasoning/tool execution, replanning, or memory update.
 
 `InputStage`, `ContextStage`, and provider-backed `ReasoningStage` exist from
 Sprint 1 but are bypassed by the current engine implementation. They must not be

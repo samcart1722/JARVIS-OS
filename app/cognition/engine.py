@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from app.cognition.classification.goal_classifier import GoalClassifier
 from app.cognition.domain.cognitive_context import CognitiveContext
+from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.planning.goal import Goal
-from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.specialists.specialist_router import SpecialistRouter
 
 
@@ -36,6 +36,6 @@ class CognitiveEngine:
         domain = self._goal_classifier.classify(context)
         specialist = self._specialist_router.route(domain)
         plan = specialist.create_plan(goal)
-        execution_result = self._capability_executor.execute(plan)
+        execution_result = self._capability_executor.execute(context, plan)
 
         return self._response_stage.process(execution_result)

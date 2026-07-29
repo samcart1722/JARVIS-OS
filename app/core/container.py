@@ -9,6 +9,13 @@ It is intentionally simple and framework-independent.
 
 from __future__ import annotations
 
+from app.cognition.capabilities.ids import NORMALIZED_INPUT_CAPABILITY_ID
+from app.cognition.capabilities.normalized_input import NormalizedInputCapability
+from app.cognition.capabilities.registry import CapabilityRegistry
+from app.cognition.classification.default_goal_classifier import (
+    DefaultGoalClassifier,
+)
+from app.cognition.engine import CognitiveEngine
 from app.cognition.memory.extractors.default_extractor import DefaultExtractor
 from app.cognition.memory.intelligence.default_classifier import (
     DefaultClassifier,
@@ -24,12 +31,8 @@ from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
 from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
-from app.cognition.classification.default_goal_classifier import (
-    DefaultGoalClassifier,
-)
-from app.cognition.engine import CognitiveEngine
-from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.pipeline.response_stage import ResponseStage
+from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.specialists.specialist_router import SpecialistRouter
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 
@@ -76,7 +79,13 @@ class Container:
         """Compose the Cognitive Engine entry point."""
         self.goal_classifier = DefaultGoalClassifier()
         self.specialist_router = SpecialistRouter()
-        self.capability_executor = CapabilityExecutor()
+        self.normalized_input_capability = NormalizedInputCapability()
+        self.capability_registry = CapabilityRegistry()
+        self.capability_registry.register(
+            NORMALIZED_INPUT_CAPABILITY_ID,
+            self.normalized_input_capability,
+        )
+        self.capability_executor = CapabilityExecutor(self.capability_registry)
         self.response_stage = ResponseStage()
         self.cognitive_engine = CognitiveEngine(
             goal_classifier=self.goal_classifier,

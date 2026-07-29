@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 from fastapi import FastAPI
 
 from app.api.routes import brain
+from app.cognition.capabilities.capability_result import CapabilityResult
 from app.cognition.engine import CognitiveEngine
 from app.core.container import Container
 
@@ -97,3 +98,34 @@ def test_container_composes_the_cognitive_engine() -> None:
     composed = Container()
 
     assert isinstance(composed.cognitive_engine, CognitiveEngine)
+
+
+def test_think_returns_output_from_the_real_deterministic_capability() -> None:
+    status, payload = post_think("Return this deterministic input")
+
+    assert status == 200
+    assert payload == {
+        "input": "Return this deterministic input",
+        "response": "Return this deterministic input",
+    }
+
+
+def test_controlled_capability_failure_is_not_presented_as_success(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        brain.container.normalized_input_capability,
+        "execute",
+        lambda context, step: CapabilityResult(
+            success=False,
+            errors=("controlled internal failure",),
+        ),
+    )
+
+    status, payload = post_think("Trigger a controlled failure")
+
+    assert status == 200
+    assert payload == {
+        "input": "Trigger a controlled failure",
+        "response": "Plan execution failed.",
+    }
