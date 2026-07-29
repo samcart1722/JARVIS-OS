@@ -43,7 +43,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 1 | Completed/tagged | Minimal cognitive pipeline and replaceable reasoning-provider contract added. |
 | 2 | Completed/tagged | Core goal, context, domain, specialist, plan, executor, and capability contracts added; Product North Star and Cognitive Lifecycle added. |
 | 3 | Completed/tagged | Executable classification → specialist → plan → execution → response flow wired in `Container` and tested. |
-| 4 | Not started / not approved | Candidate scope only; no formal decision found. |
+| 4 | Completed in working tree | Public cognitive input now calls the Container-composed `CognitiveEngine` directly; behavioral API tests verify the boundary. |
 
 ## Executable components and status
 
@@ -62,9 +62,9 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 
 ## Real request flow
 
-The FastAPI `/brain/think` route constructs legacy `Brain`, which delegates to
-legacy `Orchestrator`, then to `container.cognitive_engine.process`. The engine
-runs:
+The FastAPI `/brain/think` route obtains the already-composed engine from the
+module-level `Container` instance and calls
+`container.cognitive_engine.process` directly. The engine runs:
 
 `user_input → Goal + CognitiveContext → Domain → Specialist → Plan → ExecutionResult → ResponseStage → str`
 
@@ -74,15 +74,22 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
 
-Result on 2026-07-29: **9 passed, 1 warning in 0.36s**. The sole warning was
-`PytestCacheWarning` because pytest could not create its cache node-id path.
-The configured suite covers eight `UserRequest` cases and one integrated engine
-interaction. Tests under `app/tests/` are not collected by `testpaths = ["tests"]`.
+Sprint 4 baseline: **9 passed, 1 warning in 0.14s**.
+
+Sprint 4 final result: **12 passed, 1 warning**. The warning remains a
+`PytestCacheWarning` because pytest cannot create its cache node-id path. The
+configured suite now includes three public-boundary tests in addition to the
+previous eight `UserRequest` cases and integrated engine interaction. Tests
+under `app/tests/` remain excluded by `testpaths = ["tests"]`.
 
 ## Next logical work and undecided items
 
-The next logical activity is to define Sprint 4 through the project's
-architecture process, not to assume its scope. Candidate topics include memory,
+Sprint 4 establishes the canonical public boundary. Candidate later topics
+include memory,
 reasoning as a capability, files, web, and actual capability orchestration.
 Unresolved decisions include which candidate comes first, how execution receives
 context, how memory joins the lifecycle, and how/when legacy routes are retired.
+
+`app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
+consumer in the public cognitive route. Other historical modules under
+`app/reasoning`, `app/context`, and `app/memory` remain outside this sprint.
