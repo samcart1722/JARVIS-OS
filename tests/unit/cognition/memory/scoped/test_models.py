@@ -7,6 +7,7 @@ import pytest
 
 from app.cognition.memory.scoped.models import (
     MemoryScope,
+    MemorySnapshot,
     ScopedMemoryRecord,
 )
 
@@ -55,3 +56,35 @@ def test_record_is_immutable() -> None:
 
     with pytest.raises(FrozenInstanceError):
         record.content = "changed"  # type: ignore[misc]
+
+
+def test_empty_snapshot_is_valid_for_explicit_scope() -> None:
+    scope = MemoryScope("scope-a")
+
+    assert MemorySnapshot(scope=scope).records == ()
+
+
+def test_snapshot_preserves_order_and_requires_matching_scope() -> None:
+    scope = MemoryScope("scope-a")
+    records = (
+        ScopedMemoryRecord(scope, "first"),
+        ScopedMemoryRecord(scope, "second"),
+    )
+
+    assert MemorySnapshot(scope, records).records == records
+    with pytest.raises(ValueError):
+        MemorySnapshot(
+            scope,
+            (ScopedMemoryRecord(MemoryScope("scope-b"), "other"),),
+        )
+
+
+def test_snapshot_and_record_collection_are_immutable() -> None:
+    snapshot = MemorySnapshot(MemoryScope("scope-a"))
+
+    with pytest.raises(FrozenInstanceError):
+        snapshot.scope = MemoryScope("scope-b")  # type: ignore[misc]
+    with pytest.raises(TypeError):
+        MemorySnapshot(snapshot.scope, [])  # type: ignore[arg-type]
+    with pytest.raises(TypeError):
+        MemorySnapshot(None)  # type: ignore[arg-type]

@@ -206,6 +206,30 @@ pending an explicit migration policy. There is no I/O, write surface,
 migration, Container wiring, engine/context change, configuration, prompt use,
 demo use, or API change.
 
+## Controlled scoped retrieval
+
+`MEMORY_RETRIEVAL_ENABLED` defaults to false. Container composes:
+
+`InMemoryScopedMemoryRepository(()) -> RepositoryMemoryContextRetriever
+-> CognitiveEngine`
+
+Disabled or enabled without scope:
+
+`base CognitiveContext(memory_snapshot=None) -> classifier -> existing flow`
+
+Enabled with explicit scope:
+
+`base context -> retrieve(scope, normalized_input) -> MemorySnapshot
+-> enriched frozen context -> classifier -> specialist -> capability`
+
+Retrieval happens exactly once before classification. Empty snapshots continue
+normally; cross-scope snapshots are rejected; unexpected failures propagate.
+The composed repository starts empty and is not durable.
+
+The HTTP route and demo call the engine without scope, so neither retrieves
+memory. Legacy data is not copied. OllamaProvider is unchanged and still sends
+only normalized input to Ollama.
+
 ## Governance baseline
 
 The executable runtime is now catalogued in:

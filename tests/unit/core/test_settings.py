@@ -14,6 +14,7 @@ OLLAMA_VARIABLES = (
     "OLLAMA_TIMEOUT_SECONDS",
 )
 REASONING_VARIABLE = "REASONING_ENABLED"
+MEMORY_RETRIEVAL_VARIABLE = "MEMORY_RETRIEVAL_ENABLED"
 
 
 def clear_ollama_environment(monkeypatch) -> None:
@@ -23,6 +24,10 @@ def clear_ollama_environment(monkeypatch) -> None:
 
 def clear_reasoning_environment(monkeypatch) -> None:
     monkeypatch.delenv(REASONING_VARIABLE, raising=False)
+
+
+def clear_memory_retrieval_environment(monkeypatch) -> None:
+    monkeypatch.delenv(MEMORY_RETRIEVAL_VARIABLE, raising=False)
 
 
 def test_ollama_settings_preserve_previous_defaults(monkeypatch) -> None:
@@ -149,3 +154,37 @@ def test_env_example_contains_safe_reasoning_default() -> None:
 
     assert "REASONING_ENABLED=false" in contents
     assert "OLLAMA_MODELS_URL=http://localhost:11434/api/tags" in contents
+    assert "MEMORY_RETRIEVAL_ENABLED=false" in contents
+
+
+def test_memory_retrieval_is_disabled_by_default(monkeypatch) -> None:
+    clear_memory_retrieval_environment(monkeypatch)
+
+    configured = Settings(_env_file=None)
+
+    assert configured.MEMORY_RETRIEVAL_ENABLED is False
+    assert configured.REASONING_ENABLED is False
+    assert configured.OLLAMA_MODEL == "llama3.2:3b"
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (("true", True), ("false", False)),
+)
+def test_memory_retrieval_supports_boolean_override(
+    monkeypatch, value: str, expected: bool
+) -> None:
+    clear_memory_retrieval_environment(monkeypatch)
+    monkeypatch.setenv(MEMORY_RETRIEVAL_VARIABLE, value)
+
+    assert (
+        Settings(_env_file=None).MEMORY_RETRIEVAL_ENABLED is expected
+    )
+
+
+def test_invalid_memory_retrieval_boolean_is_rejected(monkeypatch) -> None:
+    clear_memory_retrieval_environment(monkeypatch)
+    monkeypatch.setenv(MEMORY_RETRIEVAL_VARIABLE, "sometimes")
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)

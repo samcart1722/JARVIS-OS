@@ -28,3 +28,19 @@ class ScopedMemoryRecord:
         if not normalized_content:
             raise ValueError("Memory content cannot be empty.")
         object.__setattr__(self, "content", normalized_content)
+
+
+@dataclass(frozen=True, slots=True)
+class MemorySnapshot:
+    """Represent one completed contextual retrieval for an explicit scope."""
+
+    scope: MemoryScope
+    records: tuple[ScopedMemoryRecord, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.scope, MemoryScope):
+            raise TypeError("A memory snapshot requires a MemoryScope.")
+        if not isinstance(self.records, tuple):
+            raise TypeError("Memory snapshot records must be a tuple.")
+        if any(record.scope != self.scope for record in self.records):
+            raise ValueError("Memory snapshot records must match its scope.")

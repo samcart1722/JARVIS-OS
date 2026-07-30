@@ -15,6 +15,14 @@ results, and tested isolation. Sprint 13 may integrate controlled read-only
 retrieval while preserving these invariants. Migration, writes, durable
 persistence, and prompt incorporation remain deferred.
 
+## Sprint 13 completed
+
+Controlled Memory Context Integration v1 composes the empty scoped repository,
+adds an opt-in flag, retrieves only with explicit scope, and propagates an
+immutable snapshot before classification. Public HTTP and demo behavior remain
+unchanged. Real scoped data sources, identity, writes, durability, migration,
+and safe prompt use remain future work.
+
 ## Completed sprints
 
 | Sprint | Objective achieved | Evidence |

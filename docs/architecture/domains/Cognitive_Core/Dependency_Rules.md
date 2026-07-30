@@ -155,3 +155,15 @@ The in-memory scoped implementation must not wrap or import the global
 `InMemoryRepository` or `LegacyMemoryAdapter`. Until reviewed integration,
 API, engine, context, Container, Ollama, readiness, and demo must not consume
 scoped memory.
+
+## Active memory-context integration
+
+`CognitiveContext` may depend on `MemorySnapshot`. `CognitiveEngine` may depend
+on the `MemoryContextRetriever` contract and scoped domain models, but not on
+the in-memory implementation, legacy adapter, Settings, or storage.
+
+`RepositoryMemoryContextRetriever` depends on `ScopedMemoryRepository`, never
+its concrete implementation. `Container` alone may compose the concrete empty
+repository and inject the feature flag. API, demo, OllamaProvider, readiness,
+DefaultSpecialist, and CapabilityExecutor must not import scoped-memory
+infrastructure. Memory and readiness remain independent.

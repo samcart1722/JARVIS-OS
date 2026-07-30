@@ -32,6 +32,12 @@ from app.cognition.memory.pipeline.default_memory_pipeline import (
 )
 from app.cognition.memory.ranking.default_ranker import DefaultRanker
 from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
+from app.cognition.memory.scoped.context_retriever import (
+    RepositoryMemoryContextRetriever,
+)
+from app.cognition.memory.scoped.in_memory_repository import (
+    InMemoryScopedMemoryRepository,
+)
 from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
@@ -88,6 +94,10 @@ class Container:
             ranker=self._memory_ranker,
         )
         self.memory = LegacyMemoryAdapter(self.memory_pipeline)
+        self.scoped_memory_repository = InMemoryScopedMemoryRepository(())
+        self.memory_context_retriever = RepositoryMemoryContextRetriever(
+            self.scoped_memory_repository
+        )
 
     def _build_reasoning(self) -> None:
         """Compose the Cognitive Engine entry point."""
@@ -128,6 +138,8 @@ class Container:
             specialist_router=self.specialist_router,
             capability_executor=self.capability_executor,
             response_stage=self.response_stage,
+            memory_context_retriever=self.memory_context_retriever,
+            memory_retrieval_enabled=self._settings.MEMORY_RETRIEVAL_ENABLED,
         )
 
     def _build_context(self) -> None:

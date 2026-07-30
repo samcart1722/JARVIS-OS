@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     REASONING_ENABLED: bool = False
+    MEMORY_RETRIEVAL_ENABLED: bool = False
     OLLAMA_BASE_URL: str = "http://localhost:11434/api/generate"
     OLLAMA_MODELS_URL: str = "http://localhost:11434/api/tags"
     OLLAMA_MODEL: str = "llama3.2:3b"
