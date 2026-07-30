@@ -54,7 +54,7 @@ def test_process_executes_the_plan_from_the_selected_specialist() -> None:
     assert context.goal is not None
     assert context.goal.description == "Prepare a monthly order"
     router.route.assert_called_once_with(Domain.UNKNOWN)
-    specialist.create_plan.assert_called_once_with(context.goal)
+    specialist.create_plan.assert_called_once_with(context)
     executor.execute.assert_called_once_with(context, plan)
     assert executor.execute.return_value is execution_result
     response_stage.process.assert_called_once_with(execution_result)

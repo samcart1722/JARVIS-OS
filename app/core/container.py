@@ -39,6 +39,10 @@ from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.providers.ollama_provider import OllamaProvider
+from app.cognition.specialists.default_specialist import DefaultSpecialist
+from app.cognition.specialists.deterministic_reasoning_selection_policy import (
+    DeterministicReasoningSelectionPolicy,
+)
 from app.cognition.specialists.specialist_router import SpecialistRouter
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 from app.core.config import Settings, settings
@@ -87,7 +91,15 @@ class Container:
     def _build_reasoning(self) -> None:
         """Compose the Cognitive Engine entry point."""
         self.goal_classifier = DefaultGoalClassifier()
-        self.specialist_router = SpecialistRouter()
+        self.reasoning_selection_policy = (
+            DeterministicReasoningSelectionPolicy(
+                reasoning_enabled=self._settings.REASONING_ENABLED
+            )
+        )
+        self.default_specialist = DefaultSpecialist(
+            self.reasoning_selection_policy
+        )
+        self.specialist_router = SpecialistRouter(self.default_specialist)
         self.normalized_input_capability = NormalizedInputCapability()
         self.ollama_client = OllamaClient(
             base_url=self._settings.OLLAMA_BASE_URL,

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
+    REASONING_ENABLED: bool = False
     OLLAMA_BASE_URL: str = "http://localhost:11434/api/generate"
     OLLAMA_MODEL: str = "llama3.2:3b"
     OLLAMA_TIMEOUT_SECONDS: int = Field(default=120, gt=0)

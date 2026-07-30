@@ -129,3 +129,19 @@ def test_controlled_capability_failure_is_not_presented_as_success(
         "input": "Trigger a controlled failure",
         "response": "Plan execution failed.",
     }
+
+
+def test_default_public_path_does_not_invoke_reasoning_provider(
+    monkeypatch,
+) -> None:
+    generate = Mock(side_effect=AssertionError("reasoning must stay disabled"))
+    monkeypatch.setattr(brain.container.reasoning_provider, "generate", generate)
+
+    status, payload = post_think("Analyze this prompt")
+
+    assert status == 200
+    assert payload == {
+        "input": "Analyze this prompt",
+        "response": "Analyze this prompt",
+    }
+    generate.assert_not_called()
