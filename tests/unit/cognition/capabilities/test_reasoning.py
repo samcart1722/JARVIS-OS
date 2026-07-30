@@ -4,6 +4,7 @@ import pytest
 
 from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.domain.cognitive_context import CognitiveContext
+from app.cognition.domain.cognitive_outcome import EMPTY_CAPABILITY_OUTPUT
 from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.planning.plan_step import PlanStep
@@ -67,6 +68,7 @@ def test_reasoning_capability_rejects_empty_output(
     assert result.success is False
     assert result.outputs == ()
     assert result.errors == ("Reasoning provider returned no output.",)
+    assert result.error_code == EMPTY_CAPABILITY_OUTPUT
 
 
 def test_reasoning_capability_propagates_unexpected_provider_exception() -> None:

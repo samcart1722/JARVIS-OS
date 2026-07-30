@@ -3,6 +3,7 @@
 from unittest.mock import Mock
 
 from app.cognition.classification.goal_classifier import GoalClassifier
+from app.cognition.domain.cognitive_outcome import CognitiveOutcome
 from app.cognition.domain.domain import Domain
 from app.cognition.engine import CognitiveEngine
 from app.cognition.pipeline.response_stage import ResponseStage
@@ -37,7 +38,8 @@ def test_process_executes_the_plan_from_the_selected_specialist() -> None:
     router.route.return_value = specialist
     specialist.create_plan.return_value = plan
     executor.execute.return_value = execution_result
-    response_stage.process.return_value = "Plan executed successfully."
+    outcome = CognitiveOutcome(success=True, response="Plan output")
+    response_stage.process.return_value = outcome
 
     engine = CognitiveEngine(
         goal_classifier=classifier,
@@ -48,7 +50,7 @@ def test_process_executes_the_plan_from_the_selected_specialist() -> None:
 
     result = engine.process("Prepare a monthly order")
 
-    assert result == "Plan executed successfully."
+    assert result is outcome
     context = classifier.classify.call_args.args[0]
     assert context.raw_input == "Prepare a monthly order"
     assert context.goal is not None

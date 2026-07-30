@@ -16,6 +16,10 @@ The active route `app/api/routes/brain.py` may import FastAPI and the already
 composed module-level `container`. It delegates to
 `container.cognitive_engine.process`.
 
+The API owns the mapping from stable cognitive error codes to HTTP status
+codes and public models. It must discard internal execution/provider error
+text and expose only the canonical safe cognitive message.
+
 It must not import or construct:
 
 - `OllamaClient` or `OllamaProvider`;
@@ -42,6 +46,7 @@ Files under active `app/cognition/domain` must not import:
 - concrete providers;
 - Ollama or `app.models`;
 - environment access.
+- HTTP status codes or public API models.
 
 Domain models may depend on standard-library types and other internal models.
 
@@ -114,7 +119,8 @@ whole repository or impose new rules on legacy code.
 - `app/cognition/pipeline` still contains input/context stages not called by the
   active engine.
 - `PlanStep.capability_id` retains an empty compatibility default.
-- Controlled execution failure maps to safe text but not a non-200 HTTP status.
+- Controlled execution failures map structurally to safe non-200 HTTP
+  responses at the API boundary.
 - Classification and routing are fallback/provisional.
 
 These are documented realities. The rules above do not claim they are

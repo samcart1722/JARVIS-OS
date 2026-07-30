@@ -1,14 +1,14 @@
 # Cognitive Core — Active Contracts
 
 Status: **Executable baseline v1**
-Signatures reflect code at Sprint 9 audit checkpoint `a478746`.
+Signatures reflect Sprint 10 code based on checkpoint `1718bd7`.
 
 ## Orchestration contracts
 
 ### CognitiveEngine
 
 ```python
-process(user_input: str) -> str
+process(user_input: str) -> CognitiveOutcome
 ```
 
 Creates one `Goal` and `CognitiveContext`, classifies the context, resolves a
@@ -117,6 +117,7 @@ CapabilityResult(
     success: bool,
     outputs: tuple[str, ...] = (),
     errors: tuple[str, ...] = (),
+    error_code: str | None = None,
     metadata: dict[str, object] = {},
 )
 
@@ -125,12 +126,15 @@ ExecutionResult(
     completed_steps: tuple[str, ...],
     outputs: tuple[str, ...] = (),
     errors: tuple[str, ...] = (),
+    error_code: str | None = None,
     metadata: tuple[dict[str, object], ...] = (),
 )
 ```
 
-The displayed metadata default is conceptual; implementation uses a
-per-instance factory.
+The displayed capability metadata default is conceptual; implementation uses a
+per-instance factory. Known failures carry `capability_not_found`,
+`capability_execution_failed`, or `empty_capability_output`. Internal `errors`
+remain available to runtime tests but are never copied to the public response.
 
 ## Reasoning contracts
 
@@ -165,17 +169,20 @@ The result model itself does not enforce non-empty text; that policy belongs to
 ## Response contract
 
 ```python
-ResponseStage.process(execution_result: ExecutionResult) -> str
+ResponseStage.process(execution_result: ExecutionResult) -> CognitiveOutcome
 ```
 
-- Success with outputs: joins outputs with newline characters.
-- Success without outputs: returns `Plan executed successfully.`
-- Failure: returns `Plan execution failed.`
+- Success joins real outputs and creates `success=True`, a non-empty
+  `response`, and no error.
+- Controlled failure creates `success=False`, `response=None`, and a
+  `CognitiveError`.
+- It never parses internal error messages and never knows FastAPI or HTTP.
 
-The HTTP route returns this text under `response`. Controlled execution failure
-currently remains an HTTP 200 response; unexpected exceptions follow FastAPI's
-existing HTTP 500 behavior. Rich structured failures/evidence and more precise
-HTTP status semantics remain technical debt.
+`CognitiveOutcome` rejects success with an error, success without useful text,
+failure without an error, and failure with a cognitive response. The HTTP
+boundary maps `capability_not_found` to 500 and the two execution/output
+failures to 503. Unexpected exceptions continue through FastAPI's existing 500
+handling.
 
 ## Composition contracts
 

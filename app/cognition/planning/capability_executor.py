@@ -8,6 +8,11 @@ from app.cognition.capabilities.registry import (
     CapabilityNotFoundError,
     CapabilityRegistry,
 )
+from app.cognition.domain.cognitive_outcome import (
+    CAPABILITY_EXECUTION_FAILED,
+    CAPABILITY_NOT_FOUND,
+    EMPTY_CAPABILITY_OUTPUT,
+)
 from app.cognition.planning.execution_result import ExecutionResult
 from app.cognition.planning.plan import Plan
 
@@ -41,6 +46,7 @@ class CapabilityExecutor:
                     errors=(
                         f"Capability is not available: {step.capability_id}",
                     ),
+                    error_code=CAPABILITY_NOT_FOUND,
                     metadata=tuple(metadata),
                 )
 
@@ -52,13 +58,25 @@ class CapabilityExecutor:
                     completed_steps=tuple(completed_steps),
                     outputs=tuple(outputs),
                     errors=result.errors,
+                    error_code=(
+                        result.error_code or CAPABILITY_EXECUTION_FAILED
+                    ),
                     metadata=tuple(metadata),
                 )
 
             completed_steps.append(step.description)
             outputs.extend(result.outputs)
 
-        # An empty plan is a valid execution with no completed work or output.
+        if not any(output.strip() for output in outputs):
+            return ExecutionResult(
+                success=False,
+                completed_steps=tuple(completed_steps),
+                outputs=tuple(outputs),
+                errors=("Capability execution produced no usable output.",),
+                error_code=EMPTY_CAPABILITY_OUTPUT,
+                metadata=tuple(metadata),
+            )
+
         return ExecutionResult(
             success=True,
             completed_steps=tuple(completed_steps),

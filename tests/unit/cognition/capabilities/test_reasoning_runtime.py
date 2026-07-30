@@ -6,6 +6,7 @@ from app.cognition.capabilities.ids import REASONING_CAPABILITY_ID
 from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.capabilities.registry import CapabilityRegistry
 from app.cognition.domain.cognitive_context import CognitiveContext
+from app.cognition.domain.cognitive_outcome import EMPTY_CAPABILITY_OUTPUT
 from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
@@ -64,6 +65,7 @@ def test_empty_reasoning_output_preserves_fail_fast_semantics() -> None:
     assert result.completed_steps == ()
     assert result.outputs == ()
     assert result.errors == ("Reasoning provider returned no output.",)
+    assert result.error_code == EMPTY_CAPABILITY_OUTPUT
 
 
 def test_unexpected_reasoning_exception_propagates_from_executor() -> None:

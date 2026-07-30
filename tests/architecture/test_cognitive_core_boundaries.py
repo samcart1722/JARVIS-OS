@@ -11,6 +11,9 @@ POLICY_FILES = (
 )
 DEFAULT_SPECIALIST = "app/cognition/specialists/default_specialist.py"
 CAPABILITY_EXECUTOR = "app/cognition/planning/capability_executor.py"
+COGNITIVE_ENGINE = "app/cognition/engine.py"
+COGNITIVE_OUTCOME = "app/cognition/domain/cognitive_outcome.py"
+RESPONSE_STAGE = "app/cognition/pipeline/response_stage.py"
 PUBLIC_ROUTE = "app/api/routes/brain.py"
 DOMAIN_FILES = tuple(
     str(path.relative_to(ROOT)).replace("\\", "/")
@@ -108,3 +111,20 @@ def test_cognitive_domain_has_no_infrastructure_dependencies() -> None:
             "os",
         ),
     )
+
+
+def test_outcome_engine_and_response_stage_do_not_import_fastapi() -> None:
+    assert_no_forbidden_imports(
+        (COGNITIVE_OUTCOME, COGNITIVE_ENGINE, RESPONSE_STAGE),
+        ("fastapi",),
+    )
+
+
+def test_http_status_mapping_is_owned_by_public_route() -> None:
+    core_files = (COGNITIVE_OUTCOME, COGNITIVE_ENGINE, RESPONSE_STAGE)
+    for relative_path in core_files:
+        source = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert "HTTP_STATUS" not in source
+
+    route_source = (ROOT / PUBLIC_ROUTE).read_text(encoding="utf-8")
+    assert "_HTTP_STATUS_BY_ERROR_CODE" in route_source

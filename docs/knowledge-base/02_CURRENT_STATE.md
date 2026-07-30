@@ -49,6 +49,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 7 | Completed in working tree | Ollama URL, model, and timeout now come from official validated application settings and are injected by `Container`. |
 | 8 | Completed in working tree | An explicit deterministic policy selects `normalized_input` or `reasoning` solely from `REASONING_ENABLED`. |
 | 9 | Completed in working tree | Active components, contracts, dependency rules, and minimal architecture enforcement now describe and protect the executable Core. |
+| 10 | Completed in working tree | Structured cognitive outcomes distinguish success and controlled failure; the HTTP boundary maps stable codes safely. |
 
 ## Executable components and status
 
@@ -69,7 +70,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | Ollama settings | Integrated | `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, and positive `OLLAMA_TIMEOUT_SECONDS` support environment overrides. |
 | Cognitive Core governance docs | Complete for active v1 runtime | Components, contracts, Core/infrastructure boundaries, legacy exclusions, and known debt are documented. |
 | Architecture tests | Integrated | Five import-boundary tests and two documentation-baseline tests inspect an explicit active-file scope using the standard library. |
-| `ResponseStage` | Integrated with execution output | Returns usable capability output on success and safe fixed text on failure. |
+| `CognitiveOutcome` / `CognitiveError` | Integrated | Enforce valid success/failure states and stable provider-independent errors. |
+| `ResponseStage` | Integrated structured boundary | Returns real output as success or a structured controlled failure; it knows no HTTP. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
 | `Capability` contract | Implemented contract only | No concrete capability integration found. |
 | `InputStage` / `ContextStage` / `ReasoningStage` | Implemented separately | Not called by the Sprint 3 `CognitiveEngine.process` path. |
@@ -109,11 +111,14 @@ The warning remains the pre-existing pytest cache-path warning. Seven new
 tests protect confirmed boundaries and minimum governance-document coverage.
 Tests under `app/tests/` remain excluded.
 
+Sprint 10 baseline: **70 passed, 1 warning in 1.69s**; Ruff and
+`git diff --check` passed. Final Sprint 10 results are recorded in its summary.
+
 ## Next logical work and undecided items
 
-Sprint 9 formalizes the active Core without changing runtime behavior.
-Operational availability, provider selection, memory, evidence, files, web,
-legacy retirement, and richer response semantics remain pending.
+Sprint 10 completes the structured success/failure and safe HTTP representation
+scope. Operational availability, provider selection, memory, evidence, files,
+web, legacy retirement, and richer evidence-bearing content remain deferred.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under

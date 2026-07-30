@@ -9,6 +9,12 @@ from fastapi import FastAPI
 
 from app.api.routes import brain
 from app.cognition.capabilities.capability_result import CapabilityResult
+from app.cognition.domain.cognitive_outcome import (
+    CAPABILITY_EXECUTION_FAILED,
+    CAPABILITY_NOT_FOUND,
+    CognitiveOutcome,
+    cognitive_error,
+)
 from app.cognition.engine import CognitiveEngine
 from app.core.container import Container
 
@@ -16,7 +22,7 @@ app = FastAPI()
 app.include_router(brain.router)
 
 
-def post_think(prompt: str) -> tuple[int, dict[str, str] | str]:
+def post_think(prompt: str) -> tuple[int, dict[str, object] | str]:
     """Call the real ASGI application without an external HTTP client."""
     messages = []
     request_sent = False
@@ -70,15 +76,21 @@ def test_think_uses_the_container_engine_and_preserves_http_contract(
     monkeypatch,
 ) -> None:
     engine = Mock(spec=CognitiveEngine)
-    engine.process.return_value = "Response produced by ResponseStage."
+    engine.process.return_value = CognitiveOutcome(
+        success=True,
+        response="Response produced by ResponseStage.",
+    )
     monkeypatch.setattr(brain.container, "cognitive_engine", engine)
 
     status, payload = post_think("Prepare a monthly order")
 
     assert status == 200
     assert payload == {
+        "success": True,
+        "prompt": "Prepare a monthly order",
         "input": "Prepare a monthly order",
         "response": "Response produced by ResponseStage.",
+        "error": None,
     }
     engine.process.assert_called_once_with("Prepare a monthly order")
 
@@ -105,8 +117,11 @@ def test_think_returns_output_from_the_real_deterministic_capability() -> None:
 
     assert status == 200
     assert payload == {
+        "success": True,
+        "prompt": "Return this deterministic input",
         "input": "Return this deterministic input",
         "response": "Return this deterministic input",
+        "error": None,
     }
 
 
@@ -124,11 +139,23 @@ def test_controlled_capability_failure_is_not_presented_as_success(
 
     status, payload = post_think("Trigger a controlled failure")
 
-    assert status == 200
+    assert status == 503
     assert payload == {
+        "success": False,
+        "prompt": "Trigger a controlled failure",
         "input": "Trigger a controlled failure",
-        "response": "Plan execution failed.",
+        "response": None,
+        "error": {
+            "code": CAPABILITY_EXECUTION_FAILED,
+            "message": (
+                "The requested cognitive capability could not complete."
+            ),
+        },
     }
+    serialized = json.dumps(payload)
+    assert "controlled internal failure" not in serialized
+    assert "Traceback" not in serialized
+    assert "C:\\" not in serialized
 
 
 def test_default_public_path_does_not_invoke_reasoning_provider(
@@ -141,7 +168,46 @@ def test_default_public_path_does_not_invoke_reasoning_provider(
 
     assert status == 200
     assert payload == {
+        "success": True,
+        "prompt": "Analyze this prompt",
         "input": "Analyze this prompt",
         "response": "Analyze this prompt",
+        "error": None,
     }
     generate.assert_not_called()
+
+
+def test_missing_capability_maps_to_safe_http_500(monkeypatch) -> None:
+    engine = Mock(spec=CognitiveEngine)
+    engine.process.return_value = CognitiveOutcome(
+        success=False,
+        error=cognitive_error(CAPABILITY_NOT_FOUND),
+    )
+    monkeypatch.setattr(brain.container, "cognitive_engine", engine)
+
+    status, payload = post_think("Request unavailable capability")
+
+    assert status == 500
+    assert payload == {
+        "success": False,
+        "prompt": "Request unavailable capability",
+        "input": "Request unavailable capability",
+        "response": None,
+        "error": {
+            "code": CAPABILITY_NOT_FOUND,
+            "message": "The requested cognitive capability is unavailable.",
+        },
+    }
+
+
+def test_unexpected_error_does_not_expose_internal_details(monkeypatch) -> None:
+    engine = Mock(spec=CognitiveEngine)
+    engine.process.side_effect = RuntimeError(
+        "provider http://internal C:\\secret\\model"
+    )
+    monkeypatch.setattr(brain.container, "cognitive_engine", engine)
+
+    status, payload = post_think("Unexpected failure")
+
+    assert status == 500
+    assert payload == "Internal Server Error"

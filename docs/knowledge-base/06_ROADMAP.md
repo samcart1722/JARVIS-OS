@@ -14,17 +14,18 @@
 | 7 | Externalize Ollama URL, model, and timeout through official Settings and explicit composition. | Working-tree implementation and `history/sprints/SPRINT_7_SUMMARY.md` |
 | 8 | Add an explicit deterministic policy selecting normalized input or reasoning from operational enablement. | Working-tree implementation and `history/sprints/SPRINT_8_SUMMARY.md` |
 | 9 | Complete active Cognitive Core documentation and enforce confirmed boundaries with standard-library architecture tests. | Working-tree implementation and `history/sprints/SPRINT_9_SUMMARY.md` |
+| 10 | Introduce structured cognitive outcomes and safe HTTP success/failure mapping. | Working-tree implementation and `history/sprints/SPRINT_10_SUMMARY.md` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 9 is complete in the working tree. The active Core component catalog,
-contracts, dependency rules, legacy boundary, and known gaps are documented.
-Minimal AST and documentation tests protect rules already satisfied by the
-runtime; production behavior is unchanged.
+Sprint 10 is complete in the working tree. The Core returns a validated
+`CognitiveOutcome`; controlled failures carry stable codes and are mapped by
+the API to safe HTTP 500/503 responses. The successful deterministic and
+reasoning paths retain their prior output.
 
-## Candidate scope after Sprint 9
+## Candidate scope after Sprint 10
 
 The following remain candidates, not commitments:
 

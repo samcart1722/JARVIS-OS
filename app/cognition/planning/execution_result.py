@@ -11,4 +11,5 @@ class ExecutionResult:
     completed_steps: tuple[str, ...]
     outputs: tuple[str, ...] = ()
     errors: tuple[str, ...] = ()
+    error_code: str | None = None
     metadata: tuple[dict[str, object], ...] = ()
