@@ -37,6 +37,9 @@ from app.cognition.memory.retrieval.default_retriever import DefaultRetriever
 from app.cognition.memory.scoped.context_retriever import (
     RepositoryMemoryContextRetriever,
 )
+from app.cognition.memory.scoped.explicit_update import (
+    ExplicitMemoryUpdateService,
+)
 from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
 )
@@ -111,6 +114,10 @@ class Container:
         )
         self.memory_context_retriever = RepositoryMemoryContextRetriever(
             self.scoped_memory_repository
+        )
+        self.explicit_memory_update_service = ExplicitMemoryUpdateService(
+            self.scoped_memory_repository,
+            enabled=self._settings.MEMORY_UPDATE_ENABLED,
         )
 
     def _build_reasoning(self) -> None:

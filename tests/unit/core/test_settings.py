@@ -15,6 +15,7 @@ OLLAMA_VARIABLES = (
 )
 REASONING_VARIABLE = "REASONING_ENABLED"
 MEMORY_RETRIEVAL_VARIABLE = "MEMORY_RETRIEVAL_ENABLED"
+MEMORY_UPDATE_VARIABLE = "MEMORY_UPDATE_ENABLED"
 MEMORY_PROMPT_VARIABLES = (
     "MEMORY_PROMPT_CONTEXT_ENABLED",
     "MEMORY_PROMPT_MAX_RECORDS",
@@ -33,6 +34,10 @@ def clear_reasoning_environment(monkeypatch) -> None:
 
 def clear_memory_retrieval_environment(monkeypatch) -> None:
     monkeypatch.delenv(MEMORY_RETRIEVAL_VARIABLE, raising=False)
+
+
+def clear_memory_update_environment(monkeypatch) -> None:
+    monkeypatch.delenv(MEMORY_UPDATE_VARIABLE, raising=False)
 
 
 def clear_memory_prompt_environment(monkeypatch) -> None:
@@ -166,6 +171,7 @@ def test_env_example_contains_safe_reasoning_default() -> None:
     assert "OLLAMA_MODELS_URL=http://localhost:11434/api/tags" in contents
     assert "MEMORY_RETRIEVAL_ENABLED=false" in contents
     assert "MEMORY_PROMPT_CONTEXT_ENABLED=false" in contents
+    assert "MEMORY_UPDATE_ENABLED=false" in contents
     assert "MEMORY_PROMPT_MAX_RECORDS=5" in contents
     assert "MEMORY_PROMPT_MAX_CHARACTERS=2000" in contents
 
@@ -255,3 +261,36 @@ def test_invalid_memory_prompt_settings_are_rejected(
 
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+def test_memory_update_is_disabled_and_independent_by_default(
+    monkeypatch,
+) -> None:
+    clear_memory_update_environment(monkeypatch)
+    clear_memory_retrieval_environment(monkeypatch)
+    clear_memory_prompt_environment(monkeypatch)
+    clear_reasoning_environment(monkeypatch)
+    clear_ollama_environment(monkeypatch)
+
+    configured = Settings(_env_file=None)
+
+    assert configured.MEMORY_UPDATE_ENABLED is False
+    assert configured.MEMORY_RETRIEVAL_ENABLED is False
+    assert configured.MEMORY_PROMPT_CONTEXT_ENABLED is False
+    assert configured.REASONING_ENABLED is False
+    assert configured.OLLAMA_MODEL == "llama3.2:3b"
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (("true", True), ("false", False)),
+)
+def test_memory_update_supports_boolean_override(
+    monkeypatch,
+    value: str,
+    expected: bool,
+) -> None:
+    clear_memory_update_environment(monkeypatch)
+    monkeypatch.setenv(MEMORY_UPDATE_VARIABLE, value)
+
+    assert Settings(_env_file=None).MEMORY_UPDATE_ENABLED is expected

@@ -55,6 +55,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 13 | Completed in working tree | Optional scoped retrieval enriches CognitiveContext before classification only when enabled and explicitly scoped. |
 | 14 | Completed in working tree | A bounded prompt policy includes scoped memory as untrusted reference data while preserving the exact default prompt. |
 | 15 | Completed in working tree | A local CLI compares baseline and scoped-memory reasoning with one readiness check, ephemeral records, and a safe immutable report. |
+| 16 | Completed in working tree | Explicit opt-in scoped writes support a controlled before/update/after local demo without persistence or API changes. |
 
 ## Executable components and status
 
@@ -136,6 +137,9 @@ off and remains unreachable from the unscoped public route.
 Sprint 15 baseline: **192 passed, 1 warning in 2.33s**. The functional demo
 adds an explicit local comparison; the unscoped public route remains
 unchanged.
+
+Sprint 16 baseline: **221 passed, 1 warning in 1.47s**. Explicit update remains
+disabled by default and absent from the public route.
 
 ## Next logical work and undecided items
 

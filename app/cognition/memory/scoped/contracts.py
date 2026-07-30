@@ -1,4 +1,4 @@
-"""Contract for scope-isolated, read-only memory persistence."""
+"""Separate contracts for scope-isolated memory reads and explicit writes."""
 
 from typing import Protocol
 
@@ -18,6 +18,13 @@ class ScopedMemoryRepository(Protocol):
         query: str,
     ) -> tuple[ScopedMemoryRecord, ...]:
         """Return deterministic literal matches owned by the given scope."""
+
+
+class ScopedMemoryWriter(Protocol):
+    """Append already-validated records through an explicit write boundary."""
+
+    def add(self, record: ScopedMemoryRecord) -> None:
+        """Add exactly the supplied record without retrieval or transformation."""
 
 
 class MemoryContextRetriever(Protocol):

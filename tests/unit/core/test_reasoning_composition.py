@@ -13,6 +13,9 @@ from app.cognition.domain.domain import Domain
 from app.cognition.memory.scoped.context_retriever import (
     RepositoryMemoryContextRetriever,
 )
+from app.cognition.memory.scoped.explicit_update import (
+    ExplicitMemoryUpdateService,
+)
 from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
 )
@@ -56,6 +59,19 @@ def test_container_registers_both_runtime_capabilities() -> None:
         container.memory_context_retriever,
         RepositoryMemoryContextRetriever,
     )
+    assert isinstance(
+        container.explicit_memory_update_service,
+        ExplicitMemoryUpdateService,
+    )
+    assert (
+        container.memory_context_retriever._repository
+        is container.scoped_memory_repository
+    )
+    assert (
+        container.explicit_memory_update_service._writer
+        is container.scoped_memory_repository
+    )
+    assert container.explicit_memory_update_service.enabled is False
     assert container.scoped_memory_repository._records_by_scope == {}
 
 
@@ -84,6 +100,27 @@ def test_container_composes_memory_flag_without_search(monkeypatch) -> None:
         is container.memory_context_retriever
     )
     assert container.scoped_memory_repository._records_by_scope == {}
+    search.assert_not_called()
+
+
+def test_container_composes_enabled_update_without_writing_or_reading(
+    monkeypatch,
+) -> None:
+    add = Mock(side_effect=AssertionError("write must be explicit"))
+    search = Mock(side_effect=AssertionError("search must be on demand"))
+    monkeypatch.setattr(InMemoryScopedMemoryRepository, "add", add)
+    monkeypatch.setattr(InMemoryScopedMemoryRepository, "search", search)
+
+    container = Container(
+        Settings(MEMORY_UPDATE_ENABLED=True, _env_file=None)
+    )
+
+    assert container.explicit_memory_update_service.enabled is True
+    assert (
+        container.explicit_memory_update_service._writer
+        is container.scoped_memory_repository
+    )
+    add.assert_not_called()
     search.assert_not_called()
 
 

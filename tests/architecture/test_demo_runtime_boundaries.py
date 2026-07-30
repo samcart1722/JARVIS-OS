@@ -62,3 +62,44 @@ def test_core_and_public_runtime_do_not_import_demo() -> None:
         source = (ROOT / path).read_text(encoding="utf-8")
         assert "demo_runtime" not in source
         assert "FunctionalCognitiveDemoRuntime" not in source
+
+
+def test_memory_update_runtime_does_not_construct_infrastructure() -> None:
+    path = "app/operations/memory_update_demo_runtime.py"
+    imported = imports(path)
+    source = (ROOT / path).read_text(encoding="utf-8")
+
+    assert "app.core.config" not in imported
+    assert "app.core.container" not in imported
+    assert "app.cognition.memory.scoped.in_memory_repository" not in imported
+    assert "app.models.ollama_client" not in imported
+    assert "app.cognition.providers.ollama_provider" not in imported
+    assert "Container(" not in source
+    assert "Ollama" not in source
+
+
+def test_memory_update_cli_is_a_thin_container_adapter() -> None:
+    imported = imports("scripts/demo_memory_update.py")
+
+    assert "app.core.config" in imported
+    assert "app.core.container" in imported
+    assert "app.operations.memory_update_demo_runtime" in imported
+    assert not any(
+        module.startswith(
+            (
+                "app.cognition.capabilities",
+                "app.cognition.providers",
+                "app.cognition.specialists",
+                "app.models",
+            )
+        )
+        for module in imported
+    )
+
+
+def test_sprint_15_demo_does_not_acquire_memory_update() -> None:
+    source = (ROOT / "scripts/demo_reasoning.py").read_text(encoding="utf-8")
+
+    assert "MEMORY_UPDATE_ENABLED" not in source
+    assert "ExplicitMemoryUpdateService" not in source
+    assert "explicit_memory_update_service" not in source

@@ -6,6 +6,11 @@ from app.cognition.memory.scoped.context_retriever import (
 from app.cognition.memory.scoped.contracts import (
     MemoryContextRetriever,
     ScopedMemoryRepository,
+    ScopedMemoryWriter,
+)
+from app.cognition.memory.scoped.explicit_update import (
+    ExplicitMemoryUpdateService,
+    MemoryUpdateDisabledError,
 )
 from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
@@ -18,10 +23,13 @@ from app.cognition.memory.scoped.models import (
 
 __all__ = (
     "InMemoryScopedMemoryRepository",
+    "ExplicitMemoryUpdateService",
     "MemoryContextRetriever",
+    "MemoryUpdateDisabledError",
     "MemoryScope",
     "MemorySnapshot",
     "RepositoryMemoryContextRetriever",
     "ScopedMemoryRecord",
     "ScopedMemoryRepository",
+    "ScopedMemoryWriter",
 )

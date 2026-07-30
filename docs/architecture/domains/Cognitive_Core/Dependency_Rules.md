@@ -186,3 +186,19 @@ The comparison runtime may depend on the engine, outcome, scope, and readiness
 contracts, but not Settings, Container, FastAPI, environment access, requests,
 or concrete providers. Its thin CLI adapter may compose Settings, Container,
 and scoped domain records. The public API remains unaware of the demo.
+
+## Explicit scoped memory update boundary
+
+`ScopedMemoryWriter` depends only on scoped domain records. The explicit update
+service may depend on that port and scoped models, but not Settings, Container,
+FastAPI, Ollama, readiness, legacy memory, environment access, or I/O.
+
+The in-memory repository may implement both separate read and write ports.
+Container alone injects its one instance into retriever and update service.
+Engine, provider, prompt builder, retriever, readiness, public API, and Sprint
+15 demo must not import or invoke the update service.
+
+`ExplicitMemoryUpdateDemoRuntime` may depend on the engine, update service,
+scope models, outcomes, and readiness contract. It must not construct Settings,
+Container, concrete repository, provider, client, capability, specialist, or
+registry. Only its thin CLI adapter composes Settings and Container.
