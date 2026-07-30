@@ -1,7 +1,7 @@
 # Runtime Architecture
 
-This document describes the active runtime after Sprint 10, based on
-`1718bd7`.
+This document describes the active runtime after Sprint 11, based on the
+working tree at `f843842`.
 
 ## Public path and flow
 
@@ -111,6 +111,7 @@ OllamaProvider(client) → ReasoningStage → ReasoningCapability`
 Defaults preserve prior behavior:
 
 - `OLLAMA_BASE_URL=http://localhost:11434/api/generate`
+- `OLLAMA_MODELS_URL=http://localhost:11434/api/tags`
 - `OLLAMA_MODEL=llama3.2:3b`
 - `OLLAMA_TIMEOUT_SECONDS=120`
 
@@ -158,6 +159,34 @@ described as active stages.
   to `CognitiveEngine.process`.
 
 These paths are recorded, not deprecated or removed by this recovery task.
+
+## Operational readiness and controlled demo
+
+Readiness is separate from cognition:
+
+`Settings -> Container -> OllamaClient -> OllamaReadinessProbe.check()
+-> ProviderReadinessResult`
+
+`OLLAMA_BASE_URL` retains its actual historical meaning: the complete
+generation endpoint. Separately configured `OLLAMA_MODELS_URL` avoids fragile
+string replacement and defaults to Ollama's non-generative `GET /api/tags`.
+One response checks server reachability and configured-model presence.
+
+Nothing checks readiness at import, construction, or on the public API path.
+Connection/timeout, absent-model, and malformed-content conditions become
+safe `provider_unavailable`, `model_unavailable`, and `invalid_response`
+states. No raw response or exception is exposed.
+
+Run the explicit demo from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo_reasoning.py "Explain Luxiom"
+```
+
+Disabled reasoning performs neither readiness nor engine execution. Enabled
+reasoning checks once and only `ready` reaches the Container-composed engine.
+Existing `CognitiveOutcome` failures remain distinct from readiness failures.
+There is no fallback.
 
 ## Governance baseline
 

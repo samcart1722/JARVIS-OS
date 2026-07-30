@@ -11,6 +11,7 @@ from app.models.ollama_client import OllamaClient
 def configured_client() -> OllamaClient:
     return OllamaClient(
         base_url="http://ollama.test/api/generate",
+        models_url="http://ollama.test/api/tags",
         model="test-model",
         timeout_seconds=15,
     )
@@ -24,6 +25,7 @@ def test_client_receives_configuration_without_network(monkeypatch) -> None:
 
     assert client.url == "http://ollama.test/api/generate"
     assert client.model == "test-model"
+    assert client.models_url == "http://ollama.test/api/tags"
     assert client.timeout_seconds == 15
     post.assert_not_called()
 
@@ -48,6 +50,19 @@ def test_client_uses_injected_configuration_when_chat_runs(
         },
         timeout=15,
     )
+    response.raise_for_status.assert_called_once_with()
+
+
+def test_client_lists_models_with_one_non_generative_get(monkeypatch) -> None:
+    response = Mock()
+    response.json.return_value = {"models": []}
+    get = Mock(return_value=response)
+    monkeypatch.setattr("app.models.ollama_client.requests.get", get)
+
+    result = configured_client().list_models()
+
+    assert result == {"models": []}
+    get.assert_called_once_with("http://ollama.test/api/tags", timeout=15)
     response.raise_for_status.assert_called_once_with()
 
 

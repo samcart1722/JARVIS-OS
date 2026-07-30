@@ -132,3 +132,15 @@ Architecture enforcement excludes historical `app/brain`, `app/reasoning`,
 `app/context`, `app/memory`, handlers, prompt managers, and `app/tests`.
 Applying active-Core rules indiscriminately to those modules would misrepresent
 their migration status.
+
+## Operational readiness and demo
+
+The readiness contract/result under `app/operations` is outside the Cognitive
+Core and imports neither cognition, Settings, Container, FastAPI, requests,
+nor environment access. The concrete Ollama probe may use an injected client
+and request exception types but never generation.
+
+`Container` composes and exposes the probe without calling `check()`.
+`CognitiveEngine` and the public brain route do not import or call readiness.
+The demo service may depend on the readiness contract and existing engine and
+outcome types; only its thin CLI adapter constructs Settings and Container.

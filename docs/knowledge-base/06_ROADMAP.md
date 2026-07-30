@@ -1,5 +1,12 @@
 # Roadmap
 
+## Sprint 11 completed
+
+Provider Readiness and Demo Runtime v1 adds an explicit non-generative Ollama
+check, safe operational states, inert composition, and an opt-in CLI demo
+gated by `REASONING_ENABLED`. It adds no endpoint, automatic check, retry,
+fallback, model lifecycle operation, or public API change.
+
 ## Completed sprints
 
 | Sprint | Objective achieved | Evidence |

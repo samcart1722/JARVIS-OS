@@ -1,7 +1,7 @@
 # Cognitive Core — Active Contracts
 
 Status: **Executable baseline v1**
-Signatures reflect Sprint 10 code based on checkpoint `1718bd7`.
+Signatures reflect Sprint 11 code based on checkpoint `f843842`.
 
 ## Orchestration contracts
 
@@ -212,3 +212,17 @@ reasoning; it does not prove Ollama/model availability.
   `ResponseStage`.
 - There is no silent fallback from reasoning to normalized input.
 - Container/client/provider construction performs no network I/O.
+
+## Operational readiness contracts
+
+Outside the Cognitive Core,
+`ProviderReadinessProbe.check() -> ProviderReadinessResult`. The immutable
+result has a stable `status`, matching `ready` boolean, and canonical safe
+`message`. States are `ready`, `provider_unavailable`, `model_unavailable`,
+and `invalid_response`; contradictory state is rejected.
+
+The Ollama implementation performs exactly one non-generative model-list
+operation and never generates, downloads, loads, warms, retries, or falls
+back. The demo checks enablement first, calls readiness once only when enabled,
+and invokes the composed engine only when ready while preserving the existing
+`CognitiveOutcome`.
