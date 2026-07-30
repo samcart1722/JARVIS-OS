@@ -177,11 +177,8 @@ Connection/timeout, absent-model, and malformed-content conditions become
 safe `provider_unavailable`, `model_unavailable`, and `invalid_response`
 states. No raw response or exception is exposed.
 
-Run the explicit demo from the repository root:
-
-```powershell
-.\.venv\Scripts\python.exe .\scripts\demo_reasoning.py "Explain Luxiom"
-```
+Sprint 15 replaces the historical single-run command with the comparison in
+[`FUNCTIONAL_COGNITIVE_DEMO.md`](../operations/FUNCTIONAL_COGNITIVE_DEMO.md).
 
 Disabled reasoning performs neither readiness nor engine execution. Enabled
 reasoning checks once and only `ready` reaches the Container-composed engine.
@@ -226,9 +223,9 @@ Retrieval happens exactly once before classification. Empty snapshots continue
 normally; cross-scope snapshots are rejected; unexpected failures propagate.
 The composed repository starts empty and is not durable.
 
-The HTTP route and demo call the engine without scope, so neither retrieves
-memory. Legacy data is not copied. OllamaProvider is unchanged and still sends
-only normalized input to Ollama.
+The HTTP route calls the engine without scope, so it does not retrieve memory.
+The functional demo is the sole local adapter that supplies synthetic scoped
+records. Legacy data is not copied.
 
 ## Governance baseline
 
@@ -255,4 +252,17 @@ response sections. Records are JSON strings in snapshot order. Record count
 is limited first; combined source content is truncated sequentially to the
 character budget. The request is not truncated and scope identifier is
 omitted. Safety text marks records as untrusted reference data; this is not
-complete injection prevention. Provider, API, and demo perform no retrieval.
+complete injection prevention. Provider and API perform no retrieval; the
+functional demo's memory-aware engine invokes the configured retriever.
+
+## Functional cognitive demo
+
+The explicit local Sprint 15 demo performs:
+
+`one readiness check -> baseline engine(prompt) -> memory engine(prompt, scope)`
+
+It requires a scope, at least one synthetic record, and a prompt. Two
+independent containers use copied Settings. Baseline memory is disabled;
+memory-aware execution receives only ephemeral scoped records. Results are
+printed separately, including stable failures. Public HTTP behavior remains
+unchanged.

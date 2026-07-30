@@ -9,6 +9,8 @@ It is intentionally simple and framework-independent.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from app.cognition.capabilities.ids import (
     NORMALIZED_INPUT_CAPABILITY_ID,
     REASONING_CAPABILITY_ID,
@@ -38,6 +40,7 @@ from app.cognition.memory.scoped.context_retriever import (
 from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
 )
+from app.cognition.memory.scoped.models import ScopedMemoryRecord
 from app.cognition.memory.validation.default_validator import (
     DefaultValidator,
 )
@@ -64,8 +67,16 @@ class Container:
     This class creates and owns long-lived application services.
     """
 
-    def __init__(self, app_settings: Settings = settings) -> None:
+    def __init__(
+        self,
+        app_settings: Settings = settings,
+        *,
+        scoped_memory_records: Iterable[ScopedMemoryRecord] = (),
+    ) -> None:
+        if isinstance(scoped_memory_records, (str, bytes)):
+            raise TypeError("Scoped memory records must be a collection of records.")
         self._settings = app_settings
+        self._scoped_memory_records = tuple(scoped_memory_records)
         self._build_memory()
         self._build_reasoning()
         self._build_context()
@@ -95,7 +106,9 @@ class Container:
             ranker=self._memory_ranker,
         )
         self.memory = LegacyMemoryAdapter(self.memory_pipeline)
-        self.scoped_memory_repository = InMemoryScopedMemoryRepository(())
+        self.scoped_memory_repository = InMemoryScopedMemoryRepository(
+            self._scoped_memory_records
+        )
         self.memory_context_retriever = RepositoryMemoryContextRetriever(
             self.scoped_memory_repository
         )

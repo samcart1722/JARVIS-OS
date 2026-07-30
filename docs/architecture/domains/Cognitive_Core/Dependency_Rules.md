@@ -152,9 +152,10 @@ standard-library facilities. They must not import Settings, FastAPI,
 reasoning, readiness, legacy memory, or concrete persistence.
 
 The in-memory scoped implementation must not wrap or import the global
-`InMemoryRepository` or `LegacyMemoryAdapter`. Until reviewed integration,
-API, engine, context, Container, Ollama, readiness, and demo must not consume
-scoped memory.
+`InMemoryRepository` or `LegacyMemoryAdapter`. API, context, Ollama, and
+readiness must not consume scoped-memory persistence. The engine may use the
+read-only contract, Container may compose the implementation, and the Sprint
+15 CLI may inject synthetic records through Container's narrow parameter.
 
 ## Reasoning prompt policy
 
@@ -175,6 +176,13 @@ the in-memory implementation, legacy adapter, Settings, or storage.
 
 `RepositoryMemoryContextRetriever` depends on `ScopedMemoryRepository`, never
 its concrete implementation. `Container` alone may compose the concrete empty
-repository and inject the feature flag. API, demo, OllamaProvider, readiness,
+repository and inject the feature flag. API, OllamaProvider, readiness,
 DefaultSpecialist, and CapabilityExecutor must not import scoped-memory
 infrastructure. Memory and readiness remain independent.
+
+## Functional demo boundary
+
+The comparison runtime may depend on the engine, outcome, scope, and readiness
+contracts, but not Settings, Container, FastAPI, environment access, requests,
+or concrete providers. Its thin CLI adapter may compose Settings, Container,
+and scoped domain records. The public API remains unaware of the demo.

@@ -281,3 +281,10 @@ content sequentially to the character budget. The request is never truncated.
 JSON string serialization keeps stored line breaks and quotes as data. Scope
 identifiers are omitted. OllamaProvider calls the builder once and sends
 exactly its result to the client.
+
+## Functional demo comparison contract
+
+`FunctionalCognitiveDemoRuntime.run(prompt)` rejects blank input before
+readiness. Readiness failure executes neither engine. A ready result executes
+baseline once, then memory-aware reasoning once with the explicit scope. Both
+structured `CognitiveOutcome` values are preserved without retry or fallback.
