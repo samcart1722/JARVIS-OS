@@ -1,5 +1,24 @@
 # Technical Debt
 
+## Sprint 11 classification
+
+### Technical debt
+
+- Local pytest cache writes can emit a permission/path warning.
+- Historical `OLLAMA_BASE_URL` denotes a complete generation endpoint; its
+  imprecise name is retained for compatibility.
+
+### Deliberately deferred roadmap
+
+Provider registries, multi-provider selection, retries, circuit breakers,
+automatic health endpoints, metrics, model download/warmup, streaming, memory,
+evidence, tools, files, and web are future scope, not current defects.
+
+### Governance maintenance
+
+Keep explicit AST boundary lists and operational documentation aligned when
+active files change.
+
 Only inspected, evidenced items are included. This register does not authorize
 fixing them.
 

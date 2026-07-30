@@ -1,7 +1,7 @@
 # Cognitive Core — Active Components
 
 Status: **Executable baseline v1**
-Evidence checkpoint: Sprint 10 implementation based on `1718bd7`
+Evidence checkpoint: Sprint 11 working tree based on `f843842`
 
 ## Purpose
 
@@ -140,3 +140,12 @@ builder, evidence lifecycle, memory update, provider availability policy,
 retry, fallback, streaming, replanning, parallel execution, or rich structured
 public response. The normative Cognitive Lifecycle is therefore broader than
 the executable baseline.
+
+## Operational readiness outside the Core
+
+`ProviderReadinessResult` is an immutable safe operational model and
+`ProviderReadinessProbe.check()` is its replaceable contract.
+`OllamaReadinessProbe` uses the injected `OllamaClient` to list models once.
+`ReasoningDemoRuntime` gates the already-composed engine behind explicit
+enablement and readiness. These components are outside the Cognitive Core and
+public API; construction and normal cognitive requests do not trigger them.

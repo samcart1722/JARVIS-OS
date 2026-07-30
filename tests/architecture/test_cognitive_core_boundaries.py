@@ -15,6 +15,7 @@ COGNITIVE_ENGINE = "app/cognition/engine.py"
 COGNITIVE_OUTCOME = "app/cognition/domain/cognitive_outcome.py"
 RESPONSE_STAGE = "app/cognition/pipeline/response_stage.py"
 PUBLIC_ROUTE = "app/api/routes/brain.py"
+READINESS_CONTRACT = "app/operations/provider_readiness.py"
 DOMAIN_FILES = tuple(
     str(path.relative_to(ROOT)).replace("\\", "/")
     for path in sorted((ROOT / "app/cognition/domain").glob("*.py"))
@@ -128,3 +129,21 @@ def test_http_status_mapping_is_owned_by_public_route() -> None:
 
     route_source = (ROOT / PUBLIC_ROUTE).read_text(encoding="utf-8")
     assert "_HTTP_STATUS_BY_ERROR_CODE" in route_source
+
+
+def test_readiness_contract_is_outside_and_independent_of_cognitive_core() -> None:
+    assert_no_forbidden_imports(
+        (READINESS_CONTRACT,),
+        (
+            "app.cognition",
+            "app.core",
+            "app.models",
+            "fastapi",
+            "requests",
+            "os",
+        ),
+    )
+    engine_source = (ROOT / COGNITIVE_ENGINE).read_text(encoding="utf-8")
+    route_source = (ROOT / PUBLIC_ROUTE).read_text(encoding="utf-8")
+    assert "readiness" not in engine_source.lower()
+    assert "readiness" not in route_source.lower()

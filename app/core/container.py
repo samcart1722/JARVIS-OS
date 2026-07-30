@@ -47,6 +47,7 @@ from app.cognition.specialists.specialist_router import SpecialistRouter
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 from app.core.config import Settings, settings
 from app.models.ollama_client import OllamaClient
+from app.models.ollama_readiness_probe import OllamaReadinessProbe
 
 
 class Container:
@@ -103,9 +104,11 @@ class Container:
         self.normalized_input_capability = NormalizedInputCapability()
         self.ollama_client = OllamaClient(
             base_url=self._settings.OLLAMA_BASE_URL,
+            models_url=self._settings.OLLAMA_MODELS_URL,
             model=self._settings.OLLAMA_MODEL,
             timeout_seconds=self._settings.OLLAMA_TIMEOUT_SECONDS,
         )
+        self.provider_readiness_probe = OllamaReadinessProbe(self.ollama_client)
         self.reasoning_provider = OllamaProvider(self.ollama_client)
         self.reasoning_stage = ReasoningStage(self.reasoning_provider)
         self.reasoning_capability = ReasoningCapability(self.reasoning_stage)

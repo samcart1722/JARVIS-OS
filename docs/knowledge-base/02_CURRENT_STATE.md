@@ -1,6 +1,6 @@
 # Current State
 
-Snapshot generated: **2026-07-29** (America/Tegucigalpa).
+Snapshot updated: **2026-07-30** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
@@ -50,6 +50,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 8 | Completed in working tree | An explicit deterministic policy selects `normalized_input` or `reasoning` solely from `REASONING_ENABLED`. |
 | 9 | Completed in working tree | Active components, contracts, dependency rules, and minimal architecture enforcement now describe and protect the executable Core. |
 | 10 | Completed in working tree | Structured cognitive outcomes distinguish success and controlled failure; the HTTP boundary maps stable codes safely. |
+| 11 | Completed in working tree | Explicit Ollama readiness and a controlled opt-in reasoning demo were added outside the Core and public API. |
 
 ## Executable components and status
 
@@ -113,6 +114,10 @@ Tests under `app/tests/` remain excluded.
 
 Sprint 10 baseline: **70 passed, 1 warning in 1.69s**; Ruff and
 `git diff --check` passed. Final Sprint 10 results are recorded in its summary.
+
+Sprint 11 baseline: **86 passed, 1 warning in 1.84s**; Ruff and
+`git diff --check` passed. Readiness uses one on-demand `GET /api/tags`;
+construction and the default API path remain network-free.
 
 ## Next logical work and undecided items
 

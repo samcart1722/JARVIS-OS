@@ -9,6 +9,7 @@ from app.core.config import Settings
 
 OLLAMA_VARIABLES = (
     "OLLAMA_BASE_URL",
+    "OLLAMA_MODELS_URL",
     "OLLAMA_MODEL",
     "OLLAMA_TIMEOUT_SECONDS",
 )
@@ -32,6 +33,7 @@ def test_ollama_settings_preserve_previous_defaults(monkeypatch) -> None:
     assert configured.OLLAMA_BASE_URL == (
         "http://localhost:11434/api/generate"
     )
+    assert configured.OLLAMA_MODELS_URL == "http://localhost:11434/api/tags"
     assert configured.OLLAMA_MODEL == "llama3.2:3b"
     assert configured.OLLAMA_TIMEOUT_SECONDS == 120
 
@@ -44,6 +46,12 @@ def test_ollama_settings_preserve_previous_defaults(monkeypatch) -> None:
             "http://ollama.internal/api/generate",
             "OLLAMA_BASE_URL",
             "http://ollama.internal/api/generate",
+        ),
+        (
+            "OLLAMA_MODELS_URL",
+            "http://ollama.internal/api/tags",
+            "OLLAMA_MODELS_URL",
+            "http://ollama.internal/api/tags",
         ),
         ("OLLAMA_MODEL", "custom-model", "OLLAMA_MODEL", "custom-model"),
         ("OLLAMA_TIMEOUT_SECONDS", "45", "OLLAMA_TIMEOUT_SECONDS", 45),
@@ -140,3 +148,4 @@ def test_env_example_contains_safe_reasoning_default() -> None:
     contents = Path(".env.example").read_text(encoding="utf-8")
 
     assert "REASONING_ENABLED=false" in contents
+    assert "OLLAMA_MODELS_URL=http://localhost:11434/api/tags" in contents
