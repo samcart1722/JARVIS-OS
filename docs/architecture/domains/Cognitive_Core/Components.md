@@ -1,7 +1,7 @@
 # Cognitive Core — Active Components
 
 Status: **Executable baseline v1**
-Evidence checkpoint: Sprint 9 audit at `a478746`
+Evidence checkpoint: Sprint 10 implementation based on `1718bd7`
 
 ## Purpose
 
@@ -45,7 +45,9 @@ POST /brain/think?prompt=...
   -> NormalizedInputCapability | ReasoningCapability
   -> CapabilityResult -> ExecutionResult
   -> ResponseStage
-  -> {"input": prompt, "response": text}
+  -> CognitiveOutcome
+  -> HTTP mapper
+  -> {success, prompt, input, response, error}
 ```
 
 The reasoning branch, when explicitly enabled, is:
@@ -62,7 +64,7 @@ ReasoningCapability
 
 | Component | Responsibility and I/O | Allowed dependencies | Prohibited dependencies | Status |
 |---|---|---|---|---|
-| `CognitiveEngine` | `str -> str`; creates goal/context and sequences collaborators. | Internal classifier, router, executor, response stage, domain models. | FastAPI, Settings, concrete providers/clients. | Stable orchestration boundary. |
+| `CognitiveEngine` | `str -> CognitiveOutcome`; creates goal/context and sequences collaborators. | Internal classifier, router, executor, response stage, domain models. | FastAPI, Settings, concrete providers/clients, HTTP status codes. | Stable orchestration boundary. |
 | `Goal` | Immutable user objective description. | Standard library only. | Infrastructure and transport. | Stable model. |
 | `CognitiveContext` | Immutable request context passed through planning/execution. | `Goal`, standard library. | Settings, FastAPI, concrete infrastructure. | Stable model; lifecycle fields remain provisional. |
 | `DefaultGoalClassifier` | `CognitiveContext -> Domain`; currently always `UNKNOWN`. | Classifier contract and domain models. | Infrastructure and product rules. | Provisional. |
@@ -79,11 +81,14 @@ ReasoningCapability
 | `CapabilityExecutor` | Executes ordered plan steps and aggregates results. | Registry and planning/result models. | Concrete providers, Settings, FastAPI. | Stable v1, sequential/fail-fast. |
 | `NormalizedInputCapability` | Returns `context.normalized_input`. | Capability contract and internal models. | Network, models, memory. | Deterministic bootstrap capability. |
 | `ReasoningCapability` | Converts canonical reasoning output into capability output. | Capability contract, `ReasoningStage`, internal models. | Concrete provider/client construction. | Active, opt-in. |
-| `CapabilityResult` | Per-capability success, outputs, errors, metadata. | Standard library. | Infrastructure. | Stable v1 result. |
-| `ExecutionResult` | Aggregated plan success, completed steps, outputs, errors, metadata. | Standard library. | Infrastructure. | Stable v1 result. |
+| `CapabilityResult` | Per-capability success, outputs, internal errors, optional structured error code, metadata. | Standard library. | Infrastructure. | Stable v1 result with structured failure propagation. |
+| `ExecutionResult` | Aggregated plan success, completed steps, outputs, internal errors, structured error code, metadata. | Standard library. | Infrastructure. | Stable v1 result with structured failure propagation. |
+| `CognitiveError` | Stable provider-independent code and safe cognitive message. | Standard library. | FastAPI, providers, HTTP status codes. | Stable v1 domain model. |
+| `CognitiveOutcome` | Enforces exclusive success-with-response or failure-with-error state. | `CognitiveError`, standard library. | FastAPI, providers, HTTP status codes. | Stable v1 final Core result. |
 | `ReasoningStage` | Calls one injected `ReasoningProvider`. | Provider contract and reasoning models. | Concrete client construction. | Active invocation boundary. |
 | `ReasoningProvider` | `generate(context) -> ReasoningResult`. | Internal context/result models. | Settings and HTTP transport. | Active replaceable port. |
-| `ResponseStage` | Maps `ExecutionResult` to public text. | Execution result. | Capabilities, providers, HTTP construction. | Active; response richness is debt. |
+| `ResponseStage` | Maps `ExecutionResult` to `CognitiveOutcome` without inspecting error text. | Execution result and outcome models. | Capabilities, providers, FastAPI, HTTP construction/status. | Active structured boundary. |
+| `BrainResponse` / HTTP mapper | Preserves prompt/input/response, adds success/error, and maps known cognitive codes to HTTP. | FastAPI, public API models, `CognitiveOutcome` codes. | Provider internals and raw execution errors. | Public transport boundary outside Core. |
 | `Container` | Constructs, registers, and injects all active runtime dependencies. | Settings, Core components, concrete infrastructure. | Per-request cognitive decisions and execution. | Composition Root, outside Core. |
 | `Settings` | Validates application/Ollama settings and reasoning enablement. | Pydantic settings. | Cognitive decisions. | Operational configuration, outside Core. |
 | `OllamaProvider` | Implements `ReasoningProvider` using an injected client. | Provider port, internal models, `OllamaClient`. | Settings and capability selection. | Infrastructure. |

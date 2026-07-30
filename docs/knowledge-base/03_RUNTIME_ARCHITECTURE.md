@@ -1,6 +1,7 @@
 # Runtime Architecture
 
-This document describes only the code executed at commit `74637ab`.
+This document describes the active runtime after Sprint 10, based on
+`1718bd7`.
 
 ## Public path and flow
 
@@ -25,9 +26,10 @@ user_input
   -> ResponseStage -> normalized request input
 ```
 
-The public HTTP input is a `prompt` query parameter and the HTTP output is a
-JSON object containing `input` and string `response`. The current Core entry
-point is `CognitiveEngine.process(user_input: str) -> str`.
+The public HTTP input is a `prompt` query parameter. The output preserves
+`prompt`, `input`, and nullable `response`, and adds `success` and nullable
+`error`. The Core entry point is
+`CognitiveEngine.process(user_input: str) -> CognitiveOutcome`.
 
 ## Stage responsibilities
 
@@ -45,7 +47,8 @@ point is `CognitiveEngine.process(user_input: str) -> str`.
 | `DeterministicReasoningSelectionPolicy` | Returns an official identifier solely from immutable `reasoning_enabled`. |
 | `ReasoningStage` | Canonical single invocation boundary from `CognitiveContext` to `ReasoningProvider.generate`. |
 | `OllamaProvider` | Receives an explicitly configured `OllamaClient`; it performs network I/O only when reasoning executes. |
-| `ResponseStage` | Returns aggregated output on success or safe fixed failure text. |
+| `ResponseStage` | Converts execution state to validated `CognitiveOutcome`; it does not know HTTP or parse internal error text. |
+| API mapper | Converts known cognitive codes to safe public models and HTTP 500/503; it never exposes raw execution/provider errors. |
 
 ## Dependencies and composition
 
@@ -83,6 +86,11 @@ the existing HTTP 500 handling. An empty plan succeeds with no completed work
 or output.
 
 ## Reasoning capability path
+
+Structured execution uses the stable codes `capability_not_found`,
+`capability_execution_failed`, and `empty_capability_output`. The API maps the
+first to HTTP 500 and the latter two to HTTP 503; success remains HTTP 200.
+Unexpected exceptions continue through existing HTTP 500 handling.
 
 An explicit plan step with `capability_id="reasoning"` executes:
 

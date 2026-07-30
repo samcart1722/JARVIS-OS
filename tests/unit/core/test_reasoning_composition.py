@@ -98,7 +98,9 @@ def test_enabled_reasoning_reaches_real_provider_output_without_network() -> Non
 
     response = container.cognitive_engine.process("Any prompt")
 
-    assert response == "Controlled reasoning"
+    assert response.success is True
+    assert response.response == "Controlled reasoning"
+    assert response.error is None
     container.ollama_client.chat.assert_called_once_with("Any prompt")
 
 
@@ -108,8 +110,10 @@ def test_enabled_reasoning_failure_has_no_normalized_input_fallback() -> None:
 
     response = container.cognitive_engine.process("Must not be fallback")
 
-    assert response == "Plan execution failed."
-    assert response != "Must not be fallback"
+    assert response.success is False
+    assert response.response is None
+    assert response.error is not None
+    assert response.error.code == "empty_capability_output"
 
 
 def test_enabled_reasoning_exception_propagates_without_fallback() -> None:

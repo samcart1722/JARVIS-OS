@@ -3,6 +3,7 @@
 from app.cognition.capabilities.capability import Capability
 from app.cognition.capabilities.capability_result import CapabilityResult
 from app.cognition.domain.cognitive_context import CognitiveContext
+from app.cognition.domain.cognitive_outcome import EMPTY_CAPABILITY_OUTPUT
 from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.planning.plan_step import PlanStep
 
@@ -25,6 +26,7 @@ class ReasoningCapability(Capability):
             return CapabilityResult(
                 success=False,
                 errors=("Reasoning provider returned no output.",),
+                error_code=EMPTY_CAPABILITY_OUTPUT,
             )
 
         return CapabilityResult(

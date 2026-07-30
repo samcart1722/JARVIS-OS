@@ -10,4 +10,5 @@ class CapabilityResult:
     success: bool
     outputs: tuple[str, ...] = ()
     errors: tuple[str, ...] = ()
+    error_code: str | None = None
     metadata: dict[str, object] = field(default_factory=dict)

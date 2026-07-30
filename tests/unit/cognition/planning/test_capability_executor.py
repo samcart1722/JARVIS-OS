@@ -8,6 +8,11 @@ from app.cognition.capabilities.capability import Capability
 from app.cognition.capabilities.capability_result import CapabilityResult
 from app.cognition.capabilities.registry import CapabilityRegistry
 from app.cognition.domain.cognitive_context import CognitiveContext
+from app.cognition.domain.cognitive_outcome import (
+    CAPABILITY_EXECUTION_FAILED,
+    CAPABILITY_NOT_FOUND,
+    EMPTY_CAPABILITY_OUTPUT,
+)
 from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.planning.plan import Plan
 from app.cognition.planning.plan_step import PlanStep
@@ -106,6 +111,7 @@ def test_executor_fails_fast_and_preserves_prior_successes() -> None:
     assert result.completed_steps == ("Step 1",)
     assert result.outputs == ("valid output",)
     assert result.errors == ("controlled failure",)
+    assert result.error_code == CAPABILITY_EXECUTION_FAILED
     assert len(capability.calls) == 2
 
 
@@ -121,6 +127,7 @@ def test_executor_returns_failure_when_capability_is_missing() -> None:
     assert result.completed_steps == ()
     assert result.outputs == ()
     assert result.errors == ("Capability is not available: missing",)
+    assert result.error_code == CAPABILITY_NOT_FOUND
 
 
 def test_executor_does_not_share_results_between_executions() -> None:
@@ -141,16 +148,35 @@ def test_executor_does_not_share_results_between_executions() -> None:
     assert second.outputs == ("second",)
 
 
-def test_empty_plan_succeeds_without_completed_work() -> None:
+def test_empty_plan_is_a_controlled_empty_output_failure() -> None:
     result = CapabilityExecutor(CapabilityRegistry()).execute(
         context(),
         Plan(steps=()),
     )
 
-    assert result.success is True
+    assert result.success is False
     assert result.completed_steps == ()
     assert result.outputs == ()
-    assert result.errors == ()
+    assert result.error_code == EMPTY_CAPABILITY_OUTPUT
+
+
+def test_capability_specific_error_code_is_preserved() -> None:
+    capability = RecordingCapability(
+        (
+            CapabilityResult(
+                success=False,
+                errors=("structured failure",),
+                error_code=EMPTY_CAPABILITY_OUTPUT,
+            ),
+        )
+    )
+
+    result = executor_with(capability).execute(
+        context(), Plan(steps=(step("1"),))
+    )
+
+    assert result.error_code == EMPTY_CAPABILITY_OUTPUT
+    assert result.completed_steps == ()
 
 
 def test_unexpected_capability_exception_propagates() -> None:

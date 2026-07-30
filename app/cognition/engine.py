@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from app.cognition.classification.goal_classifier import GoalClassifier
 from app.cognition.domain.cognitive_context import CognitiveContext
+from app.cognition.domain.cognitive_outcome import CognitiveOutcome
 from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.planning.goal import Goal
@@ -25,8 +26,8 @@ class CognitiveEngine:
         self._capability_executor = capability_executor
         self._response_stage = response_stage
 
-    def process(self, user_input: str) -> str:
-        """Execute the selected specialist plan and return its public response."""
+    def process(self, user_input: str) -> CognitiveOutcome:
+        """Execute a specialist plan and return its structured outcome."""
         goal = Goal(description=user_input)
         context = CognitiveContext(
             raw_input=user_input,
