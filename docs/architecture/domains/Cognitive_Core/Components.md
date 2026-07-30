@@ -161,3 +161,19 @@ implementation indexes constructor records by scope.
 It is not composed by `Container` or consumed by the engine, context,
 capabilities, providers, readiness, demo, or API. Global and legacy memory
 remain unchanged and separate.
+
+## Controlled memory context integration
+
+Sprint 13 activates only the scoped read path. `MemorySnapshot` distinguishes
+retrieval not executed (`None`) from an executed empty scoped result.
+`MemoryContextRetriever` is the Core-facing read-only contract and
+`RepositoryMemoryContextRetriever` adapts `ScopedMemoryRepository`.
+
+`Container` composes an empty `InMemoryScopedMemoryRepository` and injects its
+retriever into `CognitiveEngine`. The engine retrieves only when the feature is
+enabled and an explicit `MemoryScope` is supplied, before classification. The
+same enriched immutable context then reaches specialist planning, capability
+execution, and reasoning-provider contracts.
+
+The public API and demo supply no scope. Ollama continues to use only
+`normalized_input`; no memory content enters its prompt.

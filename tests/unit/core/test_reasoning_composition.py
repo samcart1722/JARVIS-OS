@@ -10,6 +10,12 @@ from app.cognition.capabilities.normalized_input import NormalizedInputCapabilit
 from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.domain.cognitive_context import CognitiveContext
 from app.cognition.domain.domain import Domain
+from app.cognition.memory.scoped.context_retriever import (
+    RepositoryMemoryContextRetriever,
+)
+from app.cognition.memory.scoped.in_memory_repository import (
+    InMemoryScopedMemoryRepository,
+)
 from app.cognition.planning.goal import Goal
 from app.core.config import Settings
 from app.core.container import Container
@@ -40,6 +46,15 @@ def test_container_registers_both_runtime_capabilities() -> None:
         container.provider_readiness_probe,
         OllamaReadinessProbe,
     )
+    assert isinstance(
+        container.scoped_memory_repository,
+        InMemoryScopedMemoryRepository,
+    )
+    assert isinstance(
+        container.memory_context_retriever,
+        RepositoryMemoryContextRetriever,
+    )
+    assert container.scoped_memory_repository._records_by_scope == {}
 
 
 def test_container_construction_does_not_call_ollama(monkeypatch) -> None:
@@ -49,6 +64,25 @@ def test_container_construction_does_not_call_ollama(monkeypatch) -> None:
     Container()
 
     post.assert_not_called()
+
+
+def test_container_composes_memory_flag_without_search(monkeypatch) -> None:
+    search = Mock(side_effect=AssertionError("search must be on demand"))
+    monkeypatch.setattr(InMemoryScopedMemoryRepository, "search", search)
+    configured = Settings(
+        MEMORY_RETRIEVAL_ENABLED=True,
+        _env_file=None,
+    )
+
+    container = Container(configured)
+
+    assert container.cognitive_engine._memory_retrieval_enabled is True
+    assert (
+        container.cognitive_engine._memory_context_retriever
+        is container.memory_context_retriever
+    )
+    assert container.scoped_memory_repository._records_by_scope == {}
+    search.assert_not_called()
 
 
 def test_default_specialist_keeps_deterministic_capability_policy() -> None:

@@ -36,6 +36,24 @@ retrieval snapshots, and safe memory use in model prompts are deferred.
 When scoped memory becomes active, extend enforcement to retrieval,
 composition, context propagation, and public-boundary exclusions.
 
+## Sprint 13 classification
+
+### Technical debt
+
+The global legacy repository and unowned legacy records remain incompatible
+with scoped retrieval. The historical Ollama generation URL setting retains
+its imprecise base-URL name.
+
+### Deliberately deferred roadmap
+
+Durable persistence, writes, Memory Update, legacy migration, authenticated
+identity/scope transport, memory selection policy, stored prompt-injection
+defense, safe prompt incorporation, retention, and deletion remain deferred.
+
+### Governance maintenance
+
+Keep explicit AST lists synchronized as new memory consumers become active.
+
 Only inspected, evidenced items are included. This register does not authorize
 fixing them.
 

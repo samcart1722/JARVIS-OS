@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from app.cognition.memory.scoped.models import MemorySnapshot
 from app.cognition.planning.goal import Goal
 
 
@@ -15,6 +16,6 @@ class CognitiveContext:
     task: str | None = None
     workspace: str | None = None
     conversation_context: tuple[str, ...] = ()
-    memory_snapshot: tuple[str, ...] = ()
+    memory_snapshot: MemorySnapshot | None = None
     initial_evidence: tuple[str, ...] = ()
     permissions: tuple[str, ...] = ()

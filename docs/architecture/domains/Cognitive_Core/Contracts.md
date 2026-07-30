@@ -243,3 +243,27 @@ implementation accepts an immutable tuple of initial records, selects the
 requested scope before a case-insensitive literal substring match, and
 preserves constructor order. There is no unscoped overload, `search_all`, or
 write method.
+
+## Memory context integration contracts
+
+```python
+MemoryContextRetriever.retrieve(
+    scope: MemoryScope,
+    query: str,
+) -> MemorySnapshot
+
+CognitiveEngine.process(
+    user_input: str,
+    *,
+    memory_scope: MemoryScope | None = None,
+) -> CognitiveOutcome
+```
+
+`MemorySnapshot(scope, records)` is frozen and rejects cross-scope records.
+`None` in `CognitiveContext.memory_snapshot` means retrieval did not execute;
+an empty snapshot means it executed with no matches.
+
+Disabled retrieval or absent scope performs no call. Enabled retrieval with
+scope calls once using normalized input, verifies the returned scope, replaces
+the immutable context, and only then classifies. Unexpected errors propagate.
+Enabling retrieval without an injected retriever is rejected at construction.
