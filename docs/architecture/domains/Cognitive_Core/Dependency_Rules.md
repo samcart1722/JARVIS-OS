@@ -156,6 +156,17 @@ The in-memory scoped implementation must not wrap or import the global
 API, engine, context, Container, Ollama, readiness, and demo must not consume
 scoped memory.
 
+## Reasoning prompt policy
+
+Prompt builders may depend on `CognitiveContext` and standard-library
+serialization. They must not import Settings, Container, FastAPI, OllamaClient,
+repositories, retrievers, legacy memory, readiness, environment, or I/O.
+
+OllamaProvider may depend on the prompt-builder contract and client, but must
+not retrieve memory. Container alone translates Settings into the concrete
+builder. API, engine, memory retriever, readiness, DefaultSpecialist, and
+CapabilityExecutor do not construct or import prompt builders.
+
 ## Active memory-context integration
 
 `CognitiveContext` may depend on `MemorySnapshot`. `CognitiveEngine` may depend

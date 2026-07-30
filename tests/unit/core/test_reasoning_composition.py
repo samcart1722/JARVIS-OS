@@ -17,6 +17,7 @@ from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
 )
 from app.cognition.planning.goal import Goal
+from app.cognition.prompts.reasoning import MemoryAwareReasoningPromptBuilder
 from app.core.config import Settings
 from app.core.container import Container
 from app.models.ollama_readiness_probe import OllamaReadinessProbe
@@ -83,6 +84,29 @@ def test_container_composes_memory_flag_without_search(monkeypatch) -> None:
     )
     assert container.scoped_memory_repository._records_by_scope == {}
     search.assert_not_called()
+
+
+def test_container_injects_memory_prompt_policy_settings() -> None:
+    configured = Settings(
+        MEMORY_PROMPT_CONTEXT_ENABLED=True,
+        MEMORY_PROMPT_MAX_RECORDS=2,
+        MEMORY_PROMPT_MAX_CHARACTERS=50,
+        _env_file=None,
+    )
+
+    container = Container(configured)
+
+    assert isinstance(
+        container.reasoning_prompt_builder,
+        MemoryAwareReasoningPromptBuilder,
+    )
+    assert (
+        container.reasoning_provider._prompt_builder
+        is container.reasoning_prompt_builder
+    )
+    assert container.reasoning_prompt_builder._memory_context_enabled is True
+    assert container.reasoning_prompt_builder._max_records == 2
+    assert container.reasoning_prompt_builder._max_characters == 50
 
 
 def test_default_specialist_keeps_deterministic_capability_policy() -> None:

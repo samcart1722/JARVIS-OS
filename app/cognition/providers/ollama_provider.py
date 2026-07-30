@@ -2,6 +2,7 @@
 
 from app.cognition.domain.cognitive_context import CognitiveContext
 from app.cognition.domain.reasoning_result import ReasoningResult
+from app.cognition.prompts.reasoning import ReasoningPromptBuilder
 from app.cognition.providers.base_provider import ReasoningProvider
 from app.models.ollama_client import OllamaClient
 
@@ -9,10 +10,16 @@ from app.models.ollama_client import OllamaClient
 class OllamaProvider(ReasoningProvider):
     """Generate reasoning results through the existing Ollama client."""
 
-    def __init__(self, client: OllamaClient) -> None:
+    def __init__(
+        self,
+        client: OllamaClient,
+        prompt_builder: ReasoningPromptBuilder,
+    ) -> None:
         self._client = client
+        self._prompt_builder = prompt_builder
 
     def generate(self, context: CognitiveContext) -> ReasoningResult:
         """Generate a response from the normalized user input."""
-        response = self._client.chat(context.normalized_input)
+        prompt = self._prompt_builder.build(context)
+        response = self._client.chat(prompt)
         return ReasoningResult(response=response)

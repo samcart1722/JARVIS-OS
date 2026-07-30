@@ -61,3 +61,11 @@ The following remain candidates, not commitments:
 Before selecting scope, resolve the executor/context contract, determine which
 existing pipeline abstractions remain valid, define test boundaries, and record
 any material architectural decision through the appropriate governance process.
+
+## Sprint 14 completed
+
+Memory-Aware Reasoning Prompt Policy v1 adds exact default compatibility,
+bounded scoped-reference inclusion, stable safety instructions, and provider
+injection. Public behavior remains unchanged. Advanced injection defense,
+ranking, durable memory, writes, migration, identity, and token limits remain
+future work.

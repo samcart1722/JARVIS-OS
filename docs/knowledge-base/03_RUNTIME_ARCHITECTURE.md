@@ -243,3 +243,16 @@ protect selection-policy, specialist, executor, public-route, and cognitive
 domain import boundaries. Separate tests require essential document sections
 and the active flow/infrastructure distinction. Legacy directories are
 deliberately outside this enforcement scope.
+
+## Memory-aware reasoning prompt
+
+Container composes `MemoryAwareReasoningPromptBuilder` into OllamaProvider.
+Prompt memory defaults off independently from retrieval. Disabled policy,
+missing snapshot, or empty snapshot returns normalized input unchanged.
+
+Enabled matching records produce stable request, untrusted-memory, and
+response sections. Records are JSON strings in snapshot order. Record count
+is limited first; combined source content is truncated sequentially to the
+character budget. The request is not truncated and scope identifier is
+omitted. Safety text marks records as untrusted reference data; this is not
+complete injection prevention. Provider, API, and demo perform no retrieval.

@@ -177,3 +177,14 @@ execution, and reasoning-provider contracts.
 
 The public API and demo supply no scope. Ollama continues to use only
 `normalized_input`; no memory content enters its prompt.
+
+## Memory-aware reasoning prompt policy
+
+Sprint 14 adds `ReasoningPromptBuilder`, an exact-compatibility builder, and a
+bounded memory-aware builder. OllamaProvider receives the contract by
+injection and performs no retrieval.
+
+Without usable enabled memory, normalized input is returned byte-for-byte.
+Otherwise a stable prompt separates the request, JSON-serialized untrusted
+scoped records, safety text, and response instruction. Record-count and
+source-content character limits are deterministic.
