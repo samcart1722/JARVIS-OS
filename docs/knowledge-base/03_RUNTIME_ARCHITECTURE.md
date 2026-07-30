@@ -41,6 +41,8 @@ point is `CognitiveEngine.process(user_input: str) -> str`.
 | `CapabilityExecutor` | Runs steps sequentially, passes context and step to capabilities, aggregates results, and fails fast. |
 | `NormalizedInputCapability` | Returns normalized context input deterministically; it performs no reasoning. |
 | `ReasoningCapability` | Converts the canonical provider-backed `ReasoningStage` result into `CapabilityResult`; available only when a plan requests `reasoning`. |
+| `ReasoningSelectionPolicy` | Contract `select_capability(context) -> str`; independent of Settings, providers, registry, and I/O. |
+| `DeterministicReasoningSelectionPolicy` | Returns an official identifier solely from immutable `reasoning_enabled`. |
 | `ReasoningStage` | Canonical single invocation boundary from `CognitiveContext` to `ReasoningProvider.generate`. |
 | `OllamaProvider` | Receives an explicitly configured `OllamaClient`; it performs network I/O only when reasoning executes. |
 | `ResponseStage` | Returns aggregated output on success or safe fixed failure text. |
@@ -54,6 +56,10 @@ model, and timeout, and injects it into `OllamaProvider`. Construction does not
 perform network I/O. The Container constructs `CapabilityExecutor`
 with the shared registry, then injects it and the other stages into
 `CognitiveEngine`.
+
+`Container` also translates `REASONING_ENABLED` into
+`DeterministicReasoningSelectionPolicy`, injects it into `DefaultSpecialist`,
+and injects that specialist into `SpecialistRouter`.
 The module creates a module-level `container`; the FastAPI route consumes its
 `cognitive_engine` without rebuilding dependencies. `_build_memory()` separately composes
 the cognitive memory pipeline and a `LegacyMemoryAdapter`.
@@ -103,6 +109,22 @@ Defaults preserve prior behavior:
 Pydantic Settings provides environment overrides and rejects timeout values
 less than one. Cognitive Core contracts and capabilities do not import Settings
 or read environment variables.
+
+## Deterministic selection policy
+
+Disabled/default flow:
+
+`REASONING_ENABLED=false → policy → normalized_input → deterministic output`
+
+Enabled flow:
+
+`REASONING_ENABLED=true → policy → reasoning → ReasoningCapability →
+ReasoningStage → ReasoningProvider`
+
+The policy does not inspect prompt text, domain, registry, provider health, or
+network availability. The same boolean always produces the same identifier.
+Enabling reasoning permits provider execution but does not prove provider
+availability. There is no automatic fallback to `normalized_input`.
 
 ## Documented versus executable lifecycle
 

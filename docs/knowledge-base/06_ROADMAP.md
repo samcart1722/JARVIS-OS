@@ -12,23 +12,23 @@
 | 5 | Establish Capability Runtime v1 with logical identifiers, direct registry, fail-fast execution, and deterministic public output. | Working-tree implementation and `history/sprints/SPRINT_5_SUMMARY.md` |
 | 6 | Register provider-backed reasoning as an opt-in capability while preserving deterministic public behavior. | Working-tree implementation and `history/sprints/SPRINT_6_SUMMARY.md` |
 | 7 | Externalize Ollama URL, model, and timeout through official Settings and explicit composition. | Working-tree implementation and `history/sprints/SPRINT_7_SUMMARY.md` |
+| 8 | Add an explicit deterministic policy selecting normalized input or reasoning from operational enablement. | Working-tree implementation and `history/sprints/SPRINT_8_SUMMARY.md` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 7 is complete in the working tree. `Container` injects official Ollama
-settings into `OllamaClient`, then injects that client into `OllamaProvider`.
-`DefaultSpecialist` still selects `normalized_input`, so the public route
-remains deterministic and does not require Ollama. No memory update
-participates in the cycle.
+Sprint 8 is complete in the working tree. `Container` translates
+`REASONING_ENABLED` into an injected selection policy. The safe default remains
+`false`, so the public route selects `normalized_input` and does not require
+Ollama. Explicit `true` selects `reasoning` without heuristics or fallback.
 
-## Candidate scope after Sprint 7
+## Candidate scope after Sprint 8
 
 The following remain candidates, not commitments:
 
 - integrate Memory into the lifecycle;
-- define provider-selection and activation policy before publicly selecting reasoning;
+- define provider availability and operational failure policy;
 - add a Files capability;
 - add a Web capability;
 - add capabilities that perform useful work through separately approved scope.

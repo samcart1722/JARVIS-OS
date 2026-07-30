@@ -35,7 +35,7 @@ class CognitiveEngine:
         )
         domain = self._goal_classifier.classify(context)
         specialist = self._specialist_router.route(domain)
-        plan = specialist.create_plan(goal)
+        plan = specialist.create_plan(context)
         execution_result = self._capability_executor.execute(context, plan)
 
         return self._response_stage.process(execution_result)
