@@ -218,3 +218,20 @@ remain write-free.
 Core. It checks readiness once, executes before, performs ordered explicit
 writes, and executes after with the same prompt and scope. Its immutable report
 stores safe counts, readiness, and outcomes without scope or content.
+
+## Evidence-bounded reasoning
+
+Sprint 17 adds immutable grounding envelopes and selected-evidence models, a
+pure deterministic selector, a strict JSON parser, an evidence-bounded prompt
+builder, and a `ReasoningProvider` decorator. The builder and decorator share
+one selector policy. `OllamaProvider` remains responsible only for prompt
+transport and one model invocation.
+
+When grounding is disabled or selected evidence is empty, the historical
+provider result is returned exactly. When active, valid answers expose only
+stable selected-record numbers; insufficient evidence produces deterministic
+safe text; invalid protocol produces a controlled cognitive failure.
+
+`GroundedReasoningDemoRuntime` is operational infrastructure outside the
+public API. It gates two isolated engines behind one readiness check and stores
+no scope, prompt, record content, or raw provider response.

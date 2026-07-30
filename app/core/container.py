@@ -22,6 +22,11 @@ from app.cognition.classification.default_goal_classifier import (
     DefaultGoalClassifier,
 )
 from app.cognition.engine import CognitiveEngine
+from app.cognition.grounding.evidence import MemoryEvidenceSelector
+from app.cognition.grounding.parser import JsonGroundedResponseParser
+from app.cognition.grounding.provider import (
+    EvidenceBoundedReasoningProvider,
+)
 from app.cognition.memory.extractors.default_extractor import DefaultExtractor
 from app.cognition.memory.intelligence.default_classifier import (
     DefaultClassifier,
@@ -50,7 +55,10 @@ from app.cognition.memory.validation.default_validator import (
 from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
-from app.cognition.prompts.reasoning import MemoryAwareReasoningPromptBuilder
+from app.cognition.prompts.reasoning import (
+    EvidenceBoundedReasoningPromptBuilder,
+    MemoryAwareReasoningPromptBuilder,
+)
 from app.cognition.providers.ollama_provider import OllamaProvider
 from app.cognition.specialists.default_specialist import DefaultSpecialist
 from app.cognition.specialists.deterministic_reasoning_selection_policy import (
@@ -140,17 +148,44 @@ class Container:
             timeout_seconds=self._settings.OLLAMA_TIMEOUT_SECONDS,
         )
         self.provider_readiness_probe = OllamaReadinessProbe(self.ollama_client)
-        self.reasoning_prompt_builder = MemoryAwareReasoningPromptBuilder(
-            memory_context_enabled=(
-                self._settings.MEMORY_PROMPT_CONTEXT_ENABLED
-            ),
+        self.memory_evidence_selector = MemoryEvidenceSelector(
             max_records=self._settings.MEMORY_PROMPT_MAX_RECORDS,
             max_characters=self._settings.MEMORY_PROMPT_MAX_CHARACTERS,
         )
-        self.reasoning_provider = OllamaProvider(
+        self.memory_aware_reasoning_prompt_builder = (
+            MemoryAwareReasoningPromptBuilder(
+                memory_context_enabled=(
+                    self._settings.MEMORY_PROMPT_CONTEXT_ENABLED
+                ),
+                max_records=self._settings.MEMORY_PROMPT_MAX_RECORDS,
+                max_characters=self._settings.MEMORY_PROMPT_MAX_CHARACTERS,
+            )
+        )
+        grounded_enabled = self._settings.MEMORY_GROUNDED_RESPONSE_ENABLED
+        self.grounded_response_parser = None
+        self.reasoning_prompt_builder = (
+            EvidenceBoundedReasoningPromptBuilder(
+                self.memory_aware_reasoning_prompt_builder,
+                self.memory_evidence_selector,
+                enabled=True,
+            )
+            if grounded_enabled
+            else self.memory_aware_reasoning_prompt_builder
+        )
+        self.ollama_reasoning_provider = OllamaProvider(
             self.ollama_client,
             self.reasoning_prompt_builder,
         )
+        if grounded_enabled:
+            self.grounded_response_parser = JsonGroundedResponseParser()
+            self.reasoning_provider = EvidenceBoundedReasoningProvider(
+                self.ollama_reasoning_provider,
+                self.grounded_response_parser,
+                self.memory_evidence_selector,
+                enabled=True,
+            )
+        else:
+            self.reasoning_provider = self.ollama_reasoning_provider
         self.reasoning_stage = ReasoningStage(self.reasoning_provider)
         self.reasoning_capability = ReasoningCapability(self.reasoning_stage)
         self.capability_registry = CapabilityRegistry()

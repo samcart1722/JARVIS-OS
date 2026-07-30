@@ -320,3 +320,29 @@ boundary.
 Its immutable report records canonical readiness, before/after outcomes,
 requested/written counts, and an explicit-scope boolean. It never stores scope,
 content, prompt, URL, exception, provider, writer, or repository.
+
+## Evidence-bounded reasoning contracts
+
+`MemoryEvidenceSelector.select(context) -> tuple[SelectedMemoryEvidence, ...]`
+preserves snapshot order, numbers records from one, and applies positive record
+and combined-character limits without mutating the snapshot.
+
+`GroundedResponseParser.parse(raw_response, max_record_number=...)` returns an
+immutable `GroundedResponseEnvelope`. The JSON root must contain exactly
+`status`, `answer`, and `used_record_numbers`. `answered` requires non-blank
+text and at least one unique in-range positive integer. `insufficient_evidence`
+requires no references; its final human text is deterministic.
+
+`EvidenceBoundedReasoningProvider.generate(context)` invokes its inner
+`ReasoningProvider` exactly once. It returns the exact inner result when
+grounding does not apply, preserves inner failures, and never retries or falls
+back to raw text. Invalid protocol becomes
+`grounded_response_protocol_invalid`.
+
+`ReasoningResult(response: str, error_code: str | None = None)` retains the
+historical success construction while allowing a provider decorator to return
+a controlled internal failure for capability translation.
+
+`GroundedReasoningDemoRuntime.run(prompt)` validates input, checks readiness
+once, then invokes standard and grounded engines once each with the same
+explicit scope. Its report contains safe outcomes and counts only.

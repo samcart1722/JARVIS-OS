@@ -285,3 +285,26 @@ successful `remember(scope, content)` appends exactly one record; duplicates
 are preserved. The after execution retrieves from the same ephemeral
 repository. There is no automatic write from engine, provider, prompt builder,
 retriever, readiness, or API, and no persistence or legacy-memory access.
+
+## Evidence-bounded memory reasoning
+
+With `MEMORY_GROUNDED_RESPONSE_ENABLED=false`, or without selected evidence,
+the historical memory-aware prompt and provider result remain exact.
+
+With the flag enabled and a non-empty scoped snapshot:
+
+`CognitiveContext -> shared MemoryEvidenceSelector
+-> EvidenceBoundedReasoningPromptBuilder -> OllamaProvider (one call)
+-> EvidenceBoundedReasoningProvider -> strict JSON parser
+-> validated ReasoningResult`
+
+The prompt exposes numbered untrusted records but never scope. The parser
+accepts one exact envelope, validates references against the same selected
+range, and performs no repair. Answered responses add a stable record-number
+footer; insufficient evidence uses deterministic text; invalid protocol
+becomes a safe structured failure with no raw-response fallback.
+
+The operational comparison uses one readiness check, then standard and
+grounded engines once each with identical prompt, scope, and synthetic
+records. This is structural grounding and auditability, not semantic fact
+verification.

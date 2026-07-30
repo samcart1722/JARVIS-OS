@@ -5,12 +5,14 @@ from dataclasses import dataclass
 CAPABILITY_NOT_FOUND = "capability_not_found"
 CAPABILITY_EXECUTION_FAILED = "capability_execution_failed"
 EMPTY_CAPABILITY_OUTPUT = "empty_capability_output"
+GROUNDED_RESPONSE_PROTOCOL_INVALID = "grounded_response_protocol_invalid"
 
 COGNITIVE_ERROR_CODES = frozenset(
     {
         CAPABILITY_NOT_FOUND,
         CAPABILITY_EXECUTION_FAILED,
         EMPTY_CAPABILITY_OUTPUT,
+        GROUNDED_RESPONSE_PROTOCOL_INVALID,
     }
 )
 
@@ -21,6 +23,9 @@ _ERROR_MESSAGES = {
     ),
     EMPTY_CAPABILITY_OUTPUT: (
         "The requested cognitive capability produced no usable result."
+    ),
+    GROUNDED_RESPONSE_PROTOCOL_INVALID: (
+        "The reasoning provider returned an invalid evidence-bounded response."
     ),
 }
 

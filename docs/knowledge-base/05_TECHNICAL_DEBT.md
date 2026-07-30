@@ -102,3 +102,17 @@ fixing them.
 Sprint 16 partially resolves TD-005 through a separate explicit local update
 operation. The canonical `CognitiveEngine` lifecycle still performs no
 automatic Memory Update, by design.
+
+## Sprint 17 classification
+
+- Resolved for v1: strict grounded envelope parsing, bounded visible-reference
+  validation, controlled protocol failure, and deterministic insufficient
+  evidence handling.
+- Deliberately deferred: semantic claim verification, fact checking, a second
+  evaluator model, external retrieval, embeddings, advanced injection defense,
+  tokenizer accounting, persistence, identity, retries, JSON repair, and
+  free-text fallback.
+- Accepted limitation: valid record numbers do not prove that every generated
+  claim is supported by those records.
+- Governance maintenance: keep explicit grounding and operational AST lists
+  synchronized as these surfaces evolve.
