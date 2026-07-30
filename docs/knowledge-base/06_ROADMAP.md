@@ -76,3 +76,10 @@ Functional Cognitive Demo v1 provides a controlled local baseline versus
 memory-aware comparison with one readiness check, explicit ephemeral scope,
 isolated flags, visible outcomes, and no persistence or fallback. Public API
 behavior remains unchanged.
+
+## Sprint 16 completed
+
+Explicit Scoped Memory Update v1 adds a separate writer contract, ordered
+ephemeral append, opt-in update service, shared reader/writer repository, and a
+controlled before/update/after CLI. It adds no automatic extraction,
+persistence, legacy migration, or HTTP behavior.

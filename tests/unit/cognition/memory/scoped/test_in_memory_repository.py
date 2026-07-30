@@ -84,20 +84,69 @@ def test_results_and_constructor_input_are_not_mutated_or_shared() -> None:
         result.append(owned)  # type: ignore[attr-defined]
 
 
-def test_constructor_rejects_mutable_or_unscoped_input() -> None:
+def test_constructor_copies_mutable_input_and_rejects_unscoped_values() -> None:
     scope = MemoryScope("scope-a")
+    owned = record(scope, "content")
+    initial = [owned]
+    repository = InMemoryScopedMemoryRepository(initial)
+    initial.clear()
 
-    with pytest.raises(TypeError):
-        InMemoryScopedMemoryRepository([record(scope, "content")])  # type: ignore[arg-type]
+    assert repository.search(scope, "content") == (owned,)
     with pytest.raises(TypeError):
         InMemoryScopedMemoryRepository((object(),))  # type: ignore[arg-type]
 
 
-def test_repository_has_no_global_search_or_write_surface() -> None:
+def test_add_preserves_order_duplicates_and_scope_isolation() -> None:
+    scope_a = MemoryScope("scope-a")
+    scope_b = MemoryScope("scope-b")
+    first = record(scope_a, "Shared prompt first")
+    second = record(scope_a, "Shared prompt second")
+    other = record(scope_b, "Shared prompt other")
+    repository = InMemoryScopedMemoryRepository()
+
+    repository.add(first)
+    repository.add(first)
+    repository.add(second)
+    repository.add(other)
+
+    assert repository.search(scope_a, "Shared prompt") == (
+        first,
+        first,
+        second,
+    )
+    assert repository.search(scope_b, "Shared prompt") == (other,)
+
+
+def test_add_requires_and_preserves_exact_validated_record() -> None:
+    scope = MemoryScope("scope-a")
+    owned = record(scope, "Stable content")
+    repository = InMemoryScopedMemoryRepository()
+
+    repository.add(owned)
+
+    assert repository.search(scope, "Stable") == (owned,)
+    assert repository.search(scope, "Stable")[0] is owned
+    with pytest.raises(TypeError):
+        repository.add(object())  # type: ignore[arg-type]
+
+
+def test_repository_has_only_explicit_read_and_append_surface() -> None:
     repository = InMemoryScopedMemoryRepository()
     public_names = {
         name for name in dir(repository) if not name.startswith("_")
     }
 
-    assert public_names == {"search"}
+    assert public_names == {"add", "search"}
     assert "scope" in signature(repository.search).parameters
+    assert "record" in signature(repository.add).parameters
+    assert not public_names & {
+        "clear",
+        "delete",
+        "flush",
+        "global_search",
+        "recall_all",
+        "save_all",
+        "search_all",
+        "update",
+        "upsert",
+    }

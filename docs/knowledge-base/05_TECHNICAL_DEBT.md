@@ -87,3 +87,18 @@ fixing them.
   retention/deletion, tokenizer support, and token limits.
 - Governance maintenance: synchronize explicit AST lists whenever
   prompt-policy consumers change.
+
+## Sprint 16 classification
+
+- Technical debt: global legacy memory, legacy data without ownership, and the
+  historically imprecise `OLLAMA_BASE_URL` name remain.
+- Deliberately deferred: durable persistence, delete/update, deduplication,
+  retention, migration, identity, HTTP scope/update, automatic extraction,
+  memory selection, advanced prompt-injection defense, concurrency, and token
+  limits.
+- Governance maintenance: keep explicit AST lists synchronized as writer,
+  service, operational runtime, and CLI surfaces evolve.
+
+Sprint 16 partially resolves TD-005 through a separate explicit local update
+operation. The canonical `CognitiveEngine` lifecycle still performs no
+automatic Memory Update, by design.

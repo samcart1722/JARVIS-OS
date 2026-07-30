@@ -1,24 +1,35 @@
 """In-memory implementation of scope-isolated memory persistence."""
 
-from app.cognition.memory.scoped.contracts import ScopedMemoryRepository
+from collections.abc import Iterable
+
+from app.cognition.memory.scoped.contracts import (
+    ScopedMemoryRepository,
+    ScopedMemoryWriter,
+)
 from app.cognition.memory.scoped.models import (
     MemoryScope,
     ScopedMemoryRecord,
 )
 
 
-class InMemoryScopedMemoryRepository(ScopedMemoryRepository):
-    """Search immutable constructor records without crossing scope boundaries."""
+class InMemoryScopedMemoryRepository(
+    ScopedMemoryRepository,
+    ScopedMemoryWriter,
+):
+    """Append and search ephemeral records without crossing scope boundaries."""
 
     def __init__(
         self,
-        records: tuple[ScopedMemoryRecord, ...] = (),
+        records: Iterable[ScopedMemoryRecord] = (),
     ) -> None:
-        if not isinstance(records, tuple):
-            raise TypeError("Initial scoped memory records must be a tuple.")
+        if isinstance(records, (str, bytes)):
+            raise TypeError(
+                "Initial scoped memory records must be a collection of records."
+            )
+        normalized_records = tuple(records)
 
         grouped: dict[MemoryScope, list[ScopedMemoryRecord]] = {}
-        for record in records:
+        for record in normalized_records:
             if not isinstance(record, ScopedMemoryRecord):
                 raise TypeError("Initial records must be scoped memory records.")
             grouped.setdefault(record.scope, []).append(record)
@@ -27,6 +38,13 @@ class InMemoryScopedMemoryRepository(ScopedMemoryRepository):
             scope: tuple(owned_records)
             for scope, owned_records in grouped.items()
         }
+
+    def add(self, record: ScopedMemoryRecord) -> None:
+        """Append exactly one validated record to its explicit scope bucket."""
+        if not isinstance(record, ScopedMemoryRecord):
+            raise TypeError("Added record must be a scoped memory record.")
+        owned_records = self._records_by_scope.get(record.scope, ())
+        self._records_by_scope[record.scope] = (*owned_records, record)
 
     def search(
         self,

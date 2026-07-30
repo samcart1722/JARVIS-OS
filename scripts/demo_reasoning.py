@@ -7,6 +7,7 @@ from app.cognition.domain.cognitive_outcome import CognitiveOutcome
 from app.cognition.memory.scoped.models import MemoryScope, ScopedMemoryRecord
 from app.core.config import Settings
 from app.core.container import Container
+from app.operations.demo_records import query_addressable_demo_content
 from app.operations.demo_runtime import (
     COMPARISON_SUCCEEDED,
     FunctionalCognitiveDemoRuntime,
@@ -49,12 +50,7 @@ def _format_outcome(label: str, outcome: CognitiveOutcome) -> str:
 
 def _demo_record_content(prompt: str, content: str) -> str:
     """Create transparent query-addressable content for the literal demo store."""
-    return (
-        "[DEMO RETRIEVAL KEY]\n"
-        f"{prompt}\n\n"
-        "[USER-PROVIDED REFERENCE]\n"
-        f"{content}"
-    )
+    return query_addressable_demo_content(prompt, content)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

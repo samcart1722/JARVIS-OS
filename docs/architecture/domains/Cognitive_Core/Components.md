@@ -136,7 +136,8 @@ are neither deleted nor represented as part of the canonical public runtime.
 ## Known gaps
 
 Classification, routing, and planning are provisional. There is no task
-builder, evidence lifecycle, memory update, provider availability policy,
+builder, evidence lifecycle, automatic lifecycle memory update, provider
+availability policy,
 retry, fallback, streaming, replanning, parallel execution, or rich structured
 public response. The normative Cognitive Lifecycle is therefore broader than
 the executable baseline.
@@ -152,15 +153,14 @@ public API; construction and normal cognitive requests do not trigger them.
 
 ## Scoped memory persistence foundation
 
-Sprint 12 adds a parallel, read-only foundation under
+Sprint 12 added a parallel, read-only foundation under
 `app/cognition/memory/scoped`. `MemoryScope` is an explicit immutable opaque
 identifier. `ScopedMemoryRecord` owns immutable content within one scope.
 `ScopedMemoryRepository` requires scope on every search, and the in-memory
 implementation indexes constructor records by scope.
 
-It is not composed by `Container` or consumed by the engine, context,
-capabilities, providers, readiness, demo, or API. Global and legacy memory
-remain unchanged and separate.
+Later sprints compose this separate scoped subsystem without copying global or
+legacy memory. Global and legacy memory remain unchanged and separate.
 
 ## Controlled memory context integration
 
@@ -200,3 +200,21 @@ retrieval and prompt memory are enabled only for the comparison path. No demo
 record is persisted. Its immutable report exposes only safe readiness,
 positive record count, an explicit-scope boolean, and structured outcomes; it
 never stores the scope or infrastructure details.
+
+## Explicit scoped memory update
+
+Sprint 16 adds the separate `ScopedMemoryWriter` port and
+`ExplicitMemoryUpdateService`. The in-memory repository implements ordered,
+scope-owned append while retaining the read contract. Exact duplicates are
+allowed.
+
+Container injects the same repository into the retriever and update service.
+Update enablement is independent and false by default. Writes occur only
+through deliberate `remember(scope, content)` calls; construction, retrieval,
+reasoning, prompt building, readiness, provider execution, and the public API
+remain write-free.
+
+`ExplicitMemoryUpdateDemoRuntime` is operational infrastructure outside the
+Core. It checks readiness once, executes before, performs ordered explicit
+writes, and executes after with the same prompt and scope. Its immutable report
+stores safe counts, readiness, and outcomes without scope or content.

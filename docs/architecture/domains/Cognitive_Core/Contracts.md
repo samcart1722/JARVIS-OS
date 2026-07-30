@@ -227,9 +227,9 @@ back. The demo checks enablement first, calls readiness once only when enabled,
 and invokes the composed engine only when ready while preserving the existing
 `CognitiveOutcome`.
 
-## Scoped memory persistence contract
+## Scoped memory persistence contracts
 
-Sprint 12 defines an inactive read-only contract:
+The read contract remains:
 
 ```python
 ScopedMemoryRepository.search(
@@ -239,10 +239,30 @@ ScopedMemoryRepository.search(
 ```
 
 Scope and content are required, non-blank, immutable values. The in-memory
-implementation accepts an immutable tuple of initial records, selects the
+implementation defensively copies initial records, selects the
 requested scope before a case-insensitive literal substring match, and
-preserves constructor order. There is no unscoped overload, `search_all`, or
-write method.
+preserves insertion order. There is no unscoped overload or `search_all`.
+
+Sprint 16 adds a separate write port:
+
+```python
+ScopedMemoryWriter.add(record: ScopedMemoryRecord) -> None
+```
+
+`add` appends exactly the validated record to its own scope bucket. It creates
+no scope, performs no retrieval or I/O, and permits exact duplicates. No
+delete, update, upsert, clear, or global operation exists.
+
+```python
+ExplicitMemoryUpdateService.remember(
+    scope: MemoryScope,
+    content: str,
+) -> ScopedMemoryRecord
+```
+
+Disabled update rejects before writing. Enabled update constructs one record,
+calls the writer once, and returns that record. Unexpected writer errors
+propagate.
 
 ## Memory context integration contracts
 
@@ -288,3 +308,15 @@ exactly its result to the client.
 readiness. Readiness failure executes neither engine. A ready result executes
 baseline once, then memory-aware reasoning once with the explicit scope. Both
 structured `CognitiveOutcome` values are preserved without retry or fallback.
+
+## Explicit memory update demo contract
+
+The operational runtime validates a non-empty prompt, checks readiness once,
+then executes before, writes each explicit content in order, and executes
+after using the same prompt and scope. Readiness failure produces zero outcomes
+and zero writes. A write error prevents after and propagates to the safe CLI
+boundary.
+
+Its immutable report records canonical readiness, before/after outcomes,
+requested/written counts, and an explicit-scope boolean. It never stores scope,
+content, prompt, URL, exception, provider, writer, or repository.

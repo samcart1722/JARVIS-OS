@@ -266,3 +266,22 @@ independent containers use copied Settings. Baseline memory is disabled;
 memory-aware execution receives only ephemeral scoped records. Results are
 printed separately, including stable failures. Public HTTP behavior remains
 unchanged.
+
+## Explicit scoped memory update
+
+`MEMORY_UPDATE_ENABLED` defaults to false independently from retrieval and
+prompt context. Container composes one `InMemoryScopedMemoryRepository` shared
+by the read-only `RepositoryMemoryContextRetriever` and
+`ExplicitMemoryUpdateService` through the separate `ScopedMemoryWriter`
+contract.
+
+The Sprint 16 local runtime performs:
+
+`readiness -> before(prompt, scope) -> ordered explicit writes
+-> after(prompt, scope)`
+
+Readiness runs once. Failed readiness performs no cognition or write. Each
+successful `remember(scope, content)` appends exactly one record; duplicates
+are preserved. The after execution retrieves from the same ephemeral
+repository. There is no automatic write from engine, provider, prompt builder,
+retriever, readiness, or API, and no persistence or legacy-memory access.
