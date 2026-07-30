@@ -175,8 +175,9 @@ enabled and an explicit `MemoryScope` is supplied, before classification. The
 same enriched immutable context then reaches specialist planning, capability
 execution, and reasoning-provider contracts.
 
-The public API and demo supply no scope. Ollama continues to use only
-`normalized_input`; no memory content enters its prompt.
+The public API and historical single-run demo supply no scope. Sprint 15's
+functional comparison supplies an explicit ephemeral scope only to its
+memory-aware engine.
 
 ## Memory-aware reasoning prompt policy
 
@@ -188,3 +189,14 @@ Without usable enabled memory, normalized input is returned byte-for-byte.
 Otherwise a stable prompt separates the request, JSON-serialized untrusted
 scoped records, safety text, and response instruction. Record-count and
 source-content character limits are deterministic.
+
+## Functional cognitive demo
+
+Sprint 15 adds `FunctionalCognitiveDemoRuntime` outside the public API. It
+checks readiness exactly once, then runs the same prompt through isolated
+baseline and memory-aware engines. The CLI constructs explicit, ephemeral
+records under one required `MemoryScope`. Baseline memory is disabled; scoped
+retrieval and prompt memory are enabled only for the comparison path. No demo
+record is persisted. Its immutable report exposes only safe readiness,
+positive record count, an explicit-scope boolean, and structured outcomes; it
+never stores the scope or infrastructure details.

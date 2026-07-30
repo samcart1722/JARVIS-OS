@@ -54,6 +54,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 12 | Completed in working tree | A parallel read-only memory repository foundation enforces explicit scope ownership and A/B isolation without runtime integration. |
 | 13 | Completed in working tree | Optional scoped retrieval enriches CognitiveContext before classification only when enabled and explicitly scoped. |
 | 14 | Completed in working tree | A bounded prompt policy includes scoped memory as untrusted reference data while preserving the exact default prompt. |
+| 15 | Completed in working tree | A local CLI compares baseline and scoped-memory reasoning with one readiness check, ephemeral records, and a safe immutable report. |
 
 ## Executable components and status
 
@@ -131,6 +132,10 @@ no retrieval.
 
 Sprint 14 baseline: **154 passed, 1 warning in 1.26s**. Prompt memory defaults
 off and remains unreachable from the unscoped public route.
+
+Sprint 15 baseline: **192 passed, 1 warning in 2.33s**. The functional demo
+adds an explicit local comparison; the unscoped public route remains
+unchanged.
 
 ## Next logical work and undecided items
 

@@ -69,3 +69,10 @@ bounded scoped-reference inclusion, stable safety instructions, and provider
 injection. Public behavior remains unchanged. Advanced injection defense,
 ranking, durable memory, writes, migration, identity, and token limits remain
 future work.
+
+## Sprint 15 completed
+
+Functional Cognitive Demo v1 provides a controlled local baseline versus
+memory-aware comparison with one readiness check, explicit ephemeral scope,
+isolated flags, visible outcomes, and no persistence or fallback. Public API
+behavior remains unchanged.

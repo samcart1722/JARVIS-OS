@@ -16,6 +16,7 @@ from app.cognition.memory.scoped.context_retriever import (
 from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
 )
+from app.cognition.memory.scoped.models import MemoryScope, ScopedMemoryRecord
 from app.cognition.planning.goal import Goal
 from app.cognition.prompts.reasoning import MemoryAwareReasoningPromptBuilder
 from app.core.config import Settings
@@ -107,6 +108,66 @@ def test_container_injects_memory_prompt_policy_settings() -> None:
     assert container.reasoning_prompt_builder._memory_context_enabled is True
     assert container.reasoning_prompt_builder._max_records == 2
     assert container.reasoning_prompt_builder._max_characters == 50
+
+
+def test_container_accepts_explicit_ephemeral_scoped_records() -> None:
+    scope = MemoryScope("demo-scope")
+    record = ScopedMemoryRecord(scope, "Prompt reference")
+
+    container = Container(
+        Settings(_env_file=None),
+        scoped_memory_records=(record,),
+    )
+
+    assert container.scoped_memory_repository.search(
+        scope, "Prompt"
+    ) == (record,)
+
+
+def test_container_defensively_copies_mutable_scoped_record_collection() -> None:
+    scope = MemoryScope("scope-a")
+    record = ScopedMemoryRecord(scope, "Prompt reference")
+    records = [record]
+
+    container = Container(
+        Settings(_env_file=None),
+        scoped_memory_records=records,
+    )
+    records.clear()
+
+    assert container._scoped_memory_records == (record,)
+    assert container.scoped_memory_repository.search(
+        scope, "Prompt"
+    ) == (record,)
+
+
+def test_container_rejects_text_as_scoped_record_collection() -> None:
+    import pytest
+
+    with pytest.raises(TypeError, match="collection of records"):
+        Container(
+            Settings(_env_file=None),
+            scoped_memory_records="not records",
+        )
+
+
+def test_container_preserves_scope_isolation_for_injected_records() -> None:
+    scope_a = MemoryScope("scope-a")
+    scope_b = MemoryScope("scope-b")
+    record_a = ScopedMemoryRecord(scope_a, "Shared prompt A")
+    record_b = ScopedMemoryRecord(scope_b, "Shared prompt B")
+
+    container = Container(
+        Settings(_env_file=None),
+        scoped_memory_records=[record_a, record_b],
+    )
+
+    assert container.scoped_memory_repository.search(
+        scope_a, "Shared prompt"
+    ) == (record_a,)
+    assert container.scoped_memory_repository.search(
+        scope_b, "Shared prompt"
+    ) == (record_b,)
 
 
 def test_default_specialist_keeps_deterministic_capability_policy() -> None:
