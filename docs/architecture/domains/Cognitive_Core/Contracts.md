@@ -226,3 +226,20 @@ operation and never generates, downloads, loads, warms, retries, or falls
 back. The demo checks enablement first, calls readiness once only when enabled,
 and invokes the composed engine only when ready while preserving the existing
 `CognitiveOutcome`.
+
+## Scoped memory persistence contract
+
+Sprint 12 defines an inactive read-only contract:
+
+```python
+ScopedMemoryRepository.search(
+    scope: MemoryScope,
+    query: str,
+) -> tuple[ScopedMemoryRecord, ...]
+```
+
+Scope and content are required, non-blank, immutable values. The in-memory
+implementation accepts an immutable tuple of initial records, selects the
+requested scope before a case-insensitive literal substring match, and
+preserves constructor order. There is no unscoped overload, `search_all`, or
+write method.
