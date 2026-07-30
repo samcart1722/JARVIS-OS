@@ -53,6 +53,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 11 | Completed in working tree | Explicit Ollama readiness and a controlled opt-in reasoning demo were added outside the Core and public API. |
 | 12 | Completed in working tree | A parallel read-only memory repository foundation enforces explicit scope ownership and A/B isolation without runtime integration. |
 | 13 | Completed in working tree | Optional scoped retrieval enriches CognitiveContext before classification only when enabled and explicitly scoped. |
+| 14 | Completed in working tree | A bounded prompt policy includes scoped memory as untrusted reference data while preserving the exact default prompt. |
 
 ## Executable components and status
 
@@ -127,6 +128,9 @@ is deliberately not composed into the active runtime.
 Sprint 13 baseline: **130 passed, 1 warning in 1.30s**. Container now composes
 an empty scoped repository; public requests still supply no scope and perform
 no retrieval.
+
+Sprint 14 baseline: **154 passed, 1 warning in 1.26s**. Prompt memory defaults
+off and remains unreachable from the unscoped public route.
 
 ## Next logical work and undecided items
 

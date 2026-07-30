@@ -15,6 +15,11 @@ OLLAMA_VARIABLES = (
 )
 REASONING_VARIABLE = "REASONING_ENABLED"
 MEMORY_RETRIEVAL_VARIABLE = "MEMORY_RETRIEVAL_ENABLED"
+MEMORY_PROMPT_VARIABLES = (
+    "MEMORY_PROMPT_CONTEXT_ENABLED",
+    "MEMORY_PROMPT_MAX_RECORDS",
+    "MEMORY_PROMPT_MAX_CHARACTERS",
+)
 
 
 def clear_ollama_environment(monkeypatch) -> None:
@@ -28,6 +33,11 @@ def clear_reasoning_environment(monkeypatch) -> None:
 
 def clear_memory_retrieval_environment(monkeypatch) -> None:
     monkeypatch.delenv(MEMORY_RETRIEVAL_VARIABLE, raising=False)
+
+
+def clear_memory_prompt_environment(monkeypatch) -> None:
+    for variable in MEMORY_PROMPT_VARIABLES:
+        monkeypatch.delenv(variable, raising=False)
 
 
 def test_ollama_settings_preserve_previous_defaults(monkeypatch) -> None:
@@ -155,6 +165,9 @@ def test_env_example_contains_safe_reasoning_default() -> None:
     assert "REASONING_ENABLED=false" in contents
     assert "OLLAMA_MODELS_URL=http://localhost:11434/api/tags" in contents
     assert "MEMORY_RETRIEVAL_ENABLED=false" in contents
+    assert "MEMORY_PROMPT_CONTEXT_ENABLED=false" in contents
+    assert "MEMORY_PROMPT_MAX_RECORDS=5" in contents
+    assert "MEMORY_PROMPT_MAX_CHARACTERS=2000" in contents
 
 
 def test_memory_retrieval_is_disabled_by_default(monkeypatch) -> None:
@@ -185,6 +198,60 @@ def test_memory_retrieval_supports_boolean_override(
 def test_invalid_memory_retrieval_boolean_is_rejected(monkeypatch) -> None:
     clear_memory_retrieval_environment(monkeypatch)
     monkeypatch.setenv(MEMORY_RETRIEVAL_VARIABLE, "sometimes")
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
+
+
+def test_memory_prompt_defaults_are_safe_and_independent(monkeypatch) -> None:
+    clear_memory_prompt_environment(monkeypatch)
+    clear_memory_retrieval_environment(monkeypatch)
+    clear_reasoning_environment(monkeypatch)
+    clear_ollama_environment(monkeypatch)
+
+    configured = Settings(_env_file=None)
+
+    assert configured.MEMORY_PROMPT_CONTEXT_ENABLED is False
+    assert configured.MEMORY_PROMPT_MAX_RECORDS == 5
+    assert configured.MEMORY_PROMPT_MAX_CHARACTERS == 2000
+    assert configured.MEMORY_RETRIEVAL_ENABLED is False
+    assert configured.REASONING_ENABLED is False
+    assert configured.OLLAMA_MODEL == "llama3.2:3b"
+
+
+@pytest.mark.parametrize(
+    ("variable", "value", "expected"),
+    (
+        ("MEMORY_PROMPT_CONTEXT_ENABLED", "true", True),
+        ("MEMORY_PROMPT_CONTEXT_ENABLED", "false", False),
+        ("MEMORY_PROMPT_MAX_RECORDS", "3", 3),
+        ("MEMORY_PROMPT_MAX_CHARACTERS", "500", 500),
+    ),
+)
+def test_memory_prompt_settings_support_overrides(
+    monkeypatch, variable: str, value: str, expected: bool | int
+) -> None:
+    clear_memory_prompt_environment(monkeypatch)
+    monkeypatch.setenv(variable, value)
+
+    assert getattr(Settings(_env_file=None), variable) == expected
+
+
+@pytest.mark.parametrize(
+    ("variable", "value"),
+    (
+        ("MEMORY_PROMPT_CONTEXT_ENABLED", "sometimes"),
+        ("MEMORY_PROMPT_MAX_RECORDS", "0"),
+        ("MEMORY_PROMPT_MAX_RECORDS", "-1"),
+        ("MEMORY_PROMPT_MAX_CHARACTERS", "0"),
+        ("MEMORY_PROMPT_MAX_CHARACTERS", "-1"),
+    ),
+)
+def test_invalid_memory_prompt_settings_are_rejected(
+    monkeypatch, variable: str, value: str
+) -> None:
+    clear_memory_prompt_environment(monkeypatch)
+    monkeypatch.setenv(variable, value)
 
     with pytest.raises(ValidationError):
         Settings(_env_file=None)

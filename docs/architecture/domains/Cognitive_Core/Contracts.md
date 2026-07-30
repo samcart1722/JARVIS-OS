@@ -267,3 +267,17 @@ Disabled retrieval or absent scope performs no call. Enabled retrieval with
 scope calls once using normalized input, verifies the returned scope, replaces
 the immutable context, and only then classifies. Unexpected errors propagate.
 Enabling retrieval without an injected retriever is rejected at construction.
+
+## Reasoning prompt contract
+
+`ReasoningPromptBuilder.build(context: CognitiveContext) -> str` returns a
+non-empty deterministic prompt. The compatibility builder returns normalized
+input exactly. The memory-aware implementation requires positive record and
+character limits.
+
+Memory is included only for a non-empty snapshot while enabled. It retains
+snapshot order, limits record count, and truncates combined original memory
+content sequentially to the character budget. The request is never truncated.
+JSON string serialization keeps stored line breaks and quotes as data. Scope
+identifiers are omitted. OllamaProvider calls the builder once and sends
+exactly its result to the client.

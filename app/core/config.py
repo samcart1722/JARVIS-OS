@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     REASONING_ENABLED: bool = False
     MEMORY_RETRIEVAL_ENABLED: bool = False
+    MEMORY_PROMPT_CONTEXT_ENABLED: bool = False
+    MEMORY_PROMPT_MAX_RECORDS: int = Field(default=5, gt=0)
+    MEMORY_PROMPT_MAX_CHARACTERS: int = Field(default=2000, gt=0)
     OLLAMA_BASE_URL: str = "http://localhost:11434/api/generate"
     OLLAMA_MODELS_URL: str = "http://localhost:11434/api/tags"
     OLLAMA_MODEL: str = "llama3.2:3b"

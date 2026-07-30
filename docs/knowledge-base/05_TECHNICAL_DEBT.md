@@ -77,3 +77,13 @@ fixing them.
 | TD-012 | Resolved for structured success/failure in Sprint 10: `ResponseStage` returns `CognitiveOutcome`; the API safely maps stable codes to HTTP. Rich evidence-oriented content remains future scope, not a defect in this contract. | Controlled failures are no longer successful text/HTTP 200 responses. | Resolved for v1 | Sprint 10 | Preserve the Core/HTTP boundary and do not expose internal errors. |
 | TD-013 | pytest reports a cache-path warning (`WinError 183`) while all 9 configured tests pass. | Test result is valid but local cache maintenance is degraded. | Low | Local tooling maintenance. | Do not change application architecture to address a cache warning. |
 | TD-014 | Product identity is Luxiom, while README, package name, settings, architectural history, and module paths contain JARVIS-OS/JARVIS terminology. | Onboarding and release identity are ambiguous. | Medium | Planned migration with compatibility assessment. | Do not rebrand opportunistically. |
+
+## Sprint 14 classification
+
+- Technical debt: global legacy memory, unowned legacy data, and the
+  historically imprecise `OLLAMA_BASE_URL` name.
+- Deliberately deferred: advanced stored prompt-injection defenses,
+  selection/ranking, durable memory, writes, migration, identity,
+  retention/deletion, tokenizer support, and token limits.
+- Governance maintenance: synchronize explicit AST lists whenever
+  prompt-policy consumers change.
