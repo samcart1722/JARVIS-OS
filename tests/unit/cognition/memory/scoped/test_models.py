@@ -55,4 +55,3 @@ def test_record_is_immutable() -> None:
 
     with pytest.raises(FrozenInstanceError):
         record.content = "changed"  # type: ignore[misc]
-

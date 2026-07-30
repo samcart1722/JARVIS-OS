@@ -17,4 +17,3 @@ class ScopedMemoryRepository(Protocol):
         query: str,
     ) -> tuple[ScopedMemoryRecord, ...]:
         """Return deterministic literal matches owned by the given scope."""
-
