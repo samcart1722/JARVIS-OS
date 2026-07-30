@@ -45,4 +45,3 @@ def test_result_is_immutable() -> None:
 
     with pytest.raises(FrozenInstanceError):
         result.ready = False  # type: ignore[misc]
-

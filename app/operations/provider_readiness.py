@@ -51,4 +51,3 @@ class ProviderReadinessProbe(Protocol):
 
     def check(self) -> ProviderReadinessResult:
         """Perform one on-demand readiness check."""
-
