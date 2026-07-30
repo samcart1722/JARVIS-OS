@@ -48,6 +48,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 6 | Completed in working tree | Provider-backed `ReasoningCapability` is registered and executable on demand without changing the default public policy. |
 | 7 | Completed in working tree | Ollama URL, model, and timeout now come from official validated application settings and are injected by `Container`. |
 | 8 | Completed in working tree | An explicit deterministic policy selects `normalized_input` or `reasoning` solely from `REASONING_ENABLED`. |
+| 9 | Completed in working tree | Active components, contracts, dependency rules, and minimal architecture enforcement now describe and protect the executable Core. |
 
 ## Executable components and status
 
@@ -66,6 +67,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `DefaultSpecialist` | Policy-driven | Receives `CognitiveContext`, delegates selection once, and constructs the same one-step plan shape. |
 | `OllamaProvider` | Composed, not publicly activated | Receives a configured `OllamaClient`; construction performs no network call. |
 | Ollama settings | Integrated | `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, and positive `OLLAMA_TIMEOUT_SECONDS` support environment overrides. |
+| Cognitive Core governance docs | Complete for active v1 runtime | Components, contracts, Core/infrastructure boundaries, legacy exclusions, and known debt are documented. |
+| Architecture tests | Integrated | Five import-boundary tests and two documentation-baseline tests inspect an explicit active-file scope using the standard library. |
 | `ResponseStage` | Integrated with execution output | Returns usable capability output on success and safe fixed text on failure. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
 | `Capability` contract | Implemented contract only | No concrete capability integration found. |
@@ -98,17 +101,19 @@ Sprint 7 baseline: **34 passed, 1 warning in 1.05s**.
 Sprint 8 baseline: **45 passed, 1 warning in 1.05s**; Ruff passed and
 `git diff --check` was clean.
 
-Sprint 8 final result: **63 passed, 1 warning in 1.41s** with `DEBUG=true`. The warning
-remains the pre-existing pytest cache-path warning. Coverage now includes
-boolean settings, isolated policy determinism, specialist delegation,
-enabled reasoning with a controlled provider, no-fallback failure, and the
-unchanged public default. Tests under `app/tests/` remain excluded.
+Sprint 9 baseline: **63 passed, 1 warning in 0.87s**; Ruff and
+`git diff --check` passed.
+
+Sprint 9 final result: **70 passed, 1 warning in 1.10s** with `DEBUG=true`.
+The warning remains the pre-existing pytest cache-path warning. Seven new
+tests protect confirmed boundaries and minimum governance-document coverage.
+Tests under `app/tests/` remain excluded.
 
 ## Next logical work and undecided items
 
-Sprint 8 provides explicit activation selection without provider discovery.
+Sprint 9 formalizes the active Core without changing runtime behavior.
 Operational availability, provider selection, memory, evidence, files, web,
-and legacy retirement remain pending.
+legacy retirement, and richer response semantics remain pending.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under

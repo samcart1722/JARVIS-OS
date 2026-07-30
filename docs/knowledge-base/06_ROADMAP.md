@@ -13,17 +13,18 @@
 | 6 | Register provider-backed reasoning as an opt-in capability while preserving deterministic public behavior. | Working-tree implementation and `history/sprints/SPRINT_6_SUMMARY.md` |
 | 7 | Externalize Ollama URL, model, and timeout through official Settings and explicit composition. | Working-tree implementation and `history/sprints/SPRINT_7_SUMMARY.md` |
 | 8 | Add an explicit deterministic policy selecting normalized input or reasoning from operational enablement. | Working-tree implementation and `history/sprints/SPRINT_8_SUMMARY.md` |
+| 9 | Complete active Cognitive Core documentation and enforce confirmed boundaries with standard-library architecture tests. | Working-tree implementation and `history/sprints/SPRINT_9_SUMMARY.md` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 8 is complete in the working tree. `Container` translates
-`REASONING_ENABLED` into an injected selection policy. The safe default remains
-`false`, so the public route selects `normalized_input` and does not require
-Ollama. Explicit `true` selects `reasoning` without heuristics or fallback.
+Sprint 9 is complete in the working tree. The active Core component catalog,
+contracts, dependency rules, legacy boundary, and known gaps are documented.
+Minimal AST and documentation tests protect rules already satisfied by the
+runtime; production behavior is unchanged.
 
-## Candidate scope after Sprint 8
+## Candidate scope after Sprint 9
 
 The following remain candidates, not commitments:
 
