@@ -51,6 +51,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 9 | Completed in working tree | Active components, contracts, dependency rules, and minimal architecture enforcement now describe and protect the executable Core. |
 | 10 | Completed in working tree | Structured cognitive outcomes distinguish success and controlled failure; the HTTP boundary maps stable codes safely. |
 | 11 | Completed in working tree | Explicit Ollama readiness and a controlled opt-in reasoning demo were added outside the Core and public API. |
+| 12 | Completed in working tree | A parallel read-only memory repository foundation enforces explicit scope ownership and A/B isolation without runtime integration. |
 
 ## Executable components and status
 
@@ -118,6 +119,9 @@ Sprint 10 baseline: **70 passed, 1 warning in 1.69s**; Ruff and
 Sprint 11 baseline: **86 passed, 1 warning in 1.84s**; Ruff and
 `git diff --check` passed. Readiness uses one on-demand `GET /api/tags`;
 construction and the default API path remain network-free.
+
+Sprint 12 baseline: **111 passed, 1 warning in 1.36s**. The scoped foundation
+is deliberately not composed into the active runtime.
 
 ## Next logical work and undecided items
 

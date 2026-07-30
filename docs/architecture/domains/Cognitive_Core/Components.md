@@ -149,3 +149,15 @@ the executable baseline.
 `ReasoningDemoRuntime` gates the already-composed engine behind explicit
 enablement and readiness. These components are outside the Cognitive Core and
 public API; construction and normal cognitive requests do not trigger them.
+
+## Scoped memory persistence foundation
+
+Sprint 12 adds a parallel, read-only foundation under
+`app/cognition/memory/scoped`. `MemoryScope` is an explicit immutable opaque
+identifier. `ScopedMemoryRecord` owns immutable content within one scope.
+`ScopedMemoryRepository` requires scope on every search, and the in-memory
+implementation indexes constructor records by scope.
+
+It is not composed by `Container` or consumed by the engine, context,
+capabilities, providers, readiness, demo, or API. Global and legacy memory
+remain unchanged and separate.

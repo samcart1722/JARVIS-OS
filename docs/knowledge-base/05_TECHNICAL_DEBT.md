@@ -19,6 +19,23 @@ evidence, tools, files, and web are future scope, not current defects.
 Keep explicit AST boundary lists and operational documentation aligned when
 active files change.
 
+## Sprint 12 classification
+
+### Inherited technical limitation
+
+The global memory repository and legacy records lack ownership and cannot be
+exposed through the scoped boundary.
+
+### Deliberately deferred roadmap
+
+Legacy migration, writes, durable persistence, engine/Container integration,
+retrieval snapshots, and safe memory use in model prompts are deferred.
+
+### Governance maintenance
+
+When scoped memory becomes active, extend enforcement to retrieval,
+composition, context propagation, and public-boundary exclusions.
+
 Only inspected, evidenced items are included. This register does not authorize
 fixing them.
 

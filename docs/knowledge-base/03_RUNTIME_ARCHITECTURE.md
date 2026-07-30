@@ -188,6 +188,24 @@ reasoning checks once and only `ready` reaches the Container-composed engine.
 Existing `CognitiveOutcome` failures remain distinct from readiness failures.
 There is no fallback.
 
+## Scoped memory persistence foundation
+
+The engine-integration audit found that the composed global repository returns
+every active record and carries no ownership. Sprint 12 adds a separate,
+inactive foundation:
+
+`MemoryScope -> ScopedMemoryRecord -> ScopedMemoryRepository
+-> InMemoryScopedMemoryRepository`
+
+Construction groups records by scope. Search first looks up the requested
+scope's bucket, then applies a case-insensitive literal substring match.
+Results preserve constructor order and are immutable tuples.
+
+The repository consumes no legacy data. Unowned records remain incompatible
+pending an explicit migration policy. There is no I/O, write surface,
+migration, Container wiring, engine/context change, configuration, prompt use,
+demo use, or API change.
+
 ## Governance baseline
 
 The executable runtime is now catalogued in:

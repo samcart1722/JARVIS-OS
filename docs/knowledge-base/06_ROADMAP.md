@@ -7,6 +7,14 @@ check, safe operational states, inert composition, and an opt-in CLI demo
 gated by `REASONING_ENABLED`. It adds no endpoint, automatic check, retry,
 fallback, model lifecycle operation, or public API change.
 
+## Sprint 12 completed
+
+Scoped Memory Persistence Foundation v1 establishes explicit ownership,
+repository-boundary filtering, deterministic literal search, immutable
+results, and tested isolation. Sprint 13 may integrate controlled read-only
+retrieval while preserving these invariants. Migration, writes, durable
+persistence, and prompt incorporation remain deferred.
+
 ## Completed sprints
 
 | Sprint | Objective achieved | Evidence |

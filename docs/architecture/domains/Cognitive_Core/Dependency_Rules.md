@@ -144,3 +144,14 @@ and request exception types but never generation.
 `CognitiveEngine` and the public brain route do not import or call readiness.
 The demo service may depend on the readiness contract and existing engine and
 outcome types; only its thin CLI adapter constructs Settings and Container.
+
+## Scoped memory persistence foundation
+
+Scoped models and contract may depend only on their own internal models and
+standard-library facilities. They must not import Settings, FastAPI,
+reasoning, readiness, legacy memory, or concrete persistence.
+
+The in-memory scoped implementation must not wrap or import the global
+`InMemoryRepository` or `LegacyMemoryAdapter`. Until reviewed integration,
+API, engine, context, Container, Ollama, readiness, and demo must not consume
+scoped memory.
