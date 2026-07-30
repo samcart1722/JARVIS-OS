@@ -8,3 +8,4 @@ class ReasoningResult:
     """Represent the response produced by cognitive reasoning."""
 
     response: str
+    error_code: str | None = None

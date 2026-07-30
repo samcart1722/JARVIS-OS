@@ -10,6 +10,10 @@ from app.cognition.capabilities.normalized_input import NormalizedInputCapabilit
 from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.domain.cognitive_context import CognitiveContext
 from app.cognition.domain.domain import Domain
+from app.cognition.grounding.parser import JsonGroundedResponseParser
+from app.cognition.grounding.provider import (
+    EvidenceBoundedReasoningProvider,
+)
 from app.cognition.memory.scoped.context_retriever import (
     RepositoryMemoryContextRetriever,
 )
@@ -19,9 +23,16 @@ from app.cognition.memory.scoped.explicit_update import (
 from app.cognition.memory.scoped.in_memory_repository import (
     InMemoryScopedMemoryRepository,
 )
-from app.cognition.memory.scoped.models import MemoryScope, ScopedMemoryRecord
+from app.cognition.memory.scoped.models import (
+    MemoryScope,
+    MemorySnapshot,
+    ScopedMemoryRecord,
+)
 from app.cognition.planning.goal import Goal
-from app.cognition.prompts.reasoning import MemoryAwareReasoningPromptBuilder
+from app.cognition.prompts.reasoning import (
+    EvidenceBoundedReasoningPromptBuilder,
+    MemoryAwareReasoningPromptBuilder,
+)
 from app.core.config import Settings
 from app.core.container import Container
 from app.models.ollama_readiness_probe import OllamaReadinessProbe
@@ -145,6 +156,69 @@ def test_container_injects_memory_prompt_policy_settings() -> None:
     assert container.reasoning_prompt_builder._memory_context_enabled is True
     assert container.reasoning_prompt_builder._max_records == 2
     assert container.reasoning_prompt_builder._max_characters == 50
+
+
+def test_container_grounded_false_preserves_historical_composition() -> None:
+    container = Container(
+        Settings(
+            MEMORY_GROUNDED_RESPONSE_ENABLED=False,
+            _env_file=None,
+        )
+    )
+
+    assert isinstance(
+        container.reasoning_prompt_builder,
+        MemoryAwareReasoningPromptBuilder,
+    )
+    assert container.reasoning_provider is container.ollama_reasoning_provider
+    assert container.grounded_response_parser is None
+
+
+def test_container_grounded_true_composes_shared_evidence_policy() -> None:
+    configured = Settings(
+        MEMORY_GROUNDED_RESPONSE_ENABLED=True,
+        MEMORY_PROMPT_CONTEXT_ENABLED=False,
+        _env_file=None,
+    )
+    original_values = configured.model_dump()
+
+    container = Container(configured)
+
+    assert isinstance(
+        container.reasoning_prompt_builder,
+        EvidenceBoundedReasoningPromptBuilder,
+    )
+    assert isinstance(
+        container.reasoning_provider,
+        EvidenceBoundedReasoningProvider,
+    )
+    assert isinstance(
+        container.grounded_response_parser,
+        JsonGroundedResponseParser,
+    )
+    assert (
+        container.reasoning_prompt_builder._evidence_selector
+        is container.memory_evidence_selector
+    )
+    assert (
+        container.reasoning_provider._evidence_selector
+        is container.memory_evidence_selector
+    )
+    scope = MemoryScope("scope")
+    context = CognitiveContext(
+        raw_input="request",
+        normalized_input="request",
+        memory_snapshot=MemorySnapshot(
+            scope=scope,
+            records=(ScopedMemoryRecord(scope, "evidence"),),
+        ),
+    )
+    prompt = container.reasoning_prompt_builder.build(context)
+
+    assert "[EVIDENCE-BOUNDED RESPONSE PROTOCOL]" in prompt
+    assert configured.MEMORY_PROMPT_CONTEXT_ENABLED is False
+    assert configured.MEMORY_GROUNDED_RESPONSE_ENABLED is True
+    assert configured.model_dump() == original_values
 
 
 def test_container_accepts_explicit_ephemeral_scoped_records() -> None:

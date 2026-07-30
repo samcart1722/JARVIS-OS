@@ -202,3 +202,26 @@ Engine, provider, prompt builder, retriever, readiness, public API, and Sprint
 scope models, outcomes, and readiness contract. It must not construct Settings,
 Container, concrete repository, provider, client, capability, specialist, or
 registry. Only its thin CLI adapter composes Settings and Container.
+
+## Evidence-bounded reasoning boundary
+
+Grounding models, selector, and parser are pure Core support and may depend
+only on domain context/snapshot models and the standard library. The parser
+must not know engines, providers, Settings, Container, FastAPI, repositories,
+Ollama, readiness, environment, or I/O.
+
+The evidence-bounded prompt builder may depend on the prompt contract,
+`CognitiveContext`, selector, and standard-library serialization. The provider
+decorator may depend on `ReasoningProvider`, reasoning models, selector, and
+parser. Neither may depend on Settings, Container, FastAPI, repositories,
+retrievers, legacy memory, concrete clients, readiness, filesystem, or
+database.
+
+Container alone selects historical or grounded composition and shares the
+selector policy between builder and decorator. OllamaProvider remains unaware
+of parsing. The API must not import grounding modules or expose scope.
+
+`GroundedReasoningDemoRuntime` may depend on engine, outcome, scope, and
+readiness contracts, but not Settings, Container, FastAPI, repositories,
+concrete providers, clients, environment, or I/O. Its thin CLI owns local
+composition only.

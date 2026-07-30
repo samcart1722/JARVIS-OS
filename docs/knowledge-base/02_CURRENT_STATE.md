@@ -141,6 +141,11 @@ unchanged.
 Sprint 16 baseline: **221 passed, 1 warning in 1.47s**. Explicit update remains
 disabled by default and absent from the public route.
 
+Sprint 17 adds opt-in evidence-bounded response parsing and auditable selected
+record numbers. It defaults off; absent or empty memory preserves the exact
+historical path. The protocol validates structure and references, not truth or
+semantic support, and the public route still supplies no scope.
+
 ## Next logical work and undecided items
 
 Sprint 10 completes the structured success/failure and safe HTTP representation

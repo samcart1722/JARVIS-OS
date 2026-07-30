@@ -7,6 +7,7 @@ from app.cognition.domain.cognitive_outcome import (
     CAPABILITY_NOT_FOUND,
     COGNITIVE_ERROR_CODES,
     EMPTY_CAPABILITY_OUTPUT,
+    GROUNDED_RESPONSE_PROTOCOL_INVALID,
     CognitiveError,
     CognitiveOutcome,
     cognitive_error,
@@ -61,6 +62,7 @@ def test_error_codes_are_centralized_and_infrastructure_neutral() -> None:
         CAPABILITY_NOT_FOUND,
         CAPABILITY_EXECUTION_FAILED,
         EMPTY_CAPABILITY_OUTPUT,
+        GROUNDED_RESPONSE_PROTOCOL_INVALID,
     }
     joined = " ".join(COGNITIVE_ERROR_CODES).lower()
     assert "ollama" not in joined

@@ -83,3 +83,12 @@ Explicit Scoped Memory Update v1 adds a separate writer contract, ordered
 ephemeral append, opt-in update service, shared reader/writer repository, and a
 controlled before/update/after CLI. It adds no automatic extraction,
 persistence, legacy migration, or HTTP behavior.
+
+## Sprint 17 completed
+
+Evidence-Bounded Memory Reasoning v1 adds an independent opt-in flag, shared
+bounded evidence selection, strict JSON envelope parsing, auditable record
+references, deterministic insufficient-evidence output, controlled protocol
+failure, and a comparative local demo. It does not verify truth, semantically
+fact-check claims, retry, repair JSON, fall back to free text, persist memory,
+or change the HTTP surface.

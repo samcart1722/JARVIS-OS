@@ -4,7 +4,10 @@ import pytest
 
 from app.cognition.capabilities.reasoning import ReasoningCapability
 from app.cognition.domain.cognitive_context import CognitiveContext
-from app.cognition.domain.cognitive_outcome import EMPTY_CAPABILITY_OUTPUT
+from app.cognition.domain.cognitive_outcome import (
+    EMPTY_CAPABILITY_OUTPUT,
+    GROUNDED_RESPONSE_PROTOCOL_INVALID,
+)
 from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.planning.plan_step import PlanStep
@@ -78,3 +81,21 @@ def test_reasoning_capability_propagates_unexpected_provider_exception() -> None
 
     with pytest.raises(RuntimeError, match="provider internal detail"):
         capability.execute(context(), reasoning_step())
+
+
+def test_reasoning_capability_preserves_controlled_provider_failure() -> None:
+    class ControlledFailureProvider:
+        def generate(self, context: CognitiveContext) -> ReasoningResult:
+            del context
+            return ReasoningResult(
+                response="",
+                error_code=GROUNDED_RESPONSE_PROTOCOL_INVALID,
+            )
+
+    result = ReasoningCapability(
+        ReasoningStage(ControlledFailureProvider())
+    ).execute(context(), reasoning_step())
+
+    assert result.success is False
+    assert result.outputs == ()
+    assert result.error_code == GROUNDED_RESPONSE_PROTOCOL_INVALID

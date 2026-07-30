@@ -22,6 +22,12 @@ class ReasoningCapability(Capability):
         """Run canonical reasoning once and translate its result."""
         del step
         result = self._reasoning_stage.process(context)
+        if result.error_code is not None:
+            return CapabilityResult(
+                success=False,
+                errors=("Reasoning provider returned a controlled failure.",),
+                error_code=result.error_code,
+            )
         if not result.response.strip():
             return CapabilityResult(
                 success=False,
