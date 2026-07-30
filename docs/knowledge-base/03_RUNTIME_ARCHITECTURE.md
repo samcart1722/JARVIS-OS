@@ -150,3 +150,17 @@ described as active stages.
   to `CognitiveEngine.process`.
 
 These paths are recorded, not deprecated or removed by this recovery task.
+
+## Governance baseline
+
+The executable runtime is now catalogued in:
+
+- [`Components.md`](../architecture/domains/Cognitive_Core/Components.md);
+- [`Contracts.md`](../architecture/domains/Cognitive_Core/Contracts.md);
+- [`Dependency_Rules.md`](../architecture/domains/Cognitive_Core/Dependency_Rules.md).
+
+Architecture tests use AST inspection over an explicit active-file list. They
+protect selection-policy, specialist, executor, public-route, and cognitive
+domain import boundaries. Separate tests require essential document sections
+and the active flow/infrastructure distinction. Legacy directories are
+deliberately outside this enforcement scope.
