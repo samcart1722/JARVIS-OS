@@ -99,4 +99,3 @@ def test_cognitive_failure_remains_distinct_from_readiness_failure() -> None:
     assert result.status == COGNITIVE_FAILED
     assert result.cognitive_outcome is outcome
     assert CAPABILITY_EXECUTION_FAILED in result.message
-

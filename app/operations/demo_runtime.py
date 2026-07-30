@@ -69,4 +69,3 @@ class ReasoningDemoRuntime:
             ),
             cognitive_outcome=outcome,
         )
-
