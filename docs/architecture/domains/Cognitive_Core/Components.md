@@ -243,3 +243,8 @@ Sprint 19 adds immutable verdict models, strict parser, pure cited-evidence
 prompt serialization, and one Ollama-backed verifier before claim formatting.
 The prompt builder and provider share a selector instance but independently
 recompute selection over the same immutable snapshot.
+
+Sprint 20 lets Container inject either the primary client or one separately
+configured verifier client into the existing verifier adapter.
+Verifier settings are optional overrides; absent values inherit primary
+configuration by value without mutating Settings.

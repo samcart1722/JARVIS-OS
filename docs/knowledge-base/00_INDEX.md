@@ -41,3 +41,4 @@ Before this sequence, read the normative
 - [Explicit Scoped Memory Update Demo v1](../operations/EXPLICIT_MEMORY_UPDATE_DEMO.md)
 - [Claim-Level Evidence Attribution Demo v1](../operations/CLAIM_LEVEL_EVIDENCE_ATTRIBUTION_DEMO.md)
 - [Claim Evidence Support Verification Demo v1](../operations/CLAIM_EVIDENCE_VERIFICATION_DEMO.md)
+- [Independent Claim Verifier Demo v1](../operations/INDEPENDENT_CLAIM_VERIFIER_DEMO.md)

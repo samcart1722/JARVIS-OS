@@ -232,3 +232,6 @@ API, and readiness do not import claim modules.
 
 Verification models/parser/prompt remain infrastructure-free. Only the adapter
 knows OllamaClient; Container composes it and Engine/API remain unaware.
+
+Container alone may construct the independent verifier client and readiness
+probe. Operations runtime consumes probes and engines only.

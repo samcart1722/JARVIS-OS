@@ -1,5 +1,8 @@
 # Current State
 
+> Sprint 20 optionally separates generator and verifier client configuration;
+> shared-client Sprint 19 behavior remains the default.
+
 > Sprint 19 optionally applies one model-assisted, all-or-nothing claim support
 > gate. It does not prove truth or factual accuracy.
 

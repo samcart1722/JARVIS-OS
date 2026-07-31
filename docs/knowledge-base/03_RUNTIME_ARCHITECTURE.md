@@ -1,5 +1,9 @@
 # Runtime Architecture
 
+Independent verifier mode composes a second inert `OllamaClient` only when all
+four feature flags are active. Generation remains primary; verification uses
+the secondary client sequentially with no fallback.
+
 With grounding, claim attribution, and verification enabled, one structured
 claim envelope is verified once against only its cited bounded evidence before
 the existing deterministic formatter runs.
