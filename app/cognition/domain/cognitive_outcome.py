@@ -6,6 +6,9 @@ CAPABILITY_NOT_FOUND = "capability_not_found"
 CAPABILITY_EXECUTION_FAILED = "capability_execution_failed"
 EMPTY_CAPABILITY_OUTPUT = "empty_capability_output"
 GROUNDED_RESPONSE_PROTOCOL_INVALID = "grounded_response_protocol_invalid"
+CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID = (
+    "claim_evidence_verification_protocol_invalid"
+)
 
 COGNITIVE_ERROR_CODES = frozenset(
     {
@@ -13,6 +16,7 @@ COGNITIVE_ERROR_CODES = frozenset(
         CAPABILITY_EXECUTION_FAILED,
         EMPTY_CAPABILITY_OUTPUT,
         GROUNDED_RESPONSE_PROTOCOL_INVALID,
+        CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID,
     }
 )
 
@@ -26,6 +30,9 @@ _ERROR_MESSAGES = {
     ),
     GROUNDED_RESPONSE_PROTOCOL_INVALID: (
         "The reasoning provider returned an invalid evidence-bounded response."
+    ),
+    CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID: (
+        "The claim evidence verifier returned an invalid response."
     ),
 }
 

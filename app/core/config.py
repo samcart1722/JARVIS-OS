@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     MEMORY_UPDATE_ENABLED: bool = False
     MEMORY_GROUNDED_RESPONSE_ENABLED: bool = False
     MEMORY_CLAIM_EVIDENCE_ATTRIBUTION_ENABLED: bool = False
+    MEMORY_CLAIM_EVIDENCE_VERIFICATION_ENABLED: bool = False
     MEMORY_PROMPT_MAX_RECORDS: int = Field(default=5, gt=0)
     MEMORY_PROMPT_MAX_CHARACTERS: int = Field(default=2000, gt=0)
     OLLAMA_BASE_URL: str = "http://localhost:11434/api/generate"

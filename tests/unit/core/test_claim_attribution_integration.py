@@ -7,6 +7,7 @@ from app.cognition.grounding.claim_parser import JsonClaimEvidenceResponseParser
 from app.cognition.grounding.claim_provider import ClaimEvidenceAttributionProvider
 from app.cognition.grounding.parser import JsonGroundedResponseParser
 from app.cognition.grounding.provider import EvidenceBoundedReasoningProvider
+from app.cognition.grounding.verification_provider import OllamaClaimEvidenceVerifier
 from app.cognition.memory.scoped.models import MemoryScope, ScopedMemoryRecord
 from app.cognition.prompts.reasoning import (
     ClaimEvidenceAttributionPromptBuilder,
@@ -18,7 +19,7 @@ from app.core.container import Container
 from app.operations.demo_records import query_addressable_demo_content
 
 
-def make(*, grounded: bool, claim: bool) -> Container:
+def make(*, grounded: bool, claim: bool, verification: bool = False) -> Container:
     prompt = "What is Luxiom?"
     scope = MemoryScope("scope")
     return Container(
@@ -28,6 +29,7 @@ def make(*, grounded: bool, claim: bool) -> Container:
             MEMORY_PROMPT_CONTEXT_ENABLED=True,
             MEMORY_GROUNDED_RESPONSE_ENABLED=grounded,
             MEMORY_CLAIM_EVIDENCE_ATTRIBUTION_ENABLED=claim,
+            MEMORY_CLAIM_EVIDENCE_VERIFICATION_ENABLED=verification,
             _env_file=None,
         ),
         scoped_memory_records=(
@@ -120,3 +122,42 @@ def test_claim_json_reaches_auditable_outcome_once() -> None:
     assert outcome.success and "Claim 2:" in outcome.response
     assert "scope\n" not in outcome.response
     container.ollama_client.chat.assert_called_once()
+
+
+def test_sprint19_flag_matrix_activates_only_all_three_flags() -> None:
+    historical = make(grounded=False, claim=True, verification=True)
+    sprint17 = make(grounded=True, claim=False, verification=True)
+    sprint18 = make(grounded=True, claim=True, verification=False)
+    sprint19 = make(grounded=True, claim=True, verification=True)
+    assert historical.reasoning_provider is historical.ollama_reasoning_provider
+    assert historical.claim_evidence_verifier is None
+    assert isinstance(sprint17.reasoning_provider, EvidenceBoundedReasoningProvider)
+    assert sprint17.claim_evidence_verifier is None
+    assert isinstance(sprint18.reasoning_provider, ClaimEvidenceAttributionProvider)
+    assert sprint18.claim_evidence_verifier is None
+    assert isinstance(sprint19.reasoning_provider, ClaimEvidenceAttributionProvider)
+    assert isinstance(sprint19.claim_evidence_verifier, OllamaClaimEvidenceVerifier)
+    assert sprint19.reasoning_provider._provider is sprint19.ollama_reasoning_provider
+    assert sprint19.reasoning_provider._verifier is sprint19.claim_evidence_verifier
+    assert (
+        sprint19.reasoning_prompt_builder._evidence_selector
+        is sprint19.reasoning_provider._selector
+        is sprint19.memory_evidence_selector
+    )
+
+
+def test_sprint19_container_is_inert(monkeypatch) -> None:
+    from app.cognition.grounding.verification_parser import (
+        JsonClaimEvidenceVerificationParser,
+    )
+    from app.cognition.grounding.verification_provider import (
+        OllamaClaimEvidenceVerifier,
+    )
+    from app.models.ollama_client import OllamaClient
+
+    calls = Mock()
+    monkeypatch.setattr(OllamaClient, "chat", calls.chat)
+    monkeypatch.setattr(JsonClaimEvidenceVerificationParser, "parse", calls.parse)
+    monkeypatch.setattr(OllamaClaimEvidenceVerifier, "verify", calls.verify)
+    make(grounded=True, claim=True, verification=True)
+    assert calls.mock_calls == []

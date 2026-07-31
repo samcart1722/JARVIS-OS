@@ -1,5 +1,12 @@
 # Technical Debt
 
+Model-assisted verification can falsely support or reject claims; the same
+configured generation model is not an independent verifier.
+
+Sprint 18's prompt builder and claim provider each recompute the deterministic
+bounded selection with the same selector instance and immutable snapshot. This
+is not a second retrieval or repository access.
+
 Claim references are structurally validated but not semantically verified;
 claims may also be compound rather than atomic.
 

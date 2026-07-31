@@ -5,6 +5,7 @@ import pytest
 from app.cognition.domain.cognitive_outcome import (
     CAPABILITY_EXECUTION_FAILED,
     CAPABILITY_NOT_FOUND,
+    CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID,
     COGNITIVE_ERROR_CODES,
     EMPTY_CAPABILITY_OUTPUT,
     GROUNDED_RESPONSE_PROTOCOL_INVALID,
@@ -63,6 +64,7 @@ def test_error_codes_are_centralized_and_infrastructure_neutral() -> None:
         CAPABILITY_EXECUTION_FAILED,
         EMPTY_CAPABILITY_OUTPUT,
         GROUNDED_RESPONSE_PROTOCOL_INVALID,
+        CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID,
     }
     joined = " ".join(COGNITIVE_ERROR_CODES).lower()
     assert "ollama" not in joined
