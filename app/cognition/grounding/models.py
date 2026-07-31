@@ -5,6 +5,9 @@ from dataclasses import dataclass
 ANSWERED = "answered"
 INSUFFICIENT_EVIDENCE = "insufficient_evidence"
 GROUNDED_STATUSES = frozenset((ANSWERED, INSUFFICIENT_EVIDENCE))
+INSUFFICIENT_EVIDENCE_MESSAGE = (
+    "Insufficient scoped memory evidence to answer the current request."
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,6 +38,4 @@ class GroundedResponseEnvelope:
                 raise ValueError("Answered response requires evidence references.")
             return
         if self.used_record_numbers:
-            raise ValueError(
-                "Insufficient-evidence response cannot cite records."
-            )
+            raise ValueError("Insufficient-evidence response cannot cite records.")

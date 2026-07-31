@@ -1,5 +1,8 @@
 # Runtime Architecture
 
+With both grounding and claim attribution enabled, Container selects one claim
+protocol path. Historical and Sprint 17 composition remain unchanged.
+
 This document describes the active runtime after Sprint 11, based on the
 working tree at `f843842`.
 

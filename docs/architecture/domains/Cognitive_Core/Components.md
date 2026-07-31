@@ -235,3 +235,6 @@ safe text; invalid protocol produces a controlled cognitive failure.
 `GroundedReasoningDemoRuntime` is operational infrastructure outside the
 public API. It gates two isolated engines behind one readiness check and stores
 no scope, prompt, record content, or raw provider response.
+
+Sprint 18 adds pure claim models, parser, formatter, prompt policy, and one
+provider decorator. Container activates that path only when both flags are on.

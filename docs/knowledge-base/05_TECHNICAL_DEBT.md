@@ -1,5 +1,8 @@
 # Technical Debt
 
+Claim references are structurally validated but not semantically verified;
+claims may also be compound rather than atomic.
+
 ## Sprint 11 classification
 
 ### Technical debt

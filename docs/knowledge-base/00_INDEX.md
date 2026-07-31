@@ -39,3 +39,4 @@ Before this sequence, read the normative
 
 - [Functional Cognitive Demo v1](../operations/FUNCTIONAL_COGNITIVE_DEMO.md)
 - [Explicit Scoped Memory Update Demo v1](../operations/EXPLICIT_MEMORY_UPDATE_DEMO.md)
+- [Claim-Level Evidence Attribution Demo v1](../operations/CLAIM_LEVEL_EVIDENCE_ATTRIBUTION_DEMO.md)

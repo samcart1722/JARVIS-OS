@@ -1,5 +1,8 @@
 # Current State
 
+> Sprint 18 adds opt-in structural references per claim while preserving the
+> historical and Sprint 17 paths. It does not verify semantic support.
+
 Snapshot updated: **2026-07-30** (America/Tegucigalpa).
 
 ## Repository checkpoint
