@@ -174,12 +174,18 @@ class Container:
         verification_enabled = (
             claim_enabled and self._settings.MEMORY_CLAIM_EVIDENCE_VERIFICATION_ENABLED
         )
+        independent_verifier_enabled = (
+            verification_enabled
+            and self._settings.MEMORY_INDEPENDENT_CLAIM_VERIFIER_ENABLED
+        )
         self.grounded_response_parser = None
         self.claim_evidence_response_parser = None
         self.claim_evidence_formatter = None
         self.claim_evidence_verification_parser = None
         self.claim_evidence_verification_prompt_builder = None
         self.claim_evidence_verifier = None
+        self.claim_verifier_ollama_client = None
+        self.claim_verifier_readiness_probe = None
         if claim_enabled:
             self.reasoning_prompt_builder = ClaimEvidenceAttributionPromptBuilder(
                 self.memory_aware_reasoning_prompt_builder,
@@ -208,8 +214,40 @@ class Container:
                 self.claim_evidence_verification_prompt_builder = (
                     ClaimEvidenceVerificationPromptBuilder()
                 )
+                verifier_client = self.ollama_client
+                if independent_verifier_enabled:
+                    verifier_base_url = (
+                        self._settings.OLLAMA_VERIFIER_BASE_URL
+                        if self._settings.OLLAMA_VERIFIER_BASE_URL is not None
+                        else self._settings.OLLAMA_BASE_URL
+                    )
+                    verifier_models_url = (
+                        self._settings.OLLAMA_VERIFIER_MODELS_URL
+                        if self._settings.OLLAMA_VERIFIER_MODELS_URL is not None
+                        else self._settings.OLLAMA_MODELS_URL
+                    )
+                    verifier_model = (
+                        self._settings.OLLAMA_VERIFIER_MODEL
+                        if self._settings.OLLAMA_VERIFIER_MODEL is not None
+                        else self._settings.OLLAMA_MODEL
+                    )
+                    verifier_timeout = (
+                        self._settings.OLLAMA_VERIFIER_TIMEOUT_SECONDS
+                        if self._settings.OLLAMA_VERIFIER_TIMEOUT_SECONDS is not None
+                        else self._settings.OLLAMA_TIMEOUT_SECONDS
+                    )
+                    self.claim_verifier_ollama_client = OllamaClient(
+                        base_url=verifier_base_url,
+                        models_url=verifier_models_url,
+                        model=verifier_model,
+                        timeout_seconds=verifier_timeout,
+                    )
+                    self.claim_verifier_readiness_probe = OllamaReadinessProbe(
+                        self.claim_verifier_ollama_client
+                    )
+                    verifier_client = self.claim_verifier_ollama_client
                 self.claim_evidence_verifier = OllamaClaimEvidenceVerifier(
-                    self.ollama_client,
+                    verifier_client,
                     self.claim_evidence_verification_prompt_builder,
                     self.claim_evidence_verification_parser,
                 )

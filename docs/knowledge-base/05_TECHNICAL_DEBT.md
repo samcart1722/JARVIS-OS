@@ -1,7 +1,11 @@
 # Technical Debt
 
-Model-assisted verification can falsely support or reject claims; the same
-configured generation model is not an independent verifier.
+Separate verifier clients may use identical or correlated models; readiness
+does not demonstrate semantic quality or epistemic independence.
+
+Model-assisted verification can falsely support or reject claims. Shared mode,
+or independent mode without an explicit model override, may reuse the same
+configured generation model and therefore provides no model diversity.
 
 Sprint 18's prompt builder and claim provider each recompute the deterministic
 bounded selection with the same selector instance and immutable snapshot. This

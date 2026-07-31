@@ -1,11 +1,11 @@
 # Roadmap
 
-After Sprint 19, truth checking, independent verification, confidence,
-contradiction handling, partial filtering, human review, durable audit, HTTP,
-and external-source verification remain deferred.
+After Sprint 20, vendor/family diversity policy, truth checking, external
+sources, deterministic entailment, confidence, contradictions, partial
+filtering, durable audit, HTTP exposure, and human review remain deferred.
 
 Model-assisted support classification is complete. Factual truth, deterministic
-entailment, independent verification, contradictions, claim atomicity,
+entailment, guaranteed epistemic independence, contradictions, claim atomicity,
 calibrated confidence, persistence, identity, HTTP, and ranking remain open.
 
 ## Sprint 11 completed

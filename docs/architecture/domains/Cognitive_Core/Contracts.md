@@ -352,3 +352,6 @@ require text and in-range references; insufficient evidence has no claims.
 
 Verification requires exactly one verdict for every generated claim. Any
 unsupported verdict fails closed; all supported preserves Sprint 18 output.
+
+Independent mode changes client identity/configuration only; verifier protocol,
+all-or-nothing semantics, and public outcomes remain unchanged.
