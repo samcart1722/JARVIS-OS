@@ -30,6 +30,15 @@ from app.cognition.grounding.parser import JsonGroundedResponseParser
 from app.cognition.grounding.provider import (
     EvidenceBoundedReasoningProvider,
 )
+from app.cognition.grounding.verification_parser import (
+    JsonClaimEvidenceVerificationParser,
+)
+from app.cognition.grounding.verification_prompt import (
+    ClaimEvidenceVerificationPromptBuilder,
+)
+from app.cognition.grounding.verification_provider import (
+    OllamaClaimEvidenceVerifier,
+)
 from app.cognition.memory.extractors.default_extractor import DefaultExtractor
 from app.cognition.memory.intelligence.default_classifier import (
     DefaultClassifier,
@@ -162,9 +171,15 @@ class Container:
             grounded_enabled
             and self._settings.MEMORY_CLAIM_EVIDENCE_ATTRIBUTION_ENABLED
         )
+        verification_enabled = (
+            claim_enabled and self._settings.MEMORY_CLAIM_EVIDENCE_VERIFICATION_ENABLED
+        )
         self.grounded_response_parser = None
         self.claim_evidence_response_parser = None
         self.claim_evidence_formatter = None
+        self.claim_evidence_verification_parser = None
+        self.claim_evidence_verification_prompt_builder = None
+        self.claim_evidence_verifier = None
         if claim_enabled:
             self.reasoning_prompt_builder = ClaimEvidenceAttributionPromptBuilder(
                 self.memory_aware_reasoning_prompt_builder,
@@ -186,11 +201,24 @@ class Container:
         if claim_enabled:
             self.claim_evidence_response_parser = JsonClaimEvidenceResponseParser()
             self.claim_evidence_formatter = ClaimEvidenceFormatter()
+            if verification_enabled:
+                self.claim_evidence_verification_parser = (
+                    JsonClaimEvidenceVerificationParser()
+                )
+                self.claim_evidence_verification_prompt_builder = (
+                    ClaimEvidenceVerificationPromptBuilder()
+                )
+                self.claim_evidence_verifier = OllamaClaimEvidenceVerifier(
+                    self.ollama_client,
+                    self.claim_evidence_verification_prompt_builder,
+                    self.claim_evidence_verification_parser,
+                )
             self.reasoning_provider = ClaimEvidenceAttributionProvider(
                 self.ollama_reasoning_provider,
                 self.claim_evidence_response_parser,
                 self.memory_evidence_selector,
                 self.claim_evidence_formatter,
+                self.claim_evidence_verifier,
                 enabled=True,
             )
         elif grounded_enabled:

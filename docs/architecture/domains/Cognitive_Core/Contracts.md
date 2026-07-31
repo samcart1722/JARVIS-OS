@@ -349,3 +349,6 @@ explicit scope. Its report contains safe outcomes and counts only.
 
 Claim attribution uses an exact `{status, claims}` envelope. Answered claims
 require text and in-range references; insufficient evidence has no claims.
+
+Verification requires exactly one verdict for every generated claim. Any
+unsupported verdict fails closed; all supported preserves Sprint 18 output.

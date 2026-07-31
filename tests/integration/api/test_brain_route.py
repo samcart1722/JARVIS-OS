@@ -12,6 +12,7 @@ from app.cognition.capabilities.capability_result import CapabilityResult
 from app.cognition.domain.cognitive_outcome import (
     CAPABILITY_EXECUTION_FAILED,
     CAPABILITY_NOT_FOUND,
+    CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID,
     CognitiveOutcome,
     cognitive_error,
 )
@@ -147,9 +148,7 @@ def test_controlled_capability_failure_is_not_presented_as_success(
         "response": None,
         "error": {
             "code": CAPABILITY_EXECUTION_FAILED,
-            "message": (
-                "The requested cognitive capability could not complete."
-            ),
+            "message": ("The requested cognitive capability could not complete."),
         },
     }
     serialized = json.dumps(payload)
@@ -211,3 +210,24 @@ def test_unexpected_error_does_not_expose_internal_details(monkeypatch) -> None:
 
     assert status == 500
     assert payload == "Internal Server Error"
+
+
+def test_verifier_protocol_failure_maps_to_safe_public_503(monkeypatch) -> None:
+    engine = Mock(spec=CognitiveEngine)
+    engine.process.return_value = CognitiveOutcome(
+        success=False,
+        error=cognitive_error(CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID),
+    )
+    monkeypatch.setattr(brain.container, "cognitive_engine", engine)
+
+    status, payload = post_think("Trigger verifier failure")
+
+    assert status == 503
+    assert payload["response"] is None
+    assert payload["error"] == {
+        "code": CLAIM_EVIDENCE_VERIFICATION_PROTOCOL_INVALID,
+        "message": "The claim evidence verifier returned an invalid response.",
+    }
+    serialized = json.dumps(payload)
+    assert "private verifier response" not in serialized
+    assert "http://" not in serialized

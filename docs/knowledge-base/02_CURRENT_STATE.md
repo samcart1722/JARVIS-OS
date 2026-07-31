@@ -1,5 +1,8 @@
 # Current State
 
+> Sprint 19 optionally applies one model-assisted, all-or-nothing claim support
+> gate. It does not prove truth or factual accuracy.
+
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 

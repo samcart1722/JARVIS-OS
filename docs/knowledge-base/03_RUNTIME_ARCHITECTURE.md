@@ -1,5 +1,9 @@
 # Runtime Architecture
 
+With grounding, claim attribution, and verification enabled, one structured
+claim envelope is verified once against only its cited bounded evidence before
+the existing deterministic formatter runs.
+
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 

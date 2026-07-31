@@ -229,3 +229,6 @@ composition only.
 Claim models have no infrastructure dependencies. The claim parser, formatter,
 provider, and demo runtime retain explicit inward-facing boundaries; Engine,
 API, and readiness do not import claim modules.
+
+Verification models/parser/prompt remain infrastructure-free. Only the adapter
+knows OllamaClient; Container composes it and Engine/API remain unaware.

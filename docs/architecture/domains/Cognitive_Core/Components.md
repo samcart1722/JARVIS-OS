@@ -238,3 +238,8 @@ no scope, prompt, record content, or raw provider response.
 
 Sprint 18 adds pure claim models, parser, formatter, prompt policy, and one
 provider decorator. Container activates that path only when both flags are on.
+
+Sprint 19 adds immutable verdict models, strict parser, pure cited-evidence
+prompt serialization, and one Ollama-backed verifier before claim formatting.
+The prompt builder and provider share a selector instance but independently
+recompute selection over the same immutable snapshot.

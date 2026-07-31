@@ -1,7 +1,12 @@
 # Roadmap
 
-Post-Sprint-18 candidates include semantic verification, fact checking,
-contradictions, claim atomicity, persistence, identity, HTTP, and ranking.
+After Sprint 19, truth checking, independent verification, confidence,
+contradiction handling, partial filtering, human review, durable audit, HTTP,
+and external-source verification remain deferred.
+
+Model-assisted support classification is complete. Factual truth, deterministic
+entailment, independent verification, contradictions, claim atomicity,
+calibrated confidence, persistence, identity, HTTP, and ranking remain open.
 
 ## Sprint 11 completed
 
