@@ -17,16 +17,17 @@ to authoritative material; it does not replace normative documents.
 
 Before this sequence, read the normative
 [Product North Star](../00_Product_North_Star.md) and
-[Cognitive Lifecycle](../01_Cognitive_Lifecycle.md).
+[Cognitive Lifecycle](../01_Cognitive_Lifecycle.md), followed by the
+[Local-First Knowledge and Model Policy](../02_Local_First_Knowledge_and_Model_Policy.md).
 
 ## Document classes
 
 | Class | Documents | Role |
 |---|---|---|
-| Normative / governing | [Product North Star](../00_Product_North_Star.md), [Cognitive Lifecycle](../01_Cognitive_Lifecycle.md), foundation and architecture documents linked from [Source of Truth](09_SOURCE_OF_TRUTH.md) | Define intended identity, lifecycle, and constraints; status labels still matter. |
+| Normative / governing | [Product North Star](../00_Product_North_Star.md), [Cognitive Lifecycle](../01_Cognitive_Lifecycle.md), [Local-First Knowledge and Model Policy](../02_Local_First_Knowledge_and_Model_Policy.md), foundation and architecture documents linked from [Source of Truth](09_SOURCE_OF_TRUTH.md) | Define intended identity, lifecycle, and constraints; status labels still matter. |
 | Operational state | [Current State](02_CURRENT_STATE.md), [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md), [Technical Debt](05_TECHNICAL_DEBT.md) | Describe verified executable reality at a point in time. |
 | Planning | [Roadmap](06_ROADMAP.md) | Separates completed sprints from unapproved candidates. |
-| History | [Sprint summaries](history/sprints/SPRINT_0_SUMMARY.md), [Sprint 8 summary](history/sprints/SPRINT_8_SUMMARY.md), [Sprint 9 summary](history/sprints/SPRINT_9_SUMMARY.md), [Sprint 10 summary](history/sprints/SPRINT_10_SUMMARY.md), [Sprint 11 summary](history/sprints/SPRINT_11_SUMMARY.md), [Sprint 12 summary](history/sprints/SPRINT_12_SUMMARY.md), [Sprint 13 summary](history/sprints/SPRINT_13_SUMMARY.md), [Sprint 14 summary](history/sprints/SPRINT_14_SUMMARY.md), [Sprint 15 summary](history/sprints/SPRINT_15_SUMMARY.md), [Sprint 16 summary](history/sprints/SPRINT_16_SUMMARY.md), [Sprint 17 summary](history/sprints/SPRINT_17_SUMMARY.md), [conversation policy](history/conversations/README.md) | Preserve traceable context without becoming normative truth. |
+| History | [Sprint summaries](history/sprints/SPRINT_0_SUMMARY.md), [Sprint 20 summary](history/sprints/SPRINT_20_SUMMARY.md), [Sprint 21 summary](history/sprints/SPRINT_21_SUMMARY.md), [conversation policy](history/conversations/README.md) | Preserve traceable context without becoming normative truth. |
 | Recovery | [AI Handoff](07_AI_HANDOFF.md), [Backup and Recovery](08_BACKUP_AND_RECOVERY.md), [Source of Truth](09_SOURCE_OF_TRUTH.md) | Restore context, repository history, and working practices. |
 
 ## Cognitive Core governance baseline
@@ -42,3 +43,4 @@ Before this sequence, read the normative
 - [Claim-Level Evidence Attribution Demo v1](../operations/CLAIM_LEVEL_EVIDENCE_ATTRIBUTION_DEMO.md)
 - [Claim Evidence Support Verification Demo v1](../operations/CLAIM_EVIDENCE_VERIFICATION_DEMO.md)
 - [Independent Claim Verifier Demo v1](../operations/INDEPENDENT_CLAIM_VERIFIER_DEMO.md)
+- [Local-First Family Resolution Demo v1](../operations/LOCAL_FIRST_FAMILY_RESOLUTION_DEMO.md)

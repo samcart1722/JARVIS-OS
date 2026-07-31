@@ -1,5 +1,21 @@
 # Runtime Architecture
 
+## Local-first route (Sprint 21)
+
+`ActorIdentity + WorkspaceIdentity + typed intent` flows through
+`LocalFirstResolver`, explicit permission policy, `StructuredListCapability`,
+and one workspace/list-scoped in-memory repository. Authorization precedes all
+repository access. Handled success, denial, and validation failure are terminal
+local outcomes and never fall through to Ollama. `CognitiveEngine` remains
+unchanged and available as the separate reasoning orchestrator.
+
+These are two distinct entry paths. The public HTTP route calls
+`CognitiveEngine`; it does not expose `LocalFirstResolver`. The typed resolver
+does not extract natural-language intents and returns `not_handled` for an
+unsupported object. A caller or future application orchestrator must explicitly
+choose whether to invoke the separately available cognitive path; Sprint 21
+contains no automatic fallback or resolve-or-reason bridge.
+
 Independent verifier mode composes a second inert `OllamaClient` only when all
 four feature flags are active. Generation remains primary; verification uses
 the secondary client sequentially with no fallback.
@@ -11,8 +27,9 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the active runtime after Sprint 11, based on the
-working tree at `f843842`.
+This document describes the runtime through the Sprint 21 review checkpoint:
+released baseline `sprint-20-complete` at `ca4fa2d`, plus uncommitted Sprint 21
+feature-tree changes. It does not claim a Sprint 21 commit, merge, or tag.
 
 ## Public path and flow
 

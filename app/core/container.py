@@ -39,6 +39,13 @@ from app.cognition.grounding.verification_prompt import (
 from app.cognition.grounding.verification_provider import (
     OllamaClaimEvidenceVerifier,
 )
+from app.cognition.local_resolution.capability import StructuredListCapability
+from app.cognition.local_resolution.permissions import (
+    ExplicitPermissionPolicy,
+    PermissionGrant,
+)
+from app.cognition.local_resolution.repository import InMemoryListItemRepository
+from app.cognition.local_resolution.resolver import LocalFirstResolver
 from app.cognition.memory.extractors.default_extractor import DefaultExtractor
 from app.cognition.memory.intelligence.default_classifier import (
     DefaultClassifier,
@@ -96,12 +103,15 @@ class Container:
         app_settings: Settings = settings,
         *,
         scoped_memory_records: Iterable[ScopedMemoryRecord] = (),
+        local_permission_grants: tuple[PermissionGrant, ...] = (),
     ) -> None:
         if isinstance(scoped_memory_records, (str, bytes)):
             raise TypeError("Scoped memory records must be a collection of records.")
         self._settings = app_settings
         self._scoped_memory_records = tuple(scoped_memory_records)
+        self._local_permission_grants = local_permission_grants
         self._build_memory()
+        self._build_local_resolution()
         self._build_reasoning()
         self._build_context()
         self._build_prompt()
@@ -139,6 +149,20 @@ class Container:
         self.explicit_memory_update_service = ExplicitMemoryUpdateService(
             self.scoped_memory_repository,
             enabled=self._settings.MEMORY_UPDATE_ENABLED,
+        )
+
+    def _build_local_resolution(self) -> None:
+        """Compose the deterministic local capability path once."""
+        self.local_list_repository = InMemoryListItemRepository()
+        self.local_permission_policy = ExplicitPermissionPolicy(
+            self._local_permission_grants
+        )
+        self.structured_list_capability = StructuredListCapability(
+            self.local_list_repository,
+            self.local_permission_policy,
+        )
+        self.local_first_resolver = LocalFirstResolver(
+            self.structured_list_capability
         )
 
     def _build_reasoning(self) -> None:

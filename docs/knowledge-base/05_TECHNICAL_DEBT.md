@@ -1,5 +1,20 @@
 # Technical Debt
 
+## Sprint 21 limitations
+
+The structured-list repository is ephemeral and loses state at process exit.
+Typed commands are built directly; natural language is not converted to local
+intents. Actor identity is explicit but unauthenticated, permissions are a
+small deterministic policy rather than RBAC, and workspace identity is not a
+durable product workspace. Local-first covers one generic capability, not
+general knowledge retrieval. There is no external-access policy engine,
+mobile/smart-glasses interface, automatic ingestion or synchronization.
+Existing memory/reasoning routes may still use models when explicitly invoked.
+`LocalFirstResolver` is composed but not integrated into `CognitiveEngine`, the
+public API, natural-language extraction, or an automatic resolve-or-reason
+orchestrator. Its `not_handled` result requires a caller to choose the separate
+historical cognitive route; it is not an automatic fallback.
+
 Separate verifier clients may use identical or correlated models; readiness
 does not demonstrate semantic quality or epistemic independence.
 

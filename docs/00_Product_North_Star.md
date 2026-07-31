@@ -1,7 +1,22 @@
 # LUXIOM
 ## Product North Star
 
-Version: 1.0
+Version: 1.1
+
+---
+
+# Local-first y modelos bajo demanda
+
+Luxiom debe intentar primero capacidades locales deterministas autorizadas y
+estado local suficiente. Un modelo se usa bajo demanda solamente cuando la
+interpretación o síntesis lo requiere; el acceso externo requiere una futura
+política explícita. El producto aspira a operar en espacios personales,
+familiares y profesionales, mediante múltiples interfaces, sin convertir esos
+ejemplos en reglas de negocio del Core.
+
+La operación offline-capable significa que las tareas soportadas localmente
+pueden completarse sin modelo ni red. Identidad, workspace y autorización
+humana siguen siendo explícitos.
 
 ---
 

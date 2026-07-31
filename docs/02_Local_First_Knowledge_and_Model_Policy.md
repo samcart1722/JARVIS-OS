@@ -1,0 +1,43 @@
+# Local-First Knowledge and Model Policy
+
+Version: 1.0
+Status: Normative
+
+## Policy
+
+Luxiom resuelve en este orden: capability local determinista autorizada;
+estado o conocimiento local autorizado; respuesta determinista si es
+suficiente; modelo local cuando haga falta interpretación o síntesis; acceso
+externo solamente bajo una futura política explícita; insuficiencia segura si
+no existe ruta autorizada.
+
+Offline-capable significa que una ruta soportada completa su trabajo sin
+modelo, Internet ni servicio externo. Model-on-demand prohíbe invocar un modelo
+para una solicitud estructurada ya resuelta, denegada o invalidada localmente.
+El criterio zero-call debe demostrarse con observación de la frontera del
+provider, no solo con metadatos.
+
+Los intents tipados permiten ejecución determinista sin afirmar comprensión
+general del lenguaje. Toda lectura o escritura exige actor, workspace y permiso
+explícitos; las acciones desconocidas se deniegan. La autorización humana
+continúa gobernando ejecución y acceso.
+
+Memoria cognitiva, conocimiento durable, capturas, candidatos y conocimiento
+validado son conceptos distintos. Una captura no es verdad; un candidato no es
+conocimiento validado; memoria no pertenece al modelo. La intención de producto
+incluye múltiples usuarios y workspaces sin privilegios implícitos.
+
+Sprint 21 implementa solo una capability genérica de listas con repositorio en
+memoria. No aporta persistencia durable, conversión de lenguaje natural,
+ingestión automática, voz, aplicaciones móviles ni smart glasses. Tampoco existe
+aún un motor de política para acceso externo. Si no hay ruta autorizada, el
+sistema debe fallar de forma segura.
+
+La implementación actual es una ruta tipada separada. `LocalFirstResolver`
+devuelve `not_handled` para intents no soportados; `CognitiveEngine` permanece
+disponible por separado. Sprint 21 no conecta automáticamente ambas rutas, no
+integra el resolver en `CognitiveEngine.process` ni en la API pública, y no
+incluye un orquestador automático resolve-or-reason.
+
+El estándar ADR permanece Draft y pendiente de certificación; esta política no
+presenta ningún ADR como aprobado.
