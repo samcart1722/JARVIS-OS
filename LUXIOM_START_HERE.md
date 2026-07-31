@@ -8,16 +8,24 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-- Last completed sprint: **Sprint 3 — Cognitive Core integration**
-  (`74637ab`, tag `sprint-3-complete`).
-- Verified runtime: input becomes a `Goal` and `CognitiveContext`, is classified,
+- The current runtime includes the **Sprint 21 local-first resolution
+  foundation**, implemented in this feature working tree and still pending
+  commit, PR, merge, and tag.
+- The canonical released baseline before this branch is `sprint-20-complete` at
+  `ca4fa2d3fc62bd2c486070cc4663ba169e6cfdd9`.
+- The public HTTP path remains the historical `CognitiveEngine` route: input
+  becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by
   `CapabilityExecutor`, and formatted by `ResponseStage`.
-- Current behavior is deliberately minimal: classification always falls back
-  to `Domain.UNKNOWN`; the default specialist creates one descriptive step;
-  the executor invokes no concrete capability; memory is not in this cycle.
-- Next work: define Sprint 4 formally. Candidate areas are documented, but
-  Sprint 4 is not approved or started.
+- Sprint 21 separately provides a typed, authorized, deterministic local list
+  path with zero model calls. It is not exposed through public HTTP and there
+  is no automatic natural-language routing or resolve-or-reason bridge.
+  Classification within the historical path still falls back
+  to `Domain.UNKNOWN`. The public `CognitiveEngine` path uses
+  `CapabilityExecutor` and registered concrete capabilities; its default policy
+  selects `NormalizedInputCapability` unless reasoning is explicitly enabled.
+  Public HTTP supplies no explicit scope and therefore does not use the
+  separate Sprint 21 local resolver.
 
 ## Essential guardrails
 
@@ -34,12 +42,13 @@ approved ADR was found; do not treat draft standards or RFCs as decisions.
 
 1. [Product North Star](docs/00_Product_North_Star.md)
 2. [Cognitive Lifecycle](docs/01_Cognitive_Lifecycle.md)
-3. [Knowledge Base index](docs/knowledge-base/00_INDEX.md)
-4. [Current State](docs/knowledge-base/02_CURRENT_STATE.md)
-5. [Runtime Architecture](docs/knowledge-base/03_RUNTIME_ARCHITECTURE.md)
-6. [Decisions and Guardrails](docs/knowledge-base/04_DECISIONS_AND_GUARDRAILS.md)
-7. [Technical Debt](docs/knowledge-base/05_TECHNICAL_DEBT.md)
-8. [AI Handoff](docs/knowledge-base/07_AI_HANDOFF.md)
+3. [Local-First Knowledge and Model Policy](docs/02_Local_First_Knowledge_and_Model_Policy.md)
+4. [Knowledge Base index](docs/knowledge-base/00_INDEX.md)
+5. [Current State](docs/knowledge-base/02_CURRENT_STATE.md)
+6. [Runtime Architecture](docs/knowledge-base/03_RUNTIME_ARCHITECTURE.md)
+7. [Decisions and Guardrails](docs/knowledge-base/04_DECISIONS_AND_GUARDRAILS.md)
+8. [Technical Debt](docs/knowledge-base/05_TECHNICAL_DEBT.md)
+9. [AI Handoff](docs/knowledge-base/07_AI_HANDOFF.md)
 
 The complete recovery documentation lives in
 [`docs/knowledge-base/`](docs/knowledge-base/00_INDEX.md).

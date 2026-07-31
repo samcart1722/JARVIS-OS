@@ -74,3 +74,8 @@ Capabilities, and technology through Tools. Keep the Core stable and record
 material architectural decisions. The repository currently contains historical
 JARVIS-OS identity and legacy modules; continuity work records this mismatch
 without performing rebranding.
+
+Sprint 21 makes the product's local-first intent executable through a generic,
+typed list capability. Personal and family scenarios are composition examples,
+not Core domains; HealthBridge remains the first planned product and receives
+no exception in the Core.

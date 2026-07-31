@@ -5,7 +5,9 @@
 1. Approved Product North Star and normative foundation/lifecycle documents:
    - [`docs/00_Product_North_Star.md`](../00_Product_North_Star.md)
    - [`docs/01_Cognitive_Lifecycle.md`](../01_Cognitive_Lifecycle.md)
-   - [`docs/foundation/`](../foundation/CONSTITUTION.md)
+   - [`docs/02_Local_First_Knowledge_and_Model_Policy.md`](../02_Local_First_Knowledge_and_Model_Policy.md)
+   - Foundation documents according to their individual status. The
+     [Constitution](../foundation/CONSTITUTION.md) remains Draft.
 2. Approved, current ADRs. **None were found at this checkpoint.** The file
    [`Architecture_Decision_Record_Standard.md`](../architecture/Architecture_Decision_Record_Standard.md)
    is a Draft standard, not an ADR decision.

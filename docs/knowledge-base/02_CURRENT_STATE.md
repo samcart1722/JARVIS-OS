@@ -1,5 +1,16 @@
 # Current State
 
+## Sprint 21 executable state
+
+The repository now contains an ephemeral, workspace-scoped structured-list
+capability with explicit actor and deny-by-default permission policy. Typed add
+and read intents resolve deterministically with model/external call counts of
+zero. `LocalFirstResolver` returns `not_handled` for unsupported typed intents;
+the pre-existing reasoning path remains separately available, but no automatic
+bridge chooses between them.
+This supersedes older checkpoint counts below as current operational truth;
+those figures remain historical evidence.
+
 > Sprint 20 optionally separates generator and verifier client configuration;
 > shared-client Sprint 19 behavior remains the default.
 
@@ -9,17 +20,17 @@
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 
-Snapshot updated: **2026-07-30** (America/Tegucigalpa).
+Snapshot updated: **2026-07-31** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
-- Branch: `docs/engineering-platform`
-- Commit: `74637ab126c6dc2942bb5ae01cea0f9db7cd1d30`
-- Tag: `sprint-3-complete`
-- Upstream: `origin/docs/engineering-platform`
-- Working tree before this recovery pack: clean
-- Working tree after generation: intentionally contains only the uncommitted
-  documentation and backup-script changes listed by `git status`
+- Branch: `feat/sprint-21-local-first-family-resolution`
+- Base HEAD: `ca4fa2d3fc62bd2c486070cc4663ba169e6cfdd9`
+- Canonical released tag: `sprint-20-complete`
+- Sprint 21 state: implemented in the feature working tree, pending commit, PR,
+  merge, and tag; no Sprint 21 commit or tag exists at this checkpoint.
+- Configured verification: **534 passed** with `DEBUG=true`; Ruff and
+  `git diff --check` clean.
 
 ## Confirmed stack
 
@@ -52,19 +63,24 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 1 | Completed/tagged | Minimal cognitive pipeline and replaceable reasoning-provider contract added. |
 | 2 | Completed/tagged | Core goal, context, domain, specialist, plan, executor, and capability contracts added; Product North Star and Cognitive Lifecycle added. |
 | 3 | Completed/tagged | Executable classification → specialist → plan → execution → response flow wired in `Container` and tested. |
-| 4 | Completed in working tree | Public cognitive input now calls the Container-composed `CognitiveEngine` directly; behavioral API tests verify the boundary. |
-| 5 | Completed in working tree | Capability Runtime v1 resolves and executes a registered deterministic capability and exposes its output. |
-| 6 | Completed in working tree | Provider-backed `ReasoningCapability` is registered and executable on demand without changing the default public policy. |
-| 7 | Completed in working tree | Ollama URL, model, and timeout now come from official validated application settings and are injected by `Container`. |
-| 8 | Completed in working tree | An explicit deterministic policy selects `normalized_input` or `reasoning` solely from `REASONING_ENABLED`. |
-| 9 | Completed in working tree | Active components, contracts, dependency rules, and minimal architecture enforcement now describe and protect the executable Core. |
-| 10 | Completed in working tree | Structured cognitive outcomes distinguish success and controlled failure; the HTTP boundary maps stable codes safely. |
-| 11 | Completed in working tree | Explicit Ollama readiness and a controlled opt-in reasoning demo were added outside the Core and public API. |
-| 12 | Completed in working tree | A parallel read-only memory repository foundation enforces explicit scope ownership and A/B isolation without runtime integration. |
-| 13 | Completed in working tree | Optional scoped retrieval enriches CognitiveContext before classification only when enabled and explicitly scoped. |
-| 14 | Completed in working tree | A bounded prompt policy includes scoped memory as untrusted reference data while preserving the exact default prompt. |
-| 15 | Completed in working tree | A local CLI compares baseline and scoped-memory reasoning with one readiness check, ephemeral records, and a safe immutable report. |
-| 16 | Completed in working tree | Explicit opt-in scoped writes support a controlled before/update/after local demo without persistence or API changes. |
+| 4 | Completed/tagged | Public cognitive input calls the Container-composed `CognitiveEngine`; behavioral API tests verify the boundary. |
+| 5 | Completed/tagged | Capability Runtime v1 resolves and executes a registered deterministic capability. |
+| 6 | Completed/tagged | Provider-backed `ReasoningCapability` is executable on demand without changing default policy. |
+| 7 | Completed/tagged | Ollama URL, model, and timeout use validated settings and explicit composition. |
+| 8 | Completed/tagged | Deterministic policy selects normalized input or reasoning from explicit enablement. |
+| 9 | Completed/tagged | Active Core documentation and architecture enforcement protect executable boundaries. |
+| 10 | Completed/tagged | Structured outcomes and safe HTTP failure mapping are integrated. |
+| 11 | Completed/tagged | Explicit Ollama readiness and controlled opt-in reasoning demo were added outside Core/API. |
+| 12 | Completed/tagged | Scoped in-memory repository contracts enforce ownership and isolation. |
+| 13 | Completed/tagged | Optional scoped retrieval enriches context only when enabled and explicitly scoped. |
+| 14 | Completed/tagged | Bounded memory-aware prompt policy preserves exact default behavior. |
+| 15 | Completed/tagged | Controlled baseline/scoped-memory comparison demo proves isolated behavior. |
+| 16 | Completed/tagged | Explicit opt-in scoped writes support a controlled ephemeral demo. |
+| 17 | Completed/tagged | Evidence-bounded reasoning validates a strict envelope and bounded references. |
+| 18 | Completed/tagged | Claim-level evidence attribution adds structurally auditable references. |
+| 19 | Completed/tagged | Model-assisted claim support verification remains optional and controlled. |
+| 20 | Completed/tagged | Independent verifier-client composition remains opt-in. |
+| 21 | Implemented, uncommitted | Separate typed local list resolution adds explicit identity, workspace, permissions and zero-call deterministic execution. |
 
 ## Executable components and status
 
@@ -84,11 +100,11 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `OllamaProvider` | Composed, not publicly activated | Receives a configured `OllamaClient`; construction performs no network call. |
 | Ollama settings | Integrated | `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, and positive `OLLAMA_TIMEOUT_SECONDS` support environment overrides. |
 | Cognitive Core governance docs | Complete for active v1 runtime | Components, contracts, Core/infrastructure boundaries, legacy exclusions, and known debt are documented. |
-| Architecture tests | Integrated | Five import-boundary tests and two documentation-baseline tests inspect an explicit active-file scope using the standard library. |
+| Architecture tests | Integrated | Protect explicit active-file import, composition, documentation, and local-resolution boundaries using the standard library. |
 | `CognitiveOutcome` / `CognitiveError` | Integrated | Enforce valid success/failure states and stable provider-independent errors. |
 | `ResponseStage` | Integrated structured boundary | Returns real output as success or a structured controlled failure; it knows no HTTP. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
-| `Capability` contract | Implemented contract only | No concrete capability integration found. |
+| Concrete capabilities | Integrated in separate paths | `NormalizedInputCapability` and `ReasoningCapability` are registered in the historical `CognitiveEngine` path. `StructuredListCapability` serves the separate Sprint 21 typed path, which is not integrated into `CognitiveEngine` or public HTTP. |
 | `InputStage` / `ContextStage` / `ReasoningStage` | Implemented separately | Not called by the Sprint 3 `CognitiveEngine.process` path. |
 
 ## Real request flow
@@ -106,6 +122,9 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 ## Tests
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
+
+Sprint 21 review result: **534 passed** with `DEBUG=true`; Ruff and
+`git diff --check` passed. The older counts below are historical checkpoints.
 
 Sprint 4 baseline: **9 passed, 1 warning in 0.14s**.
 
@@ -155,11 +174,13 @@ record numbers. It defaults off; absent or empty memory preserves the exact
 historical path. The protocol validates structure and references, not truth or
 semantic support, and the public route still supplies no scope.
 
-## Next logical work and undecided items
+## Integration limit and undecided items
 
-Sprint 10 completes the structured success/failure and safe HTTP representation
-scope. Operational availability, provider selection, memory, evidence, files,
-web, legacy retirement, and richer evidence-bearing content remain deferred.
+The local resolver is not called by `CognitiveEngine.process`, the public API,
+natural-language intent extraction, or an automatic resolve-or-reason
+orchestrator. The list repository is ephemeral. Durable local knowledge,
+persistence, identity authentication, integration policy, and external-access
+governance remain deferred and require separately approved scope.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under

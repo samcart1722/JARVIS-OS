@@ -1,6 +1,7 @@
 # Roadmap
 
-After Sprint 20, vendor/family diversity policy, truth checking, external
+With Sprint 21 implemented in the feature working tree, vendor/family diversity
+policy, truth checking, external
 sources, deterministic entailment, confidence, contradictions, partial
 filtering, durable audit, HTTP exposure, and human review remain deferred.
 
@@ -46,29 +47,41 @@ and safe prompt use remain future work.
 | 8 | Add an explicit deterministic policy selecting normalized input or reasoning from operational enablement. | Working-tree implementation and `history/sprints/SPRINT_8_SUMMARY.md` |
 | 9 | Complete active Cognitive Core documentation and enforce confirmed boundaries with standard-library architecture tests. | Working-tree implementation and `history/sprints/SPRINT_9_SUMMARY.md` |
 | 10 | Introduce structured cognitive outcomes and safe HTTP success/failure mapping. | Working-tree implementation and `history/sprints/SPRINT_10_SUMMARY.md` |
+| 11 | Add explicit provider readiness and an opt-in operational demo. | `4428a2a`, tag `sprint-11-complete` |
+| 12 | Establish scoped, isolated in-memory persistence contracts. | `0264300`, tag `sprint-12-complete` |
+| 13 | Integrate optional scoped memory context retrieval. | `372c4cc`, tag `sprint-13-complete` |
+| 14 | Add bounded memory-aware reasoning prompt policy. | `1b29dc8`, tag `sprint-14-complete` |
+| 15 | Add the controlled functional cognitive comparison demo. | `183ef47`, tag `sprint-15-complete` |
+| 16 | Add explicit opt-in scoped memory updates. | `ac45d39`, tag `sprint-16-complete` |
+| 17 | Add evidence-bounded memory reasoning. | `825b1da`, tag `sprint-17-complete` |
+| 18 | Add claim-level evidence attribution. | `7823429`, tag `sprint-18-complete` |
+| 19 | Add model-assisted claim support verification. | `32c9319`, tag `sprint-19-complete` |
+| 20 | Add independent verifier-client composition. | `ca4fa2d`, tag `sprint-20-complete` |
+| 21 | Add the typed local-first list foundation. | Implemented in feature working tree; pending commit, PR, merge, and tag |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 10 is complete in the working tree. The Core returns a validated
+Sprint 21 is implemented but uncommitted in the feature working tree. The
+typed resolver remains separate from the public HTTP/CognitiveEngine path. The
+Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
 the API to safe HTTP 500/503 responses. The successful deterministic and
 reasoning paths retain their prior output.
 
-## Candidate scope after Sprint 10
+## Candidate scope after Sprint 21
 
 The following remain candidates, not commitments:
 
-- integrate Memory into the lifecycle;
-- define provider availability and operational failure policy;
-- add a Files capability;
-- add a Web capability;
-- add capabilities that perform useful work through separately approved scope.
+- define durable, workspace-scoped local knowledge and persistence boundaries;
+- define authentication and application-level resolve-or-reason integration;
+- define migration, audit, synchronization, and external-access policy before
+  adding durable or connected behavior.
 
-Before selecting scope, resolve the executor/context contract, determine which
-existing pipeline abstractions remain valid, define test boundaries, and record
-any material architectural decision through the appropriate governance process.
+These are deferred candidates, not Sprint 22 scope. Before selecting work,
+define test boundaries and record material decisions through the appropriate
+governance process.
 
 ## Sprint 14 completed
 

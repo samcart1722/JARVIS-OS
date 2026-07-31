@@ -1,7 +1,21 @@
 # LUXIOM
 # Cognitive Lifecycle
 
-Version: 1.1
+Version: 1.2
+
+---
+
+# Resolución local previa
+
+Antes de iniciar razonamiento con modelos, Luxiom evalúa si existe una
+capability local determinista para un intent ya estructurado. La ejecución
+requiere actor, workspace y permiso explícitos. Si la capability resuelve,
+deniega o falla su validación de forma controlada, el ciclo termina sin modelo
+ni acceso externo. No toda tarea requiere un modelo.
+
+Cuando la ruta local no reconoce el intent, continúa disponible el ciclo
+Goal → Task → Specialist → Plan → Capability. Esta versión no clasifica
+lenguaje natural hacia intents locales.
 
 ---
 

@@ -6,6 +6,7 @@ preserves the status and source of each statement rather than inventing ADRs.
 
 | Decision / guardrail | Reason | Impact | Source | Status |
 |---|---|---|---|---|
+| Local deterministic capability precedes model reasoning for typed supported intents. | Preserve offline operation, authorization and provider independence. | Handled success, denial and validation failure make zero model/external calls. | `docs/02_Local_First_Knowledge_and_Model_Policy.md` | Normative in Sprint 21; formal ADR governance pending |
 | The LLM is not the Core; models are replaceable reasoning providers. | Preserve platform ownership, memory continuity, and provider independence. | Provider changes must not redesign the Core. | `docs/00_Product_North_Star.md`; `docs/01_Cognitive_Lifecycle.md`; `app/cognition/providers/base_provider.py` | Vigente |
 | The Core is domain-independent. | One reusable platform must govern multiple products. | Client/domain logic stays outside the Core. | `docs/00_Product_North_Star.md`; `docs/01_Cognitive_Lifecycle.md` | Vigente |
 | HealthBridge consumes Luxiom; it is not part of the Core. | It is the first validation of the multi-product architecture. | No HealthBridge exception or coupling in Core code. | `docs/00_Product_North_Star.md` | Vigente |
