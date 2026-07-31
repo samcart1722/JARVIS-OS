@@ -6,16 +6,12 @@ from app.cognition.domain.cognitive_outcome import (
 )
 from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.grounding.evidence import MemoryEvidenceSelector
-from app.cognition.grounding.models import ANSWERED
+from app.cognition.grounding.models import ANSWERED, INSUFFICIENT_EVIDENCE_MESSAGE
 from app.cognition.grounding.parser import (
     GroundedResponseParser,
     GroundedResponseProtocolError,
 )
 from app.cognition.providers.base_provider import ReasoningProvider
-
-INSUFFICIENT_EVIDENCE_MESSAGE = (
-    "Insufficient scoped memory evidence to answer the current request."
-)
 
 
 class EvidenceBoundedReasoningProvider:
@@ -36,11 +32,7 @@ class EvidenceBoundedReasoningProvider:
 
     def generate(self, context: CognitiveContext) -> ReasoningResult:
         """Call once and validate only when bounded evidence is active."""
-        evidence = (
-            self._evidence_selector.select(context)
-            if self._enabled
-            else ()
-        )
+        evidence = self._evidence_selector.select(context) if self._enabled else ()
         result = self._provider.generate(context)
         if not evidence or result.error_code is not None:
             return result
@@ -56,12 +48,9 @@ class EvidenceBoundedReasoningProvider:
             )
         if envelope.status != ANSWERED:
             return ReasoningResult(response=INSUFFICIENT_EVIDENCE_MESSAGE)
-        references = ", ".join(
-            str(number) for number in envelope.used_record_numbers
-        )
+        references = ", ".join(str(number) for number in envelope.used_record_numbers)
         return ReasoningResult(
             response=(
-                f"{envelope.answer}\n"
-                f"Evidence used: scoped memory records {references}."
+                f"{envelope.answer}\nEvidence used: scoped memory records {references}."
             )
         )

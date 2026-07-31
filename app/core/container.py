@@ -22,6 +22,9 @@ from app.cognition.classification.default_goal_classifier import (
     DefaultGoalClassifier,
 )
 from app.cognition.engine import CognitiveEngine
+from app.cognition.grounding.claim_formatter import ClaimEvidenceFormatter
+from app.cognition.grounding.claim_parser import JsonClaimEvidenceResponseParser
+from app.cognition.grounding.claim_provider import ClaimEvidenceAttributionProvider
 from app.cognition.grounding.evidence import MemoryEvidenceSelector
 from app.cognition.grounding.parser import JsonGroundedResponseParser
 from app.cognition.grounding.provider import (
@@ -56,6 +59,7 @@ from app.cognition.pipeline.reasoning_stage import ReasoningStage
 from app.cognition.pipeline.response_stage import ResponseStage
 from app.cognition.planning.capability_executor import CapabilityExecutor
 from app.cognition.prompts.reasoning import (
+    ClaimEvidenceAttributionPromptBuilder,
     EvidenceBoundedReasoningPromptBuilder,
     MemoryAwareReasoningPromptBuilder,
 )
@@ -131,14 +135,10 @@ class Container:
     def _build_reasoning(self) -> None:
         """Compose the Cognitive Engine entry point."""
         self.goal_classifier = DefaultGoalClassifier()
-        self.reasoning_selection_policy = (
-            DeterministicReasoningSelectionPolicy(
-                reasoning_enabled=self._settings.REASONING_ENABLED
-            )
+        self.reasoning_selection_policy = DeterministicReasoningSelectionPolicy(
+            reasoning_enabled=self._settings.REASONING_ENABLED
         )
-        self.default_specialist = DefaultSpecialist(
-            self.reasoning_selection_policy
-        )
+        self.default_specialist = DefaultSpecialist(self.reasoning_selection_policy)
         self.specialist_router = SpecialistRouter(self.default_specialist)
         self.normalized_input_capability = NormalizedInputCapability()
         self.ollama_client = OllamaClient(
@@ -152,31 +152,48 @@ class Container:
             max_records=self._settings.MEMORY_PROMPT_MAX_RECORDS,
             max_characters=self._settings.MEMORY_PROMPT_MAX_CHARACTERS,
         )
-        self.memory_aware_reasoning_prompt_builder = (
-            MemoryAwareReasoningPromptBuilder(
-                memory_context_enabled=(
-                    self._settings.MEMORY_PROMPT_CONTEXT_ENABLED
-                ),
-                max_records=self._settings.MEMORY_PROMPT_MAX_RECORDS,
-                max_characters=self._settings.MEMORY_PROMPT_MAX_CHARACTERS,
-            )
+        self.memory_aware_reasoning_prompt_builder = MemoryAwareReasoningPromptBuilder(
+            memory_context_enabled=(self._settings.MEMORY_PROMPT_CONTEXT_ENABLED),
+            max_records=self._settings.MEMORY_PROMPT_MAX_RECORDS,
+            max_characters=self._settings.MEMORY_PROMPT_MAX_CHARACTERS,
         )
         grounded_enabled = self._settings.MEMORY_GROUNDED_RESPONSE_ENABLED
+        claim_enabled = (
+            grounded_enabled
+            and self._settings.MEMORY_CLAIM_EVIDENCE_ATTRIBUTION_ENABLED
+        )
         self.grounded_response_parser = None
-        self.reasoning_prompt_builder = (
-            EvidenceBoundedReasoningPromptBuilder(
+        self.claim_evidence_response_parser = None
+        self.claim_evidence_formatter = None
+        if claim_enabled:
+            self.reasoning_prompt_builder = ClaimEvidenceAttributionPromptBuilder(
                 self.memory_aware_reasoning_prompt_builder,
                 self.memory_evidence_selector,
                 enabled=True,
             )
-            if grounded_enabled
-            else self.memory_aware_reasoning_prompt_builder
-        )
+        elif grounded_enabled:
+            self.reasoning_prompt_builder = EvidenceBoundedReasoningPromptBuilder(
+                self.memory_aware_reasoning_prompt_builder,
+                self.memory_evidence_selector,
+                enabled=True,
+            )
+        else:
+            self.reasoning_prompt_builder = self.memory_aware_reasoning_prompt_builder
         self.ollama_reasoning_provider = OllamaProvider(
             self.ollama_client,
             self.reasoning_prompt_builder,
         )
-        if grounded_enabled:
+        if claim_enabled:
+            self.claim_evidence_response_parser = JsonClaimEvidenceResponseParser()
+            self.claim_evidence_formatter = ClaimEvidenceFormatter()
+            self.reasoning_provider = ClaimEvidenceAttributionProvider(
+                self.ollama_reasoning_provider,
+                self.claim_evidence_response_parser,
+                self.memory_evidence_selector,
+                self.claim_evidence_formatter,
+                enabled=True,
+            )
+        elif grounded_enabled:
             self.grounded_response_parser = JsonGroundedResponseParser()
             self.reasoning_provider = EvidenceBoundedReasoningProvider(
                 self.ollama_reasoning_provider,

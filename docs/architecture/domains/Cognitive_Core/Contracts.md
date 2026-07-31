@@ -346,3 +346,6 @@ a controlled internal failure for capability translation.
 `GroundedReasoningDemoRuntime.run(prompt)` validates input, checks readiness
 once, then invokes standard and grounded engines once each with the same
 explicit scope. Its report contains safe outcomes and counts only.
+
+Claim attribution uses an exact `{status, claims}` envelope. Answered claims
+require text and in-range references; insufficient evidence has no claims.

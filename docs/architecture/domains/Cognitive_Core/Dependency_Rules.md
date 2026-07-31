@@ -225,3 +225,7 @@ of parsing. The API must not import grounding modules or expose scope.
 readiness contracts, but not Settings, Container, FastAPI, repositories,
 concrete providers, clients, environment, or I/O. Its thin CLI owns local
 composition only.
+
+Claim models have no infrastructure dependencies. The claim parser, formatter,
+provider, and demo runtime retain explicit inward-facing boundaries; Engine,
+API, and readiness do not import claim modules.

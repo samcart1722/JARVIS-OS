@@ -1,5 +1,8 @@
 # Roadmap
 
+Post-Sprint-18 candidates include semantic verification, fact checking,
+contradictions, claim atomicity, persistence, identity, HTTP, and ranking.
+
 ## Sprint 11 completed
 
 Provider Readiness and Demo Runtime v1 adds an explicit non-generative Ollama
