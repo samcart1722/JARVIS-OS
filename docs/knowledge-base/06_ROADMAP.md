@@ -1,6 +1,6 @@
 # Roadmap
 
-With Sprint 22 implemented in the feature working tree, vendor/family diversity
+With Sprint 23 implemented in the feature working tree, vendor/family diversity
 policy, truth checking, external
 sources, deterministic entailment, confidence, contradictions, partial
 filtering, durable audit, HTTP exposure, and human review remain deferred.
@@ -59,30 +59,31 @@ and safe prompt use remain future work.
 | 19 | Add model-assisted claim support verification. | `32c9319`, tag `sprint-19-complete` |
 | 20 | Add independent verifier-client composition. | `ca4fa2d`, tag `sprint-20-complete` |
 | 21 | Add the typed local-first list foundation. | `8c0330b`, tag `sprint-21-complete` |
-| 22 | Add durable local list and minimal knowledge persistence. | Implemented in feature working tree; pending commit, PR, merge, and tag |
+| 22 | Add durable local list and minimal knowledge persistence. | `9dcb36b`, tag `sprint-22-complete` |
+| 23 | Add explicit local-first cognitive routing coordination. | Implemented in feature working tree; pending commit, PR, merge, and tag |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 22 is implemented but uncommitted in the feature working tree. The
+Sprint 23 is implemented but uncommitted in the feature working tree. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
 the API to safe HTTP 500/503 responses. The successful deterministic and
 reasoning paths retain their prior output.
 
-## Candidate scope after Sprint 22
+## Candidate scope after Sprint 23
 
 The following remain candidates, not commitments:
 
 - define authenticated identity, retention, encryption and synchronization;
 - define semantic retrieval and truth-validation policy separately;
-- define authentication and application-level resolve-or-reason integration;
+- define authentication and any future public coordinator integration;
 - define migration, audit, synchronization, and external-access policy before
   adding durable or connected behavior.
 
-These are deferred candidates, not Sprint 22 scope. Before selecting work,
+These are deferred candidates, not Sprint 23 scope. Before selecting work,
 define test boundaries and record material decisions through the appropriate
 governance process.
 

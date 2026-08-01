@@ -8,17 +8,20 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 22 is implemented in `feat/sprint-22-durable-local-knowledge` and remains
-pending commit, PR, merge, and tag. Its explicitly composed SQLite path persists
-typed lists and immutable knowledge records across processes. The Core depends
-only on repository contracts; default `Container` construction remains in-memory
-and creates no database. It adds no public HTTP exposure, natural-language
-routing, or automatic resolve-or-reason bridge.
+Sprint 22 is released at `9dcb36b`, tag `sprint-22-complete`. Sprint 23 is
+implemented in `feat/sprint-23-local-first-cognitive-routing` and remains
+uncommitted, unmerged, and untagged. Its explicit application coordinator tries
+an already-typed local intent first. Handled local success or failure is
+terminal; only `not_handled`, explicit fallback authorization, and valid
+cognitive input can select the existing cognitive path.
 
-- The current runtime extends the released **Sprint 21 local-first resolution
-  foundation** with uncommitted Sprint 22 durability.
-- The canonical released baseline before this branch is `sprint-21-complete` at
-  `8c0330b54fca07eb2fe03657f499bc7fbac9e898`.
+The coordinator is not used by public HTTP and performs no natural-language
+parsing. Default `Container` construction remains in-memory and inert.
+
+- The current runtime extends the released Sprint 22 durable local foundation
+  with explicit, caller-authorized routing coordination.
+- The canonical released baseline before this branch is `sprint-22-complete` at
+  `9dcb36b466dfe6531916d96a7f79fe14688b8801`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by

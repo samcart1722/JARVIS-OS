@@ -1,5 +1,18 @@
 # Technical Debt
 
+## Sprint 23 classification
+
+Inherited debt remains: unauthenticated identity, provisional goal/domain
+routing, legacy parallel modules, and incomplete lifecycle scaffolds.
+
+Deliberately deferred scope includes public coordinator HTTP exposure,
+natural-language intent extraction, authentication/RBAC, semantic retrieval,
+knowledge prompt integration, synchronization, encryption, retention, and
+external-access policy. These are not defects introduced by the coordinator.
+
+New technical debt introduced by Sprint 23: none identified. The coordinator
+is typed, explicitly authorized, independently testable, and composed once.
+
 ## Sprint 22 limitations
 
 SQLite durability is local to one explicitly supplied database. Luxiom still
@@ -24,6 +37,12 @@ Existing memory/reasoning routes may still use models when explicitly invoked.
 public API, natural-language extraction, or an automatic resolve-or-reason
 orchestrator. Its `not_handled` result requires a caller to choose the separate
 historical cognitive route; it is not an automatic fallback.
+
+Sprint 23 partially resolves explicit coordination through
+`LocalFirstCognitiveCoordinator`. A caller must still invoke that coordinator
+and explicitly authorize fallback. Public HTTP integration, natural-language
+extraction, authentication, and automatic fallback remain deferred; this is
+not full product integration.
 
 Separate verifier clients may use identical or correlated models; readiness
 does not demonstrate semantic quality or epistemic independence.

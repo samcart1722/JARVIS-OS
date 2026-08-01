@@ -90,3 +90,10 @@ def test_container_retains_falsey_injected_repositories() -> None:
         container.structured_knowledge_capability._repository
         is knowledge_repository
     )
+
+
+def test_container_composes_one_coordinator_from_existing_paths() -> None:
+    container = Container(Settings(_env_file=None))
+    coordinator = container.local_first_cognitive_coordinator
+    assert coordinator._local_resolver is container.local_first_resolver
+    assert coordinator._cognitive_processor is container.cognitive_engine
