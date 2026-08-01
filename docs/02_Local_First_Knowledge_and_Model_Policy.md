@@ -41,3 +41,17 @@ incluye un orquestador automático resolve-or-reason.
 
 El estándar ADR permanece Draft y pendiente de certificación; esta política no
 presenta ningún ADR como aprobado.
+
+## Sprint 22 durable foundation
+
+Sprint 22 añade adaptadores SQLite explícitos para listas y el registro mínimo
+de conocimiento tipado, conservando al Core independiente de SQLite. La
+identidad de conocimiento es `workspace_id + record_id`; la procedencia es
+obligatoria y se conserva exactamente. Una escritura idéntica es idempotente,
+una distinta produce conflicto controlado y una lectura ausente produce
+`local_knowledge_not_found`.
+
+Guardar no certifica verdad ni confianza. No hay sincronización, cifrado en
+reposo, borrado/retención, búsqueda semántica, extracción automática ni
+integración del conocimiento durable en prompts. Esta es una base durable, no
+un Knowledge Engine completo.

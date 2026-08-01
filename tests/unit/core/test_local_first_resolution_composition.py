@@ -16,9 +16,19 @@ from app.core.config import Settings
 from app.core.container import Container
 
 
+class FalseyRepository:
+    def __bool__(self) -> bool:
+        return False
+
+
 def test_container_composes_one_shared_local_repository_without_calls() -> None:
     grant = PermissionGrant("a", "w", frozenset((LIST_ITEMS_ADD, LIST_ITEMS_READ)))
-    with patch("app.models.ollama_client.OllamaClient.chat") as chat:
+    with (
+        patch("app.models.ollama_client.OllamaClient.chat") as chat,
+        patch("app.models.ollama_readiness_probe.OllamaReadinessProbe.check") as ready,
+        patch("requests.get") as network_get,
+        patch("requests.post") as network_post,
+    ):
         container = Container(
             Settings(_env_file=None), local_permission_grants=(grant,)
         )
@@ -44,6 +54,9 @@ def test_container_composes_one_shared_local_repository_without_calls() -> None:
         is container.local_list_repository
     )
     chat.assert_not_called()
+    ready.assert_not_called()
+    network_get.assert_not_called()
+    network_post.assert_not_called()
 
 
 def test_existing_reasoning_path_remains_separate_and_calls_provider_once() -> None:
@@ -52,3 +65,28 @@ def test_existing_reasoning_path_remains_separate_and_calls_provider_once() -> N
         generate.return_value = ReasoningResult(response="ok")
         container.cognitive_engine.process("unrelated reasoning request")
     generate.assert_called_once()
+
+
+def test_default_container_construction_creates_no_database(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    Container(Settings(_env_file=None))
+    assert tuple(tmp_path.iterdir()) == ()
+
+
+def test_container_retains_falsey_injected_repositories() -> None:
+    list_repository = FalseyRepository()
+    knowledge_repository = FalseyRepository()
+    container = Container(
+        Settings(_env_file=None),
+        local_list_repository=list_repository,
+        local_knowledge_repository=knowledge_repository,
+    )
+    assert container.local_list_repository is list_repository
+    assert container.local_knowledge_repository is knowledge_repository
+    assert container.structured_list_capability._repository is list_repository
+    assert (
+        container.structured_knowledge_capability._repository
+        is knowledge_repository
+    )

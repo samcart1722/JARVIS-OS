@@ -42,3 +42,8 @@ Known contradiction at this checkpoint: Luxiom is the confirmed product
 identity in the Product North Star and recent Git history, while README,
 `pyproject.toml`, `app/core/config.py`, and many historical documents still use
 JARVIS-OS/JARVIS. This pack records but does not resolve that migration.
+
+Sprint 22 evidence exists only in the
+`feat/sprint-22-durable-local-knowledge` working tree at this checkpoint. The
+base tag remains `sprint-21-complete`; no Sprint 22 commit, merge, or tag is
+claimed. Constitution and ADR statuses remain unchanged.

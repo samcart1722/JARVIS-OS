@@ -27,7 +27,7 @@ Before this sequence, read the normative
 | Normative / governing | [Product North Star](../00_Product_North_Star.md), [Cognitive Lifecycle](../01_Cognitive_Lifecycle.md), [Local-First Knowledge and Model Policy](../02_Local_First_Knowledge_and_Model_Policy.md), foundation and architecture documents linked from [Source of Truth](09_SOURCE_OF_TRUTH.md) | Define intended identity, lifecycle, and constraints; status labels still matter. |
 | Operational state | [Current State](02_CURRENT_STATE.md), [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md), [Technical Debt](05_TECHNICAL_DEBT.md) | Describe verified executable reality at a point in time. |
 | Planning | [Roadmap](06_ROADMAP.md) | Separates completed sprints from unapproved candidates. |
-| History | [Sprint summaries](history/sprints/SPRINT_0_SUMMARY.md), [Sprint 20 summary](history/sprints/SPRINT_20_SUMMARY.md), [Sprint 21 summary](history/sprints/SPRINT_21_SUMMARY.md), [conversation policy](history/conversations/README.md) | Preserve traceable context without becoming normative truth. |
+| History | [Sprint summaries](history/sprints/SPRINT_0_SUMMARY.md), [Sprint 20 summary](history/sprints/SPRINT_20_SUMMARY.md), [Sprint 21 summary](history/sprints/SPRINT_21_SUMMARY.md), [Sprint 22 summary](history/sprints/SPRINT_22_SUMMARY.md), [conversation policy](history/conversations/README.md) | Preserve traceable context without becoming normative truth. |
 | Recovery | [AI Handoff](07_AI_HANDOFF.md), [Backup and Recovery](08_BACKUP_AND_RECOVERY.md), [Source of Truth](09_SOURCE_OF_TRUTH.md) | Restore context, repository history, and working practices. |
 
 ## Cognitive Core governance baseline
@@ -37,6 +37,9 @@ Before this sequence, read the normative
 - [Dependency rules](../architecture/domains/Cognitive_Core/Dependency_Rules.md)
 
 ## Operations
+
+- [Durable Local Knowledge Demo](../operations/DURABLE_LOCAL_KNOWLEDGE_DEMO.md)
+  runs explicit `seed` and `verify` processes against a caller-supplied database.
 
 - [Functional Cognitive Demo v1](../operations/FUNCTIONAL_COGNITIVE_DEMO.md)
 - [Explicit Scoped Memory Update Demo v1](../operations/EXPLICIT_MEMORY_UPDATE_DEMO.md)

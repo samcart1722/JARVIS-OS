@@ -1,9 +1,12 @@
-"""Infrastructure-free contracts for local list resolution."""
+"""Infrastructure-free contracts for typed local resolution."""
 
 from typing import Protocol
 
 from app.cognition.local_resolution.models import (
     ActorIdentity,
+    KnowledgeRead,
+    KnowledgeRecord,
+    KnowledgeStored,
     ListItemsAdded,
     ListItemsSnapshot,
     WorkspaceIdentity,
@@ -16,6 +19,22 @@ class ListItemRepository(Protocol):
     ) -> ListItemsAdded: ...
 
     def read(self, workspace: WorkspaceIdentity, list_id: str) -> ListItemsSnapshot: ...
+
+
+class LocalRepositoryError(RuntimeError):
+    """Safe repository failure without infrastructure detail."""
+
+
+class KnowledgeRecordConflict(LocalRepositoryError):
+    """Signal an immutable-record conflict without leaking storage details."""
+
+
+class KnowledgeRecordRepository(Protocol):
+    def store(self, record: KnowledgeRecord) -> KnowledgeStored: ...
+
+    def read(
+        self, workspace: WorkspaceIdentity, record_id: str
+    ) -> KnowledgeRead: ...
 
 
 class PermissionPolicy(Protocol):

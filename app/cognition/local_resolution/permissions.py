@@ -6,6 +6,8 @@ from app.cognition.local_resolution.models import ActorIdentity, WorkspaceIdenti
 
 LIST_ITEMS_ADD = "list.items.add"
 LIST_ITEMS_READ = "list.items.read"
+KNOWLEDGE_RECORDS_ADD = "knowledge.records.add"
+KNOWLEDGE_RECORDS_READ = "knowledge.records.read"
 
 
 @dataclass(frozen=True, slots=True)

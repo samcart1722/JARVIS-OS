@@ -20,5 +20,5 @@ no ADR was represented as approved.
 The resolver is composed in `Container` but is not integrated into
 `CognitiveEngine.process` or the public API. Unsupported typed intents return
 `not_handled`; no automatic bridge selects the separately available historical
-reasoning route. Sprint 21 remains uncommitted in its feature working tree at
-this review checkpoint.
+reasoning route. At its review checkpoint Sprint 21 was uncommitted; it was
+subsequently released at `8c0330b`, tag `sprint-21-complete`.

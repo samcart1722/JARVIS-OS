@@ -79,3 +79,8 @@ Sprint 21 makes the product's local-first intent executable through a generic,
 typed list capability. Personal and family scenarios are composition examples,
 not Core domains; HealthBridge remains the first planned product and receives
 no exception in the Core.
+Sprint 22 makes that narrow path durable through explicitly injected SQLite
+repositories and adds one immutable, provenance-bearing knowledge record. The
+Core remains domain-independent and infrastructure-independent. Persistence
+does not imply truth certification, semantic retrieval, synchronization, or a
+complete Knowledge Engine.

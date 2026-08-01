@@ -1,8 +1,18 @@
 # Technical Debt
 
+## Sprint 22 limitations
+
+SQLite durability is local to one explicitly supplied database. Luxiom still
+lacks authenticated identity, natural-language local routing, public
+local-first HTTP, automatic resolve-or-reason orchestration, multi-device sync,
+encryption at rest, deletion/retention policy, semantic retrieval, truth
+validation, automatic ingestion, and durable-knowledge prompt integration.
+This is a durable foundation, not a complete Knowledge Engine.
+
 ## Sprint 21 limitations
 
-The structured-list repository is ephemeral and loses state at process exit.
+The Sprint 21 default structured-list repository is ephemeral; Sprint 22 adds
+an explicitly injected durable alternative without changing that default.
 Typed commands are built directly; natural language is not converted to local
 intents. Actor identity is explicit but unauthenticated, permissions are a
 small deterministic policy rather than RBAC, and workspace identity is not a
