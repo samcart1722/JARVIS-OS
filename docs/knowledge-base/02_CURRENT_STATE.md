@@ -1,12 +1,15 @@
 # Current State
 
-## Sprint 22 executable state
+## Sprint 23 executable state
 
-Sprint 22 is implemented in the feature working tree and remains pending
-commit, PR, merge, and tag. Explicit SQLite storage persists structured lists
-and minimal immutable knowledge records across process reconstruction.
-Provenance round-trips exactly; authorization precedes repository access.
-Missing records and immutable-record conflicts are controlled terminal results.
+Sprint 22 is released at merge `9dcb36b`, tag `sprint-22-complete`. Sprint 23 is
+implemented in the feature working tree and remains uncommitted, unmerged, and
+untagged. One explicit coordinator calls `LocalFirstResolver` first. A handled
+local result is terminal. Only `not_handled` plus explicit authorization and a
+valid non-blank cognitive input invokes the existing cognitive path.
+
+The coordinator accepts already-typed intents and is not called by public HTTP.
+No natural-language parser or automatic bridge was added to `CognitiveEngine`.
 
 The repository now contains an ephemeral, workspace-scoped structured-list
 capability with explicit actor and deny-by-default permission policy. Typed add
@@ -30,13 +33,12 @@ Snapshot updated: **2026-08-01** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
-- Branch: `feat/sprint-22-durable-local-knowledge`
-- Base HEAD: `8c0330b54fca07eb2fe03657f499bc7fbac9e898`
-- Canonical released tag: `sprint-21-complete`
-- Sprint 22 state: implemented in the feature working tree, pending commit, PR,
-  merge, and tag; no Sprint 22 commit or tag exists at this checkpoint.
-- Configured verification after focused review corrections: **570 passed** with
-  `DEBUG=true`; Ruff and
+- Branch: `feat/sprint-23-local-first-cognitive-routing`
+- Base HEAD: `9dcb36b466dfe6531916d96a7f79fe14688b8801`
+- Canonical released tag: `sprint-22-complete`
+- Sprint 23 state: implemented in the feature working tree, pending commit, PR,
+  merge, and tag; no Sprint 23 commit or tag exists at this checkpoint.
+- Configured Sprint 23 verification: **591 passed** with `DEBUG=true`; Ruff and
   `git diff --check` clean.
 
 ## Confirmed stack
@@ -88,7 +90,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 19 | Completed/tagged | Model-assisted claim support verification remains optional and controlled. |
 | 20 | Completed/tagged | Independent verifier-client composition remains opt-in. |
 | 21 | Completed/tagged | Released at `8c0330b`, tag `sprint-21-complete`; typed local lists add explicit identity, workspace, permissions and zero-call deterministic execution. |
-| 22 | Implemented, uncommitted | Explicit SQLite adapters persist typed lists and minimal provenance-bearing knowledge without changing public HTTP or reasoning. |
+| 22 | Completed/tagged | Released at `9dcb36b`, tag `sprint-22-complete`; explicit SQLite adapters persist typed lists and minimal provenance-bearing knowledge. |
+| 23 | Implemented, uncommitted | An explicit coordinator makes typed local-first priority executable without changing public HTTP or `CognitiveEngine`. |
 
 ## Executable components and status
 
@@ -113,6 +116,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `ResponseStage` | Integrated structured boundary | Returns real output as success or a structured controlled failure; it knows no HTTP. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
 | Concrete capabilities | Integrated in separate paths | `NormalizedInputCapability` and `ReasoningCapability` remain in the historical engine. Separate `StructuredListCapability` and `StructuredKnowledgeCapability` serve typed local intents outside `CognitiveEngine` and public HTTP. |
+| `LocalFirstCognitiveCoordinator` | Composed, explicit application boundary | Preserves handled local results; only authorized valid `not_handled` requests call the existing cognitive processor. Public HTTP does not use it. |
 | `InputStage` / `ContextStage` / `ReasoningStage` | Implemented separately | Not called by the Sprint 3 `CognitiveEngine.process` path. |
 
 ## Real request flow
@@ -131,9 +135,11 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
 
-Current Sprint 22 feature-tree result after focused review corrections:
-**570 passed** with `DEBUG=true`; Ruff and `git diff --check` passed. The
-pre-correction Sprint 22 result was **561 passed**.
+Current Sprint 23 feature-tree result: **591 passed** with `DEBUG=true`; Ruff
+and `git diff --check` passed using controlled external pytest temporary files.
+
+Sprint 22 released baseline result: **570 passed** with `DEBUG=true`; Ruff and
+`git diff --check` passed.
 
 Sprint 21 baseline result: **534 passed** with `DEBUG=true`; Ruff and
 `git diff --check` passed. The older counts below are historical checkpoints.

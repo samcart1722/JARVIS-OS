@@ -1,5 +1,21 @@
 # Runtime Architecture
 
+## Explicit local-first coordinator (Sprint 23)
+
+`Container` composes one `LocalFirstCognitiveCoordinator` after its existing
+`LocalFirstResolver` and `CognitiveEngine`. The coordinator calls the resolver
+exactly once. Handled local success and controlled failure select `local` and
+are terminal. Unsupported local intent selects `safe_insufficiency` unless the
+caller supplies explicit fallback authorization and valid non-blank cognitive
+input; only then does it call the existing processor once and select
+`cognitive`.
+
+The coordinator depends on a `CognitiveProcessor` Protocol and imports no
+SQLite, infrastructure, HTTP framework, network client, provider, or demo. It
+is absent from `CognitiveEngine` and the public API route. The cognitive route
+can remain deterministic when existing settings select normalized input; route
+selection does not claim model use.
+
 ## Local-first route (Sprints 21–22)
 
 Typed list and knowledge intents enter `LocalFirstResolver`. Separate focused
@@ -22,10 +38,10 @@ unchanged and available as the separate reasoning orchestrator.
 These are two distinct entry paths. The public HTTP route calls
 `CognitiveEngine`; it does not expose `LocalFirstResolver`. The typed resolver
 does not extract natural-language intents and returns `not_handled` for an
-unsupported object. A caller or future application orchestrator must explicitly
-choose whether to invoke the separately available cognitive path. Sprint 21
-contains no automatic fallback or resolve-or-reason bridge, and Sprint 22 does
-not add one.
+unsupported object. Sprint 21 and Sprint 22 added no automatic fallback or
+resolve-or-reason bridge. Sprint 23 provides an explicit caller-invoked
+`LocalFirstCognitiveCoordinator`, but it is not automatic and public HTTP does
+not use it. `CognitiveEngine` itself contains no fallback routing.
 
 Independent verifier mode composes a second inert `OllamaClient` only when all
 four feature flags are active. Generation remains primary; verification uses
@@ -38,9 +54,9 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the runtime through the Sprint 22 feature-tree
-checkpoint: released baseline `sprint-21-complete` at `8c0330b`, plus
-uncommitted Sprint 22 changes. It does not claim a Sprint 22 commit, merge, or
+This document describes the runtime through the Sprint 23 feature-tree
+checkpoint: released baseline `sprint-22-complete` at `9dcb36b`, plus
+uncommitted Sprint 23 changes. It does not claim a Sprint 23 commit, merge, or
 tag.
 
 ## Public path and flow

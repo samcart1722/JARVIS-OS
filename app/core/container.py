@@ -90,6 +90,7 @@ from app.cognition.prompts.reasoning import (
     MemoryAwareReasoningPromptBuilder,
 )
 from app.cognition.providers.ollama_provider import OllamaProvider
+from app.cognition.routing.coordinator import LocalFirstCognitiveCoordinator
 from app.cognition.specialists.default_specialist import DefaultSpecialist
 from app.cognition.specialists.deterministic_reasoning_selection_policy import (
     DeterministicReasoningSelectionPolicy,
@@ -127,6 +128,7 @@ class Container:
         self._build_memory()
         self._build_local_resolution()
         self._build_reasoning()
+        self._build_local_first_cognitive_routing()
         self._build_context()
         self._build_prompt()
         self._build_models()
@@ -341,6 +343,13 @@ class Container:
             response_stage=self.response_stage,
             memory_context_retriever=self.memory_context_retriever,
             memory_retrieval_enabled=self._settings.MEMORY_RETRIEVAL_ENABLED,
+        )
+
+    def _build_local_first_cognitive_routing(self) -> None:
+        """Compose one explicit coordinator from the existing paths."""
+        self.local_first_cognitive_coordinator = LocalFirstCognitiveCoordinator(
+            self.local_first_resolver,
+            self.cognitive_engine,
         )
 
     def _build_context(self) -> None:
