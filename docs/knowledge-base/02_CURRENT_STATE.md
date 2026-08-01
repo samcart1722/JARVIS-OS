@@ -1,6 +1,12 @@
 # Current State
 
-## Sprint 21 executable state
+## Sprint 22 executable state
+
+Sprint 22 is implemented in the feature working tree and remains pending
+commit, PR, merge, and tag. Explicit SQLite storage persists structured lists
+and minimal immutable knowledge records across process reconstruction.
+Provenance round-trips exactly; authorization precedes repository access.
+Missing records and immutable-record conflicts are controlled terminal results.
 
 The repository now contains an ephemeral, workspace-scoped structured-list
 capability with explicit actor and deny-by-default permission policy. Typed add
@@ -20,16 +26,17 @@ those figures remain historical evidence.
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 
-Snapshot updated: **2026-07-31** (America/Tegucigalpa).
+Snapshot updated: **2026-08-01** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
-- Branch: `feat/sprint-21-local-first-family-resolution`
-- Base HEAD: `ca4fa2d3fc62bd2c486070cc4663ba169e6cfdd9`
-- Canonical released tag: `sprint-20-complete`
-- Sprint 21 state: implemented in the feature working tree, pending commit, PR,
-  merge, and tag; no Sprint 21 commit or tag exists at this checkpoint.
-- Configured verification: **534 passed** with `DEBUG=true`; Ruff and
+- Branch: `feat/sprint-22-durable-local-knowledge`
+- Base HEAD: `8c0330b54fca07eb2fe03657f499bc7fbac9e898`
+- Canonical released tag: `sprint-21-complete`
+- Sprint 22 state: implemented in the feature working tree, pending commit, PR,
+  merge, and tag; no Sprint 22 commit or tag exists at this checkpoint.
+- Configured verification after focused review corrections: **570 passed** with
+  `DEBUG=true`; Ruff and
   `git diff --check` clean.
 
 ## Confirmed stack
@@ -80,7 +87,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 18 | Completed/tagged | Claim-level evidence attribution adds structurally auditable references. |
 | 19 | Completed/tagged | Model-assisted claim support verification remains optional and controlled. |
 | 20 | Completed/tagged | Independent verifier-client composition remains opt-in. |
-| 21 | Implemented, uncommitted | Separate typed local list resolution adds explicit identity, workspace, permissions and zero-call deterministic execution. |
+| 21 | Completed/tagged | Released at `8c0330b`, tag `sprint-21-complete`; typed local lists add explicit identity, workspace, permissions and zero-call deterministic execution. |
+| 22 | Implemented, uncommitted | Explicit SQLite adapters persist typed lists and minimal provenance-bearing knowledge without changing public HTTP or reasoning. |
 
 ## Executable components and status
 
@@ -104,7 +112,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `CognitiveOutcome` / `CognitiveError` | Integrated | Enforce valid success/failure states and stable provider-independent errors. |
 | `ResponseStage` | Integrated structured boundary | Returns real output as success or a structured controlled failure; it knows no HTTP. |
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
-| Concrete capabilities | Integrated in separate paths | `NormalizedInputCapability` and `ReasoningCapability` are registered in the historical `CognitiveEngine` path. `StructuredListCapability` serves the separate Sprint 21 typed path, which is not integrated into `CognitiveEngine` or public HTTP. |
+| Concrete capabilities | Integrated in separate paths | `NormalizedInputCapability` and `ReasoningCapability` remain in the historical engine. Separate `StructuredListCapability` and `StructuredKnowledgeCapability` serve typed local intents outside `CognitiveEngine` and public HTTP. |
 | `InputStage` / `ContextStage` / `ReasoningStage` | Implemented separately | Not called by the Sprint 3 `CognitiveEngine.process` path. |
 
 ## Real request flow
@@ -123,7 +131,11 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
 
-Sprint 21 review result: **534 passed** with `DEBUG=true`; Ruff and
+Current Sprint 22 feature-tree result after focused review corrections:
+**570 passed** with `DEBUG=true`; Ruff and `git diff --check` passed. The
+pre-correction Sprint 22 result was **561 passed**.
+
+Sprint 21 baseline result: **534 passed** with `DEBUG=true`; Ruff and
 `git diff --check` passed. The older counts below are historical checkpoints.
 
 Sprint 4 baseline: **9 passed, 1 warning in 0.14s**.
@@ -178,9 +190,10 @@ semantic support, and the public route still supplies no scope.
 
 The local resolver is not called by `CognitiveEngine.process`, the public API,
 natural-language intent extraction, or an automatic resolve-or-reason
-orchestrator. The list repository is ephemeral. Durable local knowledge,
-persistence, identity authentication, integration policy, and external-access
-governance remain deferred and require separately approved scope.
+orchestrator. Default repositories are ephemeral; explicit operations
+composition can inject SQLite durability. Identity authentication, integration
+policy, encryption, synchronization, retention, semantic retrieval, truth
+validation, and external-access governance remain deferred.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under

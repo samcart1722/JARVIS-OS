@@ -146,3 +146,20 @@ def test_sprint_15_and_16_demos_do_not_enable_grounding() -> None:
         source = (ROOT / path).read_text(encoding="utf-8")
         assert "MEMORY_GROUNDED_RESPONSE_ENABLED" not in source
         assert "EvidenceBoundedReasoningProvider" not in source
+
+
+def test_durable_demo_is_separate_from_public_runtime() -> None:
+    for path in (
+        "app/cognition/engine.py",
+        "app/api/routes/brain.py",
+        "app/main.py",
+    ):
+        source = (ROOT / path).read_text(encoding="utf-8")
+        assert "durable_local_knowledge_demo" not in source
+
+
+def test_durable_demo_cli_delegates_to_operations_runtime() -> None:
+    imported = imports("scripts/demo_durable_local_knowledge.py")
+    assert "app.operations.durable_local_knowledge_demo_runtime" in imported
+    assert "sqlite3" not in imported
+    assert not any(module.startswith("app.cognition") for module in imported)

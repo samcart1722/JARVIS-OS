@@ -1,6 +1,9 @@
-"""Process-local, workspace-scoped structured-list repository."""
+"""Process-local, workspace-scoped list and knowledge repositories."""
 
 from app.cognition.local_resolution.models import (
+    KnowledgeRead,
+    KnowledgeRecord,
+    KnowledgeStored,
     ListItemsAdded,
     ListItemsSnapshot,
     WorkspaceIdentity,
@@ -39,3 +42,29 @@ class InMemoryListItemRepository:
         return ListItemsSnapshot(
             tuple(self._items.get((workspace.workspace_id, list_id), ()))
         )
+
+
+class InMemoryKnowledgeRecordRepository:
+    def __init__(self) -> None:
+        self._records: dict[tuple[str, str], KnowledgeRecord] = {}
+
+    def store(self, record: KnowledgeRecord) -> KnowledgeStored:
+        from app.cognition.local_resolution.contracts import KnowledgeRecordConflict
+
+        if not isinstance(record, KnowledgeRecord):
+            raise ValueError("A valid knowledge record is required.")
+        identity = (record.workspace.workspace_id, record.record_id)
+        existing = self._records.get(identity)
+        if existing is None:
+            self._records[identity] = record
+            return KnowledgeStored(record, True)
+        if existing == record:
+            return KnowledgeStored(existing, False)
+        raise KnowledgeRecordConflict("Knowledge record already exists.")
+
+    def read(
+        self, workspace: WorkspaceIdentity, record_id: str
+    ) -> KnowledgeRead:
+        if not isinstance(workspace, WorkspaceIdentity) or not record_id.strip():
+            raise ValueError("Valid workspace and record ID are required.")
+        return KnowledgeRead(self._records.get((workspace.workspace_id, record_id)))

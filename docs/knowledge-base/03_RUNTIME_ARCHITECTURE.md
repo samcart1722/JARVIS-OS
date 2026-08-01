@@ -1,6 +1,16 @@
 # Runtime Architecture
 
-## Local-first route (Sprint 21)
+## Local-first route (Sprints 21–22)
+
+Typed list and knowledge intents enter `LocalFirstResolver`. Separate focused
+capabilities authorize before calling infrastructure-independent repository
+Protocols. Default composition uses in-memory repositories. The durable demo
+injects explicitly opened and initialized SQLite storage.
+
+SQLite schema v1 contains `schema_metadata`, `list_items`, and
+`knowledge_records`. List identity and order are workspace/list scoped;
+knowledge identity is `workspace_id + record_id`. The adapter lives under
+`app/infrastructure/local_storage/`; `app/cognition` does not import it.
 
 `ActorIdentity + WorkspaceIdentity + typed intent` flows through
 `LocalFirstResolver`, explicit permission policy, `StructuredListCapability`,
@@ -13,8 +23,9 @@ These are two distinct entry paths. The public HTTP route calls
 `CognitiveEngine`; it does not expose `LocalFirstResolver`. The typed resolver
 does not extract natural-language intents and returns `not_handled` for an
 unsupported object. A caller or future application orchestrator must explicitly
-choose whether to invoke the separately available cognitive path; Sprint 21
-contains no automatic fallback or resolve-or-reason bridge.
+choose whether to invoke the separately available cognitive path. Sprint 21
+contains no automatic fallback or resolve-or-reason bridge, and Sprint 22 does
+not add one.
 
 Independent verifier mode composes a second inert `OllamaClient` only when all
 four feature flags are active. Generation remains primary; verification uses
@@ -27,9 +38,10 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the runtime through the Sprint 21 review checkpoint:
-released baseline `sprint-20-complete` at `ca4fa2d`, plus uncommitted Sprint 21
-feature-tree changes. It does not claim a Sprint 21 commit, merge, or tag.
+This document describes the runtime through the Sprint 22 feature-tree
+checkpoint: released baseline `sprint-21-complete` at `8c0330b`, plus
+uncommitted Sprint 22 changes. It does not claim a Sprint 22 commit, merge, or
+tag.
 
 ## Public path and flow
 

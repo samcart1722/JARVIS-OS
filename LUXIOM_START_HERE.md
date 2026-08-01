@@ -8,11 +8,17 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-- The current runtime includes the **Sprint 21 local-first resolution
-  foundation**, implemented in this feature working tree and still pending
-  commit, PR, merge, and tag.
-- The canonical released baseline before this branch is `sprint-20-complete` at
-  `ca4fa2d3fc62bd2c486070cc4663ba169e6cfdd9`.
+Sprint 22 is implemented in `feat/sprint-22-durable-local-knowledge` and remains
+pending commit, PR, merge, and tag. Its explicitly composed SQLite path persists
+typed lists and immutable knowledge records across processes. The Core depends
+only on repository contracts; default `Container` construction remains in-memory
+and creates no database. It adds no public HTTP exposure, natural-language
+routing, or automatic resolve-or-reason bridge.
+
+- The current runtime extends the released **Sprint 21 local-first resolution
+  foundation** with uncommitted Sprint 22 durability.
+- The canonical released baseline before this branch is `sprint-21-complete` at
+  `8c0330b54fca07eb2fe03657f499bc7fbac9e898`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by
