@@ -1,5 +1,30 @@
 # Runtime Architecture
 
+## Deterministic text interpretation (Sprint 24)
+
+`Container` composes one `DeterministicLocalCommandInterpreter` and one
+`LocalCommandTextRouter` after, and using, its existing Sprint 23 coordinator.
+The interpreter executes nothing. Valid list text becomes an existing typed
+intent; invalid list syntax stops before resolver/coordinator/cognition; other
+text passes an immutable unrecognized sentinel through the unchanged resolver.
+Only explicit fallback authorization permits the existing cognitive route.
+The original text is preserved as cognitive input.
+
+The supported grammar is limited to `list read <list_id>` and
+`list add <list_id> :: <item> [| <item> ...]`. The deterministic interpreter
+accepts this already bounded command syntax. This deliberately narrow grammar
+is not general natural-language understanding: it performs no fuzzy matching,
+ambiguity resolution, multilingual interpretation, conversational context,
+model-assisted classification, or semantic inference. Malformed text beginning
+with the `list` command namespace is `invalid` and terminal; unrelated text is
+`not_interpreted`, and cognitive fallback remains explicit and
+caller-authorized.
+
+The public HTTP route does not import or invoke text routing. No Settings,
+provider, HTTP, SQLite, infrastructure, readiness, or network dependency enters
+the interpretation/routing boundary. The existing `CognitiveEngine` is not
+modified.
+
 ## Explicit local-first coordinator (Sprint 23)
 
 `Container` composes one `LocalFirstCognitiveCoordinator` after its existing
@@ -54,10 +79,10 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the runtime through the Sprint 23 feature-tree
-checkpoint: released baseline `sprint-22-complete` at `9dcb36b`, plus
-uncommitted Sprint 23 changes. It does not claim a Sprint 23 commit, merge, or
-tag.
+This document describes the Sprint 24 feature-tree checkpoint over released
+baseline `sprint-23-complete` at
+`be59175c201df1f2458551d99e2f5dcc3e9d2aac`. It does not claim a Sprint 24
+commit, merge, or tag.
 
 ## Public path and flow
 

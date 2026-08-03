@@ -1,6 +1,12 @@
 # Roadmap
 
-With Sprint 23 implemented in the feature working tree, vendor/family diversity
+Sprint 24 implements only deterministic local command interpretation in the
+feature working tree. Broad natural language, public exposure, authentication
+and RBAC, semantic retrieval, knowledge prompts, synchronization, encryption,
+retention, and external access remain unapproved deferrals. The Constitution
+and ADR standard remain Draft; no approved ADR is implied.
+
+With Sprint 24 implemented in the feature working tree, vendor/family diversity
 policy, truth checking, external
 sources, deterministic entailment, confidence, contradictions, partial
 filtering, durable audit, HTTP exposure, and human review remain deferred.
@@ -60,20 +66,21 @@ and safe prompt use remain future work.
 | 20 | Add independent verifier-client composition. | `ca4fa2d`, tag `sprint-20-complete` |
 | 21 | Add the typed local-first list foundation. | `8c0330b`, tag `sprint-21-complete` |
 | 22 | Add durable local list and minimal knowledge persistence. | `9dcb36b`, tag `sprint-22-complete` |
-| 23 | Add explicit local-first cognitive routing coordination. | Implemented in feature working tree; pending commit, PR, merge, and tag |
+| 23 | Add explicit local-first cognitive routing coordination. | `be59175c`, tag `sprint-23-complete` |
+| 24 | Add bounded deterministic list-command interpretation and explicit text routing. | Implemented in feature working tree; pending release |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 23 is implemented but uncommitted in the feature working tree. The
+Sprint 24 is implemented but uncommitted in the feature working tree. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
 the API to safe HTTP 500/503 responses. The successful deterministic and
 reasoning paths retain their prior output.
 
-## Candidate scope after Sprint 23
+## Candidate scope after Sprint 24
 
 The following remain candidates, not commitments:
 
@@ -83,7 +90,7 @@ The following remain candidates, not commitments:
 - define migration, audit, synchronization, and external-access policy before
   adding durable or connected behavior.
 
-These are deferred candidates, not Sprint 23 scope. Before selecting work,
+These are deferred candidates, not Sprint 24 scope. Before selecting work,
 define test boundaries and record material decisions through the appropriate
 governance process.
 

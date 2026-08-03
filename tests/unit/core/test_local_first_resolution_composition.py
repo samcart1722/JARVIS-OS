@@ -97,3 +97,15 @@ def test_container_composes_one_coordinator_from_existing_paths() -> None:
     coordinator = container.local_first_cognitive_coordinator
     assert coordinator._local_resolver is container.local_first_resolver
     assert coordinator._cognitive_processor is container.cognitive_engine
+
+
+def test_container_composes_text_routing_from_existing_coordinator() -> None:
+    container = Container(Settings(_env_file=None))
+    assert (
+        container.local_command_text_router._interpreter
+        is container.local_command_interpreter
+    )
+    assert (
+        container.local_command_text_router._coordinator
+        is container.local_first_cognitive_coordinator
+    )

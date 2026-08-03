@@ -39,6 +39,10 @@ from app.cognition.grounding.verification_prompt import (
 from app.cognition.grounding.verification_provider import (
     OllamaClaimEvidenceVerifier,
 )
+from app.cognition.interpretation.interpreter import (
+    DeterministicLocalCommandInterpreter,
+)
+from app.cognition.interpretation.routing import LocalCommandTextRouter
 from app.cognition.local_resolution.capability import StructuredListCapability
 from app.cognition.local_resolution.contracts import (
     KnowledgeRecordRepository,
@@ -129,6 +133,7 @@ class Container:
         self._build_local_resolution()
         self._build_reasoning()
         self._build_local_first_cognitive_routing()
+        self._build_local_command_interpretation()
         self._build_context()
         self._build_prompt()
         self._build_models()
@@ -350,6 +355,14 @@ class Container:
         self.local_first_cognitive_coordinator = LocalFirstCognitiveCoordinator(
             self.local_first_resolver,
             self.cognitive_engine,
+        )
+
+    def _build_local_command_interpretation(self) -> None:
+        """Compose one deterministic interpreter around the existing coordinator."""
+        self.local_command_interpreter = DeterministicLocalCommandInterpreter()
+        self.local_command_text_router = LocalCommandTextRouter(
+            self.local_command_interpreter,
+            self.local_first_cognitive_coordinator,
         )
 
     def _build_context(self) -> None:

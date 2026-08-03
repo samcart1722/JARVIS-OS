@@ -8,20 +8,28 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 22 is released at `9dcb36b`, tag `sprint-22-complete`. Sprint 23 is
-implemented in `feat/sprint-23-local-first-cognitive-routing` and remains
-uncommitted, unmerged, and untagged. Its explicit application coordinator tries
-an already-typed local intent first. Handled local success or failure is
-terminal; only `not_handled`, explicit fallback authorization, and valid
-cognitive input can select the existing cognitive path.
+Sprint 23 is completed/tagged at merge
+`be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`.
+Sprint 24 is implemented only in
+`feat/sprint-24-deterministic-local-command-interpretation` until release. It
+adds a deliberately narrow `list read` / `list add` interpreter and an explicit
+text-routing service. This is not general natural-language understanding.
+Malformed commands in the `list` namespace are terminal; unrelated text can
+reach cognition only with explicit fallback authorization. Public HTTP remains
+unchanged and does not use this service.
+
+Sprint 23's explicit application coordinator tries an already-typed local
+intent first. Handled local success or failure is terminal; only
+`not_handled`, explicit fallback authorization, and valid cognitive input can
+select the existing cognitive path.
 
 The coordinator is not used by public HTTP and performs no natural-language
 parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The canonical released baseline before this branch is `sprint-22-complete` at
-  `9dcb36b466dfe6531916d96a7f79fe14688b8801`.
+- The canonical released baseline before this branch is `sprint-23-complete` at
+  `be59175c201df1f2458551d99e2f5dcc3e9d2aac`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by
