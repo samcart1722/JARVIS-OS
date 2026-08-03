@@ -1,5 +1,17 @@
 # Technical Debt
 
+## Sprint 24 classification
+
+New technical debt introduced: none identified. The immutable interpreter and
+router are injected, deterministic, infrastructure-independent, and composed
+once. Inherited debt remains separate.
+
+Deliberately deferred: richer grammar, multilingual interpretation,
+conversational context, ambiguity resolution, fuzzy matching, model-assisted
+intent extraction, public HTTP integration, authentication/RBAC, semantic
+retrieval, durable knowledge prompt use, synchronization, encryption,
+retention, and external access.
+
 ## Sprint 23 classification
 
 Inherited debt remains: unauthenticated identity, provisional goal/domain

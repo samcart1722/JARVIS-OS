@@ -1,10 +1,24 @@
 # Current State
 
-## Sprint 23 executable state
+## Sprint 24 executable state
 
-Sprint 22 is released at merge `9dcb36b`, tag `sprint-22-complete`. Sprint 23 is
-implemented in the feature working tree and remains uncommitted, unmerged, and
-untagged. One explicit coordinator calls `LocalFirstResolver` first. A handled
+Sprint 23 is released at merge
+`be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`.
+Sprint 24 exists only in its feature working tree until release. A deterministic
+interpreter maps the narrow generic list grammar to the existing typed intents;
+an application router invokes the existing Sprint 23 coordinator. Recognized
+malformed list commands are terminal safe insufficiency. Unrecognized text may
+fall back only with explicit authorization. Public HTTP remains unchanged.
+
+This boundary is not broad natural-language understanding or a model
+classifier. A cognitive route also does not imply model execution when the
+existing settings choose the deterministic cognitive capability.
+
+## Sprint 23 released foundation
+
+Sprint 23 is released at merge `be59175c201df1f2458551d99e2f5dcc3e9d2aac`,
+tag `sprint-23-complete`. One explicit coordinator calls `LocalFirstResolver`
+first. A handled
 local result is terminal. Only `not_handled` plus explicit authorization and a
 valid non-blank cognitive input invokes the existing cognitive path.
 
@@ -29,17 +43,15 @@ those figures remain historical evidence.
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 
-Snapshot updated: **2026-08-01** (America/Tegucigalpa).
+Snapshot updated: **2026-08-03** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
-- Branch: `feat/sprint-23-local-first-cognitive-routing`
-- Base HEAD: `9dcb36b466dfe6531916d96a7f79fe14688b8801`
-- Canonical released tag: `sprint-22-complete`
-- Sprint 23 state: implemented in the feature working tree, pending commit, PR,
-  merge, and tag; no Sprint 23 commit or tag exists at this checkpoint.
-- Configured Sprint 23 verification: **591 passed** with `DEBUG=true`; Ruff and
-  `git diff --check` clean.
+- Branch: `feat/sprint-24-deterministic-local-command-interpretation`
+- Base HEAD: `be59175c201df1f2458551d99e2f5dcc3e9d2aac`
+- Canonical released tag: `sprint-23-complete`
+- Sprint 24 state: implemented in the feature working tree; uncommitted,
+  unmerged, and untagged pending release.
 
 ## Confirmed stack
 
@@ -91,7 +103,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 20 | Completed/tagged | Independent verifier-client composition remains opt-in. |
 | 21 | Completed/tagged | Released at `8c0330b`, tag `sprint-21-complete`; typed local lists add explicit identity, workspace, permissions and zero-call deterministic execution. |
 | 22 | Completed/tagged | Released at `9dcb36b`, tag `sprint-22-complete`; explicit SQLite adapters persist typed lists and minimal provenance-bearing knowledge. |
-| 23 | Implemented, uncommitted | An explicit coordinator makes typed local-first priority executable without changing public HTTP or `CognitiveEngine`. |
+| 23 | Completed/tagged | Released at merge `be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`; explicit typed local-first coordination remains outside public HTTP and `CognitiveEngine`. |
+| 24 | Implemented, uncommitted/unmerged/untagged | The bounded deterministic text-routing service is implemented in the feature working tree pending release. |
 
 ## Executable components and status
 
@@ -117,6 +130,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | Cognitive memory pipeline | Implemented and composed | Built in `Container`, exposed through a legacy adapter, but absent from the integrated request cycle. |
 | Concrete capabilities | Integrated in separate paths | `NormalizedInputCapability` and `ReasoningCapability` remain in the historical engine. Separate `StructuredListCapability` and `StructuredKnowledgeCapability` serve typed local intents outside `CognitiveEngine` and public HTTP. |
 | `LocalFirstCognitiveCoordinator` | Composed, explicit application boundary | Preserves handled local results; only authorized valid `not_handled` requests call the existing cognitive processor. Public HTTP does not use it. |
+| `DeterministicLocalCommandInterpreter` | Implemented, bounded application interpretation | Maps only the narrow list-command grammar to existing typed intents; it is not general natural-language understanding. |
+| `LocalCommandTextRouter` | Composed, explicit application boundary | Invokes the existing Sprint 23 coordinator for bounded commands. Public HTTP and `CognitiveEngine` do not use this service. |
 | `InputStage` / `ContextStage` / `ReasoningStage` | Implemented separately | Not called by the Sprint 3 `CognitiveEngine.process` path. |
 
 ## Real request flow
@@ -135,8 +150,14 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
 
-Current Sprint 23 feature-tree result: **591 passed** with `DEBUG=true`; Ruff
-and `git diff --check` passed using controlled external pytest temporary files.
+Current Sprint 24 feature-tree result: **625 passed** with `DEBUG=true`; Ruff
+and `git diff --check` passed using the controlled external Sprint 24 pytest
+temporary directory.
+
+Historical Sprint 23 feature-tree result: **591 passed** with `DEBUG=true`;
+Ruff and `git diff --check` passed using controlled external pytest temporary
+files. Sprint 23 was subsequently released at
+`be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`.
 
 Sprint 22 released baseline result: **570 passed** with `DEBUG=true`; Ruff and
 `git diff --check` passed.
