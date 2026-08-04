@@ -1,8 +1,9 @@
 # Roadmap
 
-Sprint 24 is released at `fe958f45409c0fc11df38cd945ae9678e3ad9e23`,
-tag `sprint-24-complete`. Sprint 25 adds only strict deterministic JSON
-knowledge commands in its feature working tree pending release. Broader
+Sprint 25 is released through PR #24 at
+`1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
+(annotated tag object `6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`). It adds only strict
+deterministic JSON knowledge commands. Broader
 language interpretation and public exposure remain unapproved and deferred.
 
 Sprint 24 released deterministic local command interpretation at merge
@@ -12,7 +13,7 @@ retrieval, knowledge prompts, synchronization, encryption, retention, and
 external access remain unapproved deferrals. The Constitution and ADR standard
 remain Draft; no approved ADR is implied.
 
-With Sprint 25 implemented in the feature working tree, vendor/family diversity
+With Sprint 25 released, vendor/family diversity
 policy, truth checking, external
 sources, deterministic entailment, confidence, contradictions, partial
 filtering, durable audit, HTTP exposure, and human review remain deferred.
@@ -74,13 +75,13 @@ and safe prompt use remain future work.
 | 22 | Add durable local list and minimal knowledge persistence. | `9dcb36b`, tag `sprint-22-complete` |
 | 23 | Add explicit local-first cognitive routing coordination. | `be59175c`, tag `sprint-23-complete` |
 | 24 | Add bounded deterministic list-command interpretation and explicit text routing. | `fe958f45`, tag `sprint-24-complete` |
-| 25 | Add strict deterministic local knowledge commands. | Implemented in feature working tree; pending release |
+| 25 | Add strict deterministic local knowledge commands. | `1f2da9cf`, tag `sprint-25-complete` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 25 is implemented but uncommitted in the feature working tree. The
+Sprint 25 is completed and released. Sprint 26 has not started. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by

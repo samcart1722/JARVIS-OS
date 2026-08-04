@@ -84,11 +84,12 @@ try {
     $excludedDirectoryNames = @(
         ".git", ".venv", "venv", "__pycache__", ".pytest_cache",
         ".ruff_cache", ".mypy_cache", ".tox", ".nox", "node_modules",
-        "dist", "build", "htmlcov", "LUXIOM_BACKUPS"
+        "dist", "build", "htmlcov", "LUXIOM_BACKUPS", "backup", "backups",
+        "logs", "log", ".tmp", "tmp", "temp"
     )
     $excludedExtensions = @(
         ".pyc", ".pyo", ".log", ".tmp", ".temp", ".swp", ".bak",
-        ".key", ".pem", ".pfx", ".p12", ".jks", ".keystore"
+        ".key", ".pem", ".pfx", ".p12", ".jks", ".keystore", ".crt", ".cer"
     )
     $secretNamePattern = '(?i)(credential|credentials|secret|secrets|token|private[_-]?key)'
 
@@ -107,7 +108,10 @@ try {
             $isExcludedDirectory = @($segments | Where-Object {
                 $excludedDirectoryNames -contains $_
             }).Count -gt 0
-            $isEnvFile = $file.Name -eq ".env" -or $file.Name -like ".env.*"
+            $isEnvExample = $file.Name -ieq ".env.example"
+            $isEnvFile = (-not $isEnvExample) -and (
+                $file.Name -ieq ".env" -or $file.Name -like ".env.*"
+            )
             $isSecretName = $file.Name -match $secretNamePattern
             $isExcludedExtension = $excludedExtensions -contains $file.Extension.ToLowerInvariant()
 
@@ -159,8 +163,16 @@ try {
         "Branch: $branch",
         "Commit: $commit",
         "Tags at HEAD: $tagText",
+        "Bundle: $([System.IO.Path]::GetFileName($bundlePath))",
+        "Source ZIP: $([System.IO.Path]::GetFileName($snapshotPath))",
         "Python: $pythonVersion",
         "Tests: $TestStatus",
+        "",
+        "SOURCE SNAPSHOT EXCLUSIONS",
+        "--------------------------",
+        "Directories: .git; .venv, venv; __pycache__; .pytest_cache, .ruff_cache, .mypy_cache; .tox, .nox; node_modules; dist, build, htmlcov; LUXIOM_BACKUPS, backup, backups; logs, log; .tmp, tmp, temp.",
+        "Files: .env and private .env.* variants are excluded; the public .env.example template is intentionally included. Names containing credential, secret, token, or private-key markers; compiled Python files; logs and temporary/editor/backup files; private-key and certificate extensions (.key, .pem, .pfx, .p12, .jks, .keystore, .crt, .cer) are excluded.",
+        "The configured backup destination is excluded when it is inside the repository.",
         "",
         "GIT STATUS",
         "----------"

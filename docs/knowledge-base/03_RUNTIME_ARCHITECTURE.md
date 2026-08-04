@@ -93,12 +93,11 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the Sprint 25 feature-tree checkpoint over released
-Sprint 24 at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag
-`sprint-24-complete` (annotated tag object
-`74eccb6af9b067a26718bc19f03b39b2c910e36e`; 625 tests passed at release).
-Sprint 25 remains uncommitted, unmerged, and untagged; no commit, PR, merge, or
-tag is claimed for it.
+This document describes the runtime architecture on released Sprint 25. PR #24
+was merged at `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag
+`sprint-25-complete` (annotated tag object
+`6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`; 680 tests passed at release).
+Sprint 26 has not started.
 
 ## Public path and flow
 
