@@ -8,15 +8,14 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 23 is completed/tagged at merge
-`be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`.
-Sprint 24 is implemented only in
-`feat/sprint-24-deterministic-local-command-interpretation` until release. It
-adds a deliberately narrow `list read` / `list add` interpreter and an explicit
-text-routing service. This is not general natural-language understanding.
-Malformed commands in the `list` namespace are terminal; unrelated text can
-reach cognition only with explicit fallback authorization. Public HTTP remains
-unchanged and does not use this service.
+Sprint 24 is completed/tagged at merge
+`fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`.
+Sprint 25 is implemented only in
+`feat/sprint-25-deterministic-local-knowledge-commands` until release. It adds
+strict JSON `knowledge read` / `knowledge store` commands to the existing
+interpreter and text router. This is deterministic structured-command parsing,
+not general natural-language understanding. Malformed commands in the
+`knowledge` namespace are terminal; public HTTP remains unchanged.
 
 Sprint 23's explicit application coordinator tries an already-typed local
 intent first. Handled local success or failure is terminal; only
@@ -28,8 +27,8 @@ parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The canonical released baseline before this branch is `sprint-23-complete` at
-  `be59175c201df1f2458551d99e2f5dcc3e9d2aac`.
+- The canonical released baseline before this branch is `sprint-24-complete` at
+  `fe958f45409c0fc11df38cd945ae9678e3ad9e23`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by

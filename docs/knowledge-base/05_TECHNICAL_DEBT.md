@@ -1,5 +1,14 @@
 # Technical Debt
 
+## Sprint 25 classification
+
+New technical debt introduced: none identified. Sprint 25 extends the existing
+immutable interpreter contract and reuses all local knowledge components.
+Richer grammar, multilingual or conversational interpretation, fuzzy matching,
+model-assisted extraction, public HTTP exposure, authentication/RBAC, semantic
+retrieval, synchronization, encryption, retention and external access remain
+deliberate deferrals rather than implementation debt.
+
 ## Sprint 24 classification
 
 New technical debt introduced: none identified. The immutable interpreter and

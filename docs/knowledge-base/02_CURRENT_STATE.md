@@ -1,14 +1,14 @@
 # Current State
 
-## Sprint 24 executable state
+## Sprint 25 executable state
 
-Sprint 23 is released at merge
-`be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`.
-Sprint 24 exists only in its feature working tree until release. A deterministic
-interpreter maps the narrow generic list grammar to the existing typed intents;
-an application router invokes the existing Sprint 23 coordinator. Recognized
-malformed list commands are terminal safe insufficiency. Unrecognized text may
-fall back only with explicit authorization. Public HTTP remains unchanged.
+Sprint 24 is released at merge
+`fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`.
+Sprint 25 exists only in its feature working tree and is uncommitted, unmerged,
+and untagged. The existing interpreter now maps strict JSON knowledge commands
+to existing typed knowledge intents. Workspace comes from the routing request,
+not text; caller-supplied provenance is preserved. Malformed recognized
+knowledge commands are terminal. Public HTTP and `CognitiveEngine` are unchanged.
 
 This boundary is not broad natural-language understanding or a model
 classifier. A cognitive route also does not imply model execution when the
@@ -47,10 +47,10 @@ Snapshot updated: **2026-08-03** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
-- Branch: `feat/sprint-24-deterministic-local-command-interpretation`
-- Base HEAD: `be59175c201df1f2458551d99e2f5dcc3e9d2aac`
-- Canonical released tag: `sprint-23-complete`
-- Sprint 24 state: implemented in the feature working tree; uncommitted,
+- Branch: `feat/sprint-25-deterministic-local-knowledge-commands`
+- Base HEAD: `fe958f45409c0fc11df38cd945ae9678e3ad9e23`
+- Canonical released tag: `sprint-24-complete`
+- Sprint 25 state: implemented in the feature working tree; uncommitted,
   unmerged, and untagged pending release.
 
 ## Confirmed stack
@@ -104,7 +104,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 21 | Completed/tagged | Released at `8c0330b`, tag `sprint-21-complete`; typed local lists add explicit identity, workspace, permissions and zero-call deterministic execution. |
 | 22 | Completed/tagged | Released at `9dcb36b`, tag `sprint-22-complete`; explicit SQLite adapters persist typed lists and minimal provenance-bearing knowledge. |
 | 23 | Completed/tagged | Released at merge `be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`; explicit typed local-first coordination remains outside public HTTP and `CognitiveEngine`. |
-| 24 | Implemented, uncommitted/unmerged/untagged | The bounded deterministic text-routing service is implemented in the feature working tree pending release. |
+| 24 | Completed/tagged | Released at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`; bounded list-command interpretation remains outside public HTTP. |
+| 25 | Implemented, uncommitted/unmerged/untagged | Strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
 
 ## Executable components and status
 
@@ -150,9 +151,14 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
 
-Current Sprint 24 feature-tree result: **625 passed** with `DEBUG=true`; Ruff
-and `git diff --check` passed using the controlled external Sprint 24 pytest
+Current Sprint 25 feature-tree result: **680 passed** with `DEBUG=true`; Ruff
+and `git diff --check` passed using the controlled external Sprint 25 pytest
 temporary directory.
+
+Historical Sprint 24 feature-tree result: **625 passed** with `DEBUG=true`;
+Ruff and `git diff --check` passed using a controlled external pytest temporary
+directory. Sprint 24 was subsequently released at
+`fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`.
 
 Historical Sprint 23 feature-tree result: **591 passed** with `DEBUG=true`;
 Ruff and `git diff --check` passed using controlled external pytest temporary

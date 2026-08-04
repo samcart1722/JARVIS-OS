@@ -1,5 +1,19 @@
 # Runtime Architecture
 
+## Deterministic knowledge commands (Sprint 25)
+
+The existing `DeterministicLocalCommandInterpreter` accepts strict JSON
+`knowledge read` and `knowledge store` commands and constructs the existing
+typed knowledge intents. `LocalCommandTextRouter` supplies the request workspace
+to interpretation exactly once; workspace cannot be supplied by JSON.
+Caller-supplied provenance is preserved in the immutable `KnowledgeRecord`.
+Malformed recognized knowledge commands are terminal before coordination.
+
+This is structured deterministic parsing, not natural-language understanding.
+The existing coordinator, resolver, capability and repositories are reused.
+Public HTTP, `CognitiveEngine`, Settings, SQLite schema and providers are
+unchanged.
+
 ## Deterministic text interpretation (Sprint 24)
 
 `Container` composes one `DeterministicLocalCommandInterpreter` and one
@@ -79,10 +93,12 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the Sprint 24 feature-tree checkpoint over released
-baseline `sprint-23-complete` at
-`be59175c201df1f2458551d99e2f5dcc3e9d2aac`. It does not claim a Sprint 24
-commit, merge, or tag.
+This document describes the Sprint 25 feature-tree checkpoint over released
+Sprint 24 at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag
+`sprint-24-complete` (annotated tag object
+`74eccb6af9b067a26718bc19f03b39b2c910e36e`; 625 tests passed at release).
+Sprint 25 remains uncommitted, unmerged, and untagged; no commit, PR, merge, or
+tag is claimed for it.
 
 ## Public path and flow
 

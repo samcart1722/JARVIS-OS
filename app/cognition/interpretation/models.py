@@ -5,10 +5,17 @@ from enum import Enum
 
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    ReadKnowledgeRecordQuery,
     ReadListItemsQuery,
+    StoreKnowledgeRecordCommand,
 )
 
-LocalListIntent = AddListItemsCommand | ReadListItemsQuery
+LocalCommandIntent = (
+    AddListItemsCommand
+    | ReadListItemsQuery
+    | StoreKnowledgeRecordCommand
+    | ReadKnowledgeRecordQuery
+)
 
 
 class LocalCommandInterpretationStatus(str, Enum):
@@ -23,19 +30,32 @@ class LocalCommandInvalidReason(str, Enum):
     MISSING_LIST_ID = "missing_list_id"
     MISSING_ITEMS = "missing_items"
     EMPTY_ITEM = "empty_item"
+    MALFORMED_KNOWLEDGE_COMMAND = "malformed_knowledge_command"
+    MISSING_KNOWLEDGE_PAYLOAD = "missing_knowledge_payload"
+    INVALID_KNOWLEDGE_JSON = "invalid_knowledge_json"
+    INVALID_KNOWLEDGE_FIELDS = "invalid_knowledge_fields"
+    INVALID_KNOWLEDGE_KIND = "invalid_knowledge_kind"
 
 
 @dataclass(frozen=True, slots=True)
 class LocalCommandInterpretation:
     status: LocalCommandInterpretationStatus
-    intent: LocalListIntent | None = None
+    intent: LocalCommandIntent | None = None
     invalid_reason: LocalCommandInvalidReason | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.status, LocalCommandInterpretationStatus):
             raise ValueError("Interpretation status is invalid.")
         if self.status is LocalCommandInterpretationStatus.INTERPRETED:
-            if not isinstance(self.intent, (AddListItemsCommand, ReadListItemsQuery)):
+            if not isinstance(
+                self.intent,
+                (
+                    AddListItemsCommand,
+                    ReadListItemsQuery,
+                    StoreKnowledgeRecordCommand,
+                    ReadKnowledgeRecordQuery,
+                ),
+            ):
                 raise ValueError("An interpreted result requires a typed local intent.")
             if self.invalid_reason is not None:
                 raise ValueError("An interpreted result cannot have an invalid reason.")

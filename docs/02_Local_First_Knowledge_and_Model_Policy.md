@@ -42,6 +42,15 @@ incluye un orquestador automático resolve-or-reason.
 El estándar ADR permanece Draft y pendiente de certificación; esta política no
 presenta ningún ADR como aprobado.
 
+## Sprint 25 deterministic knowledge commands
+
+Sprint 25 extends the existing deterministic interpreter with strict JSON
+knowledge commands. The routing request supplies workspace; command text cannot
+supply or override it. Provenance remains caller-supplied and is preserved
+exactly. Malformed recognized knowledge commands are terminal and never reach
+cognition. This structured syntax is not general natural-language
+understanding and changes no public HTTP, model, provider, or external access.
+
 ## Sprint 22 durable foundation
 
 Sprint 22 añade adaptadores SQLite explícitos para listas y el registro mínimo
