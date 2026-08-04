@@ -58,7 +58,9 @@ class LocalCommandTextRouter:
     def route(self, request: TextRoutingRequest) -> TextRoutingResult:
         if not isinstance(request, TextRoutingRequest):
             raise TypeError("A valid text-routing request is required.")
-        interpretation = self._interpreter.interpret(request.text)
+        interpretation = self._interpreter.interpret(
+            request.text, request.workspace
+        )
         if interpretation.status is LocalCommandInterpretationStatus.INVALID:
             return TextRoutingResult(interpretation)
         intent = (

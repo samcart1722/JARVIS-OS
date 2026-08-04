@@ -40,12 +40,15 @@ def test_public_http_does_not_import_interpretation() -> None:
 
 
 def test_demo_runtime_receives_composition_and_constructs_no_infrastructure() -> None:
-    path = "app/operations/local_command_interpretation_demo_runtime.py"
-    source = Path(path).read_text(encoding="utf-8")
-    imports = _imports(path)
-    assert "Container(" not in source
-    assert "Settings(" not in source
-    assert not any(
-        name.startswith(("app.core", "app.infrastructure", "app.models"))
-        for name in imports
-    )
+    for path in (
+        "app/operations/local_command_interpretation_demo_runtime.py",
+        "app/operations/local_knowledge_command_demo_runtime.py",
+    ):
+        source = Path(path).read_text(encoding="utf-8")
+        imports = _imports(path)
+        assert "Container(" not in source
+        assert "Settings(" not in source
+        assert not any(
+            name.startswith(("app.core", "app.infrastructure", "app.models"))
+            for name in imports
+        )

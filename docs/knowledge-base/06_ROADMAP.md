@@ -1,12 +1,18 @@
 # Roadmap
 
-Sprint 24 implements only deterministic local command interpretation in the
-feature working tree. Broad natural language, public exposure, authentication
-and RBAC, semantic retrieval, knowledge prompts, synchronization, encryption,
-retention, and external access remain unapproved deferrals. The Constitution
-and ADR standard remain Draft; no approved ADR is implied.
+Sprint 24 is released at `fe958f45409c0fc11df38cd945ae9678e3ad9e23`,
+tag `sprint-24-complete`. Sprint 25 adds only strict deterministic JSON
+knowledge commands in its feature working tree pending release. Broader
+language interpretation and public exposure remain unapproved and deferred.
 
-With Sprint 24 implemented in the feature working tree, vendor/family diversity
+Sprint 24 released deterministic local command interpretation at merge
+`fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`.
+Broad natural language, public exposure, authentication and RBAC, semantic
+retrieval, knowledge prompts, synchronization, encryption, retention, and
+external access remain unapproved deferrals. The Constitution and ADR standard
+remain Draft; no approved ADR is implied.
+
+With Sprint 25 implemented in the feature working tree, vendor/family diversity
 policy, truth checking, external
 sources, deterministic entailment, confidence, contradictions, partial
 filtering, durable audit, HTTP exposure, and human review remain deferred.
@@ -67,20 +73,21 @@ and safe prompt use remain future work.
 | 21 | Add the typed local-first list foundation. | `8c0330b`, tag `sprint-21-complete` |
 | 22 | Add durable local list and minimal knowledge persistence. | `9dcb36b`, tag `sprint-22-complete` |
 | 23 | Add explicit local-first cognitive routing coordination. | `be59175c`, tag `sprint-23-complete` |
-| 24 | Add bounded deterministic list-command interpretation and explicit text routing. | Implemented in feature working tree; pending release |
+| 24 | Add bounded deterministic list-command interpretation and explicit text routing. | `fe958f45`, tag `sprint-24-complete` |
+| 25 | Add strict deterministic local knowledge commands. | Implemented in feature working tree; pending release |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 24 is implemented but uncommitted in the feature working tree. The
+Sprint 25 is implemented but uncommitted in the feature working tree. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
 the API to safe HTTP 500/503 responses. The successful deterministic and
 reasoning paths retain their prior output.
 
-## Candidate scope after Sprint 24
+## Candidate scope after Sprint 25
 
 The following remain candidates, not commitments:
 
@@ -90,7 +97,7 @@ The following remain candidates, not commitments:
 - define migration, audit, synchronization, and external-access policy before
   adding durable or connected behavior.
 
-These are deferred candidates, not Sprint 24 scope. Before selecting work,
+These are deferred candidates, not Sprint 25 scope. Before selecting work,
 define test boundaries and record material decisions through the appropriate
 governance process.
 

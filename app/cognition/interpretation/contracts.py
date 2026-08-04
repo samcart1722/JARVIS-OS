@@ -3,7 +3,10 @@
 from typing import Protocol
 
 from app.cognition.interpretation.models import LocalCommandInterpretation
+from app.cognition.local_resolution.models import WorkspaceIdentity
 
 
 class LocalCommandInterpreter(Protocol):
-    def interpret(self, text: str) -> LocalCommandInterpretation: ...
+    def interpret(
+        self, text: str, workspace: WorkspaceIdentity
+    ) -> LocalCommandInterpretation: ...
