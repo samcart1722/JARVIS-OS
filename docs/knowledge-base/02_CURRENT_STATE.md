@@ -2,10 +2,10 @@
 
 ## Sprint 25 executable state
 
-Sprint 24 is released at merge
-`fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`.
-Sprint 25 exists only in its feature working tree and is uncommitted, unmerged,
-and untagged. The existing interpreter now maps strict JSON knowledge commands
+Sprint 25 is completed through merged PR #24 at
+`1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
+(annotated tag object `6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`).
+The existing interpreter maps strict JSON knowledge commands
 to existing typed knowledge intents. Workspace comes from the routing request,
 not text; caller-supplied provenance is preserved. Malformed recognized
 knowledge commands are terminal. Public HTTP and `CognitiveEngine` are unchanged.
@@ -47,11 +47,11 @@ Snapshot updated: **2026-08-03** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
-- Branch: `feat/sprint-25-deterministic-local-knowledge-commands`
-- Base HEAD: `fe958f45409c0fc11df38cd945ae9678e3ad9e23`
-- Canonical released tag: `sprint-24-complete`
-- Sprint 25 state: implemented in the feature working tree; uncommitted,
-  unmerged, and untagged pending release.
+- Canonical branch: `master`
+- Canonical released HEAD: `1f2da9cfb60a06cb323f30f200720be6437e10a9`
+- Canonical released tag: `sprint-25-complete`
+- Sprint 25 state: completed, merged through PR #24, and tagged.
+- Sprint 26 state: not started.
 
 ## Confirmed stack
 
@@ -105,7 +105,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 22 | Completed/tagged | Released at `9dcb36b`, tag `sprint-22-complete`; explicit SQLite adapters persist typed lists and minimal provenance-bearing knowledge. |
 | 23 | Completed/tagged | Released at merge `be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`; explicit typed local-first coordination remains outside public HTTP and `CognitiveEngine`. |
 | 24 | Completed/tagged | Released at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`; bounded list-command interpretation remains outside public HTTP. |
-| 25 | Implemented, uncommitted/unmerged/untagged | Strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
+| 25 | Completed/tagged | Released through PR #24 at merge `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`; strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
 
 ## Executable components and status
 
@@ -151,9 +151,9 @@ See [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) for exact boundaries.
 
 Command: `.\.venv\Scripts\python.exe -m pytest`
 
-Current Sprint 25 feature-tree result: **680 passed** with `DEBUG=true`; Ruff
-and `git diff --check` passed using the controlled external Sprint 25 pytest
-temporary directory.
+Sprint 25 release validation: **680 passed** with `DEBUG=true`, including **85
+focused tests**; Ruff and `git diff --check` passed using controlled external
+Sprint 25 pytest temporary directories.
 
 Historical Sprint 24 feature-tree result: **625 passed** with `DEBUG=true`;
 Ruff and `git diff --check` passed using a controlled external pytest temporary

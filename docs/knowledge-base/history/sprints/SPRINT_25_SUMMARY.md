@@ -1,9 +1,11 @@
 # Sprint 25 Summary — Deterministic Local Knowledge Commands v1
 
-Sprint 24 is completed at merge
-`fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`.
-Sprint 25 remains uncommitted, unmerged, and untagged in its feature working
-tree.
+Sprint 25 is completed and released through merged PR #24. Its feature commit
+is `d84fdd4014701cc7643e89a219ee5189b4b6f3b3`; the merge commit is
+`1f2da9cfb60a06cb323f30f200720be6437e10a9`; and the release tag is
+`sprint-25-complete` (annotated tag object
+`6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`). The feature branch was removed
+locally and remotely after release. Sprint 26 has not started.
 
 The existing interpreter now accepts strict JSON `knowledge read` and
 `knowledge store` commands and creates the existing typed knowledge intents.
@@ -17,9 +19,13 @@ permission ordering, repositories and immutable conflict, idempotency and
 not-found semantics remain intact. Public HTTP, `CognitiveEngine`, Settings,
 schema, providers and external access are unchanged.
 
-Implementation validation passed **680 tests** with `DEBUG=true`. Ruff and
-`git diff --check` were clean using a controlled external pytest temporary
-directory.
+Release validation passed **680 tests**, including **85 focused tests**, with
+`DEBUG=true`. Ruff and `git diff --check` were clean using controlled external
+pytest temporary directories. The initial independent feature review identified
+corrective work, which was completed in a corrective pass; the final independent
+feature review returned `APPROVED WITH NON-BLOCKING NOTES`, with no further
+corrective action required before PR merge. The final backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260803_190024`.
 
 The operational demo observes actual composed boundaries: one cognitive
 processor invocation in the authorized unrelated scenario and zero provider,
