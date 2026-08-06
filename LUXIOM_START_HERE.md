@@ -8,11 +8,11 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-The canonical released baseline is Sprint 25.1 at
-`9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
-`sprint-25.1-release-closure`. The current feature tree implements Sprint 26
-deterministic exact-key local knowledge discovery. Sprint 26 remains unmerged,
-untagged, and non-canonical.
+Sprint 26 deterministic exact-key local knowledge discovery is merged into
+canonical `master` at merge commit
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`. The release tag
+`sprint-26-complete` is pending. Sprint 25.1 remains the latest completed tagged
+release until that tag is created.
 
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
@@ -21,8 +21,8 @@ strict JSON `knowledge read` / `knowledge store` commands to the existing
 interpreter and text router. This is deterministic structured-command parsing,
 not general natural-language understanding. Malformed commands in the
 `knowledge` namespace are terminal; public HTTP remains unchanged.
-Release validation passed 680 tests, including 85 focused tests. Sprint 26 has
-not started.
+Release validation passed 680 tests, including 85 focused tests. Sprint 26 was
+subsequently implemented and merged as described above.
 
 Sprint 23's explicit application coordinator tries an already-typed local
 intent first. Handled local success or failure is terminal; only
@@ -34,7 +34,7 @@ parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The canonical released baseline is `sprint-25.1-release-closure` at
+- The latest completed release tag is `sprint-25.1-release-closure` at
   `9a61d53a3db036c4399e4fa5eef5e31ee92e6462`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,

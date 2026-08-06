@@ -1,6 +1,6 @@
 # Runtime Architecture
 
-## Deterministic knowledge discovery (Sprint 26 feature tree)
+## Deterministic knowledge discovery (Sprint 26 canonical master)
 
 The existing interpreter, router, coordinator, resolver, knowledge capability,
 authorization policy, and repository instances carry a new typed
@@ -8,8 +8,10 @@ authorization policy, and repository instances carry a new typed
 precedes one exact repository lookup. Repositories order matching records by
 case-sensitive record ID and return at most 51; the capability exposes at most
 50 plus `truncated`. Zero results are handled local success and never fall back
-to cognition. This feature is unmerged and untagged; Sprint 25.1 at `9a61d53`
-remains the released baseline.
+to cognition. This feature is canonical at merge commit
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`; release tag
+`sprint-26-complete` is pending, and Sprint 25.1 remains the latest completed
+tagged release until tagging.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -104,11 +106,11 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-The canonical released baseline is Sprint 25.1 at
-`9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
-`sprint-25.1-release-closure`; its Sprint 25 validation recorded 680 passing
-tests. This document also describes the current unmerged and untagged Sprint 26
-feature-tree extension identified above.
+Sprint 25.1 at `9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
+`sprint-25.1-release-closure`, recorded 680 passing tests. Sprint 26 is now
+canonical on `master` at merge commit
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`; its release tag
+`sprint-26-complete` remains pending.
 
 ## Public path and flow
 
