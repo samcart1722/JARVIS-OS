@@ -5,11 +5,16 @@ from enum import Enum
 
 from app.cognition.domain.cognitive_outcome import CognitiveOutcome
 from app.cognition.local_resolution.models import (
+    KnowledgeDiscoveryResolutionResult,
     KnowledgeResolutionResult,
     LocalResolutionResult,
 )
 
-LocalResult = LocalResolutionResult | KnowledgeResolutionResult
+LocalResult = (
+    LocalResolutionResult
+    | KnowledgeResolutionResult
+    | KnowledgeDiscoveryResolutionResult
+)
 
 
 class CoordinatedRoute(str, Enum):
@@ -41,9 +46,7 @@ class CoordinatedRequest:
     cognitive_input: object | None = None
 
     def __post_init__(self) -> None:
-        if not isinstance(
-            self.fallback_authorization, CognitiveFallbackAuthorization
-        ):
+        if not isinstance(self.fallback_authorization, CognitiveFallbackAuthorization):
             raise ValueError("Explicit fallback authorization is required.")
 
 
@@ -61,7 +64,11 @@ class CoordinatedResult:
             if (
                 not isinstance(
                     self.local_result,
-                    (LocalResolutionResult, KnowledgeResolutionResult),
+                    (
+                        LocalResolutionResult,
+                        KnowledgeResolutionResult,
+                        KnowledgeDiscoveryResolutionResult,
+                    ),
                 )
                 or not self.local_result.handled
                 or self.cognitive_outcome is not None

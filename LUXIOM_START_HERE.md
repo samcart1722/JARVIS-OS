@@ -8,6 +8,12 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
+The canonical released baseline is Sprint 25.1 at
+`9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
+`sprint-25.1-release-closure`. The current feature tree implements Sprint 26
+deterministic exact-key local knowledge discovery. Sprint 26 remains unmerged,
+untagged, and non-canonical.
+
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
 (annotated tag object `6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`). It adds
@@ -28,8 +34,8 @@ parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The canonical released baseline is `sprint-25-complete` at
-  `1f2da9cfb60a06cb323f30f200720be6437e10a9`.
+- The canonical released baseline is `sprint-25.1-release-closure` at
+  `9a61d53a3db036c4399e4fa5eef5e31ee92e6462`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by

@@ -10,6 +10,7 @@ from app.cognition.local_resolution.contracts import (
     LocalRepositoryError,
 )
 from app.cognition.local_resolution.models import (
+    KNOWLEDGE_DISCOVERY_LOOKAHEAD,
     KnowledgeKind,
     KnowledgeProvenance,
     KnowledgeRead,
@@ -36,8 +37,7 @@ class SQLiteLocalStorage:
 
     def __init__(self, database_path: str | Path) -> None:
         if isinstance(database_path, str) and (
-            not database_path.strip()
-            or database_path.endswith(("/", "\\"))
+            not database_path.strip() or database_path.endswith(("/", "\\"))
         ):
             raise ValueError("Database path must include a filename.")
         path = Path(database_path)
@@ -165,9 +165,7 @@ class SQLiteLocalStorage:
         snapshot = self.read(workspace, normalized_list_id)
         return ListItemsAdded(tuple(added), tuple(duplicates), snapshot.items)
 
-    def read(
-        self, workspace: WorkspaceIdentity, identifier: str
-    ) -> ListItemsSnapshot:
+    def read(self, workspace: WorkspaceIdentity, identifier: str) -> ListItemsSnapshot:
         """Read a list by list ID; use read_knowledge for knowledge records."""
         connection = self._require_initialized_connection()
         if not isinstance(workspace, WorkspaceIdentity) or not identifier.strip():
@@ -240,6 +238,61 @@ class SQLiteLocalStorage:
             )
         )
 
+    def find_knowledge_by_key(
+        self,
+        workspace: WorkspaceIdentity,
+        key: str,
+        kind: KnowledgeKind | None = None,
+    ) -> tuple[KnowledgeRecord, ...]:
+        connection = self._require_initialized_connection()
+        if (
+            not isinstance(workspace, WorkspaceIdentity)
+            or not isinstance(key, str)
+            or not key.strip()
+        ):
+            raise ValueError("Valid workspace and knowledge key are required.")
+        if kind is not None and not isinstance(kind, KnowledgeKind):
+            raise ValueError("Knowledge kind is invalid.")
+        select = (
+            "SELECT record_id, kind, knowledge_key, knowledge_value, "
+            "source_type, source_reference FROM knowledge_records "
+            "WHERE workspace_id = ? AND knowledge_key = ? "
+        )
+        try:
+            if kind is None:
+                rows = connection.execute(
+                    select + "ORDER BY record_id COLLATE BINARY ASC LIMIT ?",
+                    (
+                        workspace.workspace_id,
+                        key.strip(),
+                        KNOWLEDGE_DISCOVERY_LOOKAHEAD,
+                    ),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    select
+                    + "AND kind = ? ORDER BY record_id COLLATE BINARY ASC LIMIT ?",
+                    (
+                        workspace.workspace_id,
+                        key.strip(),
+                        kind.value,
+                        KNOWLEDGE_DISCOVERY_LOOKAHEAD,
+                    ),
+                ).fetchall()
+        except sqlite3.DatabaseError as error:
+            raise LocalStorageError("Local knowledge discovery failed.") from error
+        return tuple(
+            KnowledgeRecord(
+                row[0],
+                workspace,
+                KnowledgeKind(row[1]),
+                row[2],
+                row[3],
+                KnowledgeProvenance(row[4], row[5]),
+            )
+            for row in rows
+        )
+
     def _require_connection(self) -> sqlite3.Connection:
         if self._connection is None:
             raise LocalStorageError("Local storage is not open.")
@@ -274,7 +327,13 @@ class SQLiteKnowledgeRecordRepository:
     def store(self, record: KnowledgeRecord) -> KnowledgeStored:
         return self._storage.store(record)
 
-    def read(
-        self, workspace: WorkspaceIdentity, record_id: str
-    ) -> KnowledgeRead:
+    def read(self, workspace: WorkspaceIdentity, record_id: str) -> KnowledgeRead:
         return self._storage.read_knowledge(workspace, record_id)
+
+    def find_by_key(
+        self,
+        workspace: WorkspaceIdentity,
+        key: str,
+        kind: KnowledgeKind | None = None,
+    ) -> tuple[KnowledgeRecord, ...]:
+        return self._storage.find_knowledge_by_key(workspace, key, kind)

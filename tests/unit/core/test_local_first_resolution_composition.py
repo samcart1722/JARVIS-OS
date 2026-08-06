@@ -4,10 +4,12 @@ from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.local_resolution.models import (
     ActorIdentity,
     AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
     ReadListItemsQuery,
     WorkspaceIdentity,
 )
 from app.cognition.local_resolution.permissions import (
+    KNOWLEDGE_RECORDS_READ,
     LIST_ITEMS_ADD,
     LIST_ITEMS_READ,
     PermissionGrant,
@@ -86,10 +88,7 @@ def test_container_retains_falsey_injected_repositories() -> None:
     assert container.local_list_repository is list_repository
     assert container.local_knowledge_repository is knowledge_repository
     assert container.structured_list_capability._repository is list_repository
-    assert (
-        container.structured_knowledge_capability._repository
-        is knowledge_repository
-    )
+    assert container.structured_knowledge_capability._repository is knowledge_repository
 
 
 def test_container_composes_one_coordinator_from_existing_paths() -> None:
@@ -108,4 +107,21 @@ def test_container_composes_text_routing_from_existing_coordinator() -> None:
     assert (
         container.local_command_text_router._coordinator
         is container.local_first_cognitive_coordinator
+    )
+
+
+def test_discovery_query_uses_existing_composed_graph() -> None:
+    grant = PermissionGrant("a", "w", frozenset((KNOWLEDGE_RECORDS_READ,)))
+    container = Container(Settings(_env_file=None), local_permission_grants=(grant,))
+    result = container.local_first_resolver.resolve(
+        ActorIdentity("a"), WorkspaceIdentity("w"), FindKnowledgeRecordsQuery("key")
+    )
+    assert result.success and result.records == () and not result.truncated
+    assert (
+        container.local_first_resolver._knowledge_capability
+        is container.structured_knowledge_capability
+    )
+    assert (
+        container.structured_knowledge_capability._repository
+        is container.local_knowledge_repository
     )

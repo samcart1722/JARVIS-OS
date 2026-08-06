@@ -5,6 +5,7 @@ from enum import Enum
 
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
     ReadKnowledgeRecordQuery,
     ReadListItemsQuery,
     StoreKnowledgeRecordCommand,
@@ -15,6 +16,7 @@ LocalCommandIntent = (
     | ReadListItemsQuery
     | StoreKnowledgeRecordCommand
     | ReadKnowledgeRecordQuery
+    | FindKnowledgeRecordsQuery
 )
 
 
@@ -54,6 +56,7 @@ class LocalCommandInterpretation:
                     ReadListItemsQuery,
                     StoreKnowledgeRecordCommand,
                     ReadKnowledgeRecordQuery,
+                    FindKnowledgeRecordsQuery,
                 ),
             ):
                 raise ValueError("An interpreted result requires a typed local intent.")

@@ -1,5 +1,14 @@
 # Technical Debt
 
+## Sprint 26 feature-tree classification
+
+No new technical debt is identified. The implementation extends the existing
+typed path, centralizes the 50/51 bounds, keeps public truncation in the
+capability, and explicitly aligns Python ordinal ordering with SQLite BINARY
+ordering. Pagination, a secondary index, fuzzy/semantic search, filterless
+listing, public API exposure, generic criteria, configurable limits, ranking,
+and model-assisted interpretation are deliberate narrow-scope deferrals.
+
 ## Sprint 25 classification
 
 New technical debt introduced: none identified. Sprint 25 extends the existing

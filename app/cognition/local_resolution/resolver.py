@@ -20,7 +20,10 @@ from app.cognition.local_resolution.models import (
     LOCAL_VALIDATION_FAILED,
     ActorIdentity,
     AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
+    KnowledgeDiscoveryResolutionResult,
     KnowledgeRead,
+    KnowledgeRecordsFound,
     KnowledgeResolutionResult,
     KnowledgeStored,
     ListItemsAdded,
@@ -47,10 +50,19 @@ class LocalFirstResolver:
         actor: ActorIdentity,
         workspace: WorkspaceIdentity,
         intent: object,
-    ) -> LocalResolutionResult | KnowledgeResolutionResult:
+    ) -> (
+        LocalResolutionResult
+        | KnowledgeResolutionResult
+        | KnowledgeDiscoveryResolutionResult
+    ):
         list_intent = isinstance(intent, (AddListItemsCommand, ReadListItemsQuery))
         knowledge_intent = isinstance(
-            intent, (StoreKnowledgeRecordCommand, ReadKnowledgeRecordQuery)
+            intent,
+            (
+                StoreKnowledgeRecordCommand,
+                ReadKnowledgeRecordQuery,
+                FindKnowledgeRecordsQuery,
+            ),
         )
         if not list_intent and not knowledge_intent:
             return LocalResolutionResult(False, False, "", LOCAL_NOT_HANDLED_ROUTE)
@@ -59,6 +71,14 @@ class LocalFirstResolver:
         if not isinstance(actor, ActorIdentity) or not isinstance(
             workspace, WorkspaceIdentity
         ):
+            if isinstance(intent, FindKnowledgeRecordsQuery):
+                return KnowledgeDiscoveryResolutionResult(
+                    True,
+                    False,
+                    "Local knowledge discovery could not be completed.",
+                    LOCAL_CAPABILITY_ROUTE,
+                    error_code=LOCAL_VALIDATION_FAILED,
+                )
             if knowledge_intent:
                 return KnowledgeResolutionResult(
                     True,
@@ -80,6 +100,14 @@ class LocalFirstResolver:
             else:
                 result = self._knowledge_capability.execute(actor, workspace, intent)
         except LocalPermissionDenied:
+            if isinstance(intent, FindKnowledgeRecordsQuery):
+                return KnowledgeDiscoveryResolutionResult(
+                    True,
+                    False,
+                    "Local knowledge discovery denied.",
+                    LOCAL_CAPABILITY_ROUTE,
+                    error_code=LOCAL_PERMISSION_DENIED,
+                )
             if knowledge_intent:
                 return KnowledgeResolutionResult(
                     True,
@@ -104,6 +132,14 @@ class LocalFirstResolver:
                 error_code=LOCAL_KNOWLEDGE_CONFLICT,
             )
         except LocalRepositoryError:
+            if isinstance(intent, FindKnowledgeRecordsQuery):
+                return KnowledgeDiscoveryResolutionResult(
+                    True,
+                    False,
+                    "Local knowledge discovery could not be completed.",
+                    LOCAL_CAPABILITY_ROUTE,
+                    error_code=LOCAL_VALIDATION_FAILED,
+                )
             if knowledge_intent:
                 return KnowledgeResolutionResult(
                     True,
@@ -120,6 +156,14 @@ class LocalFirstResolver:
                 error_code=LOCAL_VALIDATION_FAILED,
             )
         except (TypeError, ValueError):
+            if isinstance(intent, FindKnowledgeRecordsQuery):
+                return KnowledgeDiscoveryResolutionResult(
+                    True,
+                    False,
+                    "Local knowledge discovery could not be completed.",
+                    LOCAL_CAPABILITY_ROUTE,
+                    error_code=LOCAL_VALIDATION_FAILED,
+                )
             if knowledge_intent:
                 return KnowledgeResolutionResult(
                     True,
@@ -177,6 +221,15 @@ class LocalFirstResolver:
                 "Knowledge record read locally.",
                 LOCAL_CAPABILITY_ROUTE,
                 record=result.record,
+            )
+        if isinstance(result, KnowledgeRecordsFound):
+            return KnowledgeDiscoveryResolutionResult(
+                True,
+                True,
+                "Knowledge records found locally.",
+                LOCAL_CAPABILITY_ROUTE,
+                records=result.records,
+                truncated=result.truncated,
             )
         if knowledge_intent:
             return KnowledgeResolutionResult(

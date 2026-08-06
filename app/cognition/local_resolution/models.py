@@ -9,6 +9,8 @@ LOCAL_PERMISSION_DENIED = "local_permission_denied"
 LOCAL_VALIDATION_FAILED = "local_validation_failed"
 LOCAL_KNOWLEDGE_CONFLICT = "local_knowledge_conflict"
 LOCAL_KNOWLEDGE_NOT_FOUND = "local_knowledge_not_found"
+KNOWLEDGE_DISCOVERY_MAX_RESULTS = 50
+KNOWLEDGE_DISCOVERY_LOOKAHEAD = 51
 
 
 def _non_blank(value: str, label: str) -> str:
@@ -132,6 +134,17 @@ class ReadKnowledgeRecordQuery:
 
 
 @dataclass(frozen=True, slots=True)
+class FindKnowledgeRecordsQuery:
+    key: str
+    kind: KnowledgeKind | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "key", _non_blank(self.key, "Knowledge key"))
+        if self.kind is not None and not isinstance(self.kind, KnowledgeKind):
+            raise ValueError("Knowledge kind is invalid.")
+
+
+@dataclass(frozen=True, slots=True)
 class KnowledgeStored:
     record: KnowledgeRecord
     created: bool
@@ -140,6 +153,24 @@ class KnowledgeStored:
 @dataclass(frozen=True, slots=True)
 class KnowledgeRead:
     record: KnowledgeRecord | None
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeRecordsFound:
+    records: tuple[KnowledgeRecord, ...]
+    truncated: bool
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.records, tuple) or any(
+            not isinstance(record, KnowledgeRecord) for record in self.records
+        ):
+            raise ValueError("Knowledge discovery records must be a tuple of records.")
+        if len(self.records) > KNOWLEDGE_DISCOVERY_MAX_RESULTS:
+            raise ValueError("Knowledge discovery returned too many records.")
+        if not isinstance(self.truncated, bool):
+            raise ValueError("Knowledge discovery truncation must be explicit.")
+        if self.truncated and len(self.records) != KNOWLEDGE_DISCOVERY_MAX_RESULTS:
+            raise ValueError("Truncated knowledge discovery must contain 50 records.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,3 +216,25 @@ class KnowledgeResolutionResult:
             raise ValueError("Knowledge result success and record are inconsistent.")
         if self.created and not self.success:
             raise ValueError("Only a successful store can create a record.")
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeDiscoveryResolutionResult:
+    handled: bool
+    success: bool
+    response: str
+    resolution_route: str
+    records: tuple[KnowledgeRecord, ...] = ()
+    truncated: bool = False
+    error_code: str | None = None
+    model_used: bool = False
+    external_access: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.handled or self.resolution_route != LOCAL_CAPABILITY_ROUTE:
+            raise ValueError("Knowledge discovery must be a handled local result.")
+        if self.model_used or self.external_access:
+            raise ValueError("Local resolution cannot report remote activity.")
+        KnowledgeRecordsFound(self.records, self.truncated)
+        if not self.success and (self.records or self.truncated):
+            raise ValueError("Failed knowledge discovery cannot contain records.")

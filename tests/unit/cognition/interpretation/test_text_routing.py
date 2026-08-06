@@ -59,9 +59,7 @@ from app.operations.local_command_interpretation_demo_runtime import (
 def _router(actions=(LIST_ITEMS_ADD, LIST_ITEMS_READ)):
     actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
     grants = (
-        (PermissionGrant("actor", "workspace", frozenset(actions)),)
-        if actions
-        else ()
+        (PermissionGrant("actor", "workspace", frozenset(actions)),) if actions else ()
     )
     policy = ExplicitPermissionPolicy(grants)
     resolver = Mock(
@@ -72,9 +70,7 @@ def _router(actions=(LIST_ITEMS_ADD, LIST_ITEMS_READ)):
     )
     processor = Mock()
     processor.process.return_value = CognitiveOutcome(True, response="cognitive")
-    coordinator = Mock(
-        wraps=LocalFirstCognitiveCoordinator(resolver, processor)
-    )
+    coordinator = Mock(wraps=LocalFirstCognitiveCoordinator(resolver, processor))
     interpreter = Mock(wraps=DeterministicLocalCommandInterpreter())
     return (
         LocalCommandTextRouter(interpreter, coordinator),
@@ -97,11 +93,41 @@ def test_interpreted_add_calls_each_boundary_once_and_is_terminal() -> None:
     router, interpreter, coordinator, resolver, processor, actor, workspace = _router()
     result = router.route(_request(actor, workspace, "list add x :: a", True))
     assert result.coordinated_result.route is CoordinatedRoute.LOCAL
-    interpreter.interpret.assert_called_once_with(
-        "list add x :: a", workspace
-    )
+    interpreter.interpret.assert_called_once_with("list add x :: a", workspace)
     coordinator.coordinate.assert_called_once()
     resolver.resolve.assert_called_once()
+    processor.process.assert_not_called()
+
+
+def test_valid_find_calls_existing_boundaries_and_repository_once() -> None:
+    router, interpreter, coordinator, resolver, processor, actor, workspace = _router(
+        (KNOWLEDGE_RECORDS_READ,)
+    )
+    repository = resolver._mock_wraps._knowledge_capability._repository
+    repository.find_by_key = Mock(wraps=repository.find_by_key)
+    text = 'knowledge find :: {"key":"missing"}'
+    result = router.route(_request(actor, workspace, text, True))
+    local = result.coordinated_result.local_result
+    assert result.coordinated_result.route is CoordinatedRoute.LOCAL
+    assert local.success and local.records == () and not local.truncated
+    interpreter.interpret.assert_called_once_with(text, workspace)
+    coordinator.coordinate.assert_called_once()
+    resolver.resolve.assert_called_once()
+    repository.find_by_key.assert_called_once_with(workspace, "missing", None)
+    processor.process.assert_not_called()
+
+
+def test_invalid_find_is_terminal_before_coordination() -> None:
+    router, interpreter, coordinator, resolver, processor, actor, workspace = _router(
+        (KNOWLEDGE_RECORDS_READ,)
+    )
+    text = "knowledge find :: {"
+    result = router.route(_request(actor, workspace, text, True))
+    assert result.interpretation.status is LocalCommandInterpretationStatus.INVALID
+    assert result.coordinated_result is None
+    interpreter.interpret.assert_called_once_with(text, workspace)
+    coordinator.coordinate.assert_not_called()
+    resolver.resolve.assert_not_called()
     processor.process.assert_not_called()
 
 
@@ -164,8 +190,7 @@ def test_permission_denial_and_validation_error_are_preserved() -> None:
     denied = router.route(_request(actor, workspace, "list add x :: a", True))
     invalid_actor = router.route(_request(None, workspace, "list read x", True))
     assert (
-        denied.coordinated_result.local_result.error_code
-        == "local_permission_denied"
+        denied.coordinated_result.local_result.error_code == "local_permission_denied"
     )
     assert (
         invalid_actor.coordinated_result.local_result.error_code
@@ -290,9 +315,7 @@ def test_knowledge_denial_is_terminal_and_malformed_stops_before_routing() -> No
     denied = router.route(_request(actor, workspace, _knowledge_store(), True))
     assert denied.coordinated_result.local_result.error_code == LOCAL_PERMISSION_DENIED
     assert repository._records == {}
-    malformed = router.route(
-        _request(actor, workspace, "knowledge store :: {", True)
-    )
+    malformed = router.route(_request(actor, workspace, "knowledge store :: {", True))
     assert malformed.coordinated_result is None
     assert interpreter.interpret.call_count == 2
     coordinator.coordinate.assert_called_once()
@@ -324,9 +347,13 @@ def test_knowledge_read_invalid_identity_is_terminal(actor, workspace) -> None:
     ("first_store", "identical_store", "read", "conflict", "not_found", "denied"),
 )
 def test_each_knowledge_operation_has_exact_local_call_profile(case) -> None:
-    actions = () if case == "denied" else (
-        KNOWLEDGE_RECORDS_ADD,
-        KNOWLEDGE_RECORDS_READ,
+    actions = (
+        ()
+        if case == "denied"
+        else (
+            KNOWLEDGE_RECORDS_ADD,
+            KNOWLEDGE_RECORDS_READ,
+        )
     )
     router, interpreter, coordinator, resolver, processor, actor, workspace = _router(
         actions
