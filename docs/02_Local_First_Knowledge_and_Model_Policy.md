@@ -3,6 +3,15 @@
 Version: 1.0
 Status: Normative
 
+## Sprint 26 feature-tree application
+
+The unmerged and untagged Sprint 26 tree adds authorized, workspace-scoped,
+exact-key knowledge discovery with an optional exact kind. It returns at most
+50 records in binary/ordinal record-ID order, uses one internal lookahead row,
+and treats zero matches as local success. It performs no model, provider,
+network, ranking, inference, or external access. The released baseline remains
+Sprint 25.1 at `9a61d53a3db036c4399e4fa5eef5e31ee92e6462`.
+
 ## Policy
 
 Luxiom resuelve en este orden: capability local determinista autorizada;

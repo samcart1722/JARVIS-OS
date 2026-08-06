@@ -1,5 +1,16 @@
 # Runtime Architecture
 
+## Deterministic knowledge discovery (Sprint 26 feature tree)
+
+The existing interpreter, router, coordinator, resolver, knowledge capability,
+authorization policy, and repository instances carry a new typed
+`FindKnowledgeRecordsQuery`. Authorization with `knowledge.records.read`
+precedes one exact repository lookup. Repositories order matching records by
+case-sensitive record ID and return at most 51; the capability exposes at most
+50 plus `truncated`. Zero results are handled local success and never fall back
+to cognition. This feature is unmerged and untagged; Sprint 25.1 at `9a61d53`
+remains the released baseline.
+
 ## Deterministic knowledge commands (Sprint 25)
 
 The existing `DeterministicLocalCommandInterpreter` accepts strict JSON
@@ -93,11 +104,11 @@ the existing deterministic formatter runs.
 With both grounding and claim attribution enabled, Container selects one claim
 protocol path. Historical and Sprint 17 composition remain unchanged.
 
-This document describes the runtime architecture on released Sprint 25. PR #24
-was merged at `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag
-`sprint-25-complete` (annotated tag object
-`6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`; 680 tests passed at release).
-Sprint 26 has not started.
+The canonical released baseline is Sprint 25.1 at
+`9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
+`sprint-25.1-release-closure`; its Sprint 25 validation recorded 680 passing
+tests. This document also describes the current unmerged and untagged Sprint 26
+feature-tree extension identified above.
 
 ## Public path and flow
 

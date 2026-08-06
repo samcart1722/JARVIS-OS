@@ -18,6 +18,7 @@ from app.cognition.interpretation.models import (
 )
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
     KnowledgeKind,
     ReadKnowledgeRecordQuery,
     ReadListItemsQuery,
@@ -49,9 +50,7 @@ def test_add_trims_preserves_and_orders_item_display_text(
     result = interpreter.interpret(
         "LIST add groceries ::  milk | Eggs | Gerber  ", workspace
     )
-    assert result.intent == AddListItemsCommand(
-        "groceries", ("milk", "Eggs", "Gerber")
-    )
+    assert result.intent == AddListItemsCommand("groceries", ("milk", "Eggs", "Gerber"))
 
 
 @pytest.mark.parametrize("text", ("", "  ", None, object()))
@@ -64,8 +63,7 @@ def test_empty_or_non_string_input_is_invalid(interpreter, workspace, text) -> N
 @pytest.mark.parametrize("text", ("list read", "list add :: milk"))
 def test_missing_list_id_is_invalid(interpreter, workspace, text) -> None:
     assert (
-        interpreter.interpret(text, workspace).invalid_reason
-        is Reason.MISSING_LIST_ID
+        interpreter.interpret(text, workspace).invalid_reason is Reason.MISSING_LIST_ID
     )
 
 
@@ -166,6 +164,70 @@ def test_valid_read_maps_to_existing_query(interpreter, workspace) -> None:
     assert result.intent == ReadKnowledgeRecordQuery("family child diaper size")
 
 
+@pytest.mark.parametrize("kind", (None, *tuple(KnowledgeKind)))
+def test_valid_find_maps_exact_key_and_optional_kind(
+    interpreter, workspace, kind
+) -> None:
+    kind_field = "" if kind is None else f',"kind":"{kind.value}"'
+    result = interpreter.interpret(
+        f'KnOwLeDgE FiNd :: {{"key":" child.diaper_size "{kind_field}}}',
+        workspace,
+    )
+    assert result.intent == FindKnowledgeRecordsQuery("child.diaper_size", kind)
+
+
+def test_find_accepts_reversed_fields(interpreter, workspace) -> None:
+    result = interpreter.interpret(
+        'knowledge find :: {"kind":"fact","key":"child.diaper_size"}', workspace
+    )
+    assert result.intent == FindKnowledgeRecordsQuery(
+        "child.diaper_size", KnowledgeKind.FACT
+    )
+
+
+@pytest.mark.parametrize(
+    ("text", "reason"),
+    (
+        ("knowledge find", Reason.MALFORMED_KNOWLEDGE_COMMAND),
+        ("knowledge find {}", Reason.MALFORMED_KNOWLEDGE_COMMAND),
+        ("knowledge find :: ", Reason.MISSING_KNOWLEDGE_PAYLOAD),
+        ("knowledge find :: {", Reason.INVALID_KNOWLEDGE_JSON),
+        ('knowledge find :: {"key":"k"} trailing', Reason.INVALID_KNOWLEDGE_JSON),
+        ('knowledge find :: {"key":"a","key":"b"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        (
+            'knowledge find :: {"key":"k","kind":"fact","kind":"state"}',
+            Reason.INVALID_KNOWLEDGE_FIELDS,
+        ),
+        ('knowledge find :: {"Key":"k"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        (
+            'knowledge find :: {"key":"k","workspace":"w"}',
+            Reason.INVALID_KNOWLEDGE_FIELDS,
+        ),
+        ('knowledge find :: {"key":"k","extra":"x"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ("knowledge find :: {}", Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge find :: {"key":" "}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge find :: {"key":1}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge find :: {"key":"k","kind":1}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge find :: {"key":"k","kind":"FACT"}', Reason.INVALID_KNOWLEDGE_KIND),
+        (
+            'knowledge find :: {"key":"k","kind":"opinion"}',
+            Reason.INVALID_KNOWLEDGE_KIND,
+        ),
+        ("knowledge find :: []", Reason.INVALID_KNOWLEDGE_JSON),
+        ('knowledge find :: "k"', Reason.INVALID_KNOWLEDGE_JSON),
+        ("knowledge find :: null", Reason.INVALID_KNOWLEDGE_JSON),
+        ("knowledge find :: true", Reason.INVALID_KNOWLEDGE_JSON),
+        ("knowledge find :: 1", Reason.INVALID_KNOWLEDGE_JSON),
+    ),
+)
+def test_invalid_find_has_exact_terminal_reason(
+    interpreter, workspace, text, reason
+) -> None:
+    result = interpreter.interpret(text, workspace)
+    assert result.status is Status.INVALID
+    assert result.invalid_reason is reason
+
+
 @pytest.mark.parametrize("text", ("knowledgebase read :: {}", "knowledge.foo"))
 def test_similar_text_outside_namespace_is_not_interpreted(
     interpreter, workspace, text
@@ -196,7 +258,7 @@ def test_missing_knowledge_payload(interpreter, workspace) -> None:
     "payload",
     (
         "{",
-        '{} trailing',
+        "{} trailing",
         "[]",
         '"value"',
         "null",
@@ -244,9 +306,11 @@ def test_invalid_knowledge_kind(interpreter, workspace) -> None:
 def test_interpretation_invariants_accept_knowledge_and_reject_object(
     workspace,
 ) -> None:
-    record = DeterministicLocalCommandInterpreter().interpret(
-        f"knowledge store :: {_store_payload()}", workspace
-    ).intent
+    record = (
+        DeterministicLocalCommandInterpreter()
+        .interpret(f"knowledge store :: {_store_payload()}", workspace)
+        .intent
+    )
     assert LocalCommandInterpretation(Status.INTERPRETED, record).intent is record
     with pytest.raises(ValueError):
         LocalCommandInterpretation(Status.INTERPRETED, object())
@@ -314,9 +378,7 @@ def test_difficult_knowledge_json_rejections(
         '{"record_id":"r","kind":"fact"}',
     }
     operation = "read" if payload in read_payloads else "store"
-    result = interpreter.interpret(
-        f"knowledge {operation} :: {payload}", workspace
-    )
+    result = interpreter.interpret(f"knowledge {operation} :: {payload}", workspace)
     assert result.status is Status.INVALID
     assert result.invalid_reason is reason
 
@@ -333,16 +395,12 @@ def test_json_escapes_are_decoded_and_preserved(
         '{"record_id":"r","kind":"fact","key":"k","value":'
         f'{encoded_value},"source_type":"s","source_reference":"p"}}'
     )
-    result = interpreter.interpret(
-        f"knowledge store :: {payload}", workspace
-    )
+    result = interpreter.interpret(f"knowledge store :: {payload}", workspace)
     assert result.status is Status.INTERPRETED
     assert result.intent.record.value == expected
 
 
-def test_knowledge_json_trailing_whitespace_is_accepted(
-    interpreter, workspace
-) -> None:
+def test_knowledge_json_trailing_whitespace_is_accepted(interpreter, workspace) -> None:
     result = interpreter.interpret(
         'knowledge read :: {"record_id":"r"} \t\r\n', workspace
     )

@@ -5,6 +5,12 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
+Feature-tree note: Sprint 26 exact-key discovery is implemented but remains
+unmerged and untagged. Its released base is Sprint 25.1 at `9a61d53`, tag
+`sprint-25.1-release-closure`. See the
+[Sprint 26 summary](history/sprints/SPRINT_26_SUMMARY.md) and
+[operational demo](../operations/DETERMINISTIC_LOCAL_KNOWLEDGE_DISCOVERY_DEMO.md).
+
 1. [Project Context](01_PROJECT_CONTEXT.md) — identity, purpose, and platform model.
 2. [Current State](02_CURRENT_STATE.md) — dated, evidence-based repository snapshot.
 3. [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md) — what the code actually runs.

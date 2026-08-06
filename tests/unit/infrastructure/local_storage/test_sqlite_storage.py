@@ -7,11 +7,21 @@ from pathlib import Path
 import pytest
 
 from app.cognition.local_resolution.contracts import KnowledgeRecordConflict
+from app.cognition.local_resolution.knowledge_capability import (
+    StructuredKnowledgeCapability,
+)
 from app.cognition.local_resolution.models import (
+    ActorIdentity,
+    FindKnowledgeRecordsQuery,
     KnowledgeKind,
     KnowledgeProvenance,
     KnowledgeRecord,
     WorkspaceIdentity,
+)
+from app.cognition.local_resolution.permissions import (
+    KNOWLEDGE_RECORDS_READ,
+    ExplicitPermissionPolicy,
+    PermissionGrant,
 )
 from app.infrastructure.local_storage.sqlite_storage import (
     SCHEMA_VERSION,
@@ -127,7 +137,11 @@ def test_lists_persist_order_duplicates_isolation_and_snapshot(tmp_path) -> None
         second.open()
         second.initialize()
         assert second.read(one, "shopping").items == (
-            "diapers", "Gerber", "grapes", "milk", "later"
+            "diapers",
+            "Gerber",
+            "grapes",
+            "milk",
+            "later",
         )
         assert second.read(two, "shopping").items == ()
         assert second.read(one, "other'; DROP TABLE list_items; --").items == ("safe",)
@@ -171,10 +185,162 @@ def test_knowledge_round_trip_idempotency_conflict_and_workspace_identity(
         assert recovered.provenance == record.provenance
         assert repository.read(two, record.record_id).record == other_record
         assert (
-            repository.read(WorkspaceIdentity("three"), record.record_id).record
-            is None
+            repository.read(WorkspaceIdentity("three"), record.record_id).record is None
         )
         with pytest.raises(FrozenInstanceError):
             recovered.value = "changed"
     finally:
         second.close()
+
+
+def test_knowledge_discovery_exact_binary_order_kind_workspace_and_cap(
+    tmp_path,
+) -> None:
+    path = tmp_path / "discovery.sqlite3"
+    one, two = WorkspaceIdentity("one"), WorkspaceIdentity("two")
+    storage = SQLiteLocalStorage(path)
+    storage.open()
+    storage.initialize()
+    repository = SQLiteKnowledgeRecordRepository(storage)
+
+    def record(
+        record_id, workspace=one, key="child.diaper_size", kind=KnowledgeKind.FACT
+    ):
+        return KnowledgeRecord(
+            record_id,
+            workspace,
+            kind,
+            key,
+            "4",
+            KnowledgeProvenance("user_asserted", f"actor:{record_id}"),
+        )
+
+    try:
+        expected = tuple(sorted(("A", "r-10", "r-2", "z", "Á")))
+        for record_id in reversed(expected):
+            repository.store(record(record_id))
+        repository.store(record("concept", kind=KnowledgeKind.CONCEPT))
+        repository.store(record("substring", key="child.diaper"))
+        repository.store(record("case", key="CHILD.DIAPER_SIZE"))
+        repository.store(record("other", workspace=two))
+        assert (
+            tuple(
+                item.record_id
+                for item in repository.find_by_key(
+                    one, "child.diaper_size", KnowledgeKind.FACT
+                )
+            )
+            == expected
+        )
+        assert tuple(
+            item.record_id
+            for item in repository.find_by_key(
+                one, "child.diaper_size", KnowledgeKind.CONCEPT
+            )
+        ) == ("concept",)
+        assert repository.find_by_key(one, "missing") == ()
+        assert all(
+            item.workspace == one
+            for item in repository.find_by_key(one, "child.diaper_size")
+        )
+        for number in range(60):
+            repository.store(record(f"bulk-{number:02}", key="bulk"))
+        assert len(repository.find_by_key(one, "bulk")) == 51
+    finally:
+        storage.close()
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
+        tables = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
+        indexes = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master "
+                "WHERE type = 'index' AND name NOT LIKE 'sqlite_autoindex_%'"
+            )
+        }
+    assert tables == {"schema_metadata", "list_items", "knowledge_records"}
+    assert indexes == set()
+
+
+@pytest.mark.parametrize(
+    ("total", "repository_count", "visible_count", "truncated"),
+    (
+        (49, 49, 49, False),
+        (50, 50, 50, False),
+        (51, 51, 50, True),
+        (52, 51, 50, True),
+    ),
+)
+def test_sqlite_discovery_boundary_matrix_through_real_capability(
+    tmp_path, total, repository_count, visible_count, truncated
+) -> None:
+    storage = SQLiteLocalStorage(tmp_path / f"boundary-{total}.sqlite3")
+    storage.open()
+    storage.initialize()
+    repository = SQLiteKnowledgeRecordRepository(storage)
+    actor = ActorIdentity("actor")
+    workspace, other = WorkspaceIdentity("home"), WorkspaceIdentity("other")
+
+    def record(
+        record_id,
+        record_workspace=workspace,
+        key="boundary.key",
+        kind=KnowledgeKind.FACT,
+    ):
+        return KnowledgeRecord(
+            record_id,
+            record_workspace,
+            kind,
+            key,
+            "value",
+            KnowledgeProvenance("reviewed", f"actor:{record_id}"),
+        )
+
+    try:
+        for number in reversed(range(total)):
+            repository.store(record(f"match-{number:03}"))
+        repository.store(record("other-key", key="boundary"))
+        repository.store(record("other-kind", kind=KnowledgeKind.CONCEPT))
+        repository.store(record("other-workspace", record_workspace=other))
+
+        repository_records = repository.find_by_key(
+            workspace, "boundary.key", KnowledgeKind.FACT
+        )
+        policy = ExplicitPermissionPolicy(
+            (
+                PermissionGrant(
+                    actor.actor_id,
+                    workspace.workspace_id,
+                    frozenset((KNOWLEDGE_RECORDS_READ,)),
+                ),
+            )
+        )
+        result = StructuredKnowledgeCapability(repository, policy).execute(
+            actor,
+            workspace,
+            FindKnowledgeRecordsQuery("boundary.key", KnowledgeKind.FACT),
+        )
+
+        expected_ids = tuple(f"match-{number:03}" for number in range(total))
+        assert len(repository_records) == repository_count <= 51
+        assert (
+            tuple(record.record_id for record in repository_records)
+            == expected_ids[:51]
+        )
+        assert len(result.records) == visible_count <= 50
+        assert tuple(record.record_id for record in result.records) == expected_ids[:50]
+        assert result.truncated is truncated
+        assert all(
+            item.workspace == workspace
+            and item.key == "boundary.key"
+            and item.kind is KnowledgeKind.FACT
+            for item in (*repository_records, *result.records)
+        )
+    finally:
+        storage.close()

@@ -10,6 +10,7 @@ from app.cognition.interpretation.models import (
 )
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
     KnowledgeKind,
     KnowledgeProvenance,
     KnowledgeRecord,
@@ -20,13 +21,13 @@ from app.cognition.local_resolution.models import (
 )
 
 _LIST_NAMESPACE = re.compile(r"^list(?:\s|$)", re.IGNORECASE | re.ASCII)
-_KNOWLEDGE_NAMESPACE = re.compile(
-    r"^knowledge(?:\s|$)", re.IGNORECASE | re.ASCII
-)
+_KNOWLEDGE_NAMESPACE = re.compile(r"^knowledge(?:\s|$)", re.IGNORECASE | re.ASCII)
 _KNOWLEDGE_PREFIX = re.compile(
-    r"^knowledge\s+(read|store)\s+::", re.IGNORECASE | re.ASCII
+    r"^knowledge\s+(read|store|find)\s+::", re.IGNORECASE | re.ASCII
 )
 _READ_FIELDS = frozenset(("record_id",))
+_FIND_FIELDS = frozenset(("key",))
+_FIND_KIND_FIELDS = frozenset(("key", "kind"))
 _STORE_FIELDS = frozenset(
     ("record_id", "kind", "key", "value", "source_type", "source_reference")
 )
@@ -106,9 +107,7 @@ class DeterministicLocalCommandInterpreter:
     ) -> LocalCommandInterpretation:
         prefix = _KNOWLEDGE_PREFIX.match(command)
         if prefix is None:
-            return _invalid(
-                LocalCommandInvalidReason.MALFORMED_KNOWLEDGE_COMMAND
-            )
+            return _invalid(LocalCommandInvalidReason.MALFORMED_KNOWLEDGE_COMMAND)
         payload_text = command[prefix.end() :].lstrip()
         if not payload_text:
             return _invalid(LocalCommandInvalidReason.MISSING_KNOWLEDGE_PAYLOAD)
@@ -124,8 +123,11 @@ class DeterministicLocalCommandInterpreter:
 
         operation = prefix.group(1).lower()
         required = _READ_FIELDS if operation == "read" else _STORE_FIELDS
+        if operation == "find":
+            required = frozenset(payload)
         if (
-            frozenset(payload) != required
+            (operation == "find" and required not in (_FIND_FIELDS, _FIND_KIND_FIELDS))
+            or (operation != "find" and frozenset(payload) != required)
             or any(not isinstance(value, str) for value in payload.values())
             or any(not value.strip() for value in payload.values())
         ):
@@ -134,6 +136,17 @@ class DeterministicLocalCommandInterpreter:
             return LocalCommandInterpretation(
                 LocalCommandInterpretationStatus.INTERPRETED,
                 intent=ReadKnowledgeRecordQuery(payload["record_id"]),
+            )
+        if operation == "find":
+            kind = None
+            if "kind" in payload:
+                try:
+                    kind = KnowledgeKind(payload["kind"])
+                except ValueError:
+                    return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_KIND)
+            return LocalCommandInterpretation(
+                LocalCommandInterpretationStatus.INTERPRETED,
+                intent=FindKnowledgeRecordsQuery(payload["key"], kind),
             )
         try:
             kind = KnowledgeKind(payload["kind"])

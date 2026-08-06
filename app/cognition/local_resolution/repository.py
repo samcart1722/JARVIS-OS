@@ -1,6 +1,8 @@
 """Process-local, workspace-scoped list and knowledge repositories."""
 
 from app.cognition.local_resolution.models import (
+    KNOWLEDGE_DISCOVERY_LOOKAHEAD,
+    KnowledgeKind,
     KnowledgeRead,
     KnowledgeRecord,
     KnowledgeStored,
@@ -62,9 +64,34 @@ class InMemoryKnowledgeRecordRepository:
             return KnowledgeStored(existing, False)
         raise KnowledgeRecordConflict("Knowledge record already exists.")
 
-    def read(
-        self, workspace: WorkspaceIdentity, record_id: str
-    ) -> KnowledgeRead:
+    def read(self, workspace: WorkspaceIdentity, record_id: str) -> KnowledgeRead:
         if not isinstance(workspace, WorkspaceIdentity) or not record_id.strip():
             raise ValueError("Valid workspace and record ID are required.")
         return KnowledgeRead(self._records.get((workspace.workspace_id, record_id)))
+
+    def find_by_key(
+        self,
+        workspace: WorkspaceIdentity,
+        key: str,
+        kind: KnowledgeKind | None = None,
+    ) -> tuple[KnowledgeRecord, ...]:
+        if (
+            not isinstance(workspace, WorkspaceIdentity)
+            or not isinstance(key, str)
+            or not key.strip()
+        ):
+            raise ValueError("Valid workspace and knowledge key are required.")
+        if kind is not None and not isinstance(kind, KnowledgeKind):
+            raise ValueError("Knowledge kind is invalid.")
+        matches = (
+            record
+            for (workspace_id, _), record in self._records.items()
+            if workspace_id == workspace.workspace_id
+            and record.key == key.strip()
+            and (kind is None or record.kind is kind)
+        )
+        return tuple(
+            sorted(matches, key=lambda record: record.record_id)[
+                :KNOWLEDGE_DISCOVERY_LOOKAHEAD
+            ]
+        )

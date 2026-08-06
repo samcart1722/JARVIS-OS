@@ -34,8 +34,7 @@ def test_interpretation_has_no_infrastructure_or_operations_dependencies() -> No
 def test_public_http_does_not_import_interpretation() -> None:
     for path in ("app/api/routes/brain.py", "app/cognition/engine.py"):
         assert not any(
-            name.startswith("app.cognition.interpretation")
-            for name in _imports(path)
+            name.startswith("app.cognition.interpretation") for name in _imports(path)
         )
 
 
@@ -43,6 +42,7 @@ def test_demo_runtime_receives_composition_and_constructs_no_infrastructure() ->
     for path in (
         "app/operations/local_command_interpretation_demo_runtime.py",
         "app/operations/local_knowledge_command_demo_runtime.py",
+        "app/operations/local_knowledge_discovery_demo_runtime.py",
     ):
         source = Path(path).read_text(encoding="utf-8")
         imports = _imports(path)
