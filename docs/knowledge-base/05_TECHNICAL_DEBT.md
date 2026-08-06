@@ -1,6 +1,6 @@
 # Technical Debt
 
-## Sprint 26 feature-tree classification
+## Sprint 26 merged-release classification
 
 No new technical debt is identified. The implementation extends the existing
 typed path, centralizes the 50/51 bounds, keeps public truncation in the

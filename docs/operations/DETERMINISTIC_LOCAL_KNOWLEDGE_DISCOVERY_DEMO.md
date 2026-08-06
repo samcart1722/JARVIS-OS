@@ -1,8 +1,9 @@
 # Deterministic Local Knowledge Discovery Demo
 
-Feature-tree status: Sprint 26 is implemented but unmerged and untagged. The
-released baseline is Sprint 25.1 at `9a61d53`, tag
-`sprint-25.1-release-closure`.
+Sprint 26 is merged into canonical `master` at
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`. Release tag
+`sprint-26-complete` is pending; Sprint 25.1 remains the latest completed tagged
+release until that tag is created.
 
 Run from the repository root:
 

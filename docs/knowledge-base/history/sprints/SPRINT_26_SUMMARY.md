@@ -1,10 +1,12 @@
 # Sprint 26 Summary — Deterministic Local Knowledge Discovery v1
 
-Status: implemented on feature branch; unmerged and untagged.
+Status: merged into canonical `master`; release tag pending.
 
-The canonical released baseline remains Sprint 25.1 at
-`9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
-`sprint-25.1-release-closure`.
+Feature commit: `92d283c228f308f19f836726ef02d470745b1355`.
+PR: #26.
+Merge commit: `54e04261933ab85dbe4b237e6f81037d508b4a1c`.
+Release tag: pending `sprint-26-complete`. Sprint 25.1 remains the latest
+completed tagged release until that tag is created.
 
 Sprint 26 adds strict `knowledge find` commands for an exact key and optional
 exact `fact`, `concept`, or `state` kind. Workspace still comes exclusively
@@ -18,6 +20,9 @@ schema version 1 with no migration or index. Existing interpreter, router,
 coordinator, resolver, capability, repository composition, list/read/store
 semantics, public HTTP, cognitive engine, providers, Settings, RBAC, and
 dependencies remain unchanged.
+
+Final validation: 726 tests passed. Final independent verdict:
+`APPROVED WITH NON-BLOCKING NOTES`.
 
 Deliberately deferred: pagination, secondary indexing, fuzzy or semantic
 search, unrestricted listing, generic criteria, configurable limits, ranking,

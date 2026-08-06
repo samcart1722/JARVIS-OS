@@ -5,9 +5,10 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Feature-tree note: Sprint 26 exact-key discovery is implemented but remains
-unmerged and untagged. Its released base is Sprint 25.1 at `9a61d53`, tag
-`sprint-25.1-release-closure`. See the
+Sprint 26 exact-key discovery is merged into canonical `master` at
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`. Release tag
+`sprint-26-complete` is pending; Sprint 25.1 remains the latest completed tagged
+release until that tag is created. See the
 [Sprint 26 summary](history/sprints/SPRINT_26_SUMMARY.md) and
 [operational demo](../operations/DETERMINISTIC_LOCAL_KNOWLEDGE_DISCOVERY_DEMO.md).
 

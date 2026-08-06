@@ -1,9 +1,9 @@
 # Roadmap
 
-Sprint 26 exact-key local knowledge discovery is implemented on the current
-feature tree but is unmerged and untagged. The canonical released baseline
-remains Sprint 25.1 at `9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
-`sprint-25.1-release-closure`. Pagination, indexing based on measured scale,
+Sprint 26 exact-key local knowledge discovery is merged into canonical
+`master` at `54e04261933ab85dbe4b237e6f81037d508b4a1c`. Release tag
+`sprint-26-complete` is pending; Sprint 25.1 remains the latest completed tagged
+release until that tag is created. Pagination, indexing based on measured scale,
 fuzzy/semantic search, filterless listing, public exposure, ranking, and
 model-assisted interpretation remain deferred and are not implied next scope.
 
@@ -83,13 +83,15 @@ and safe prompt use remain future work.
 | 23 | Add explicit local-first cognitive routing coordination. | `be59175c`, tag `sprint-23-complete` |
 | 24 | Add bounded deterministic list-command interpretation and explicit text routing. | `fe958f45`, tag `sprint-24-complete` |
 | 25 | Add strict deterministic local knowledge commands. | `1f2da9cf`, tag `sprint-25-complete` |
+| 26 | Add deterministic exact-key local knowledge discovery. | `92d283c2`, PR #26, merge `54e04261`; release tag `sprint-26-complete` pending |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 25.1 is completed and released. Sprint 26 is implemented on the current
-feature tree but remains unmerged and untagged. The
+Sprint 25.1 remains the latest completed tagged release. Sprint 26 is merged
+into canonical `master` at `54e04261933ab85dbe4b237e6f81037d508b4a1c`, with
+release tag `sprint-26-complete` pending. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
