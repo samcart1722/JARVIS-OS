@@ -10,10 +10,11 @@ workspace-scoped,
 exact-key knowledge discovery with an optional exact kind. It returns at most
 50 records in binary/ordinal record-ID order, uses one internal lookahead row,
 and treats zero matches as local success. It performs no model, provider,
-network, ranking, inference, or external access. Merge commit
-`54e04261933ab85dbe4b237e6f81037d508b4a1c` is canonical; release tag
-`sprint-26-complete` is pending, so Sprint 25.1 remains the latest completed
-tagged release until tagging.
+network, ranking, inference, or external access. The functional implementation
+merged at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical
+release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
+fully released at the annotated tag `sprint-26-complete` and is the latest
+completed tagged release.
 
 ## Policy
 

@@ -1,6 +1,6 @@
 # Current State
 
-## Sprint 26 merged canonical state
+## Sprint 26 released canonical state
 
 Canonical `master` implements deterministic local discovery through
 `knowledge find :: {"key":"..."}` with an optional exact
@@ -8,10 +8,11 @@ Canonical `master` implements deterministic local discovery through
 `knowledge.records.read`, ordered by case-sensitive record ID, capped at 50
 visible records with one lookahead row, and returns empty success for zero
 matches. Public HTTP, cognitive contracts, Settings, dependencies, RBAC, and
-SQLite schema version 1 remain unchanged. The canonical code is Sprint 26 at
-merge commit `54e04261933ab85dbe4b237e6f81037d508b4a1c`.
-Release tag `sprint-26-complete` is pending; Sprint 25.1 remains the latest
-completed tagged release until that tag is created.
+SQLite schema version 1 remain unchanged. The functional implementation merged
+at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical Sprint 26
+release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
+fully released at the annotated tag `sprint-26-complete` and is the latest
+completed tagged release.
 
 ## Sprint 25 executable state
 
@@ -61,10 +62,10 @@ Snapshot updated: **2026-08-03** (America/Tegucigalpa).
 ## Repository checkpoint
 
 - Canonical branch: `master`
-- Canonical code HEAD: `54e04261933ab85dbe4b237e6f81037d508b4a1c`
-- Latest completed release tag: `sprint-25.1-release-closure`
+- Canonical code HEAD: `ae13c3ed9720ee9564384366f2110670eb88fd85`
+- Latest completed release tag: `sprint-26-complete`
 - Sprint 25.1 state: completed, merged, and tagged.
-- Sprint 26 state: merged into `master`; release tag `sprint-26-complete` pending.
+- Sprint 26 state: fully released from `master` at tag `sprint-26-complete`.
 
 ## Confirmed stack
 
