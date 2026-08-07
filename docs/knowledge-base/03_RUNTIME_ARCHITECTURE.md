@@ -8,10 +8,11 @@ authorization policy, and repository instances carry a new typed
 precedes one exact repository lookup. Repositories order matching records by
 case-sensitive record ID and return at most 51; the capability exposes at most
 50 plus `truncated`. Zero results are handled local success and never fall back
-to cognition. This feature is canonical at merge commit
-`54e04261933ab85dbe4b237e6f81037d508b4a1c`; release tag
-`sprint-26-complete` is pending, and Sprint 25.1 remains the latest completed
-tagged release until tagging.
+to cognition. The feature merged at
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
+commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
+released at the annotated tag `sprint-26-complete` and is the latest completed
+tagged release.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -108,9 +109,10 @@ protocol path. Historical and Sprint 17 composition remain unchanged.
 
 Sprint 25.1 at `9a61d53a3db036c4399e4fa5eef5e31ee92e6462`, tag
 `sprint-25.1-release-closure`, recorded 680 passing tests. Sprint 26 is now
-canonical on `master` at merge commit
-`54e04261933ab85dbe4b237e6f81037d508b4a1c`; its release tag
-`sprint-26-complete` remains pending.
+fully released from canonical `master`. Its functional merge is
+`54e04261933ab85dbe4b237e6f81037d508b4a1c`, its final release commit is
+`ae13c3ed9720ee9564384366f2110670eb88fd85`, and its annotated release tag is
+`sprint-26-complete`.
 
 ## Public path and flow
 

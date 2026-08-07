@@ -1,12 +1,18 @@
 # Sprint 26 Summary — Deterministic Local Knowledge Discovery v1
 
-Status: merged into canonical `master`; release tag pending.
+Status: fully released from canonical `master`.
 
 Feature commit: `92d283c228f308f19f836726ef02d470745b1355`.
-PR: #26.
-Merge commit: `54e04261933ab85dbe4b237e6f81037d508b4a1c`.
-Release tag: pending `sprint-26-complete`. Sprint 25.1 remains the latest
-completed tagged release until that tag is created.
+Feature PR: #26.
+Functional merge: `54e04261933ab85dbe4b237e6f81037d508b4a1c`.
+Release-governance commit: `654c3adc5faa12f99c0a24d7fb61651af57949cb`.
+Release-governance PR: #27.
+Final release-governance merge:
+`ae13c3ed9720ee9564384366f2110670eb88fd85`.
+Release tag: annotated `sprint-26-complete`.
+Tag object: `fc8b8a403e920f547a72783a296bd7ef406e7033`.
+The tag peels to `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
+the latest completed tagged release; Sprint 25.1 remains historical.
 
 Sprint 26 adds strict `knowledge find` commands for an exact key and optional
 exact `fact`, `concept`, or `state` kind. Workspace still comes exclusively
@@ -23,6 +29,7 @@ dependencies remain unchanged.
 
 Final validation: 726 tests passed. Final independent verdict:
 `APPROVED WITH NON-BLOCKING NOTES`.
+Final release-governance review verdict: `APPROVED`.
 
 Deliberately deferred: pagination, secondary indexing, fuzzy or semantic
 search, unrestricted listing, generic criteria, configurable limits, ranking,
