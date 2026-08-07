@@ -1,12 +1,15 @@
 # Current State
 
-## Sprint 27 merged and post-merge validated state
+## Sprint 27 fully released state
 
 Sprint 27 Trusted Request Context Foundation v1 is merged into canonical
 `master` through PR #29. Its feature commit is
 `feb5405d9c0dae123c366dc4ce405fb9e9f2a30a`, its functional merge is
 `758e63278f0b342302dd1ed0d41f8514d1d9f1c3`, and post-merge validation passed
-836 tests. The `app/cognition/trusted_context` package provides immutable
+836 tests. Release-truth commit `0e220a789d683d49f4ac360cf70c65511ad96446`
+merged through governance PR #30, and the annotated `sprint-27-complete` tag
+points to release commit `1501183b4c40faaba278f8d61f875d65954223a7`.
+The `app/cognition/trusted_context` package provides immutable
 request/context/results, the
 `TrustedRequestContextResolver` port, a deterministic
 `ConfiguredTrustedRequestContextResolver`, and
@@ -18,9 +21,9 @@ path and dependency direction. The internal deterministic demo exercises seven
 trust, workspace, authorization, and payload scenarios with zero remote
 boundaries. Public HTTP, legacy `/knowledge`, and `CognitiveEngine` remain
 disconnected from this boundary. This is internal configured trust resolution,
-not authentication or durable membership. The `sprint-27-complete` tag, final
-release verification, backup, and branch cleanup remain pending; Sprint 27 is
-not yet fully released.
+not authentication or durable membership. Final validation passed 117 focused,
+70 architecture, and 836 repository tests, Ruff, and the 7/7 demo. The verified
+release backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`.
 
 ## Sprint 26 released canonical state
 
@@ -84,17 +87,19 @@ Snapshot updated: **2026-08-07** (America/Tegucigalpa).
 ## Repository checkpoint
 
 - Canonical branch: `master`
-- Current canonical `master` / `origin/master` HEAD:
-  `758e63278f0b342302dd1ed0d41f8514d1d9f1c3`
-- Latest completed release tag: `sprint-26-complete`
+- Sprint 27 tagged release commit:
+  `1501183b4c40faaba278f8d61f875d65954223a7`
+- Latest completed release tag: `sprint-27-complete`
+- Sprint 27 annotated tag object:
+  `35a198af85299e9e09d086e63f66020ccdc522d3`
 - Sprint 26 annotated tag object:
   `fc8b8a403e920f547a72783a296bd7ef406e7033`
 - Sprint 26 peeled release commit:
   `ae13c3ed9720ee9564384366f2110670eb88fd85`
 - Sprint 25.1 state: completed, merged, and tagged.
 - Sprint 26 state: fully released from `master` at tag `sprint-26-complete`.
-- Sprint 27 state: merged through PR #29 and post-merge validated; tag, final
-  release verification, backup, and branch cleanup remain pending.
+- Sprint 27 state: fully released and tagged at `1501183b`, with verified
+  release backup `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`.
 
 ## Confirmed stack
 
@@ -150,7 +155,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 24 | Completed/tagged | Released at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`; bounded list-command interpretation remains outside public HTTP. |
 | 25 | Completed/tagged | Released through PR #24 at merge `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`; strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
 | 26 | Completed/tagged | Deterministic exact-key local knowledge discovery is released at `ae13c3ed`, tag `sprint-26-complete`. |
-| 27 | Merged / post-merge validated / tag pending | Internal configured trusted-context resolution, supported trusted routing, Container composition, architecture enforcement, and deterministic demo merged through PR #29 at `758e6327`; post-merge validation passed 836 tests, while final release governance remains pending. |
+| 27 | Completed/tagged | Internal configured trusted-context resolution, supported trusted routing, Container composition, architecture enforcement, and deterministic demo released at `1501183b`, tag `sprint-27-complete`; final validation passed 117 focused, 70 architecture, and 836 repository tests. |
 
 ## Executable components and status
 

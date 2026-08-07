@@ -2,7 +2,8 @@
 
 Sprint 26 is fully released from canonical `master` at
 `ae13c3ed9720ee9564384366f2110670eb88fd85`, annotated tag
-`sprint-26-complete`. Sprint 26 is the latest completed tagged release.
+`sprint-26-complete`. Sprint 26 is the prior completed tagged release; Sprint
+27 is the latest at `sprint-27-complete`.
 
 Run from the repository root:
 

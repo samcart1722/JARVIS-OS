@@ -8,16 +8,22 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 27 Trusted Request Context Foundation v1 is merged into canonical
-`master` through PR #29. Its feature commit is
+Sprint 27 Trusted Request Context Foundation v1 is fully released. Its feature
+commit is
 `feb5405d9c0dae123c366dc4ce405fb9e9f2a30a`, its functional merge is
-`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`, and post-merge validation passed
-836 tests. The internal trusted-host boundary is not authentication: its
-binding selector is not identity proof, `PermissionPolicy` remains downstream,
-and public HTTP does not use the boundary. The intended `sprint-27-complete`
-tag, final release verification, and backup remain pending.
+`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`, and release-truth governance
+merged through PR #30 at `1501183b4c40faaba278f8d61f875d65954223a7`.
+The annotated tag `sprint-27-complete` points to that release commit; its tag
+object is `35a198af85299e9e09d086e63f66020ccdc522d3`. Final validation passed 117
+focused, 70 architecture, and 836 repository tests, Ruff, and the 7/7 demo. The
+verified release backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`.
 
-Sprint 26 is the latest completed tagged release at `sprint-26-complete`.
+Sprint 27 is the latest completed tagged release. Its internal trusted-host
+boundary is not authentication: the binding selector is not identity proof,
+`PermissionPolicy` remains downstream, and public HTTP does not use the
+boundary. Sprint 26 remains the prior completed tagged release at
+`sprint-26-complete`.
 
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
@@ -39,9 +45,9 @@ parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The latest completed release tag is `sprint-26-complete`; its annotated tag
-  object is `fc8b8a403e920f547a72783a296bd7ef406e7033` and it peels to
-  `ae13c3ed9720ee9564384366f2110670eb88fd85`.
+- The latest completed release tag is `sprint-27-complete`; its annotated tag
+  object is `35a198af85299e9e09d086e63f66020ccdc522d3` and it peels to
+  `1501183b4c40faaba278f8d61f875d65954223a7`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by

@@ -31,7 +31,7 @@ for compatibility but does not participate in `CognitiveEngine.process`.
 
 ## Trusted request-context components
 
-The pre-release Sprint 27 `app/cognition/trusted_context` package owns the
+The released Sprint 27 `app/cognition/trusted_context` package owns the
 transport-neutral trusted request-context models, resolver port, configured
 resolver, and trusted local routing service.
 

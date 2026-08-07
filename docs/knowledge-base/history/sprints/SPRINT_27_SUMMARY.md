@@ -1,6 +1,6 @@
 # Sprint 27 Summary — Trusted Request Context Foundation v1
 
-Status: pre-release; technical implementation approved for release governance.
+Status: fully released at annotated tag `sprint-27-complete`.
 
 Final independent implementation re-review: `APPROVED`.
 Blocking defects: none. Required corrective work: none.
@@ -216,21 +216,30 @@ the final review and are not Sprint 27 artifacts.
 - Functional PR: #29, merged
 - Functional merge commit and canonical `master`:
   `758e63278f0b342302dd1ed0d41f8514d1d9f1c3`
+- Release-truth commit: `0e220a789d683d49f4ac360cf70c65511ad96446`
+- Governance PR: #30, merged
+- Tagged release commit: `1501183b4c40faaba278f8d61f875d65954223a7`
+- Annotated release tag: `sprint-27-complete`
+- Annotated tag object: `35a198af85299e9e09d086e63f66020ccdc522d3`
 - Post-merge validation: 836 repository tests and 117 focused Sprint 27 tests
   passed; the architecture suite passed 70 tests.
 - Manual trusted-context demo: 7/7 `PASS`, with zero
   model/provider/readiness/network calls.
-- Intended release tag `sprint-27-complete`: pending
-- Final release verification: pending
-- Final backup: pending
-- Branch cleanup: pending
+- Final release verification: complete
+- Verified release backup:
+  `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`
+- Backup bundle SHA-256:
+  `145e22e2d79549d285dc043feb57e65f84e4eadb3a8d5d9d5804d7be61a0885a`
+- Backup ZIP SHA-256:
+  `0f9f41c0ee8239d99e09008d5fcd9643bf0a90abe3fcb4a6994abe5c0809a6ca`
+- Backup manifest SHA-256:
+  `abad9d64c3af2cdc825af9644436ce0be7025fd21e4999285ba3d54f27d35b34`
 
-Sprint 27 is **MERGED AND POST-MERGE VALIDATED — RELEASE GOVERNANCE STILL
-PENDING**. It is not yet a completed tagged release.
+Sprint 27 is **FULLY RELEASED** and is the latest completed tagged release.
 
 ## Final technical conclusion
 
-Sprint 27 — Trusted Request Context Foundation v1 is technically complete and
-approved for release governance. Release status must remain pending until the
-separately governed Git, tag, verification, backup, and canonical-state steps
-actually succeed.
+Sprint 27 — Trusted Request Context Foundation v1 is technically complete,
+independently approved, tagged, verified, and backed up. Authentication,
+durable membership, transport integration, and related security/product work
+remain explicitly deferred rather than implied by this release.
