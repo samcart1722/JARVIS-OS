@@ -3,6 +3,20 @@
 Version: 1.0
 Status: Normative
 
+## Sprint 27 trusted request-context boundary
+
+For supported internal local text commands, deterministic trusted-context
+resolution now precedes interpretation. A configured, process-local resolver
+requires an explicit workspace and produces an immutable actor/workspace
+context. It uses no model, provider, network, clock, randomness, persistence,
+or schema.
+
+Trust resolution does not authorize an action. After trust success, the
+existing `PermissionPolicy` remains the downstream authorization boundary and
+the existing cognitive fallback policy is unchanged. Trust failures terminate
+before the low-level router. Sprint 27 does not connect this boundary to public
+HTTP and does not establish authentication or durable membership.
+
 ## Sprint 26 canonical application
 
 The Sprint 26 implementation merged into canonical `master` adds authorized,

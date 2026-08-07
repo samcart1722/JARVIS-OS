@@ -29,6 +29,22 @@ An AI model is not the Core. Ollama is replaceable infrastructure behind
 The cognitive memory implementation under `app/cognition/memory` is composed
 for compatibility but does not participate in `CognitiveEngine.process`.
 
+## Trusted request-context components
+
+The pre-release Sprint 27 `app/cognition/trusted_context` package owns the
+transport-neutral trusted request-context models, resolver port, configured
+resolver, and trusted local routing service.
+
+| Component | Responsibility | Ownership and boundary |
+|---|---|---|
+| `TrustedRequestContextResolver` | Resolves a host input to an immutable actor/workspace context or stable trust failure. | Internal port; no transport, persistence, provider, or authorization ownership. |
+| `ConfiguredTrustedRequestContextResolver` | Performs deterministic lookup against immutable process configuration. | Trusted-context implementation; no runtime mutation or default workspace. |
+| `TrustedLocalCommandRoutingService` | Resolves trust, short-circuits failure, then delegates to the existing text router. | Supported internal application boundary; does not authenticate public HTTP. |
+| `Container` composition | Owns one resolver and one trusted routing service while reusing the existing `LocalCommandTextRouter`. | Composition Root; injected and configured resolver ownership cannot be mixed. |
+
+These components do not alter `CognitiveEngine`. `PermissionPolicy` remains
+downstream authorization.
+
 ## Canonical active flow
 
 ```text
