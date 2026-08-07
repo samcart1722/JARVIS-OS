@@ -4,6 +4,24 @@ No approved ADR records were found in the repository. The ADR standard itself
 is a draft and `docs/adr/` does not exist. The following consolidation therefore
 preserves the status and source of each statement rather than inventing ADRs.
 
+## Sprint 27 pre-release guardrails
+
+- A binding key is an opaque configured lookup selector, not authentication,
+  a credential, token, API key, or identity proof.
+- `ActorIdentity` and `WorkspaceIdentity` are typed values, not proof of
+  identity or access. A configured binding is process state, not durable
+  account or workspace membership.
+- Workspace selection is explicit; there is no default. Trust resolution
+  precedes routing and remains distinct from downstream `PermissionPolicy`
+  authorization.
+- Supported application routing uses `TrustedLocalCommandRoutingService`.
+  `LocalCommandTextRouter` remains a valid low-level component for tests,
+  explicit composition, and the three approved historical demos.
+- Public HTTP, legacy `/knowledge`, and `CognitiveEngine` do not own or invoke
+  Sprint 27 trusted-host routing.
+- Sprint 27 adds no schema, dependency, provider, network, clock, or randomness
+  requirement. Architecture tests enforce these boundaries.
+
 | Decision / guardrail | Reason | Impact | Source | Status |
 |---|---|---|---|---|
 | Exact-key discovery is bounded, ordered, and uses the existing knowledge-read permission. | Preserve deterministic local behavior and avoid unrestricted enumeration. | Maximum 50 visible records, one lookahead row, zero-match success, no pagination or cognitive fallback. | Sprint 26 accepted contract and tests | Functional merge `54e04261933ab85dbe4b237e6f81037d508b4a1c`; fully released from canonical `master` at `ae13c3ed9720ee9564384366f2110670eb88fd85`, annotated tag `sprint-26-complete`; Sprint 26 is the latest completed tagged release |

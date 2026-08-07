@@ -1,5 +1,20 @@
 # Technical Debt
 
+## Sprint 27 pre-release classification
+
+No new uncontrolled technical debt is identified in the implemented trusted
+request-context foundation. The configured resolver and routing service are
+deterministic, transport-neutral, explicitly composed, independently tested,
+and guarded by architecture tests.
+
+Public authentication, sessions/accounts, durable workspace membership,
+transport/header integration, public HTTP protection, persistence, and
+runtime grant/revoke behavior remain inherited or deliberately deferred future
+work. They are not capabilities claimed by Sprint 27 and are not defects
+introduced by its internal configured boundary. `ActorIdentity` and
+`WorkspaceIdentity` remain typed values rather than authentication or access
+proof.
+
 ## Sprint 26 merged-release classification
 
 No new technical debt is identified. The implementation extends the existing

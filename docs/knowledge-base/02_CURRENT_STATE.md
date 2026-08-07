@@ -1,5 +1,22 @@
 # Current State
 
+## Sprint 27 pre-release implementation state
+
+Sprint 27 Trusted Request Context Foundation v1 is implemented in the feature
+working tree and remains pre-release. The `app/cognition/trusted_context`
+package provides immutable request/context/results, the
+`TrustedRequestContextResolver` port, a deterministic
+`ConfiguredTrustedRequestContextResolver`, and
+`TrustedLocalCommandRoutingService`.
+
+`Container` composes one resolver and one trusted routing service around the
+existing `LocalCommandTextRouter`. Architecture tests enforce the supported
+path and dependency direction. The internal deterministic demo exercises seven
+trust, workspace, authorization, and payload scenarios with zero remote
+boundaries. Public HTTP, legacy `/knowledge`, and `CognitiveEngine` remain
+disconnected from this boundary. This is internal configured trust resolution,
+not authentication, durable membership, or a released Sprint 27 state.
+
 ## Sprint 26 released canonical state
 
 Canonical `master` implements deterministic local discovery through
@@ -62,8 +79,13 @@ Snapshot updated: **2026-08-03** (America/Tegucigalpa).
 ## Repository checkpoint
 
 - Canonical branch: `master`
-- Canonical code HEAD: `ae13c3ed9720ee9564384366f2110670eb88fd85`
+- Current canonical `master` / `origin/master` HEAD:
+  `d368a0734a0161ad90221c1b5d275dfabfe69cfb`
 - Latest completed release tag: `sprint-26-complete`
+- Sprint 26 annotated tag object:
+  `fc8b8a403e920f547a72783a296bd7ef406e7033`
+- Sprint 26 peeled release commit:
+  `ae13c3ed9720ee9564384366f2110670eb88fd85`
 - Sprint 25.1 state: completed, merged, and tagged.
 - Sprint 26 state: fully released from `master` at tag `sprint-26-complete`.
 
@@ -120,6 +142,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 23 | Completed/tagged | Released at merge `be59175c201df1f2458551d99e2f5dcc3e9d2aac`, tag `sprint-23-complete`; explicit typed local-first coordination remains outside public HTTP and `CognitiveEngine`. |
 | 24 | Completed/tagged | Released at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`; bounded list-command interpretation remains outside public HTTP. |
 | 25 | Completed/tagged | Released through PR #24 at merge `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`; strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
+| 26 | Completed/tagged | Deterministic exact-key local knowledge discovery is released at `ae13c3ed`, tag `sprint-26-complete`. |
+| 27 | Implementation in progress / pre-release | Internal configured trusted-context resolution, supported trusted routing, Container composition, architecture enforcement, and deterministic demo are implemented; release governance remains pending. |
 
 ## Executable components and status
 
@@ -147,6 +171,8 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | `LocalFirstCognitiveCoordinator` | Composed, explicit application boundary | Preserves handled local results; only authorized valid `not_handled` requests call the existing cognitive processor. Public HTTP does not use it. |
 | `DeterministicLocalCommandInterpreter` | Implemented, bounded application interpretation | Maps only the narrow list-command grammar to existing typed intents; it is not general natural-language understanding. |
 | `LocalCommandTextRouter` | Composed, explicit application boundary | Invokes the existing Sprint 23 coordinator for bounded commands. Public HTTP and `CognitiveEngine` do not use this service. |
+| `ConfiguredTrustedRequestContextResolver` | Implemented, process-local configuration boundary | Resolves explicit configured actor/workspace context without persistence, network, or default workspace selection. |
+| `TrustedLocalCommandRoutingService` | Composed, supported internal application boundary | Resolves trust before delegating to the existing text router; trust failures short-circuit. Public HTTP does not use it. |
 | `InputStage` / `ContextStage` / `ReasoningStage` | Implemented separately | Not called by the Sprint 3 `CognitiveEngine.process` path. |
 
 ## Real request flow

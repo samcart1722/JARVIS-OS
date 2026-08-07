@@ -184,6 +184,37 @@ boundary maps `capability_not_found` to 500 and the two execution/output
 failures to 503. Unexpected exceptions continue through FastAPI's existing 500
 handling.
 
+## Trusted request-context contracts
+
+- `TrustedHostRequestInput` carries an opaque binding lookup selector and an
+  explicitly requested workspace ID. The selector is not a credential.
+- `TrustedRequestContext` contains exactly typed `ActorIdentity` and
+  `WorkspaceIdentity` values; neither value proves authentication or access.
+- `TrustedRequestContextResolution` is either success with exactly one context
+  and no error, or failure with no context and one stable trust error.
+- `TrustedRequestContextResolver.resolve` is the transport-neutral resolver
+  port.
+- `ConfiguredTrustedHostBinding` contains one normalized selector, one actor,
+  and a non-empty immutable set of configured workspace IDs. It is process
+  configuration, not durable membership.
+- `ConfiguredTrustedRequestContextResolver` validates unique bindings and
+  unique known workspaces at construction and rejects bindings that reference
+  unknown workspaces. Lookup trims surrounding whitespace, remains
+  case-sensitive, and requires explicit workspace selection.
+- `TrustedLocalCommandRequest` combines host input, text, and explicit
+  `CognitiveFallbackAuthorization`.
+- `TrustedLocalCommandRoutingResult` contains trust resolution and contains a
+  text-routing result only after trust success.
+- `TrustedLocalCommandRoutingService` resolves context first, returns trust
+  failures before routing, and constructs the existing `TextRoutingRequest`
+  only after success.
+
+Stable trust failures are `trusted_context_invalid_input`,
+`trusted_context_unknown_binding`, `trusted_context_unknown_workspace`,
+`trusted_context_workspace_not_bound`, and
+`trusted_context_resolution_failed`. They are distinct from downstream
+`local_permission_denied`.
+
 ## Composition contracts
 
 `Settings -> Container` is the operational boundary. `Container`:

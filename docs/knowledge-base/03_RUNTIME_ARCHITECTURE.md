@@ -1,5 +1,40 @@
 # Runtime Architecture
 
+## Trusted request-context boundary (Sprint 27 pre-release)
+
+The supported internal local text-command path is:
+
+```text
+TrustedHostRequestInput
+  -> TrustedRequestContextResolver
+  -> immutable TrustedRequestContext
+  -> TrustedLocalCommandRoutingService
+  -> LocalCommandTextRouter
+  -> DeterministicLocalCommandInterpreter
+  -> LocalFirstCognitiveCoordinator
+  -> PermissionPolicy / LocalFirstResolver
+  -> local capabilities and repositories
+  -> cognitive fallback only under the existing explicit policy
+```
+
+Trust failure stops before `LocalCommandTextRouter`; not every request reaches
+the downstream stages. Workspace selection is explicit, trimmed, and
+case-sensitive, with no default. Unknown and known-but-unbound workspaces have
+distinct stable failures.
+
+`Container` owns one configured or injected resolver and one trusted routing
+service, reusing the existing text router. Configured and injected resolver
+ownership cannot be mixed. Resolver injection uses an explicit `is not None`
+choice, so a deliberately falsey resolver object is retained. The default
+Container composes an empty configured resolver and is inert/deny-by-default
+for trusted bindings. The configured resolver is immutable after construction,
+has no runtime grant/revoke operation, and has no persistence, schema, clock,
+randomness, model, provider, or network dependency.
+
+Public HTTP and legacy `/knowledge` do not construct trusted inputs or call
+this service. `CognitiveEngine` was not modified and does not own trusted-host
+resolution or composition.
+
 ## Deterministic knowledge discovery (Sprint 26 canonical master)
 
 The existing interpreter, router, coordinator, resolver, knowledge capability,

@@ -1,5 +1,19 @@
 # Roadmap
 
+## Sprint 27 implementation in progress / pre-release
+
+Trusted Request Context Foundation v1 is implemented through its internal
+demo and active documentation work. It adds deterministic configured
+actor/workspace resolution, explicit workspace selection, a supported trusted
+local routing service, Container composition, architecture enforcement, and a
+seven-scenario internal demo.
+
+Sprint 27 is not released or complete. Documentation review, final validation,
+stale-truth review, hygiene, and release governance remain pending. No Sprint
+27 commit, PR, merge, tag, or release date is declared. Public authentication,
+durable membership, sessions, and HTTP integration remain future candidates,
+not implied Sprint 27 behavior.
+
 Sprint 26 exact-key local knowledge discovery is fully released from canonical
 `master` at `ae13c3ed9720ee9564384366f2110670eb88fd85`, annotated tag
 `sprint-26-complete`. The functional merge

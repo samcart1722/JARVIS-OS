@@ -37,6 +37,32 @@ It must not classify a request, select a capability during request execution,
 execute plans, or format cognitive responses. Scaffolded `pass` methods do not
 represent active services.
 
+## Trusted request-context boundary
+
+`app/cognition/trusted_context` remains independent of API/transport,
+infrastructure, persistence, SQL, Settings/environment, providers, model
+clients, network, clock, randomness, operations, authentication libraries, and
+product domains.
+
+Lower-level interpretation, routing, and local-resolution code must not depend
+back on configured trusted-host composition. Public API code and
+`CognitiveEngine` do not own or silently invoke the Sprint 27 path.
+
+`TrustedLocalCommandRoutingService` may depend on the existing
+`LocalCommandTextRouter`. Production/application local text-command routing
+uses the trusted service. Direct `TextRoutingRequest` construction is approved
+only in that service and these three historical low-level operation demos:
+`local_command_interpretation_demo_runtime.py`,
+`local_knowledge_command_demo_runtime.py`, and
+`local_knowledge_discovery_demo_runtime.py`. Low-level use remains valid in
+tests and explicit internal composition. `LocalCommandTextRouter` is not
+private.
+
+`PermissionPolicy` remains downstream authorization. `Container` is the
+composition owner for one trusted resolver and service. Standard-library
+architecture tests enforce these import, direction, isolation, and constructor
+rules.
+
 ## Cognitive domain
 
 Files under active `app/cognition/domain` must not import:

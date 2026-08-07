@@ -51,6 +51,7 @@ from app.cognition.local_resolution.contracts import (
 from app.cognition.local_resolution.knowledge_capability import (
     StructuredKnowledgeCapability,
 )
+from app.cognition.local_resolution.models import WorkspaceIdentity
 from app.cognition.local_resolution.permissions import (
     ExplicitPermissionPolicy,
     PermissionGrant,
@@ -100,6 +101,12 @@ from app.cognition.specialists.deterministic_reasoning_selection_policy import (
     DeterministicReasoningSelectionPolicy,
 )
 from app.cognition.specialists.specialist_router import SpecialistRouter
+from app.cognition.trusted_context import (
+    ConfiguredTrustedHostBinding,
+    ConfiguredTrustedRequestContextResolver,
+    TrustedLocalCommandRoutingService,
+    TrustedRequestContextResolver,
+)
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 from app.core.config import Settings, settings
 from app.models.ollama_client import OllamaClient
@@ -121,19 +128,37 @@ class Container:
         local_permission_grants: tuple[PermissionGrant, ...] = (),
         local_list_repository: ListItemRepository | None = None,
         local_knowledge_repository: KnowledgeRecordRepository | None = None,
+        trusted_host_bindings: tuple[ConfiguredTrustedHostBinding, ...] = (),
+        trusted_known_workspaces: tuple[WorkspaceIdentity, ...] = (),
+        trusted_request_context_resolver: TrustedRequestContextResolver
+        | None = None,
     ) -> None:
         if isinstance(scoped_memory_records, (str, bytes)):
             raise TypeError("Scoped memory records must be a collection of records.")
+        if type(trusted_host_bindings) is not tuple:
+            raise ValueError("Trusted host bindings must be a tuple.")
+        if type(trusted_known_workspaces) is not tuple:
+            raise ValueError("Trusted known workspaces must be a tuple.")
+        if trusted_request_context_resolver is not None and (
+            trusted_host_bindings or trusted_known_workspaces
+        ):
+            raise ValueError("Trusted resolver ownership is ambiguous.")
         self._settings = app_settings
         self._scoped_memory_records = tuple(scoped_memory_records)
         self._local_permission_grants = local_permission_grants
         self._injected_local_list_repository = local_list_repository
         self._injected_local_knowledge_repository = local_knowledge_repository
+        self._trusted_host_bindings = tuple(trusted_host_bindings)
+        self._trusted_known_workspaces = tuple(trusted_known_workspaces)
+        self._injected_trusted_request_context_resolver = (
+            trusted_request_context_resolver
+        )
         self._build_memory()
         self._build_local_resolution()
         self._build_reasoning()
         self._build_local_first_cognitive_routing()
         self._build_local_command_interpretation()
+        self._build_trusted_request_context()
         self._build_context()
         self._build_prompt()
         self._build_models()
@@ -363,6 +388,23 @@ class Container:
         self.local_command_text_router = LocalCommandTextRouter(
             self.local_command_interpreter,
             self.local_first_cognitive_coordinator,
+        )
+
+    def _build_trusted_request_context(self) -> None:
+        """Compose trusted context resolution around the existing text router."""
+        self.trusted_request_context_resolver = (
+            self._injected_trusted_request_context_resolver
+            if self._injected_trusted_request_context_resolver is not None
+            else ConfiguredTrustedRequestContextResolver(
+                self._trusted_host_bindings,
+                self._trusted_known_workspaces,
+            )
+        )
+        self.trusted_local_command_routing_service = (
+            TrustedLocalCommandRoutingService(
+                self.trusted_request_context_resolver,
+                self.local_command_text_router,
+            )
         )
 
     def _build_context(self) -> None:

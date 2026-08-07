@@ -5,6 +5,21 @@ Version: 1.2
 
 ---
 
+# Contexto confiable previo para comandos locales internos
+
+Para la ruta interna soportada de comandos de texto, Sprint 27 resuelve
+primero un contexto confiable configurado con actor y workspace explícitos.
+No existe selección de workspace por defecto. Un fallo de confianza termina
+antes de `LocalCommandTextRouter` y de la interpretación determinista.
+
+Cuando la confianza se resuelve, `TrustedLocalCommandRoutingService` delega en
+la ruta local existente. `PermissionPolicy` continúa siendo la autorización
+downstream; resolver contexto no concede permiso. Esta frontera es interna,
+no autentica HTTP público y no modifica el ciclo de `CognitiveEngine` usado
+por la API.
+
+---
+
 # Resolución local previa
 
 Antes de iniciar razonamiento con modelos, Luxiom evalúa si existe una
