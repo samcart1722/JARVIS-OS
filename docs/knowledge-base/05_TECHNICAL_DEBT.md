@@ -1,6 +1,6 @@
 # Technical Debt
 
-## Sprint 27 pre-release classification
+## Sprint 27 released classification
 
 No new uncontrolled technical debt is identified in the implemented trusted
 request-context foundation. The configured resolver and routing service are

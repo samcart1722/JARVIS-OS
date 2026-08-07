@@ -43,8 +43,11 @@ identity in the Product North Star and recent Git history, while README,
 `pyproject.toml`, `app/core/config.py`, and many historical documents still use
 JARVIS-OS/JARVIS. This pack records but does not resolve that migration.
 
-At this checkpoint canonical `master` contains the Sprint 27 functional merge
-`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`. Sprint 26 remains the latest
-completed tagged release at `sprint-26-complete`; the intended
-`sprint-27-complete` tag is pending. Constitution and ADR statuses remain
-unchanged.
+Sprint 27 is fully released. Its functional merge is
+`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`; release-truth governance merged
+through PR #30; and annotated tag `sprint-27-complete`, object
+`35a198af85299e9e09d086e63f66020ccdc522d3`, points to release commit
+`1501183b4c40faaba278f8d61f875d65954223a7`. The verified release backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`. Sprint 27 is the latest
+completed tagged release; Sprint 26 remains the prior completed tagged release
+at `sprint-26-complete`. Constitution and ADR statuses remain unchanged.

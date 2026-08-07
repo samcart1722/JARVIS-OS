@@ -5,11 +5,12 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 26 exact-key discovery is fully released from canonical `master` at
-`ae13c3ed9720ee9564384366f2110670eb88fd85`, annotated tag
-`sprint-26-complete`. Sprint 26 is the latest completed tagged release. See the
-[Sprint 26 summary](history/sprints/SPRINT_26_SUMMARY.md) and
-[operational demo](../operations/DETERMINISTIC_LOCAL_KNOWLEDGE_DISCOVERY_DEMO.md).
+Sprint 27 Trusted Request Context Foundation v1 is the latest completed tagged
+release at `1501183b4c40faaba278f8d61f875d65954223a7`, annotated tag
+`sprint-27-complete`. Sprint 26 remains the prior completed tagged release. See
+the [Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md), the
+[Sprint 26 summary](history/sprints/SPRINT_26_SUMMARY.md), and the
+[Sprint 26 operational demo](../operations/DETERMINISTIC_LOCAL_KNOWLEDGE_DISCOVERY_DEMO.md).
 
 1. [Project Context](01_PROJECT_CONTEXT.md) — identity, purpose, and platform model.
 2. [Current State](02_CURRENT_STATE.md) — dated, evidence-based repository snapshot.

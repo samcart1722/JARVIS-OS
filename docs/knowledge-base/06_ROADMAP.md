@@ -1,6 +1,6 @@
 # Roadmap
 
-## Sprint 27 merged and post-merge validated / release pending
+## Sprint 27 fully released
 
 Trusted Request Context Foundation v1 is implemented through its internal
 demo and active documentation work. It adds deterministic configured
@@ -11,16 +11,19 @@ seven-scenario internal demo.
 Independent technical review approved Sprint 27. Feature commit
 `feb5405d9c0dae123c366dc4ce405fb9e9f2a30a` merged through PR #29 at
 `758e63278f0b342302dd1ed0d41f8514d1d9f1c3`; post-merge validation passed 836
-tests. The `sprint-27-complete` tag, final release verification, backup, and
-branch cleanup remain pending, so Sprint 27 is not yet fully released. Public
-authentication, durable membership, sessions, and HTTP integration remain
-future candidates, not implied Sprint 27 behavior.
+tests. Release-truth commit `0e220a789d683d49f4ac360cf70c65511ad96446`
+merged through PR #30. Sprint 27 is fully released at
+`1501183b4c40faaba278f8d61f875d65954223a7`, annotated tag
+`sprint-27-complete`, with verified backup
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`. Public authentication,
+durable membership, sessions, and HTTP integration remain future candidates,
+not implied Sprint 27 behavior.
 
 Sprint 26 exact-key local knowledge discovery is fully released from canonical
 `master` at `ae13c3ed9720ee9564384366f2110670eb88fd85`, annotated tag
 `sprint-26-complete`. The functional merge
 `54e04261933ab85dbe4b237e6f81037d508b4a1c` remains historical evidence.
-Sprint 26 is the latest completed tagged release. Pagination, indexing based on measured scale,
+Sprint 26 is the prior completed tagged release. Pagination, indexing based on measured scale,
 fuzzy/semantic search, filterless listing, public exposure, ranking, and
 model-assisted interpretation remain deferred and are not implied next scope.
 
@@ -101,14 +104,16 @@ and safe prompt use remain future work.
 | 24 | Add bounded deterministic list-command interpretation and explicit text routing. | `fe958f45`, tag `sprint-24-complete` |
 | 25 | Add strict deterministic local knowledge commands. | `1f2da9cf`, tag `sprint-25-complete` |
 | 26 | Add deterministic exact-key local knowledge discovery. | `92d283c2`, PR #26, functional merge `54e04261`; final release `ae13c3ed`, tag `sprint-26-complete` |
-| 27 | Add the trusted request-context foundation for supported internal local routing. | `feb5405d`, PR #29, functional merge `758e6327`; post-merge validated, release tag pending |
+| 27 | Add the trusted request-context foundation for supported internal local routing. | `feb5405d`, PR #29, functional merge `758e6327`; governance PR #30, release `1501183b`, tag `sprint-27-complete` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 26 is the latest completed tagged release from canonical `master` at
-`ae13c3ed9720ee9564384366f2110670eb88fd85`, tag `sprint-26-complete`. The
+Sprint 27 is the latest completed tagged release at
+`1501183b4c40faaba278f8d61f875d65954223a7`, tag `sprint-27-complete`. Sprint
+26 remains the prior tagged release at `ae13c3ed9720ee9564384366f2110670eb88fd85`,
+tag `sprint-26-complete`. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by

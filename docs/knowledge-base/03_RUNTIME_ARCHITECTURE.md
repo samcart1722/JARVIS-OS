@@ -1,6 +1,6 @@
 # Runtime Architecture
 
-## Trusted request-context boundary (Sprint 27 pre-release)
+## Trusted request-context boundary (Sprint 27 released)
 
 The supported internal local text-command path is:
 
@@ -46,8 +46,8 @@ case-sensitive record ID and return at most 51; the capability exposes at most
 to cognition. The feature merged at
 `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
-released at the annotated tag `sprint-26-complete` and is the latest completed
-tagged release.
+released at the annotated tag `sprint-26-complete` and is the prior completed
+tagged release; Sprint 27 is the latest at `sprint-27-complete`.
 
 ## Deterministic knowledge commands (Sprint 25)
 
