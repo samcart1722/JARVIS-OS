@@ -1,6 +1,6 @@
 # Roadmap
 
-## Sprint 27 implementation in progress / pre-release
+## Sprint 27 merged and post-merge validated / release pending
 
 Trusted Request Context Foundation v1 is implemented through its internal
 demo and active documentation work. It adds deterministic configured
@@ -8,11 +8,13 @@ actor/workspace resolution, explicit workspace selection, a supported trusted
 local routing service, Container composition, architecture enforcement, and a
 seven-scenario internal demo.
 
-Sprint 27 is not released or complete. Documentation review, final validation,
-stale-truth review, hygiene, and release governance remain pending. No Sprint
-27 commit, PR, merge, tag, or release date is declared. Public authentication,
-durable membership, sessions, and HTTP integration remain future candidates,
-not implied Sprint 27 behavior.
+Independent technical review approved Sprint 27. Feature commit
+`feb5405d9c0dae123c366dc4ce405fb9e9f2a30a` merged through PR #29 at
+`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`; post-merge validation passed 836
+tests. The `sprint-27-complete` tag, final release verification, backup, and
+branch cleanup remain pending, so Sprint 27 is not yet fully released. Public
+authentication, durable membership, sessions, and HTTP integration remain
+future candidates, not implied Sprint 27 behavior.
 
 Sprint 26 exact-key local knowledge discovery is fully released from canonical
 `master` at `ae13c3ed9720ee9564384366f2110670eb88fd85`, annotated tag
@@ -99,6 +101,7 @@ and safe prompt use remain future work.
 | 24 | Add bounded deterministic list-command interpretation and explicit text routing. | `fe958f45`, tag `sprint-24-complete` |
 | 25 | Add strict deterministic local knowledge commands. | `1f2da9cf`, tag `sprint-25-complete` |
 | 26 | Add deterministic exact-key local knowledge discovery. | `92d283c2`, PR #26, functional merge `54e04261`; final release `ae13c3ed`, tag `sprint-26-complete` |
+| 27 | Add the trusted request-context foundation for supported internal local routing. | `feb5405d`, PR #29, functional merge `758e6327`; post-merge validated, release tag pending |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 

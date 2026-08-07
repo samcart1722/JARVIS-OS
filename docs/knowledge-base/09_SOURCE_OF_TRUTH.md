@@ -43,7 +43,8 @@ identity in the Product North Star and recent Git history, while README,
 `pyproject.toml`, `app/core/config.py`, and many historical documents still use
 JARVIS-OS/JARVIS. This pack records but does not resolve that migration.
 
-Sprint 22 evidence exists only in the
-`feat/sprint-22-durable-local-knowledge` working tree at this checkpoint. The
-base tag remains `sprint-21-complete`; no Sprint 22 commit, merge, or tag is
-claimed. Constitution and ADR statuses remain unchanged.
+At this checkpoint canonical `master` contains the Sprint 27 functional merge
+`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`. Sprint 26 remains the latest
+completed tagged release at `sprint-26-complete`; the intended
+`sprint-27-complete` tag is pending. Constitution and ADR statuses remain
+unchanged.

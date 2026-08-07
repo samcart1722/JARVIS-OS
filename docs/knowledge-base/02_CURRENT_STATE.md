@@ -1,10 +1,13 @@
 # Current State
 
-## Sprint 27 pre-release implementation state
+## Sprint 27 merged and post-merge validated state
 
-Sprint 27 Trusted Request Context Foundation v1 is implemented in the feature
-working tree and remains pre-release. The `app/cognition/trusted_context`
-package provides immutable request/context/results, the
+Sprint 27 Trusted Request Context Foundation v1 is merged into canonical
+`master` through PR #29. Its feature commit is
+`feb5405d9c0dae123c366dc4ce405fb9e9f2a30a`, its functional merge is
+`758e63278f0b342302dd1ed0d41f8514d1d9f1c3`, and post-merge validation passed
+836 tests. The `app/cognition/trusted_context` package provides immutable
+request/context/results, the
 `TrustedRequestContextResolver` port, a deterministic
 `ConfiguredTrustedRequestContextResolver`, and
 `TrustedLocalCommandRoutingService`.
@@ -15,7 +18,9 @@ path and dependency direction. The internal deterministic demo exercises seven
 trust, workspace, authorization, and payload scenarios with zero remote
 boundaries. Public HTTP, legacy `/knowledge`, and `CognitiveEngine` remain
 disconnected from this boundary. This is internal configured trust resolution,
-not authentication, durable membership, or a released Sprint 27 state.
+not authentication or durable membership. The `sprint-27-complete` tag, final
+release verification, backup, and branch cleanup remain pending; Sprint 27 is
+not yet fully released.
 
 ## Sprint 26 released canonical state
 
@@ -74,13 +79,13 @@ those figures remain historical evidence.
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 
-Snapshot updated: **2026-08-03** (America/Tegucigalpa).
+Snapshot updated: **2026-08-07** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
 - Canonical branch: `master`
 - Current canonical `master` / `origin/master` HEAD:
-  `d368a0734a0161ad90221c1b5d275dfabfe69cfb`
+  `758e63278f0b342302dd1ed0d41f8514d1d9f1c3`
 - Latest completed release tag: `sprint-26-complete`
 - Sprint 26 annotated tag object:
   `fc8b8a403e920f547a72783a296bd7ef406e7033`
@@ -88,6 +93,8 @@ Snapshot updated: **2026-08-03** (America/Tegucigalpa).
   `ae13c3ed9720ee9564384366f2110670eb88fd85`
 - Sprint 25.1 state: completed, merged, and tagged.
 - Sprint 26 state: fully released from `master` at tag `sprint-26-complete`.
+- Sprint 27 state: merged through PR #29 and post-merge validated; tag, final
+  release verification, backup, and branch cleanup remain pending.
 
 ## Confirmed stack
 
@@ -143,7 +150,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 24 | Completed/tagged | Released at merge `fe958f45409c0fc11df38cd945ae9678e3ad9e23`, tag `sprint-24-complete`; bounded list-command interpretation remains outside public HTTP. |
 | 25 | Completed/tagged | Released through PR #24 at merge `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`; strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
 | 26 | Completed/tagged | Deterministic exact-key local knowledge discovery is released at `ae13c3ed`, tag `sprint-26-complete`. |
-| 27 | Implementation in progress / pre-release | Internal configured trusted-context resolution, supported trusted routing, Container composition, architecture enforcement, and deterministic demo are implemented; release governance remains pending. |
+| 27 | Merged / post-merge validated / tag pending | Internal configured trusted-context resolution, supported trusted routing, Container composition, architecture enforcement, and deterministic demo merged through PR #29 at `758e6327`; post-merge validation passed 836 tests, while final release governance remains pending. |
 
 ## Executable components and status
 

@@ -211,17 +211,22 @@ the final review and are not Sprint 27 artifacts.
 ## Release governance status
 
 - Technical implementation and independent review: `APPROVED`
-- Release operations: pending
-- Commit: not yet created
-- Push: not yet performed
-- PR: not yet created
-- Merge: not yet performed
-- Tag: not yet created
-- Final backup: not yet performed
+- Feature commit: `feb5405d9c0dae123c366dc4ce405fb9e9f2a30a`
+- Feature push: complete
+- Functional PR: #29, merged
+- Functional merge commit and canonical `master`:
+  `758e63278f0b342302dd1ed0d41f8514d1d9f1c3`
+- Post-merge validation: 836 repository tests and 117 focused Sprint 27 tests
+  passed; the architecture suite passed 70 tests.
+- Manual trusted-context demo: 7/7 `PASS`, with zero
+  model/provider/readiness/network calls.
+- Intended release tag `sprint-27-complete`: pending
+- Final release verification: pending
+- Final backup: pending
+- Branch cleanup: pending
 
-Sprint 27 remains **PRE-RELEASE**. No Sprint 27 commit SHA, PR number, merge
-commit, release tag, release date, backup path, or branch-cleanup event exists
-yet.
+Sprint 27 is **MERGED AND POST-MERGE VALIDATED — RELEASE GOVERNANCE STILL
+PENDING**. It is not yet a completed tagged release.
 
 ## Final technical conclusion
 
