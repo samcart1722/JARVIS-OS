@@ -25,9 +25,15 @@ from app.cognition.local_resolution.permissions import (
 )
 from app.infrastructure.local_storage.sqlite_storage import (
     SCHEMA_VERSION,
+    LocalStorageError,
     SQLiteKnowledgeRecordRepository,
     SQLiteLocalStorage,
     UnsupportedSchemaVersion,
+)
+from app.membership import (
+    InMemoryMembershipRepository,
+    MembershipRepositoryError,
+    MembershipStatus,
 )
 
 
@@ -40,6 +46,34 @@ def _record(workspace: WorkspaceIdentity, value: str = "4") -> KnowledgeRecord:
         value,
         KnowledgeProvenance("user_asserted", "actor:wife"),
     )
+
+
+def _create_v1_database(path: Path) -> None:
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "CREATE TABLE schema_metadata ("
+            "schema_key TEXT PRIMARY KEY, schema_version INTEGER NOT NULL)"
+        )
+        connection.execute(
+            "CREATE TABLE list_items ("
+            "workspace_id TEXT NOT NULL, list_id TEXT NOT NULL, "
+            "normalized_item TEXT NOT NULL, display_item TEXT NOT NULL, "
+            "position INTEGER NOT NULL, "
+            "PRIMARY KEY (workspace_id, list_id, normalized_item), "
+            "UNIQUE (workspace_id, list_id, position))"
+        )
+        connection.execute(
+            "CREATE TABLE knowledge_records ("
+            "workspace_id TEXT NOT NULL, record_id TEXT NOT NULL, "
+            "kind TEXT NOT NULL, knowledge_key TEXT NOT NULL, "
+            "knowledge_value TEXT NOT NULL, source_type TEXT NOT NULL, "
+            "source_reference TEXT NOT NULL, "
+            "PRIMARY KEY (workspace_id, record_id))"
+        )
+        connection.execute(
+            "INSERT INTO schema_metadata VALUES ('local_storage', 1)"
+        )
+        connection.execute("PRAGMA user_version = 1")
 
 
 def test_constructor_is_inert_and_initialization_is_explicit(tmp_path) -> None:
@@ -250,7 +284,7 @@ def test_knowledge_discovery_exact_binary_order_kind_workspace_and_cap(
         storage.close()
 
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
         tables = {
             row[0]
             for row in connection.execute(
@@ -264,7 +298,12 @@ def test_knowledge_discovery_exact_binary_order_kind_workspace_and_cap(
                 "WHERE type = 'index' AND name NOT LIKE 'sqlite_autoindex_%'"
             )
         }
-    assert tables == {"schema_metadata", "list_items", "knowledge_records"}
+    assert tables == {
+        "schema_metadata",
+        "list_items",
+        "knowledge_records",
+        "actor_workspace_memberships",
+    }
     assert indexes == set()
 
 
@@ -344,3 +383,259 @@ def test_sqlite_discovery_boundary_matrix_through_real_capability(
         )
     finally:
         storage.close()
+
+
+def test_fresh_v2_schema_contains_only_approved_membership_shape(tmp_path) -> None:
+    path = tmp_path / "fresh.sqlite3"
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+        actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+        assert storage.create(actor, workspace).status is MembershipStatus.ACTIVE
+        assert storage.read(workspace, "list").items == ()
+        assert storage.read_knowledge(workspace, "record").record is None
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone() == (2,)
+        assert connection.execute(
+            "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
+            ("local_storage",),
+        ).fetchone() == (2,)
+        columns = connection.execute(
+            "PRAGMA table_info(actor_workspace_memberships)"
+        ).fetchall()
+        assert tuple((row[1], row[2], row[3], row[5]) for row in columns) == (
+            ("actor_id", "TEXT", 1, 1),
+            ("workspace_id", "TEXT", 1, 2),
+            ("status", "TEXT", 1, 0),
+        )
+        sql = connection.execute(
+            "SELECT sql FROM sqlite_master WHERE name = ?",
+            ("actor_workspace_memberships",),
+        ).fetchone()[0]
+        assert "status IN ('active', 'inactive')" in sql
+
+
+def test_v1_migration_is_additive_and_preserves_semantic_values(tmp_path) -> None:
+    path = tmp_path / "migration.sqlite3"
+    _create_v1_database(path)
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "INSERT INTO list_items VALUES (?, ?, ?, ?, ?)",
+            ("home", "shopping", "milk", "Milk", 0),
+        )
+        connection.execute(
+            "INSERT INTO knowledge_records VALUES (?, ?, ?, ?, ?, ?, ?)",
+            ("home", "record", "fact", "family.value", "exact", "reviewed", "source"),
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+        workspace = WorkspaceIdentity("home")
+        assert storage.read(workspace, "shopping").items == ("Milk",)
+        recovered = storage.read_knowledge(workspace, "record").record
+        assert recovered is not None
+        assert (recovered.key, recovered.value) == ("family.value", "exact")
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone() == (2,)
+        assert connection.execute(
+            "SELECT workspace_id, list_id, normalized_item, display_item, position "
+            "FROM list_items"
+        ).fetchone() == ("home", "shopping", "milk", "Milk", 0)
+        assert connection.execute(
+            "SELECT workspace_id, record_id, kind, knowledge_key, knowledge_value, "
+            "source_type, source_reference FROM knowledge_records"
+        ).fetchone() == (
+            "home", "record", "fact", "family.value", "exact", "reviewed", "source"
+        )
+
+
+def test_v1_migration_failure_rolls_back_ddl_versions_and_preserves_data(
+    tmp_path,
+) -> None:
+    path = tmp_path / "migration-failure.sqlite3"
+    _create_v1_database(path)
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "INSERT INTO list_items VALUES (?, ?, ?, ?, ?)",
+            ("home", "shopping", "milk", "Milk", 0),
+        )
+        connection.execute(
+            "INSERT INTO knowledge_records VALUES (?, ?, ?, ?, ?, ?, ?)",
+            ("home", "record", "fact", "family.value", "exact", "reviewed", "source"),
+        )
+        connection.execute(
+            "CREATE TRIGGER fail_schema_metadata_update "
+            "BEFORE UPDATE ON schema_metadata BEGIN "
+            "SELECT RAISE(ABORT, 'forced migration failure'); END"
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        with pytest.raises(LocalStorageError, match="migration failed"):
+            storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone() == (1,)
+        assert connection.execute(
+            "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
+            ("local_storage",),
+        ).fetchone() == (1,)
+        assert connection.execute(
+            "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = ?",
+            ("actor_workspace_memberships",),
+        ).fetchone() == (0,)
+        assert connection.execute("SELECT * FROM list_items").fetchone() == (
+            "home", "shopping", "milk", "Milk", 0
+        )
+        assert connection.execute("SELECT * FROM knowledge_records").fetchone() == (
+            "home", "record", "fact", "family.value", "exact", "reviewed", "source"
+        )
+        connection.execute("DROP TRIGGER fail_schema_metadata_update")
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+        assert storage.read(WorkspaceIdentity("home"), "shopping").items == ("Milk",)
+        assert storage.read_knowledge(
+            WorkspaceIdentity("home"), "record"
+        ).record.value == "exact"
+    with sqlite3.connect(path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone() == (2,)
+        assert connection.execute(
+            "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
+            ("local_storage",),
+        ).fetchone() == (2,)
+        assert connection.execute(
+            "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = ?",
+            ("actor_workspace_memberships",),
+        ).fetchone() == (1,)
+
+
+@pytest.mark.parametrize("repository_kind", ("memory", "sqlite"))
+def test_membership_repository_lifecycle_parity(repository_kind, tmp_path) -> None:
+    storage = None
+    if repository_kind == "memory":
+        repository = InMemoryMembershipRepository()
+    else:
+        storage = SQLiteLocalStorage(tmp_path / "parity.sqlite3")
+        storage.open()
+        storage.initialize()
+        repository = storage
+    actor, other_actor = ActorIdentity("Actor"), ActorIdentity("actor")
+    workspace, other_workspace = WorkspaceIdentity("Home"), WorkspaceIdentity("home")
+    try:
+        assert repository.get(actor, workspace) is None
+        assert repository.activate(actor, workspace) is None
+        assert repository.deactivate(actor, workspace) is None
+        assert repository.create(actor, workspace).status is MembershipStatus.ACTIVE
+        assert repository.create(actor, workspace).status is MembershipStatus.ACTIVE
+        assert (
+            repository.deactivate(actor, workspace).status
+            is MembershipStatus.INACTIVE
+        )
+        assert (
+            repository.deactivate(actor, workspace).status
+            is MembershipStatus.INACTIVE
+        )
+        assert repository.create(actor, workspace).status is MembershipStatus.INACTIVE
+        assert repository.activate(actor, workspace).status is MembershipStatus.ACTIVE
+        assert repository.activate(actor, workspace).status is MembershipStatus.ACTIVE
+        assert repository.get(other_actor, workspace) is None
+        assert repository.get(actor, other_workspace) is None
+    finally:
+        if storage is not None:
+            storage.close()
+
+
+def test_memberships_survive_close_and_reconstruction(tmp_path) -> None:
+    path = tmp_path / "durable.sqlite3"
+    actor = ActorIdentity("actor")
+    active_workspace = WorkspaceIdentity("active")
+    inactive_workspace = WorkspaceIdentity("inactive")
+    with SQLiteLocalStorage(path) as first:
+        first.initialize()
+        first.create(actor, active_workspace)
+        first.create(actor, inactive_workspace)
+        first.deactivate(actor, inactive_workspace)
+    with SQLiteLocalStorage(path) as second:
+        second.initialize()
+        assert second.get(actor, active_workspace).status is MembershipStatus.ACTIVE
+        assert second.get(actor, inactive_workspace).status is MembershipStatus.INACTIVE
+        assert second.get(actor, WorkspaceIdentity("missing")) is None
+
+
+def test_membership_constraints_reject_duplicate_null_and_invalid_status(
+    tmp_path,
+) -> None:
+    path = tmp_path / "constraints.sqlite3"
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "INSERT INTO actor_workspace_memberships "
+            "VALUES ('actor', 'workspace', 'active')"
+        )
+        for values in (
+            ("actor", "workspace", "inactive"),
+            (None, "workspace", "active"),
+            ("actor", None, "active"),
+            ("actor", "other", None),
+            ("actor", "other", "invalid"),
+        ):
+            with pytest.raises(sqlite3.IntegrityError):
+                connection.execute(
+                    "INSERT INTO actor_workspace_memberships VALUES (?, ?, ?)", values
+                )
+
+
+def test_v2_metadata_and_required_membership_schema_are_verified(tmp_path) -> None:
+    metadata_path = tmp_path / "metadata.sqlite3"
+    _create_v1_database(metadata_path)
+    with sqlite3.connect(metadata_path) as connection:
+        connection.execute("UPDATE schema_metadata SET schema_version = 1")
+        connection.execute("PRAGMA user_version = 2")
+    missing_path = tmp_path / "missing.sqlite3"
+    _create_v1_database(missing_path)
+    with sqlite3.connect(missing_path) as connection:
+        connection.execute("UPDATE schema_metadata SET schema_version = 2")
+        connection.execute("PRAGMA user_version = 2")
+    for path in (metadata_path, missing_path):
+        with SQLiteLocalStorage(path) as storage:
+            with pytest.raises(LocalStorageError, match="schema is invalid"):
+                storage.initialize()
+
+
+def test_membership_errors_are_safe_and_invalid_persisted_status_fails(
+    tmp_path,
+) -> None:
+    path = tmp_path / "errors.sqlite3"
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+        storage._connection.execute("DROP TABLE actor_workspace_memberships")
+        with pytest.raises(MembershipRepositoryError, match="Membership read failed"):
+            storage.get(actor, workspace)
+    corrupt_path = tmp_path / "corrupt.sqlite3"
+    with SQLiteLocalStorage(corrupt_path) as storage:
+        storage.initialize()
+        storage._connection.execute("PRAGMA ignore_check_constraints = ON")
+        storage._connection.execute(
+            "INSERT INTO actor_workspace_memberships VALUES (?, ?, ?)",
+            ("actor", "workspace", "corrupt"),
+        )
+        with pytest.raises(
+            MembershipRepositoryError, match="Membership data is invalid"
+        ):
+            storage.get(actor, workspace)
+
+
+@pytest.mark.parametrize("operation", ("get", "create", "activate", "deactivate"))
+def test_membership_operations_require_exact_canonical_identities(
+    operation, tmp_path
+) -> None:
+    with SQLiteLocalStorage(tmp_path / "types.sqlite3") as storage:
+        storage.initialize()
+        method = getattr(storage, operation)
+        with pytest.raises(ValueError, match="actor is invalid"):
+            method("actor", WorkspaceIdentity("workspace"))
+        with pytest.raises(ValueError, match="workspace is invalid"):
+            method(ActorIdentity("actor"), "workspace")

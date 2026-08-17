@@ -56,6 +56,14 @@ from app.cognition.trusted_context import (
     TrustedRequestContext,
     TrustedRequestContextResolution,
 )
+from app.membership.models import (
+    MEMBERSHIP_INACTIVE,
+    MEMBERSHIP_NOT_FOUND,
+    MEMBERSHIP_RESOLUTION_FAILED,
+    ActorWorkspaceMembership,
+    MembershipDecision,
+    MembershipStatus,
+)
 
 ERROR_CODES = (
     TRUSTED_CONTEXT_INVALID_INPUT,
@@ -100,12 +108,34 @@ def _text_result() -> TextRoutingResult:
     )
 
 
-def test_constructor_requires_both_collaborators() -> None:
+def _active_decision(
+    context: TrustedRequestContext | None = None,
+) -> MembershipDecision:
+    context = context or _context()
+    return MembershipDecision(
+        True,
+        ActorWorkspaceMembership(
+            context.actor,
+            context.workspace,
+            MembershipStatus.ACTIVE,
+        ),
+    )
+
+
+def _failed_decision(
+    error_code: str = MEMBERSHIP_NOT_FOUND,
+) -> MembershipDecision:
+    return MembershipDecision(False, error_code=error_code)
+
+
+def test_constructor_requires_all_collaborators() -> None:
     with pytest.raises(ValueError):
-        TrustedLocalCommandRoutingService(None, Mock())
+        TrustedLocalCommandRoutingService(None, Mock(), Mock())
     with pytest.raises(ValueError):
-        TrustedLocalCommandRoutingService(Mock(), None)
-    TrustedLocalCommandRoutingService(Mock(), Mock())
+        TrustedLocalCommandRoutingService(Mock(), None, Mock())
+    with pytest.raises(ValueError):
+        TrustedLocalCommandRoutingService(Mock(), Mock(), None)
+    TrustedLocalCommandRoutingService(Mock(), Mock(), Mock())
 
 
 class _FalseyResolver:
@@ -128,36 +158,56 @@ class _FalseyRouter:
         return _text_result()
 
 
+class _FalseyMembershipService:
+    def __bool__(self) -> bool:
+        return False
+
+    def decide(self, actor: ActorIdentity, workspace: WorkspaceIdentity):
+        return _active_decision(TrustedRequestContext(actor, workspace))
+
+
 def test_falsey_collaborators_are_retained_without_replacement() -> None:
     resolver = _FalseyResolver()
+    membership_service = _FalseyMembershipService()
     router = _FalseyRouter()
-    service = TrustedLocalCommandRoutingService(resolver, router)
+    service = TrustedLocalCommandRoutingService(
+        resolver,
+        membership_service,
+        router,
+    )
     result = service.route(_request())
     assert result.trust_resolution.error_code == TRUSTED_CONTEXT_UNKNOWN_BINDING
     assert service._resolver is resolver
+    assert service._membership_service is membership_service
     assert service._router is router
     assert router.calls == 0
 
 
 def test_wrong_request_type_raises_before_collaborator_calls() -> None:
     resolver = Mock()
+    membership_service = Mock()
     router = Mock()
-    service = TrustedLocalCommandRoutingService(resolver, router)
+    service = TrustedLocalCommandRoutingService(resolver, membership_service, router)
     for request in (None, object(), TrustedHostRequestInput("key", "workspace")):
         with pytest.raises(TypeError):
             service.route(request)
     resolver.resolve.assert_not_called()
+    membership_service.decide.assert_not_called()
     router.route.assert_not_called()
 
 
 def test_invalid_resolver_output_raises_and_stops_before_router() -> None:
     resolver = Mock()
     resolver.resolve.return_value = object()
+    membership_service = Mock()
     router = Mock()
     request = _request()
     with pytest.raises(TypeError):
-        TrustedLocalCommandRoutingService(resolver, router).route(request)
+        TrustedLocalCommandRoutingService(
+            resolver, membership_service, router
+        ).route(request)
     resolver.resolve.assert_called_once_with(request.host_input)
+    membership_service.decide.assert_not_called()
     router.route.assert_not_called()
 
 
@@ -166,12 +216,16 @@ def test_each_trust_failure_is_preserved_and_short_circuits(error_code) -> None:
     resolution = _failure(error_code)
     resolver = Mock()
     resolver.resolve.return_value = resolution
+    membership_service = Mock()
     router = Mock()
     request = _request()
-    result = TrustedLocalCommandRoutingService(resolver, router).route(request)
+    result = TrustedLocalCommandRoutingService(
+        resolver, membership_service, router
+    ).route(request)
     assert result.trust_resolution is resolution
     assert result.text_routing_result is None
     resolver.resolve.assert_called_once_with(request.host_input)
+    membership_service.decide.assert_not_called()
     router.route.assert_not_called()
 
 
@@ -184,15 +238,21 @@ def test_success_builds_one_exact_request_and_preserves_result_identities() -> N
     )
     resolver = Mock()
     resolver.resolve.return_value = resolution
+    membership_decision = _active_decision(resolution.context)
+    membership_service = Mock()
+    membership_service.decide.return_value = membership_decision
     router_result = _text_result()
     router = Mock()
     router.route.return_value = router_result
     text = object()
     request = _request(text)
 
-    result = TrustedLocalCommandRoutingService(resolver, router).route(request)
+    result = TrustedLocalCommandRoutingService(
+        resolver, membership_service, router
+    ).route(request)
 
     resolver.resolve.assert_called_once_with(request.host_input)
+    membership_service.decide.assert_called_once_with(actor, workspace)
     router.route.assert_called_once()
     routed_request = router.route.call_args.args[0]
     assert type(routed_request) is TextRoutingRequest
@@ -201,6 +261,7 @@ def test_success_builds_one_exact_request_and_preserves_result_identities() -> N
     assert routed_request.text is text
     assert routed_request.fallback_authorization is request.fallback_authorization
     assert result.trust_resolution is resolution
+    assert result.membership_decision is membership_decision
     assert result.text_routing_result is router_result
     assert request.text is text
     with pytest.raises(FrozenInstanceError):
@@ -210,11 +271,16 @@ def test_success_builds_one_exact_request_and_preserves_result_identities() -> N
 def test_invalid_router_output_raises_after_exactly_one_call_each() -> None:
     resolver = Mock()
     resolver.resolve.return_value = _success()
+    membership_service = Mock()
+    membership_service.decide.return_value = _active_decision()
     router = Mock()
     router.route.return_value = object()
     with pytest.raises(TypeError):
-        TrustedLocalCommandRoutingService(resolver, router).route(_request())
+        TrustedLocalCommandRoutingService(
+            resolver, membership_service, router
+        ).route(_request())
     resolver.resolve.assert_called_once()
+    membership_service.decide.assert_called_once()
     router.route.assert_called_once()
 
 
@@ -222,6 +288,7 @@ def test_trust_failure_has_zero_downstream_boundary_profile() -> None:
     resolution = _failure(TRUSTED_CONTEXT_RESOLUTION_FAILED)
     resolver = Mock()
     resolver.resolve.return_value = resolution
+    membership_service = Mock()
     boundaries = {
         name: Mock()
         for name in (
@@ -238,9 +305,12 @@ def test_trust_failure_has_zero_downstream_boundary_profile() -> None:
     router = Mock()
     router.boundaries = boundaries
 
-    result = TrustedLocalCommandRoutingService(resolver, router).route(_request())
+    result = TrustedLocalCommandRoutingService(
+        resolver, membership_service, router
+    ).route(_request())
 
     assert result.trust_resolution is resolution
+    membership_service.decide.assert_not_called()
     router.route.assert_not_called()
     for boundary in boundaries.values():
         boundary.assert_not_called()
@@ -268,8 +338,52 @@ def _real_router(actions: tuple[str, ...] = (LIST_ITEMS_ADD,)):
 
 def _service_with_real_router(router):
     resolver = Mock()
+    resolution = _success()
+    resolver.resolve.return_value = resolution
+    membership_service = Mock()
+    membership_service.decide.return_value = _active_decision(resolution.context)
+    return TrustedLocalCommandRoutingService(resolver, membership_service, router)
+
+
+@pytest.mark.parametrize(
+    "error_code",
+    (MEMBERSHIP_NOT_FOUND, MEMBERSHIP_INACTIVE, MEMBERSHIP_RESOLUTION_FAILED),
+)
+def test_each_membership_failure_short_circuits_before_router(error_code) -> None:
+    resolution = _success()
+    resolver = Mock()
+    resolver.resolve.return_value = resolution
+    decision = _failed_decision(error_code)
+    membership_service = Mock()
+    membership_service.decide.return_value = decision
+    router = Mock()
+
+    result = TrustedLocalCommandRoutingService(
+        resolver, membership_service, router
+    ).route(_request())
+
+    assert result.trust_resolution is resolution
+    assert result.membership_decision is decision
+    assert result.text_routing_result is None
+    membership_service.decide.assert_called_once_with(
+        resolution.context.actor,
+        resolution.context.workspace,
+    )
+    router.route.assert_not_called()
+
+
+def test_invalid_membership_service_output_raises_before_router() -> None:
+    resolver = Mock()
     resolver.resolve.return_value = _success()
-    return TrustedLocalCommandRoutingService(resolver, router)
+    membership_service = Mock()
+    membership_service.decide.return_value = object()
+    router = Mock()
+    with pytest.raises(TypeError):
+        TrustedLocalCommandRoutingService(
+            resolver, membership_service, router
+        ).route(_request())
+    membership_service.decide.assert_called_once()
+    router.route.assert_not_called()
 
 
 def test_real_router_preserves_local_success_and_permission_denial() -> None:
@@ -311,9 +425,12 @@ def test_workspace_payload_is_rejected_by_existing_interpreter() -> None:
 def test_result_has_no_sensitive_raw_or_duplicated_fields() -> None:
     resolver = Mock()
     resolver.resolve.return_value = _failure()
-    result = TrustedLocalCommandRoutingService(resolver, Mock()).route(_request())
+    result = TrustedLocalCommandRoutingService(resolver, Mock(), Mock()).route(
+        _request()
+    )
     assert tuple(field.name for field in fields(result)) == (
         "trust_resolution",
+        "membership_decision",
         "text_routing_result",
     )
     for name in (

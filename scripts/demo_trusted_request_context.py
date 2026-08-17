@@ -9,6 +9,7 @@ from app.cognition.local_resolution.repository import InMemoryListItemRepository
 from app.cognition.trusted_context.models import ConfiguredTrustedHostBinding
 from app.core.config import Settings
 from app.core.container import Container
+from app.membership.models import ActorWorkspaceMembership, MembershipStatus
 from app.operations.trusted_request_context_demo_runtime import (
     TrustedRequestContextDemoRuntime,
 )
@@ -47,6 +48,11 @@ def main() -> int:
         )
         container = Container(
             Settings(REASONING_ENABLED=False, _env_file=None),
+            memberships=(
+                ActorWorkspaceMembership(actor, primary, MembershipStatus.ACTIVE),
+                ActorWorkspaceMembership(actor, secondary, MembershipStatus.ACTIVE),
+                ActorWorkspaceMembership(actor, denied, MembershipStatus.ACTIVE),
+            ),
             local_permission_grants=grants,
             local_list_repository=repository,
             trusted_host_bindings=(binding,),

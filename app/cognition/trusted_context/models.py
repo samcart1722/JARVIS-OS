@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from app.cognition.interpretation.routing import TextRoutingResult
 from app.cognition.local_resolution.models import ActorIdentity, WorkspaceIdentity
 from app.cognition.routing.models import CognitiveFallbackAuthorization
+from app.membership.models import MembershipDecision
 
 TRUSTED_CONTEXT_INVALID_INPUT = "trusted_context_invalid_input"
 TRUSTED_CONTEXT_UNKNOWN_BINDING = "trusted_context_unknown_binding"
@@ -106,16 +107,27 @@ class TrustedLocalCommandRequest:
 @dataclass(frozen=True, slots=True)
 class TrustedLocalCommandRoutingResult:
     trust_resolution: TrustedRequestContextResolution
+    membership_decision: MembershipDecision | None = None
     text_routing_result: TextRoutingResult | None = None
 
     def __post_init__(self) -> None:
         if type(self.trust_resolution) is not TrustedRequestContextResolution:
             raise ValueError("A valid trusted context resolution is required.")
-        if self.trust_resolution.success:
-            if type(self.text_routing_result) is not TextRoutingResult:
-                raise ValueError(
-                    "Successful trust resolution requires a routing result."
-                )
+        if not self.trust_resolution.success:
+            if self.membership_decision is not None:
+                raise ValueError("Failed trust resolution forbids membership decision.")
+            if self.text_routing_result is not None:
+                raise ValueError("Failed trust resolution forbids a routing result.")
             return
-        if self.text_routing_result is not None:
-            raise ValueError("Failed trust resolution forbids a routing result.")
+        if type(self.membership_decision) is not MembershipDecision:
+            raise ValueError(
+                "Successful trust resolution requires membership decision."
+            )
+        if not self.membership_decision.success:
+            if self.text_routing_result is not None:
+                raise ValueError("Failed membership decision forbids a routing result.")
+            return
+        if type(self.text_routing_result) is not TextRoutingResult:
+            raise ValueError(
+                "Successful membership decision requires a routing result."
+            )

@@ -11,6 +11,7 @@ from app.cognition.local_resolution.contracts import (
 )
 from app.cognition.local_resolution.models import (
     KNOWLEDGE_DISCOVERY_LOOKAHEAD,
+    ActorIdentity,
     KnowledgeKind,
     KnowledgeProvenance,
     KnowledgeRead,
@@ -20,8 +21,10 @@ from app.cognition.local_resolution.models import (
     ListItemsSnapshot,
     WorkspaceIdentity,
 )
+from app.membership.contracts import MembershipRepositoryError
+from app.membership.models import ActorWorkspaceMembership, MembershipStatus
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class LocalStorageError(LocalRepositoryError):
@@ -66,7 +69,10 @@ class SQLiteLocalStorage:
         if current_version > SCHEMA_VERSION:
             raise UnsupportedSchemaVersion("Local database schema is unsupported.")
         if current_version == SCHEMA_VERSION:
-            self._verify_schema_metadata(connection)
+            self._verify_schema(connection, SCHEMA_VERSION, require_memberships=True)
+            return
+        if current_version == 1:
+            self._migrate_v1_to_v2(connection)
             return
         if current_version != 0:
             raise LocalStorageError("Local database schema cannot be initialized.")
@@ -91,12 +97,38 @@ class SQLiteLocalStorage:
                 "source_reference TEXT NOT NULL, "
                 "PRIMARY KEY (workspace_id, record_id))"
             )
+            self._create_membership_table(connection)
             connection.execute(
                 "INSERT INTO schema_metadata (schema_key, schema_version) "
                 "VALUES (?, ?)",
                 ("local_storage", SCHEMA_VERSION),
             )
             connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+
+    def _migrate_v1_to_v2(self, connection: sqlite3.Connection) -> None:
+        self._verify_schema(connection, 1, require_memberships=False)
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            self._create_membership_table(connection)
+            connection.execute(
+                "UPDATE schema_metadata SET schema_version = ? "
+                "WHERE schema_key = ?",
+                (SCHEMA_VERSION, "local_storage"),
+            )
+            connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+            connection.commit()
+        except sqlite3.DatabaseError as error:
+            connection.rollback()
+            raise LocalStorageError("Local database migration failed.") from error
+
+    @staticmethod
+    def _create_membership_table(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            "CREATE TABLE actor_workspace_memberships ("
+            "actor_id TEXT NOT NULL, workspace_id TEXT NOT NULL, "
+            "status TEXT NOT NULL CHECK (status IN ('active', 'inactive')), "
+            "PRIMARY KEY (actor_id, workspace_id))"
+        )
 
     def close(self) -> None:
         connection, self._connection = self._connection, None
@@ -293,6 +325,126 @@ class SQLiteLocalStorage:
             for row in rows
         )
 
+    def get(
+        self, actor: ActorIdentity, workspace: WorkspaceIdentity
+    ) -> ActorWorkspaceMembership | None:
+        key = self._membership_key(actor, workspace)
+        try:
+            connection = self._require_initialized_connection()
+            row = connection.execute(
+                "SELECT actor_id, workspace_id, status "
+                "FROM actor_workspace_memberships "
+                "WHERE actor_id = ? AND workspace_id = ?",
+                key,
+            ).fetchone()
+            return self._membership_from_row(row)
+        except MembershipRepositoryError:
+            raise
+        except (sqlite3.DatabaseError, LocalStorageError) as error:
+            raise MembershipRepositoryError("Membership read failed.") from error
+
+    def create(
+        self, actor: ActorIdentity, workspace: WorkspaceIdentity
+    ) -> ActorWorkspaceMembership:
+        key = self._membership_key(actor, workspace)
+        try:
+            connection = self._require_initialized_connection()
+            connection.execute("BEGIN IMMEDIATE")
+            connection.execute(
+                "INSERT OR IGNORE INTO actor_workspace_memberships "
+                "(actor_id, workspace_id, status) VALUES (?, ?, ?)",
+                (*key, MembershipStatus.ACTIVE.value),
+            )
+            membership = self._read_membership(connection, key)
+            if membership is None:
+                raise MembershipRepositoryError("Membership write failed.")
+            connection.commit()
+            return membership
+        except MembershipRepositoryError:
+            self._rollback_membership_write()
+            raise
+        except (sqlite3.DatabaseError, LocalStorageError) as error:
+            self._rollback_membership_write()
+            raise MembershipRepositoryError("Membership write failed.") from error
+
+    def activate(
+        self, actor: ActorIdentity, workspace: WorkspaceIdentity
+    ) -> ActorWorkspaceMembership | None:
+        return self._set_membership_status(actor, workspace, MembershipStatus.ACTIVE)
+
+    def deactivate(
+        self, actor: ActorIdentity, workspace: WorkspaceIdentity
+    ) -> ActorWorkspaceMembership | None:
+        return self._set_membership_status(actor, workspace, MembershipStatus.INACTIVE)
+
+    def _set_membership_status(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        status: MembershipStatus,
+    ) -> ActorWorkspaceMembership | None:
+        key = self._membership_key(actor, workspace)
+        try:
+            connection = self._require_initialized_connection()
+            connection.execute("BEGIN IMMEDIATE")
+            connection.execute(
+                "UPDATE actor_workspace_memberships SET status = ? "
+                "WHERE actor_id = ? AND workspace_id = ?",
+                (status.value, *key),
+            )
+            membership = self._read_membership(connection, key)
+            connection.commit()
+            return membership
+        except MembershipRepositoryError:
+            self._rollback_membership_write()
+            raise
+        except (sqlite3.DatabaseError, LocalStorageError) as error:
+            self._rollback_membership_write()
+            raise MembershipRepositoryError("Membership write failed.") from error
+
+    def _rollback_membership_write(self) -> None:
+        connection = self._connection
+        if connection is not None and connection.in_transaction:
+            connection.rollback()
+
+    @staticmethod
+    def _membership_key(
+        actor: ActorIdentity, workspace: WorkspaceIdentity
+    ) -> tuple[str, str]:
+        if type(actor) is not ActorIdentity:
+            raise ValueError("Membership actor is invalid.")
+        if type(workspace) is not WorkspaceIdentity:
+            raise ValueError("Membership workspace is invalid.")
+        return actor.actor_id, workspace.workspace_id
+
+    @classmethod
+    def _read_membership(
+        cls,
+        connection: sqlite3.Connection,
+        key: tuple[str, str],
+    ) -> ActorWorkspaceMembership | None:
+        row = connection.execute(
+            "SELECT actor_id, workspace_id, status "
+            "FROM actor_workspace_memberships "
+            "WHERE actor_id = ? AND workspace_id = ?",
+            key,
+        ).fetchone()
+        return cls._membership_from_row(row)
+
+    @staticmethod
+    def _membership_from_row(
+        row: tuple[str, str, str] | None,
+    ) -> ActorWorkspaceMembership | None:
+        if row is None:
+            return None
+        try:
+            status = MembershipStatus(row[2])
+            return ActorWorkspaceMembership(
+                ActorIdentity(row[0]), WorkspaceIdentity(row[1]), status
+            )
+        except ValueError as error:
+            raise MembershipRepositoryError("Membership data is invalid.") from error
+
     def _require_connection(self) -> sqlite3.Connection:
         if self._connection is None:
             raise LocalStorageError("Local storage is not open.")
@@ -306,15 +458,46 @@ class SQLiteLocalStorage:
         return connection
 
     @staticmethod
-    def _verify_schema_metadata(connection: sqlite3.Connection) -> None:
+    def _verify_schema(
+        connection: sqlite3.Connection,
+        expected_version: int,
+        *,
+        require_memberships: bool,
+    ) -> None:
         try:
             row = connection.execute(
                 "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
                 ("local_storage",),
             ).fetchone()
+            actual_columns: tuple[tuple[object, ...], ...] = ()
+            if require_memberships:
+                columns = connection.execute(
+                    "PRAGMA table_info(actor_workspace_memberships)"
+                ).fetchall()
+                table_row = connection.execute(
+                    "SELECT sql FROM sqlite_master "
+                    "WHERE type = 'table' AND name = ?",
+                    ("actor_workspace_memberships",),
+                ).fetchone()
+                actual_columns = tuple(
+                    (column[1], column[2], column[3], column[5])
+                    for column in columns
+                )
         except sqlite3.DatabaseError as error:
             raise LocalStorageError("Local database schema is invalid.") from error
-        if row is None or int(row[0]) != SCHEMA_VERSION:
+        if row is None or int(row[0]) != expected_version:
+            raise LocalStorageError("Local database schema is invalid.")
+        expected_columns = (
+            ("actor_id", "TEXT", 1, 1),
+            ("workspace_id", "TEXT", 1, 2),
+            ("status", "TEXT", 1, 0),
+        )
+        if require_memberships and actual_columns != expected_columns:
+            raise LocalStorageError("Local database schema is invalid.")
+        if require_memberships and (
+            table_row is None
+            or "status IN ('active', 'inactive')" not in str(table_row[0])
+        ):
             raise LocalStorageError("Local database schema is invalid.")
 
 

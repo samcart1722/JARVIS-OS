@@ -45,6 +45,9 @@ Before this sequence, read the normative
 
 ## Operations
 
+- [Durable Actor-Workspace Membership Demo](../operations/DURABLE_ACTOR_WORKSPACE_MEMBERSHIP_DEMO.md)
+  proves persistence and admission/permission separation.
+
 - [Deterministic Local Knowledge Commands Demo](../operations/DETERMINISTIC_LOCAL_KNOWLEDGE_COMMANDS_DEMO.md)
   proves strict knowledge store/read routing and terminal local outcomes.
 
@@ -64,3 +67,7 @@ Before this sequence, read the normative
 - [Claim Evidence Support Verification Demo v1](../operations/CLAIM_EVIDENCE_VERIFICATION_DEMO.md)
 - [Independent Claim Verifier Demo v1](../operations/INDEPENDENT_CLAIM_VERIFIER_DEMO.md)
 - [Local-First Family Resolution Demo v1](../operations/LOCAL_FIRST_FAMILY_RESOLUTION_DEMO.md)
+
+## Sprint implementation history
+
+- [Sprint 28 implementation summary](history/sprints/SPRINT_28_SUMMARY.md)

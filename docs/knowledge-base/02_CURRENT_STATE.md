@@ -283,3 +283,13 @@ validation, and external-access governance remain deferred.
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under
 `app/reasoning`, `app/context`, and `app/memory` remain outside this sprint.
+
+## Sprint 28 feature-branch state
+
+Sprint 28 is **IMPLEMENTED ON FEATURE BRANCH; FINAL INDEPENDENT REVIEW
+PENDING** on `feat/sprint-28-durable-actor-workspace-membership`, based on
+`a2f68902928e45a8cecb774660cdeec25ddf6a69` until a feature commit exists.
+Blocks A–C are independently approved. Block D is implemented but uncommitted,
+unmerged, untagged, and unreleased. The feature tree uses schema v2; final
+implementation validation is 915 full-suite tests, 78 architecture tests, and
+156 focused Sprint 28 tests, all passing. Final independent review is pending.

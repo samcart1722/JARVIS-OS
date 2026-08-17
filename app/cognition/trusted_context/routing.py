@@ -11,19 +11,25 @@ from app.cognition.trusted_context.models import (
     TrustedLocalCommandRoutingResult,
     TrustedRequestContextResolution,
 )
+from app.membership.models import MembershipDecision
+from app.membership.service import MembershipDecisionService
 
 
 class TrustedLocalCommandRoutingService:
     def __init__(
         self,
         resolver: TrustedRequestContextResolver,
+        membership_service: MembershipDecisionService,
         router: LocalCommandTextRouter,
     ) -> None:
         if resolver is None:
             raise ValueError("A trusted request context resolver is required.")
+        if membership_service is None:
+            raise ValueError("A membership decision service is required.")
         if router is None:
             raise ValueError("A local command text router is required.")
         self._resolver = resolver
+        self._membership_service = membership_service
         self._router = router
 
     def route(
@@ -39,6 +45,18 @@ class TrustedLocalCommandRoutingService:
         if not trust_resolution.success:
             return TrustedLocalCommandRoutingResult(trust_resolution)
 
+        membership_decision = self._membership_service.decide(
+            trust_resolution.context.actor,
+            trust_resolution.context.workspace,
+        )
+        if type(membership_decision) is not MembershipDecision:
+            raise TypeError("Membership service returned an invalid decision.")
+        if not membership_decision.success:
+            return TrustedLocalCommandRoutingResult(
+                trust_resolution,
+                membership_decision,
+            )
+
         text_routing_result = self._router.route(
             TextRoutingRequest(
                 actor=trust_resolution.context.actor,
@@ -51,5 +69,6 @@ class TrustedLocalCommandRoutingService:
             raise TypeError("Router returned an invalid text routing result.")
         return TrustedLocalCommandRoutingResult(
             trust_resolution,
+            membership_decision,
             text_routing_result,
         )
