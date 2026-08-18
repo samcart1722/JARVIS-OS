@@ -9,6 +9,7 @@ TRUSTED_CONTEXT_ROOT = APP_ROOT / "cognition" / "trusted_context"
 
 APPROVED_TEXT_ROUTING_REQUEST_CALLERS = frozenset(
     (
+        "app/principal_authentication/routing.py",
         "app/cognition/trusted_context/routing.py",
         "app/operations/local_command_interpretation_demo_runtime.py",
         "app/operations/local_knowledge_command_demo_runtime.py",

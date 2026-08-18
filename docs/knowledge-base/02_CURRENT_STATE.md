@@ -17,7 +17,11 @@ Validation passed 28 SQLite, 41 membership, 29 Container, 130 trusted-context,
 diff checks were clean. Both demos passed with
 model/provider/readiness/network calls of `0 / 0 / 0 / 0`. Release-truth
 synchronization is occurring in a separately reviewed metadata tree; final
-metadata merge and branch cleanup have not occurred. Sprint 29 is unauthorized.
+metadata merge and branch cleanup have not occurred. Sprint 29 is now authorized
+and scoped as Local Principal Authentication Foundation v1. Its Blocks A-D
+implementation candidate exists, but final staging, feature commit, push,
+merge, tag, backup, release-truth synchronization, release, and closure remain
+pending.
 
 ## Sprint 27 fully released state
 
@@ -317,3 +321,15 @@ verification, and recoverable backup verification are complete. This candidate
 tree synchronizes repository release truth; it still requires independent
 documentation review and a later governed metadata commit, push, PR, and
 merge. Feature-branch cleanup and final release closure remain pending.
+# Sprint 29 feature candidate
+
+The working candidate implements a local principal-authentication foundation
+and authenticated internal routing. Its configured deterministic authenticator
+is non-production, process-local, and nonpersistent. Principal-to-actor mapping
+is explicit; workspace selection, membership admission, and permission
+authorization remain separate stages. The trusted route remains separate and
+non-authenticated.
+
+Public transport authentication, production credential technology, and
+durable credential/principal/mapping storage are not integrated. Sprint 29 is
+not yet released, tagged, backed up, or closed.

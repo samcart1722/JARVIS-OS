@@ -117,6 +117,16 @@ from app.membership import (
 )
 from app.models.ollama_client import OllamaClient
 from app.models.ollama_readiness_probe import OllamaReadinessProbe
+from app.principal_authentication import (
+    AuthenticatedLocalCommandRoutingService,
+    ConfiguredLocalPrincipalAuthenticator,
+    ConfiguredPrincipalActorMapper,
+    ConfiguredPrincipalActorMapping,
+    ConfiguredPrincipalProofBinding,
+    LocalPrincipalAuthenticator,
+    PrincipalActorMapper,
+    RejectingLocalPrincipalAuthenticator,
+)
 
 
 class Container:
@@ -140,6 +150,10 @@ class Container:
         | None = None,
         memberships: tuple[ActorWorkspaceMembership, ...] = (),
         membership_repository: MembershipRepository | None = None,
+        principal_proof_bindings: tuple[ConfiguredPrincipalProofBinding, ...] = (),
+        principal_actor_mappings: tuple[ConfiguredPrincipalActorMapping, ...] = (),
+        local_principal_authenticator: LocalPrincipalAuthenticator | None = None,
+        principal_actor_mapper: PrincipalActorMapper | None = None,
     ) -> None:
         if isinstance(scoped_memory_records, (str, bytes)):
             raise TypeError("Scoped memory records must be a collection of records.")
@@ -149,6 +163,10 @@ class Container:
             raise ValueError("Trusted known workspaces must be a tuple.")
         if type(memberships) is not tuple:
             raise ValueError("Memberships must be a tuple.")
+        if type(principal_proof_bindings) is not tuple:
+            raise ValueError("Principal proof bindings must be a tuple.")
+        if type(principal_actor_mappings) is not tuple:
+            raise ValueError("Principal actor mappings must be a tuple.")
         if any(
             type(membership) is not ActorWorkspaceMembership
             for membership in memberships
@@ -156,6 +174,29 @@ class Container:
             raise ValueError("Configured membership is invalid.")
         if membership_repository is not None and memberships:
             raise ValueError("Membership repository ownership is ambiguous.")
+        if any(
+            type(binding) is not ConfiguredPrincipalProofBinding
+            for binding in principal_proof_bindings
+        ):
+            raise ValueError("Configured principal proof binding is invalid.")
+        if any(
+            type(mapping) is not ConfiguredPrincipalActorMapping
+            for mapping in principal_actor_mappings
+        ):
+            raise ValueError("Configured principal actor mapping is invalid.")
+        if local_principal_authenticator is not None and principal_proof_bindings:
+            raise ValueError("Principal authenticator ownership is ambiguous.")
+        if principal_actor_mapper is not None and principal_actor_mappings:
+            raise ValueError("Principal mapper ownership is ambiguous.")
+        operational_authentication = (
+            bool(principal_proof_bindings)
+            or local_principal_authenticator is not None
+        )
+        mapper_configured = (
+            bool(principal_actor_mappings) or principal_actor_mapper is not None
+        )
+        if operational_authentication and not mapper_configured:
+            raise ValueError("Operational authentication requires a principal mapper.")
         if trusted_request_context_resolver is not None and (
             trusted_host_bindings or trusted_known_workspaces
         ):
@@ -172,12 +213,17 @@ class Container:
         )
         self._memberships = tuple(memberships)
         self._injected_membership_repository = membership_repository
+        self._principal_proof_bindings = tuple(principal_proof_bindings)
+        self._principal_actor_mappings = tuple(principal_actor_mappings)
+        self._injected_local_principal_authenticator = local_principal_authenticator
+        self._injected_principal_actor_mapper = principal_actor_mapper
         self._build_memory()
         self._build_local_resolution()
         self._build_reasoning()
         self._build_local_first_cognitive_routing()
         self._build_local_command_interpretation()
         self._build_membership()
+        self._build_principal_authentication()
         self._build_trusted_request_context()
         self._build_context()
         self._build_prompt()
@@ -423,6 +469,31 @@ class Container:
         self.trusted_local_command_routing_service = (
             TrustedLocalCommandRoutingService(
                 self.trusted_request_context_resolver,
+                self.membership_decision_service,
+                self.local_command_text_router,
+            )
+        )
+
+    def _build_principal_authentication(self) -> None:
+        """Compose the authentication-first local command boundary."""
+        self.local_principal_authenticator = (
+            self._injected_local_principal_authenticator
+            if self._injected_local_principal_authenticator is not None
+            else (
+                ConfiguredLocalPrincipalAuthenticator(self._principal_proof_bindings)
+                if self._principal_proof_bindings
+                else RejectingLocalPrincipalAuthenticator()
+            )
+        )
+        self.principal_actor_mapper = (
+            self._injected_principal_actor_mapper
+            if self._injected_principal_actor_mapper is not None
+            else ConfiguredPrincipalActorMapper(self._principal_actor_mappings)
+        )
+        self.authenticated_local_command_routing_service = (
+            AuthenticatedLocalCommandRoutingService(
+                self.local_principal_authenticator,
+                self.principal_actor_mapper,
                 self.membership_decision_service,
                 self.local_command_text_router,
             )

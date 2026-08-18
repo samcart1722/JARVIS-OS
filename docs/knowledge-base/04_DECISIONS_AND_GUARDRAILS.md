@@ -62,3 +62,12 @@ governance without weakening the released boundaries.
 - Default Container is in-memory/no-I/O; durability is explicit injection.
 - Schema v1→v2 migration is additive and explicitly transactional.
 - Public transport and authentication remain deferred.
+# Sprint 29 candidate decisions and guardrails
+
+- Authentication proof is opaque.
+- `PrincipalIdentity` and `ActorIdentity` are distinct; mapping is explicit.
+- Workspace is selected only after successful mapping.
+- Membership admission and `PermissionPolicy` authorization are separate.
+- A trusted binding selector is not authentication.
+- No public transport or production credential technology is included.
+- No SQLite authentication persistence is included.

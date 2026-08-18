@@ -228,3 +228,11 @@ authentication. This does not claim zero project-wide technical debt.
   claim is supported by those records.
 - Governance maintenance: keep explicit grounding and operational AST lists
   synchronized as these surfaces evolve.
+# Sprint 29 deliberate future work
+
+The following are deliberate deferrals, not defects in the bounded Sprint 29
+candidate: production credential verification and security design; durable
+principal, credential/verifier, and principal-to-actor mapping storage; secure
+secret management; session, device, and public-transport integration;
+credential reset/recovery; and remote identity-provider integration if later
+authorized. These concerns must not be folded into current membership tables.

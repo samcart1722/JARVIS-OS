@@ -575,3 +575,14 @@ actor/workspace membership admission → text routing → interpretation and
 coordination → `PermissionPolicy` → capability/repository. Trust failure skips
 membership; membership failure skips routing and downstream authorization.
 Active membership grants no action by itself and requires no model call.
+# Sprint 29 candidate: authenticated internal entry
+
+The candidate authenticated internal sequence is strictly ordered:
+
+`LocalAuthenticationProof` → authenticated `PrincipalIdentity` → explicit
+principal-to-`ActorIdentity` mapping → explicit `WorkspaceIdentity` selection
+→ active membership admission → local text routing → downstream
+`PermissionPolicy` authorization.
+
+The trusted internal compatibility path remains separate and
+non-authenticated. Sprint 29 adds no public HTTP authentication integration.
