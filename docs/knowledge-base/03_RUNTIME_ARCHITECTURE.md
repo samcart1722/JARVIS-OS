@@ -46,8 +46,9 @@ case-sensitive record ID and return at most 51; the capability exposes at most
 to cognition. The feature merged at
 `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
-released at the annotated tag `sprint-26-complete` and is the prior completed
-tagged release; Sprint 27 is the latest at `sprint-27-complete`.
+released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
+released trusted request context; Sprint 28 is now the latest immutable
+implementation release at `sprint-28-complete`.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -456,7 +457,7 @@ grounded engines once each with identical prompt, scope, and synthetic
 records. This is structural grounding and auditability, not semantic fact
 verification.
 
-## Sprint 28 membership composition
+## Sprint 28 released membership composition
 
 Default: trusted resolver → in-memory membership → membership decision →
 routing → permission. Default Container performs no database I/O.
@@ -464,3 +465,10 @@ routing → permission. Default Container performs no database I/O.
 Explicit durable: caller-owned `SQLiteLocalStorage` → injected membership
 repository → decision → routing → permission. SQLite owns current membership
 state only; permissions remain independently composed.
+
+This architecture is released at annotated tag `sprint-28-complete`, peeled
+commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`. Membership is workspace
+admission, not authentication, identity proof, access proof, or action
+authorization. Trusted binding remains distinct from durable membership;
+public HTTP, JWT/OAuth/session/RBAC, and public membership transport remain
+outside the released scope.

@@ -216,10 +216,11 @@ automatic Memory Update, by design.
   tokenizer accounting, persistence, identity, retries, JSON repair, and
   free-text fallback.
 
-## Sprint 28 classification
+## Sprint 28 post-release classification
 
 The migration atomicity defect found during Block C review was corrected and
-regression-tested; it is not outstanding debt. Inherited or deliberately
+regression-tested before immutable release `sprint-28-complete`; it is not
+outstanding debt. Inherited or deliberately
 deferred areas include authenticated principals, durable permissions,
 public-route integration, roles/invitations, transition history, and transport
 authentication. This does not claim zero project-wide technical debt.

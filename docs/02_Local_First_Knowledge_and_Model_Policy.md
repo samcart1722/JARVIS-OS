@@ -27,8 +27,9 @@ and treats zero matches as local success. It performs no model, provider,
 network, ranking, inference, or external access. The functional implementation
 merged at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical
 release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
-fully released at the annotated tag `sprint-26-complete` and is the prior
-completed tagged release; Sprint 27 is the latest at `sprint-27-complete`.
+fully released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
+released trusted request context, and Sprint 28 is now the latest immutable
+implementation release at `sprint-28-complete`.
 
 ## Policy
 
@@ -98,3 +99,7 @@ Membership is deterministic local-first admission before text interpretation.
 Current state may be process-local or supplied through explicitly opened
 SQLite. Default `Container` remains in-memory/no-I/O. Admission uses no model,
 provider, or network and does not alter reasoning or downstream permissions.
+This architecture is released at `sprint-28-complete`, peeled commit
+`be22ffddda6d6961497c338caadf4c85e0fcb3ed`. Membership is not authentication
+or action authorization; identities are not proof, trusted binding is not
+durable membership, and `PermissionPolicy` remains downstream.

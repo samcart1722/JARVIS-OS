@@ -1,5 +1,17 @@
 # Roadmap
 
+## Sprint 28 implementation released
+
+Durable Actor–Workspace Membership Foundation v1 is delivered through feature
+commit `95341198145f84d80c7cf37bf73b707cfe574a21`, PR #32, and normal merge
+commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`. The independently verified
+annotated tag is `sprint-28-complete` (object
+`986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`), with recoverable backup
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`.
+
+Authentication, durable permissions, roles/invitations, audit history, and
+public transport remain deferred. Sprint 29 has not been authorized or scoped.
+
 ## Sprint 27 fully released
 
 Trusted Request Context Foundation v1 is implemented through its internal
@@ -105,15 +117,16 @@ and safe prompt use remain future work.
 | 25 | Add strict deterministic local knowledge commands. | `1f2da9cf`, tag `sprint-25-complete` |
 | 26 | Add deterministic exact-key local knowledge discovery. | `92d283c2`, PR #26, functional merge `54e04261`; final release `ae13c3ed`, tag `sprint-26-complete` |
 | 27 | Add the trusted request-context foundation for supported internal local routing. | `feb5405d`, PR #29, functional merge `758e6327`; governance PR #30, release `1501183b`, tag `sprint-27-complete` |
+| 28 | Add durable actor/workspace membership admission while preserving downstream authorization. | `95341198`, PR #32, merge `be22ffdd`, tag `sprint-28-complete`, verified backup `LUXIOM_20260817_190455` |
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
 ## Current state
 
-Sprint 27 is the latest completed tagged release at
-`1501183b4c40faaba278f8d61f875d65954223a7`, tag `sprint-27-complete`. Sprint
-26 remains the prior tagged release at `ae13c3ed9720ee9564384366f2110670eb88fd85`,
-tag `sprint-26-complete`. The
+Sprint 28 is the latest immutable implementation release at
+`be22ffddda6d6961497c338caadf4c85e0fcb3ed`, tag `sprint-28-complete`. Sprint
+27 remains the prior completed tagged capability release at
+`1501183b4c40faaba278f8d61f875d65954223a7`, tag `sprint-27-complete`. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
@@ -165,10 +178,11 @@ failure, and a comparative local demo. It does not verify truth, semantically
 fact-check claims, retry, repair JSON, fall back to free text, persist memory,
 or change the HTTP surface.
 
-## Sprint 28 feature tree implemented, unreleased
+## Sprint 28 release closure in progress
 
-Durable membership is implemented on its feature branch after Block D, but is
-pending final independent review and release governance. The likely sequence
+The implementation is reviewed, merged, validated, tagged, and backed up.
+Release-truth metadata synchronization and later branch cleanup remain governed
+closure work. The future sequence
 remains trusted context → durable membership → future local authentication and
 principal mapping → future durable permissions → future trusted/public
 transport. Sprint 29 is neither authorized nor contractually frozen here.

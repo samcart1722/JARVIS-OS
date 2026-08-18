@@ -5,12 +5,14 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 27 Trusted Request Context Foundation v1 is the latest completed tagged
-release at `1501183b4c40faaba278f8d61f875d65954223a7`, annotated tag
-`sprint-27-complete`. Sprint 26 remains the prior completed tagged release. See
-the [Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md), the
-[Sprint 26 summary](history/sprints/SPRINT_26_SUMMARY.md), and the
-[Sprint 26 operational demo](../operations/DETERMINISTIC_LOCAL_KNOWLEDGE_DISCOVERY_DEMO.md).
+Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the latest
+immutable implementation release at
+`be22ffddda6d6961497c338caadf4c85e0fcb3ed`, annotated tag
+`sprint-28-complete`. Sprint 27 remains the prior completed tagged capability
+release. Start with the repository-owned
+[Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
+the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and
+[Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md).
 
 1. [Project Context](01_PROJECT_CONTEXT.md) — identity, purpose, and platform model.
 2. [Current State](02_CURRENT_STATE.md) — dated, evidence-based repository snapshot.
@@ -35,7 +37,7 @@ Before this sequence, read the normative
 | Operational state | [Current State](02_CURRENT_STATE.md), [Runtime Architecture](03_RUNTIME_ARCHITECTURE.md), [Technical Debt](05_TECHNICAL_DEBT.md) | Describe verified executable reality at a point in time. |
 | Planning | [Roadmap](06_ROADMAP.md) | Separates completed sprints from unapproved candidates. |
 | History | [Sprint summaries](history/sprints/SPRINT_0_SUMMARY.md), [Sprint 20 summary](history/sprints/SPRINT_20_SUMMARY.md), [Sprint 21 summary](history/sprints/SPRINT_21_SUMMARY.md), [Sprint 22 summary](history/sprints/SPRINT_22_SUMMARY.md), [Sprint 23 summary](history/sprints/SPRINT_23_SUMMARY.md), [Sprint 24 summary](history/sprints/SPRINT_24_SUMMARY.md), [Sprint 25 summary](history/sprints/SPRINT_25_SUMMARY.md), [conversation policy](history/conversations/README.md) | Preserve traceable context without becoming normative truth. |
-| Recovery | [AI Handoff](07_AI_HANDOFF.md), [Backup and Recovery](08_BACKUP_AND_RECOVERY.md), [Source of Truth](09_SOURCE_OF_TRUTH.md) | Restore context, repository history, and working practices. |
+| Recovery | [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), [AI Handoff](07_AI_HANDOFF.md), [Backup and Recovery](08_BACKUP_AND_RECOVERY.md), [Source of Truth](09_SOURCE_OF_TRUTH.md) | Restore context, release evidence, repository history, and working practices. |
 
 ## Cognitive Core governance baseline
 
@@ -70,4 +72,4 @@ Before this sequence, read the normative
 
 ## Sprint implementation history
 
-- [Sprint 28 implementation summary](history/sprints/SPRINT_28_SUMMARY.md)
+- [Sprint 28 release summary](history/sprints/SPRINT_28_SUMMARY.md)

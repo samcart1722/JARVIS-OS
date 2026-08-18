@@ -49,7 +49,11 @@ executable/tests, do not silently promote the draft. Follow
 [Source of Truth](09_SOURCE_OF_TRUTH.md), record the discrepancy, and seek a
 formal decision where architecture would change.
 
-## Sprint 28 permanent decisions
+## Sprint 28 released permanent decisions
+
+These decisions are implemented in immutable release `sprint-28-complete` at
+`be22ffddda6d6961497c338caadf4c85e0fcb3ed` and remain subject to future ADR
+governance without weakening the released boundaries.
 
 - Membership is neither authentication nor `PermissionPolicy`.
 - Canonical identities and exact case-sensitive actor/workspace pairs are used.
