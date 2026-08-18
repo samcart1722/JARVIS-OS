@@ -48,6 +48,20 @@ Sprint 27 is fully released. Its functional merge is
 through PR #30; and annotated tag `sprint-27-complete`, object
 `35a198af85299e9e09d086e63f66020ccdc522d3`, points to release commit
 `1501183b4c40faaba278f8d61f875d65954223a7`. The verified release backup is
-`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`. Sprint 27 is the latest
-completed tagged release; Sprint 26 remains the prior completed tagged release
-at `sprint-26-complete`. Constitution and ADR statuses remain unchanged.
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`.
+
+Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the latest
+immutable completed tagged implementation release. Its annotated tag
+`sprint-28-complete`, object
+`986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`, points to implementation release
+commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`. Sprint 27 remains valid
+historical release lineage; Sprint 26 remains the earlier completed tagged
+release at `sprint-26-complete`. Sprint 28 release-truth metadata governance and
+final closure remain pending, and Sprint 29 is unauthorized.
+
+For immutable release facts, Git objects, refs, and immutable release tags take
+precedence, followed by verified release-backup evidence, active reviewed
+repository documentation, the repository canonical checkpoint, and then any
+external/live continuity ledger used for active workflow continuity. External
+continuity context can never override contradictory Git release truth.
+Constitution and ADR statuses remain unchanged.

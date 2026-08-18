@@ -1,5 +1,24 @@
 # Current State
 
+## Sprint 28 released implementation state
+
+Sprint 28 Durable Actor–Workspace Membership Foundation v1 was independently
+approved, merged through PR #32 using a normal merge commit, and post-merge
+validated. Feature commit `95341198145f84d80c7cf37bf73b707cfe574a21`
+is the second parent of release commit
+`be22ffddda6d6961497c338caadf4c85e0fcb3ed`. Annotated tag
+`sprint-28-complete` has object
+`986ae13ca8fefcbd6197db8a723e25ae4e3dc62a` and peels to that release commit.
+The independently recoverable backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`.
+
+Validation passed 28 SQLite, 41 membership, 29 Container, 130 trusted-context,
+156 focused Sprint 28, 78 architecture, and 915 repository tests; Ruff and
+diff checks were clean. Both demos passed with
+model/provider/readiness/network calls of `0 / 0 / 0 / 0`. Release-truth
+synchronization is occurring in a separately reviewed metadata tree; final
+metadata merge and branch cleanup have not occurred. Sprint 29 is unauthorized.
+
 ## Sprint 27 fully released state
 
 Sprint 27 Trusted Request Context Foundation v1 is merged into canonical
@@ -82,14 +101,20 @@ those figures remain historical evidence.
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 
-Snapshot updated: **2026-08-07** (America/Tegucigalpa).
+Snapshot updated: **2026-08-17** (America/Tegucigalpa).
 
 ## Repository checkpoint
 
 - Canonical branch: `master`
+- Sprint 28 tagged implementation release commit:
+  `be22ffddda6d6961497c338caadf4c85e0fcb3ed`
+- Latest immutable implementation release tag: `sprint-28-complete`
+- Sprint 28 annotated tag object:
+  `986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`
+- Sprint 28 verified release backup:
+  `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`
 - Sprint 27 tagged release commit:
   `1501183b4c40faaba278f8d61f875d65954223a7`
-- Latest completed release tag: `sprint-27-complete`
 - Sprint 27 annotated tag object:
   `35a198af85299e9e09d086e63f66020ccdc522d3`
 - Sprint 26 annotated tag object:
@@ -156,6 +181,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 | 25 | Completed/tagged | Released through PR #24 at merge `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`; strict JSON knowledge commands reuse the existing local-first interpretation and routing path. |
 | 26 | Completed/tagged | Deterministic exact-key local knowledge discovery is released at `ae13c3ed`, tag `sprint-26-complete`. |
 | 27 | Completed/tagged | Internal configured trusted-context resolution, supported trusted routing, Container composition, architecture enforcement, and deterministic demo released at `1501183b`, tag `sprint-27-complete`; final validation passed 117 focused, 70 architecture, and 836 repository tests. |
+| 28 | Completed/tagged/backed up | Durable actor/workspace membership released through PR #32 at `be22ffdd`, tag `sprint-28-complete`; independently validated and recovered from `LUXIOM_20260817_190455`. |
 
 ## Executable components and status
 
@@ -284,12 +310,10 @@ validation, and external-access governance remain deferred.
 consumer in the public cognitive route. Other historical modules under
 `app/reasoning`, `app/context`, and `app/memory` remain outside this sprint.
 
-## Sprint 28 feature-branch state
+## Sprint 28 closure state
 
-Sprint 28 is **IMPLEMENTED ON FEATURE BRANCH; FINAL INDEPENDENT REVIEW
-PENDING** on `feat/sprint-28-durable-actor-workspace-membership`, based on
-`a2f68902928e45a8cecb774660cdeec25ddf6a69` until a feature commit exists.
-Blocks A–C are independently approved. Block D is implemented but uncommitted,
-unmerged, untagged, and unreleased. The feature tree uses schema v2; final
-implementation validation is 915 full-suite tests, 78 architecture tests, and
-156 focused Sprint 28 tests, all passing. Final independent review is pending.
+Implementation, review, merge, post-merge validation, immutable tagging, tag
+verification, and recoverable backup verification are complete. This candidate
+tree synchronizes repository release truth; it still requires independent
+documentation review and a later governed metadata commit, push, PR, and
+merge. Feature-branch cleanup and final release closure remain pending.
