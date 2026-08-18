@@ -386,3 +386,12 @@ unsupported verdict fails closed; all supported preserves Sprint 18 output.
 
 Independent mode changes client identity/configuration only; verifier protocol,
 all-or-nothing semantics, and public outcomes remain unchanged.
+
+## Sprint 28 membership contracts
+
+`MembershipStatus` is ACTIVE or INACTIVE. `ActorWorkspaceMembership` is one
+exact case-sensitive actor/workspace pair. `MembershipDecision` uses
+`membership_not_found`, `membership_inactive`, or
+`membership_resolution_failed`. `MembershipRepository` exposes only `get`,
+`create`, `activate`, and `deactivate`. Create never reactivates; only activate
+does, and there is no delete. Membership is separate from `PermissionPolicy`.

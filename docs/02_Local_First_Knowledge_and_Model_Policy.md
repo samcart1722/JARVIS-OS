@@ -91,3 +91,10 @@ Guardar no certifica verdad ni confianza. No hay sincronización, cifrado en
 reposo, borrado/retención, búsqueda semántica, extracción automática ni
 integración del conocimiento durable en prompts. Esta es una base durable, no
 un Knowledge Engine completo.
+
+## Sprint 28 membership admission
+
+Membership is deterministic local-first admission before text interpretation.
+Current state may be process-local or supplied through explicitly opened
+SQLite. Default `Container` remains in-memory/no-I/O. Admission uses no model,
+provider, or network and does not alter reasoning or downstream permissions.

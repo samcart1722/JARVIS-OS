@@ -111,8 +111,9 @@ capabilities authorize before calling infrastructure-independent repository
 Protocols. Default composition uses in-memory repositories. The durable demo
 injects explicitly opened and initialized SQLite storage.
 
-SQLite schema v1 contains `schema_metadata`, `list_items`, and
-`knowledge_records`. List identity and order are workspace/list scoped;
+SQLite schema v2 contains `schema_metadata`, `list_items`,
+`knowledge_records`, and `actor_workspace_memberships`; v1 remains the
+historical pre-membership schema and migrates additively. List identity and order are workspace/list scoped;
 knowledge identity is `workspace_id + record_id`. The adapter lives under
 `app/infrastructure/local_storage/`; `app/cognition` does not import it.
 
@@ -454,3 +455,12 @@ The operational comparison uses one readiness check, then standard and
 grounded engines once each with identical prompt, scope, and synthetic
 records. This is structural grounding and auditability, not semantic fact
 verification.
+
+## Sprint 28 membership composition
+
+Default: trusted resolver → in-memory membership → membership decision →
+routing → permission. Default Container performs no database I/O.
+
+Explicit durable: caller-owned `SQLiteLocalStorage` → injected membership
+repository → decision → routing → permission. SQLite owns current membership
+state only; permissions remain independently composed.

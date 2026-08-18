@@ -215,6 +215,14 @@ automatic Memory Update, by design.
   evaluator model, external retrieval, embeddings, advanced injection defense,
   tokenizer accounting, persistence, identity, retries, JSON repair, and
   free-text fallback.
+
+## Sprint 28 classification
+
+The migration atomicity defect found during Block C review was corrected and
+regression-tested; it is not outstanding debt. Inherited or deliberately
+deferred areas include authenticated principals, durable permissions,
+public-route integration, roles/invitations, transition history, and transport
+authentication. This does not claim zero project-wide technical debt.
 - Accepted limitation: valid record numbers do not prove that every generated
   claim is supported by those records.
 - Governance maintenance: keep explicit grounding and operational AST lists

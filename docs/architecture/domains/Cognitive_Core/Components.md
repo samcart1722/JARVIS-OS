@@ -264,3 +264,11 @@ Sprint 20 lets Container inject either the primary client or one separately
 configured verifier client into the existing verifier adapter.
 Verifier settings are optional overrides; absent values inherit primary
 configuration by value without mutating Settings.
+
+## Sprint 28 membership components
+
+`app/membership` owns immutable models, `MembershipRepository`, the in-memory
+implementation, and `MembershipDecisionService`. `SQLiteLocalStorage` is the
+outward durable implementation. Trusted routing requires membership before
+text routing. Container defaults to in-memory and accepts caller-owned durable
+injection. The durable demo is an operations proof, not authentication or RBAC.

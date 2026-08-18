@@ -58,3 +58,10 @@ This demo is not evidence that public HTTP is authenticated. Sprint 27 does
 not connect headers, tokens, `/brain/think`, or legacy `/knowledge` to the
 trusted-host boundary. Do not expose the binding key as a public security
 mechanism or deploy this configuration as authentication.
+
+## Sprint 28 admission update
+
+The original seven scenarios remain valid, but trusted success alone no longer
+permits routing: active membership is required first. Permission remains a
+separate downstream decision. The binding selector is not a credential, and
+neither this demo nor Sprint 28 authenticates public HTTP.

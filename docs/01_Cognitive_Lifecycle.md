@@ -567,3 +567,11 @@ Antes de implementar cualquier nueva funcionalidad debe responderse una pregunta
 Si la respuesta es "no",
 
 la funcionalidad no debe implementarse.
+
+## Sprint 28 internal trusted local-command admission
+
+The supported deterministic path is trusted-host resolution → current
+actor/workspace membership admission → text routing → interpretation and
+coordination → `PermissionPolicy` → capability/repository. Trust failure skips
+membership; membership failure skips routing and downstream authorization.
+Active membership grants no action by itself and requires no model call.

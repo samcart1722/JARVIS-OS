@@ -28,6 +28,12 @@ from app.cognition.trusted_context import (
     TrustedRequestContextResolution,
     TrustedRequestContextResolver,
 )
+from app.membership.models import (
+    MEMBERSHIP_INACTIVE,
+    ActorWorkspaceMembership,
+    MembershipDecision,
+    MembershipStatus,
+)
 
 ERROR_CODES = (
     TRUSTED_CONTEXT_INVALID_INPUT,
@@ -59,6 +65,20 @@ def _routing_result() -> TextRoutingResult:
             LocalCommandInterpretationStatus.INVALID,
             invalid_reason=LocalCommandInvalidReason.INVALID_INPUT,
         )
+    )
+
+
+def _membership_decision(success: bool = True) -> MembershipDecision:
+    if not success:
+        return MembershipDecision(False, error_code=MEMBERSHIP_INACTIVE)
+    context = _context()
+    return MembershipDecision(
+        True,
+        ActorWorkspaceMembership(
+            context.actor,
+            context.workspace,
+            MembershipStatus.ACTIVE,
+        ),
     )
 
 
@@ -250,31 +270,65 @@ def test_local_command_request_requires_exact_boundary_values() -> None:
 
 def test_routing_result_accepts_consistent_outcomes_and_preserves_identity() -> None:
     routing_result = _routing_result()
+    trust_resolution = _successful_resolution()
+    membership_decision = _membership_decision()
     success = TrustedLocalCommandRoutingResult(
-        _successful_resolution(), routing_result
+        trust_resolution, membership_decision, routing_result
     )
     failure = TrustedLocalCommandRoutingResult(_failed_resolution())
+    membership_failure = _membership_decision(False)
+    denied = TrustedLocalCommandRoutingResult(
+        trust_resolution,
+        membership_failure,
+    )
+    assert success.trust_resolution is trust_resolution
+    assert success.membership_decision is membership_decision
     assert success.text_routing_result is routing_result
+    assert denied.membership_decision is membership_failure
+    assert denied.text_routing_result is None
+    assert failure.membership_decision is None
     assert failure.text_routing_result is None
 
 
 def test_routing_result_rejects_inconsistent_or_invalid_values() -> None:
+    trust_success = _successful_resolution()
+    trust_failure = _failed_resolution()
+    membership_success = _membership_decision()
+    membership_failure = _membership_decision(False)
+    routing_result = _routing_result()
     with pytest.raises(ValueError):
-        TrustedLocalCommandRoutingResult(_successful_resolution())
+        TrustedLocalCommandRoutingResult(trust_success)
     with pytest.raises(ValueError):
-        TrustedLocalCommandRoutingResult(_failed_resolution(), _routing_result())
+        TrustedLocalCommandRoutingResult(trust_failure, membership_success)
+    with pytest.raises(ValueError):
+        TrustedLocalCommandRoutingResult(trust_failure, None, routing_result)
+    with pytest.raises(ValueError):
+        TrustedLocalCommandRoutingResult(
+            trust_success,
+            membership_failure,
+            routing_result,
+        )
+    with pytest.raises(ValueError):
+        TrustedLocalCommandRoutingResult(trust_success, membership_success)
+    with pytest.raises(ValueError):
+        TrustedLocalCommandRoutingResult(trust_success, object())
+    with pytest.raises(ValueError):
+        TrustedLocalCommandRoutingResult(
+            trust_success,
+            membership_success,
+            object(),
+        )
     with pytest.raises(ValueError):
         TrustedLocalCommandRoutingResult(object())
-    with pytest.raises(ValueError):
-        TrustedLocalCommandRoutingResult(_successful_resolution(), object())
 
 
 def test_routing_result_is_frozen_and_does_not_flatten_router_fields() -> None:
     result = TrustedLocalCommandRoutingResult(
-        _successful_resolution(), _routing_result()
+        _successful_resolution(), _membership_decision(), _routing_result()
     )
     assert tuple(field.name for field in fields(result)) == (
         "trust_resolution",
+        "membership_decision",
         "text_routing_result",
     )
     assert not hasattr(result, "success")

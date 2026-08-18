@@ -27,6 +27,9 @@ def test_demo_cli_runs_all_scenarios_with_safe_output(capsys) -> None:
     assert "Readiness calls: 0" in output
     assert "Network calls: 0" in output
     assert "Overall: PASS" in output
+    assert "membership_not_found" not in output
+    assert "membership_inactive" not in output
+    assert "membership_resolution_failed" not in output
     assert "configured-host-demo-selector" not in output
     assert "Traceback" not in output
 

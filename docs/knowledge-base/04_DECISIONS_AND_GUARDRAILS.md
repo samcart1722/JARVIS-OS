@@ -48,3 +48,13 @@ When a source marked Draft conflicts with approved product documents or
 executable/tests, do not silently promote the draft. Follow
 [Source of Truth](09_SOURCE_OF_TRUTH.md), record the discrepancy, and seek a
 formal decision where architecture would change.
+
+## Sprint 28 permanent decisions
+
+- Membership is neither authentication nor `PermissionPolicy`.
+- Canonical identities and exact case-sensitive actor/workspace pairs are used.
+- State is ACTIVE/INACTIVE only; no delete; create does not reactivate.
+- SQLite stores durable current state, not audit history.
+- Default Container is in-memory/no-I/O; durability is explicit injection.
+- Schema v1→v2 migration is additive and explicitly transactional.
+- Public transport and authentication remain deferred.

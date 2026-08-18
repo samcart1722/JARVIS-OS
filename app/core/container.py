@@ -109,6 +109,12 @@ from app.cognition.trusted_context import (
 )
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 from app.core.config import Settings, settings
+from app.membership import (
+    ActorWorkspaceMembership,
+    InMemoryMembershipRepository,
+    MembershipDecisionService,
+    MembershipRepository,
+)
 from app.models.ollama_client import OllamaClient
 from app.models.ollama_readiness_probe import OllamaReadinessProbe
 
@@ -132,6 +138,8 @@ class Container:
         trusted_known_workspaces: tuple[WorkspaceIdentity, ...] = (),
         trusted_request_context_resolver: TrustedRequestContextResolver
         | None = None,
+        memberships: tuple[ActorWorkspaceMembership, ...] = (),
+        membership_repository: MembershipRepository | None = None,
     ) -> None:
         if isinstance(scoped_memory_records, (str, bytes)):
             raise TypeError("Scoped memory records must be a collection of records.")
@@ -139,6 +147,15 @@ class Container:
             raise ValueError("Trusted host bindings must be a tuple.")
         if type(trusted_known_workspaces) is not tuple:
             raise ValueError("Trusted known workspaces must be a tuple.")
+        if type(memberships) is not tuple:
+            raise ValueError("Memberships must be a tuple.")
+        if any(
+            type(membership) is not ActorWorkspaceMembership
+            for membership in memberships
+        ):
+            raise ValueError("Configured membership is invalid.")
+        if membership_repository is not None and memberships:
+            raise ValueError("Membership repository ownership is ambiguous.")
         if trusted_request_context_resolver is not None and (
             trusted_host_bindings or trusted_known_workspaces
         ):
@@ -153,11 +170,14 @@ class Container:
         self._injected_trusted_request_context_resolver = (
             trusted_request_context_resolver
         )
+        self._memberships = tuple(memberships)
+        self._injected_membership_repository = membership_repository
         self._build_memory()
         self._build_local_resolution()
         self._build_reasoning()
         self._build_local_first_cognitive_routing()
         self._build_local_command_interpretation()
+        self._build_membership()
         self._build_trusted_request_context()
         self._build_context()
         self._build_prompt()
@@ -403,8 +423,20 @@ class Container:
         self.trusted_local_command_routing_service = (
             TrustedLocalCommandRoutingService(
                 self.trusted_request_context_resolver,
+                self.membership_decision_service,
                 self.local_command_text_router,
             )
+        )
+
+    def _build_membership(self) -> None:
+        """Compose one deterministic membership decision boundary."""
+        self.membership_repository = (
+            self._injected_membership_repository
+            if self._injected_membership_repository is not None
+            else InMemoryMembershipRepository(self._memberships)
+        )
+        self.membership_decision_service = MembershipDecisionService(
+            self.membership_repository
         )
 
     def _build_context(self) -> None:

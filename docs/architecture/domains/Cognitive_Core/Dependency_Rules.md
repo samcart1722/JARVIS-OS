@@ -261,3 +261,11 @@ knows OllamaClient; Container composes it and Engine/API remain unaware.
 
 Container alone may construct the independent verifier client and readiness
 probe. Operations runtime consumes probes and engines only.
+
+## Sprint 28 membership boundary
+
+`app/membership` may use standard library, sibling modules, and only
+`ActorIdentity`/`WorkspaceIdentity` from local-resolution models. It cannot
+depend on permissions, routing, Container, SQLite, API, authentication,
+providers, or networking. SQLite remains outward infrastructure. Public API
+and `CognitiveEngine` do not own membership.

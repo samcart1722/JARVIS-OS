@@ -28,11 +28,21 @@ from app.cognition.trusted_context import (
 )
 from app.core.config import Settings
 from app.core.container import Container
+from app.infrastructure.local_storage import SQLiteLocalStorage
+from app.membership import (
+    ActorWorkspaceMembership,
+    InMemoryMembershipRepository,
+    MembershipDecisionService,
+    MembershipStatus,
+)
 
 
 class FalseyRepository:
     def __bool__(self) -> bool:
         return False
+
+    def get(self, actor, workspace):
+        return None
 
 
 def test_container_composes_one_shared_local_repository_without_calls() -> None:
@@ -173,11 +183,26 @@ def test_default_container_composes_inert_trusted_request_path() -> None:
         ConfiguredTrustedRequestContextResolver,
     )
     assert container.trusted_local_command_routing_service is not None
+    assert isinstance(container.membership_repository, InMemoryMembershipRepository)
+    assert isinstance(container.membership_decision_service, MembershipDecisionService)
+    assert (
+        container.membership_decision_service._repository
+        is container.membership_repository
+    )
+    assert (
+        container.trusted_local_command_routing_service._membership_service
+        is container.membership_decision_service
+    )
+    assert (
+        container.trusted_local_command_routing_service._router
+        is container.local_command_text_router
+    )
     with patch.object(container.local_command_text_router, "route") as route:
         result = container.trusted_local_command_routing_service.route(
             _trusted_request()
         )
     assert result.trust_resolution.error_code == TRUSTED_CONTEXT_UNKNOWN_BINDING
+    assert result.membership_decision is None
     assert result.text_routing_result is None
     route.assert_not_called()
 
@@ -194,6 +219,10 @@ def test_configured_trusted_path_reuses_identities_and_existing_router() -> None
     grant = PermissionGrant("actor", "home", frozenset((LIST_ITEMS_ADD,)))
     container = Container(
         Settings(_env_file=None),
+        memberships=(
+            ActorWorkspaceMembership(actor, home, MembershipStatus.ACTIVE),
+            ActorWorkspaceMembership(actor, work, MembershipStatus.ACTIVE),
+        ),
         local_permission_grants=(grant,),
         trusted_host_bindings=(binding,),
         trusted_known_workspaces=(work, home),
@@ -224,6 +253,100 @@ def test_configured_trusted_path_reuses_identities_and_existing_router() -> None
         container.local_permission_policy
         is container.structured_list_capability._permissions
     )
+
+
+def test_configured_memberships_are_independent_from_permissions() -> None:
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    membership = ActorWorkspaceMembership(
+        actor,
+        workspace,
+        MembershipStatus.ACTIVE,
+    )
+    container = Container(Settings(_env_file=None), memberships=(membership,))
+
+    assert container.membership_repository.get(actor, workspace) is membership
+    assert not container.local_permission_policy.is_allowed(
+        actor,
+        workspace,
+        LIST_ITEMS_ADD,
+    )
+
+
+def test_container_uses_reconstructed_durable_membership_without_grant(
+    tmp_path,
+) -> None:
+    path = tmp_path / "memberships.sqlite3"
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    with SQLiteLocalStorage(path) as first:
+        first.initialize()
+        first.create(actor, workspace)
+
+    durable = SQLiteLocalStorage(path)
+    durable.open()
+    durable.initialize()
+    try:
+        container = Container(
+            Settings(_env_file=None),
+            membership_repository=durable,
+            trusted_host_bindings=(
+                ConfiguredTrustedHostBinding(
+                    "host-key", actor, frozenset((workspace.workspace_id,))
+                ),
+            ),
+            trusted_known_workspaces=(workspace,),
+        )
+        result = container.trusted_local_command_routing_service.route(
+            _trusted_request()
+        )
+        assert container.membership_repository is durable
+        assert container.membership_decision_service._repository is durable
+        assert (
+            container.trusted_local_command_routing_service._membership_service
+            is container.membership_decision_service
+        )
+        assert result.membership_decision.membership == durable.get(actor, workspace)
+        assert (
+            result.text_routing_result.coordinated_result.local_result.error_code
+            == "local_permission_denied"
+        )
+    finally:
+        durable.close()
+
+
+@pytest.mark.parametrize("value", ([], "", b""))
+def test_container_rejects_non_tuple_membership_configuration(value) -> None:
+    with pytest.raises(ValueError):
+        Container(Settings(_env_file=None), memberships=value)
+
+
+def test_container_rejects_invalid_membership_item() -> None:
+    with pytest.raises(ValueError):
+        Container(Settings(_env_file=None), memberships=(object(),))
+
+
+def test_container_retains_falsey_injected_membership_repository() -> None:
+    repository = FalseyRepository()
+    container = Container(
+        Settings(_env_file=None),
+        membership_repository=repository,
+    )
+    assert container.membership_repository is repository
+    assert container.membership_decision_service._repository is repository
+
+
+def test_container_rejects_ambiguous_membership_repository_ownership() -> None:
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    membership = ActorWorkspaceMembership(
+        actor,
+        workspace,
+        MembershipStatus.ACTIVE,
+    )
+    with pytest.raises(ValueError, match="ambiguous"):
+        Container(
+            Settings(_env_file=None),
+            memberships=(membership,),
+            membership_repository=FalseyRepository(),
+        )
 
 
 def test_container_retains_and_uses_exact_injected_trusted_resolver() -> None:

@@ -308,6 +308,47 @@ def test_cognitive_engine_remains_outside_trusted_host_composition() -> None:
     assert not matches, f"CognitiveEngine trusted-routing references: {matches}"
 
 
+def test_trusted_routing_requires_membership_before_text_request() -> None:
+    path = TRUSTED_CONTEXT_ROOT / "routing.py"
+    tree = _tree(path)
+    service = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef)
+        and node.name == "TrustedLocalCommandRoutingService"
+    )
+    constructor = next(
+        node
+        for node in service.body
+        if isinstance(node, ast.FunctionDef) and node.name == "__init__"
+    )
+    assert [argument.arg for argument in constructor.args.args] == [
+        "self", "resolver", "membership_service", "router"
+    ]
+    assert not constructor.args.defaults
+    route = next(
+        node
+        for node in service.body
+        if isinstance(node, ast.FunctionDef) and node.name == "route"
+    )
+    decision_lines = [
+        node.lineno
+        for node in ast.walk(route)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "decide"
+    ]
+    text_request_lines = [
+        node.lineno
+        for node in ast.walk(route)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "TextRoutingRequest"
+    ]
+    assert len(decision_lines) == len(text_request_lines) == 1
+    assert decision_lines[0] < text_request_lines[0]
+
+
 def test_trusted_context_has_no_product_domain_imports() -> None:
     product_terms = ("healthbridge", "hospital", "logistics", "medical", "pharmacy")
     violations = {}

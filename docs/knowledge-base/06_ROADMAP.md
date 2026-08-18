@@ -164,3 +164,11 @@ references, deterministic insufficient-evidence output, controlled protocol
 failure, and a comparative local demo. It does not verify truth, semantically
 fact-check claims, retry, repair JSON, fall back to free text, persist memory,
 or change the HTTP surface.
+
+## Sprint 28 feature tree implemented, unreleased
+
+Durable membership is implemented on its feature branch after Block D, but is
+pending final independent review and release governance. The likely sequence
+remains trusted context → durable membership → future local authentication and
+principal mapping → future durable permissions → future trusted/public
+transport. Sprint 29 is neither authorized nor contractually frozen here.
