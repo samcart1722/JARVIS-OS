@@ -472,3 +472,14 @@ admission, not authentication, identity proof, access proof, or action
 authorization. Trusted binding remains distinct from durable membership;
 public HTTP, JWT/OAuth/session/RBAC, and public membership transport remain
 outside the released scope.
+# Sprint 29 candidate authenticated flow
+
+Container composes the configured/rejecting authenticator, explicit
+principal-to-actor mapper, existing membership decision service, and existing
+local command text router into `AuthenticatedLocalCommandRoutingService`.
+
+The flow is: proof → principal authentication → actor mapping → explicit
+workspace selection → membership decision → local routing → downstream
+`PermissionPolicy`. Authentication failure, mapping failure, invalid workspace,
+or failed membership short-circuits every later stage. The trusted flow,
+membership admission, and permission authorization retain separate ownership.

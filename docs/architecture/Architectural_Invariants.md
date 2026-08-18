@@ -250,3 +250,16 @@ Implementations may change.
 Technologies may be replaced.
 
 These architectural invariants must remain true throughout the lifetime of the project.
+# Sprint 29 candidate invariants
+
+- Authentication is neither membership nor permission authorization.
+- `PrincipalIdentity` is not `ActorIdentity`; `ActorIdentity` is not identity
+  proof.
+- `WorkspaceIdentity` is not access proof, and trusted binding is not
+  authentication.
+- Membership follows authentication, mapping, and explicit workspace
+  selection. Routing follows active membership.
+- `PermissionPolicy` remains downstream action authorization.
+- Authentication data does not flow below the mapped
+  `ActorIdentity`/`WorkspaceIdentity` routing boundary.
+- Authenticated and trusted routes do not delegate to one another.

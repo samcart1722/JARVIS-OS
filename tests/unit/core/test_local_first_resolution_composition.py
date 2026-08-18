@@ -35,6 +35,17 @@ from app.membership import (
     MembershipDecisionService,
     MembershipStatus,
 )
+from app.principal_authentication import (
+    AuthenticatedLocalCommandRequest,
+    AuthenticatedLocalCommandRoutingService,
+    ConfiguredLocalPrincipalAuthenticator,
+    ConfiguredPrincipalActorMapper,
+    ConfiguredPrincipalActorMapping,
+    ConfiguredPrincipalProofBinding,
+    LocalAuthenticationProof,
+    PrincipalIdentity,
+    RejectingLocalPrincipalAuthenticator,
+)
 
 
 class FalseyRepository:
@@ -43,6 +54,173 @@ class FalseyRepository:
 
     def get(self, actor, workspace):
         return None
+
+
+class FalseyAuthenticator:
+    def __bool__(self) -> bool:
+        return False
+
+    def authenticate(self, proof):
+        raise AssertionError("Construction must not authenticate.")
+
+
+class FalseyMapper:
+    def __bool__(self) -> bool:
+        return False
+
+    def map(self, principal):
+        raise AssertionError("Construction must not map.")
+
+
+def _proof_binding() -> ConfiguredPrincipalProofBinding:
+    return ConfiguredPrincipalProofBinding(PrincipalIdentity("principal"), "proof")
+
+
+def _actor_mapping() -> ConfiguredPrincipalActorMapping:
+    return ConfiguredPrincipalActorMapping(
+        PrincipalIdentity("principal"), ActorIdentity("actor")
+    )
+
+
+def test_default_container_composes_fail_closed_authenticated_route() -> None:
+    with (
+        patch(
+            "app.principal_authentication.configured_authenticator."
+            "RejectingLocalPrincipalAuthenticator.authenticate"
+        ) as authenticate,
+        patch(
+            "app.principal_authentication.configured_mapper."
+            "ConfiguredPrincipalActorMapper.map"
+        ) as map_principal,
+        patch("app.membership.service.MembershipDecisionService.decide") as decide,
+        patch(
+            "app.cognition.interpretation.routing.LocalCommandTextRouter.route"
+        ) as route,
+    ):
+        container = Container(Settings(_env_file=None))
+    assert isinstance(
+        container.local_principal_authenticator,
+        RejectingLocalPrincipalAuthenticator,
+    )
+    assert isinstance(container.principal_actor_mapper, ConfiguredPrincipalActorMapper)
+    assert len(container.principal_actor_mapper._actors_by_principal) == 0
+    assert isinstance(
+        container.authenticated_local_command_routing_service,
+        AuthenticatedLocalCommandRoutingService,
+    )
+    authenticate.assert_not_called()
+    map_principal.assert_not_called()
+    decide.assert_not_called()
+    route.assert_not_called()
+
+
+def test_container_composes_configured_authenticator_and_mapper() -> None:
+    container = Container(
+        Settings(_env_file=None),
+        principal_proof_bindings=(_proof_binding(),),
+        principal_actor_mappings=(_actor_mapping(),),
+    )
+    assert isinstance(
+        container.local_principal_authenticator,
+        ConfiguredLocalPrincipalAuthenticator,
+    )
+    assert isinstance(container.principal_actor_mapper, ConfiguredPrincipalActorMapper)
+
+
+def test_authenticated_route_preserves_downstream_permission_denial() -> None:
+    membership = ActorWorkspaceMembership(
+        ActorIdentity("actor"),
+        WorkspaceIdentity("workspace"),
+        MembershipStatus.ACTIVE,
+    )
+    container = Container(
+        Settings(_env_file=None),
+        principal_proof_bindings=(_proof_binding(),),
+        principal_actor_mappings=(_actor_mapping(),),
+        memberships=(membership,),
+    )
+    result = container.authenticated_local_command_routing_service.route(
+        AuthenticatedLocalCommandRequest(
+            LocalAuthenticationProof("proof"),
+            "workspace",
+            "list add groceries :: milk",
+            CognitiveFallbackAuthorization(False),
+        )
+    )
+    assert result.authentication_result.success
+    assert result.mapping_result.success
+    assert result.membership_decision.success
+    assert (
+        result.text_routing_result.coordinated_result.local_result.error_code
+        == "local_permission_denied"
+    )
+
+
+def test_container_preserves_falsey_injected_authenticator_and_mapper() -> None:
+    authenticator, mapper = FalseyAuthenticator(), FalseyMapper()
+    container = Container(
+        Settings(_env_file=None),
+        local_principal_authenticator=authenticator,
+        principal_actor_mapper=mapper,
+    )
+    assert container.local_principal_authenticator is authenticator
+    assert container.principal_actor_mapper is mapper
+    service = container.authenticated_local_command_routing_service
+    assert service._authenticator is authenticator
+    assert service._mapper is mapper
+
+
+def test_container_supports_valid_mixed_authentication_ownership() -> None:
+    mapper = FalseyMapper()
+    configured_auth = Container(
+        Settings(_env_file=None),
+        principal_proof_bindings=(_proof_binding(),),
+        principal_actor_mapper=mapper,
+    )
+    authenticator = FalseyAuthenticator()
+    configured_mapping = Container(
+        Settings(_env_file=None),
+        local_principal_authenticator=authenticator,
+        principal_actor_mappings=(_actor_mapping(),),
+    )
+    assert configured_auth.principal_actor_mapper is mapper
+    assert configured_mapping.local_principal_authenticator is authenticator
+
+
+def test_container_rejects_ambiguous_or_incomplete_authentication_ownership() -> None:
+    with pytest.raises(ValueError, match="authenticator ownership"):
+        Container(
+            Settings(_env_file=None),
+            principal_proof_bindings=(_proof_binding(),),
+            local_principal_authenticator=FalseyAuthenticator(),
+            principal_actor_mapper=FalseyMapper(),
+        )
+    with pytest.raises(ValueError, match="mapper ownership"):
+        Container(
+            Settings(_env_file=None),
+            local_principal_authenticator=FalseyAuthenticator(),
+            principal_actor_mappings=(_actor_mapping(),),
+            principal_actor_mapper=FalseyMapper(),
+        )
+    with pytest.raises(ValueError, match="requires a principal mapper"):
+        Container(
+            Settings(_env_file=None),
+            local_principal_authenticator=FalseyAuthenticator(),
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("principal_proof_bindings", []),
+        ("principal_proof_bindings", (object(),)),
+        ("principal_actor_mappings", []),
+        ("principal_actor_mappings", (object(),)),
+    ),
+)
+def test_container_rejects_invalid_principal_configuration(field, value) -> None:
+    with pytest.raises(ValueError):
+        Container(Settings(_env_file=None), **{field: value})
 
 
 def test_container_composes_one_shared_local_repository_without_calls() -> None:

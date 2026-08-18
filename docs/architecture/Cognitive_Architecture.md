@@ -378,3 +378,16 @@ Its intelligence does not reside inside a language model.
 Its intelligence emerges from the collaboration of multiple cognitive domains operating under a deterministic and observable architecture.
 
 This document is the foundation of that architecture.
+# Sprint 29 candidate authentication boundary
+
+The internal principal-authentication boundary authenticates an opaque local
+proof into `PrincipalIdentity`, then uses a distinct mapper to obtain the
+existing `ActorIdentity`. The requested `WorkspaceIdentity` is selected only
+after mapping. Membership then decides workspace admission; local routing
+occurs only after active membership, and `PermissionPolicy` retains ownership
+of downstream action authorization.
+
+The authenticated and trusted-request entry services remain separate and do
+not delegate to one another. They share only the already-approved lower routing
+and membership boundaries. No public transport or production credential owner
+is introduced.

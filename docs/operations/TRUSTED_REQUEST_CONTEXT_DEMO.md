@@ -65,3 +65,13 @@ The original seven scenarios remain valid, but trusted success alone no longer
 permits routing: active membership is required first. Permission remains a
 separate downstream decision. The binding selector is not a credential, and
 neither this demo nor Sprint 28 authenticates public HTTP.
+
+## Sprint 29 separation update
+
+The Sprint 29 candidate introduces a separate internal local-principal
+authenticated entry boundary. This trusted-host demo remains
+**non-authenticated**: its configured binding key is an opaque lookup selector,
+not an authentication proof, and `TrustedLocalCommandRoutingService` is not
+silently upgraded into authentication. Authenticated and trusted entry paths do
+not delegate to one another; they converge only at the approved lower-level
+membership and text-routing services.

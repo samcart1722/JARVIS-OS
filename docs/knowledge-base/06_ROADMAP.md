@@ -1,5 +1,13 @@
 # Roadmap
 
+## Sprint 29 candidate
+
+The current unreleased candidate establishes a bounded local-principal
+authentication boundary and authenticated internal routing. Public transport,
+production credential technology, secure durability, sessions/devices, and
+remote identity integration remain future work. This candidate is not yet
+released, closed, tagged, or backed up; no future sprint contract is implied.
+
 ## Sprint 28 implementation released
 
 Durable Actor–Workspace Membership Foundation v1 is delivered through feature
@@ -10,7 +18,9 @@ annotated tag is `sprint-28-complete` (object
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`.
 
 Authentication, durable permissions, roles/invitations, audit history, and
-public transport remain deferred. Sprint 29 has not been authorized or scoped.
+public transport remain deferred. Sprint 29 is now authorized and scoped as
+Local Principal Authentication Foundation v1, and its unreleased implementation
+candidate exists; release governance remains pending.
 
 ## Sprint 27 fully released
 
@@ -185,4 +195,6 @@ Release-truth metadata synchronization and later branch cleanup remain governed
 closure work. The future sequence
 remains trusted context → durable membership → future local authentication and
 principal mapping → future durable permissions → future trusted/public
-transport. Sprint 29 is neither authorized nor contractually frozen here.
+transport. Sprint 29's current feature scope and contract are authorized and
+frozen for the active implementation candidate. Release governance remains
+incomplete: it is not merged, tagged, backed up, released, or closed.
