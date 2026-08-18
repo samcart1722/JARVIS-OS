@@ -8,7 +8,7 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the latest
+Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the prior
 immutable implementation release. Feature commit
 `95341198145f84d80c7cf37bf73b707cfe574a21` merged through PR #32 as normal
 two-parent merge commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`.
@@ -18,8 +18,11 @@ The annotated tag `sprint-28-complete` points to that commit; its tag object is
 recovered backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`.
 The full release record is the
 [Sprint 28 summary](docs/knowledge-base/history/sprints/SPRINT_28_SUMMARY.md).
-Sprint 29 has not been authorized and must not begin until Sprint 28
-release-governance closure is complete.
+Sprint 29 Local Principal Authentication Foundation v1 is now released through
+PR #34 at `9590beca0ddfce544f774ffc1327d01f8044a420`, annotated tag
+`sprint-29-complete` (object `c3a204555cc512ae9404039aeb8be8d6aa421550`).
+Its authoritative backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260818_141402`;
+see the [Sprint 29 summary](docs/knowledge-base/history/sprints/SPRINT_29_SUMMARY.md).
 
 Membership is workspace admission, not authentication or action authorization.
 Identities are typed values, not proof; trusted binding is not durable
@@ -47,9 +50,9 @@ parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The latest immutable implementation release tag is `sprint-28-complete`; its
-  tag object is `986ae13ca8fefcbd6197db8a723e25ae4e3dc62a` and it peels to
-  `be22ffddda6d6961497c338caadf4c85e0fcb3ed`.
+- The latest immutable implementation release tag is `sprint-29-complete`; its
+  tag object is `c3a204555cc512ae9404039aeb8be8d6aa421550` and it peels to
+  `9590beca0ddfce544f774ffc1327d01f8044a420`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by

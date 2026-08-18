@@ -57,7 +57,21 @@ immutable completed tagged implementation release. Its annotated tag
 commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`. Sprint 27 remains valid
 historical release lineage; Sprint 26 remains the earlier completed tagged
 release at `sprint-26-complete`. Sprint 28 release-truth metadata governance and
-final closure remain pending, and Sprint 29 is unauthorized.
+final closure are historical governance context.
+
+Sprint 29 Git release truth is tag `sprint-29-complete`, object
+`c3a204555cc512ae9404039aeb8be8d6aa421550`, commit
+`9590beca0ddfce544f774ffc1327d01f8044a420`, tree
+`57914fd7451d2c5c1c46251bfc7721cc06f8461a`, and approved fingerprint
+`0210c787df64fec2f44d5004309d3f73ea5aabfac1322792b0ea34c2c1742b73`.
+The sole authoritative backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260818_141402`: bundle/ZIP/manifest
+SHA-256 values are `21f6ede11b901891f871854182aa7998ad9fd16f3ab269adf8d01436ea679e7c`,
+`d6b2a6b3434514357621aef90c224a88a94c0dd9a49ea0024c68d6b9ee3e4441`, and
+`95a23b025654d269d55e392833a5eda843f0043420fd37a8436120761b9c9438`.
+`LUXIOM_20260818_140013` is `FAILED_VERIFICATION /
+NON_AUTHORITATIVE_RELEASE_BACKUP`; its hashes and LF-to-CRLF diagnostic
+fingerprint are forensic only.
 
 For immutable release facts, Git objects, refs, and immutable release tags take
 precedence, followed by verified release-backup evidence, active reviewed

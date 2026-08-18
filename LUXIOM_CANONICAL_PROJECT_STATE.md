@@ -60,7 +60,7 @@ Sprint 27 released Trusted Request Context Foundation v1 at
 `sprint-27-complete`. Sprint 28 builds on it with durable actor/workspace
 membership admission. Earlier sprint summaries preserve historical lineage.
 
-## 6. Latest immutable release — Sprint 28
+## 6. Prior immutable release — Sprint 28
 
 Sprint 28 Durable Actor–Workspace Membership Foundation v1 is implemented,
 independently approved, merged, post-merge validated, tagged, tag-verified, and
@@ -160,4 +160,37 @@ as a conversational scratchpad or mirror every external-ledger update.
   commit/push/PR/merge
 - Feature-branch cleanup not performed
 - Final release closure not yet declared
-- Sprint 29 not authorized
+- Sprint 29 Local Principal Authentication Foundation v1 is released and complete
+
+## 18. Sprint 29 immutable release checkpoint
+
+PR `#34` merged feature `8f08583701571e69b6d18a0cfea64d073201a217`
+(base `779a2719eaf83de2f98134cc76027dd6f2e7d945`) at
+`9590beca0ddfce544f774ffc1327d01f8044a420`, tree
+`57914fd7451d2c5c1c46251bfc7721cc06f8461a`. Annotated tag
+`sprint-29-complete`, object `c3a204555cc512ae9404039aeb8be8d6aa421550`,
+peels to the merge. The approved 28-path fingerprint is
+`0210c787df64fec2f44d5004309d3f73ea5aabfac1322792b0ea34c2c1742b73`.
+
+The sole authoritative backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260818_141402`; bundle, raw Git-blob ZIP,
+and manifest SHA-256 are `21f6ede11b901891f871854182aa7998ad9fd16f3ab269adf8d01436ea679e7c`,
+`d6b2a6b3434514357621aef90c224a88a94c0dd9a49ea0024c68d6b9ee3e4441`, and
+`95a23b025654d269d55e392833a5eda843f0043420fd37a8436120761b9c9438`.
+Verification matched 518/518 raw blobs. `LUXIOM_20260818_140013` is
+`FAILED_VERIFICATION / NON_AUTHORITATIVE_RELEASE_BACKUP`; `git archive` under
+the verified Windows `core.autocrlf=true` configuration converted 460 LF blobs
+to CRLF, so its hashes and diagnostic fingerprint are forensic only.
+
+The released flow is opaque proof → local authentication → principal → explicit
+actor mapping → explicit workspace selection → membership admission → local
+routing → `PermissionPolicy` action authorization → capability. Authentication,
+membership, and authorization remain separate; `PrincipalIdentity` is not
+`ActorIdentity`. The trusted binding path remains separate and non-authenticated.
+Configured authentication is local, process-local, nonpersistent, and demo
+oriented; production credentials and durable/public/multidevice authentication
+remain deferred. SQLite remains schema v2. Validation passed 75 authentication,
+39 Container, 9 demo-unit, 104 architecture, 129 trusted/membership, 278 focused,
+and 1,035 repository tests; Ruff, the 8/8 authenticated demo, and the 7/7 trusted
+demo passed with zero remote calls. The next sprint remains an unfrozen planning
+and contract-definition boundary.

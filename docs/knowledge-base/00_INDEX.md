@@ -5,11 +5,9 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the latest
-immutable implementation release at
-`be22ffddda6d6961497c338caadf4c85e0fcb3ed`, annotated tag
-`sprint-28-complete`. Sprint 27 remains the prior completed tagged capability
-release. Start with the repository-owned
+Sprint 29 Local Principal Authentication Foundation v1 is the latest immutable
+implementation release at `9590beca0ddfce544f774ffc1327d01f8044a420`, tag
+`sprint-29-complete`. Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and
 [Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md).
@@ -72,4 +70,5 @@ Before this sequence, read the normative
 
 ## Sprint implementation history
 
+- [Sprint 29 release summary](history/sprints/SPRINT_29_SUMMARY.md)
 - [Sprint 28 release summary](history/sprints/SPRINT_28_SUMMARY.md)

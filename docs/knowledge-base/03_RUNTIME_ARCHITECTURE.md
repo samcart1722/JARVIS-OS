@@ -47,8 +47,8 @@ to cognition. The feature merged at
 `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
 released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
-released trusted request context; Sprint 28 is now the latest immutable
-implementation release at `sprint-28-complete`.
+released trusted request context; Sprint 28 released durable membership; Sprint
+29 is now the latest immutable implementation release at `sprint-29-complete`.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -472,7 +472,7 @@ admission, not authentication, identity proof, access proof, or action
 authorization. Trusted binding remains distinct from durable membership;
 public HTTP, JWT/OAuth/session/RBAC, and public membership transport remain
 outside the released scope.
-# Sprint 29 candidate authenticated flow
+# Sprint 29 released authenticated flow
 
 Container composes the configured/rejecting authenticator, explicit
 principal-to-actor mapper, existing membership decision service, and existing
@@ -483,3 +483,8 @@ workspace selection → membership decision → local routing → downstream
 `PermissionPolicy`. Authentication failure, mapping failure, invalid workspace,
 or failed membership short-circuits every later stage. The trusted flow,
 membership admission, and permission authorization retain separate ownership.
+
+This flow is released at `sprint-29-complete`. `PrincipalIdentity` remains
+distinct from `ActorIdentity`; workspace selection is not access proof and
+membership is workspace admission only. The binding-key trusted route remains
+internal, separate, and non-authenticated.
