@@ -125,14 +125,16 @@ those figures remain historical evidence.
 > Sprint 18 adds opt-in structural references per claim while preserving the
 > historical and Sprint 17 paths. It does not verify semantic support.
 
-Snapshot updated: **2026-08-17** (America/Tegucigalpa).
+Historical checkpoint snapshot through Sprint 28: **2026-08-17**
+(America/Tegucigalpa).
 
-## Repository checkpoint
+## Historical repository checkpoint through Sprint 28
 
 - Canonical branch: `master`
 - Sprint 28 tagged implementation release commit:
   `be22ffddda6d6961497c338caadf4c85e0fcb3ed`
-- Latest immutable implementation release tag: `sprint-28-complete`
+- Latest immutable implementation release tag at this historical checkpoint:
+  `sprint-28-complete`
 - Sprint 28 annotated tag object:
   `986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`
 - Sprint 28 verified release backup:
@@ -173,7 +175,7 @@ Source: `pyproject.toml`, `app/main.py`, and `app/core/config.py`.
 - `app/tests/`: legacy tests present but excluded by configured `testpaths`.
 - `docs/`: foundation, architecture, RFC, implementation, and recovery material.
 
-## Sprint status
+## Historical sprint status through Sprint 28
 
 | Sprint | State | Confirmed result |
 |---|---|---|
@@ -326,21 +328,23 @@ semantic support, and the public route still supplies no scope.
 The local resolver is not called by `CognitiveEngine.process`, the public API,
 natural-language intent extraction, or an automatic resolve-or-reason
 orchestrator. Default repositories are ephemeral; explicit operations
-composition can inject SQLite durability. Identity authentication, integration
-policy, encryption, synchronization, retention, semantic retrieval, truth
-validation, and external-access governance remain deferred.
+composition can inject SQLite durability. Production/public/durable identity
+authentication, integration policy, encryption, synchronization, retention,
+semantic retrieval, truth validation, and external-access governance remain
+deferred.
 
 `app/brain/Brain` and `app/brain/Orchestrator` remain present but have no
 consumer in the public cognitive route. Other historical modules under
 `app/reasoning`, `app/context`, and `app/memory` remain outside this sprint.
 
-## Sprint 28 closure state
+## Sprint 28 closure lineage and subsequent Sprint 29 governance
 
 Implementation, review, merge, post-merge validation, immutable tagging, tag
-verification, and recoverable backup verification are complete. This candidate
-tree synchronizes repository release truth; it still requires independent
-documentation review and a later governed metadata commit, push, PR, and
-merge. Feature-branch cleanup and final release closure remain pending.
+verification, and recoverable backup verification are complete.
+Sprint 29 release-truth metadata governance completed through metadata commit
+`854e767d86443db860eb8e23b75a736d1266b394`, branch push, PR #35, and ordinary
+merge `9a441706280b22d6471b0ecff5b47ff78617a467` into `master`.
+Feature-branch cleanup and final release closure remain pending.
 # Sprint 29 released feature
 
 The released implementation provides a local principal-authentication foundation

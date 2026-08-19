@@ -6,8 +6,9 @@ Local Principal Authentication Foundation v1 is released through PR #34 at
 `9590beca0ddfce544f774ffc1327d01f8044a420`, tag `sprint-29-complete`.
 Public transport, production credential technology, secure durability,
 sessions/devices, and remote identity integration remain future work.
-Release-truth metadata synchronization remains in progress on its governed
-documentation branch; no metadata commit, PR, or merge is claimed here.
+Release-truth metadata synchronization completed through metadata commit
+`854e767d86443db860eb8e23b75a736d1266b394`, branch push, PR #35, and ordinary
+merge `9a441706280b22d6471b0ecff5b47ff78617a467` into `master`.
 
 ## Sprint 28 implementation released
 
@@ -91,7 +92,7 @@ immutable snapshot before classification. Public HTTP and demo behavior remain
 unchanged. Real scoped data sources, identity, writes, durability, migration,
 and safe prompt use remain future work.
 
-## Completed sprints
+## Historical completed-sprints snapshot through Sprint 28
 
 | Sprint | Objective achieved | Evidence |
 |---|---|---|
