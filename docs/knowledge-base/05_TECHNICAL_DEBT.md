@@ -240,3 +240,40 @@ authorized. These concerns must not be folded into current membership tables.
 The manual Sprint 29 backup required raw Git-blob ZIP construction for byte
 identity under the verified Windows `core.autocrlf=true` configuration. No
 automated backup subsystem is claimed.
+
+
+## Sprint 30 candidate classification
+
+No new uncontrolled technical debt has been identified in the bounded durable
+principal-actor mapping candidate.
+
+Sprint 30 resolves the Sprint 29 deferral for durable
+`PrincipalIdentity -> ActorIdentity` mapping only. It does not resolve
+production authentication or credential security.
+
+The following remain deliberate future work rather than capabilities claimed
+by this candidate:
+
+- production/public authentication transport;
+- production password, PIN, device, biometric, API-key, JWT, OAuth, or remote
+  identity-provider technology;
+- durable credential, proof, verifier, secret, or token storage;
+- sessions and device lifecycle;
+- account recovery and credential reset;
+- principal or account lifecycle management;
+- mapping update/delete/audit history;
+- durable action-permission policy;
+- roles, invitations, and broader RBAC;
+- public membership/authentication APIs;
+- encryption, retention, synchronization, and multi-device policy.
+
+These concerns must not be folded into `principal_actor_mappings`. That table
+is intentionally limited to exact principal/actor association.
+
+The legacy `sprint-30` tag collision is governance history, not implementation
+debt. It must remain immutable and excluded from current governed release
+inference.
+
+Governance maintenance: keep schema-v3 verification, architecture provenance
+checks, demo boundaries, Container composition rules, and byte-identical backup
+requirements synchronized as the candidate moves through review and release.

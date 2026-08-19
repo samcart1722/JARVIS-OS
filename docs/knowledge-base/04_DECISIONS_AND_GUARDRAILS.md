@@ -79,3 +79,44 @@ governance without weakening the released boundaries.
 - On the verified Windows `core.autocrlf=true` configuration, `git archive`
   converted LF blobs to CRLF. Sprint 29 byte-identical backup used
   `RAW_GIT_BLOB_BYTES`; this guardrail is limited to the verified evidence.
+
+
+## Sprint 30 candidate decisions and guardrails
+
+The following decisions are implemented in the current governed Sprint 30
+candidate but are not yet release-truth claims:
+
+- Durable persistence is added only for
+  `PrincipalIdentity -> ActorIdentity`.
+- Authentication is not principal mapping.
+- Principal mapping is not workspace membership.
+- Principal mapping is not action authorization.
+- `PrincipalIdentity` remains distinct from `ActorIdentity`.
+- One principal may map to at most one actor.
+- Multiple principals may map to the same actor.
+- Principal lookup is exact and case-sensitive.
+- Missing mapping fails closed.
+- Repository/storage failure fails closed with a distinct mapping-resolution
+  failure.
+- Durable mapping storage never authenticates a principal.
+- Durable mapping storage never proves workspace membership.
+- Durable mapping storage never grants an action permission.
+- Mapping persistence stores no credential, proof, verifier, secret, token,
+  role, permission, workspace, membership state, or session.
+- Mapping creation is append-only for a principal; no update, delete, upsert,
+  or overwrite path is introduced.
+- Default `Container` remains no-I/O.
+- SQLite durability requires explicit caller-owned repository injection.
+- `Container` remains the sole application composition root for
+  `RepositoryPrincipalActorMapper`.
+- Core principal-authentication code must not import SQLite.
+- Public HTTP, `CognitiveEngine`, the trusted route, membership semantics, and
+  downstream `PermissionPolicy` remain unchanged.
+- The deterministic durable demo is operational proof, not a public product
+  authentication surface.
+- The historical legacy tag `sprint-30` is preserved as historical evidence
+  only and must not be mutated or reused by the current governed Sprint 30.
+
+Release naming, merge SHA, immutable governed tag, backup evidence, and final
+release-truth synchronization remain future governance steps and must not be
+invented in this candidate tree.

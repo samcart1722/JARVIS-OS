@@ -5,6 +5,32 @@ Version: 1.2
 
 ---
 
+# Mapeo durable de principal a actor para la ruta autenticada local
+
+En la ruta local autenticada, una autenticacion exitosa produce primero un
+`PrincipalIdentity`. Luxiom resuelve despues ese principal hacia un
+`ActorIdentity` mediante un mapper explicito antes de seleccionar workspace,
+evaluar membership o autorizar una accion.
+
+La implementacion candidata de Sprint 30 permite que ese mapeo sea durable
+mediante un repositorio SQLite inyectado explicitamente. La persistencia no
+autentica al principal, no prueba membership y no concede permisos. Un mapeo
+ausente falla antes de workspace y membership; un fallo del repositorio tambien
+falla cerrado.
+
+La secuencia permanece separada:
+
+`AuthenticationProof -> authentication -> PrincipalIdentity -> principal/actor
+mapping -> ActorIdentity -> explicit WorkspaceIdentity -> membership ->
+PermissionPolicy -> local capability`.
+
+El almacenamiento durable contiene solamente la asociacion principal/actor.
+No contiene credenciales, proofs, tokens, roles, permisos, sesiones ni estado
+de membership. El `Container` por defecto sigue sin I/O y la ruta trusted
+historica permanece separada.
+
+---
+
 # Contexto confiable previo para comandos locales internos
 
 Para la ruta interna soportada de comandos de texto, Sprint 27 resuelve

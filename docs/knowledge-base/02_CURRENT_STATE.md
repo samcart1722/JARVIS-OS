@@ -357,3 +357,57 @@ non-authenticated.
 Public transport authentication, production credential technology, and
 durable credential/principal/mapping storage are not integrated. Sprint 29 is
 released, tagged, authoritatively backed up, and implementation-complete.
+
+
+## Sprint 30 candidate implementation state
+
+Sprint 30 — Durable Principal–Actor Mapping Foundation v1 is currently an
+implementation candidate on branch
+`feat/sprint-30-durable-principal-actor-mapping-foundation`, based on
+`267691e4b9e8fac4efb22f4223121a355b0cc6e5`.
+
+The candidate adds durable persistence only for the exact
+`PrincipalIdentity -> ActorIdentity` association. Authentication remains a
+separate preceding boundary; workspace selection, actor/workspace membership,
+and downstream `PermissionPolicy` action authorization remain separate later
+boundaries.
+
+The Core-facing `PrincipalActorMappingRepository` exposes only exact
+case-sensitive `get` and append-only `create`. One principal maps to at most one
+actor; different principals may map to the same actor. Missing mapping fails
+closed as `principal_mapping_failed`. Repository failure or invalid durable
+actor data fails closed as `principal_mapping_resolution_failed`.
+
+SQLite schema v3 adds only:
+
+```text
+principal_actor_mappings(
+    principal_id TEXT NOT NULL COLLATE BINARY PRIMARY KEY,
+    actor_id TEXT NOT NULL
+)
+```
+
+No authentication proof, credential, verifier, secret, token, workspace,
+membership state, role, permission, session, status, timestamp, or audit
+history is persisted by this mapping table.
+
+Default `Container` composition remains no-I/O. Durable mapping exists only
+through explicit repository injection. Public HTTP, `CognitiveEngine`, the
+Sprint 27 trusted route, membership semantics, and action authorization remain
+unchanged.
+
+The deterministic two-process demo has proven seed/close/reopen/verify behavior
+against caller-owned SQLite outside the repository. Primary and secondary
+principals recover the same actor and route locally; an exact case-variant
+principal remains unmapped and fails before membership or routing. Model,
+provider, readiness, network, and cognitive-call counts remain zero where
+required.
+
+This is not yet a governed Sprint 30 release. No current governed Sprint 30
+release tag, merge commit, release backup, or release-truth metadata is claimed
+here.
+
+A historical legacy tag named `sprint-30` already exists from an earlier,
+unrelated numbering lineage. It must not be moved, deleted, reused, or treated
+as evidence of this governed Sprint 30. Current governed release naming must
+use a distinct immutable tag after merge.

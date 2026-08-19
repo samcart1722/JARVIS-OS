@@ -488,3 +488,72 @@ This flow is released at `sprint-29-complete`. `PrincipalIdentity` remains
 distinct from `ActorIdentity`; workspace selection is not access proof and
 membership is workspace admission only. The binding-key trusted route remains
 internal, separate, and non-authenticated.
+
+
+## Sprint 30 candidate durable principal-actor mapping flow
+
+The Sprint 29 authenticated local route remains the application boundary.
+Sprint 30 changes only the mapper implementation selected by explicit
+composition.
+
+Configured/process-local path:
+
+```text
+LocalAuthenticationProof
+  -> LocalPrincipalAuthenticator
+  -> PrincipalIdentity
+  -> ConfiguredPrincipalActorMapper
+  -> ActorIdentity
+  -> explicit WorkspaceIdentity
+  -> MembershipDecisionService
+  -> LocalCommandTextRouter
+  -> PermissionPolicy
+  -> local capability
+```
+
+Explicit durable path:
+
+```text
+LocalAuthenticationProof
+  -> LocalPrincipalAuthenticator
+  -> PrincipalIdentity
+  -> RepositoryPrincipalActorMapper
+  -> PrincipalActorMappingRepository
+  -> SQLitePrincipalActorMappingRepository
+  -> caller-owned SQLiteLocalStorage
+  -> ActorIdentity
+  -> explicit WorkspaceIdentity
+  -> MembershipDecisionService
+  -> LocalCommandTextRouter
+  -> PermissionPolicy
+  -> local capability
+```
+
+The SQLite adapter points inward to the principal-authentication repository
+contract. Principal-authentication Core code does not import `sqlite3` or
+concrete local storage.
+
+Repository-backed mapping is fail-closed. Missing mapping ends before workspace
+selection. Declared repository failures and invalid durable actor data become
+`principal_mapping_resolution_failed`. Unexpected programming errors are not
+silently converted into repository failures.
+
+Container mapping ownership is exclusive: an explicitly injected mapper,
+configured mappings, and an injected mapping repository cannot be mixed.
+Supplying a repository causes `Container` to compose
+`RepositoryPrincipalActorMapper`. Supplying no source preserves the empty
+configured mapper and performs no database I/O.
+
+SQLite schema v3 extends the existing durable local storage additively.
+Migration v2 -> v3 preserves existing list, knowledge, and actor/workspace
+membership data while adding only `principal_actor_mappings`.
+
+The operational durable demo deliberately opens SQLite outside the repository,
+seeds mappings, closes the process, then verifies from a second Python process.
+Its membership and action-permission inputs remain separate from the durable
+mapping being proven. The CLI is a thin adapter and public HTTP remains unaware
+of this operations proof.
+
+`CognitiveEngine` is unchanged. The Sprint 27 trusted request-context route is
+unchanged and remains non-authentication. Membership remains workspace
+admission. `PermissionPolicy` remains action authorization.

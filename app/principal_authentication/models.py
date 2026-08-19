@@ -58,6 +58,7 @@ class PrincipalAuthenticationResult:
 
 class PrincipalActorMappingErrorCode(str, Enum):
     PRINCIPAL_MAPPING_FAILED = "principal_mapping_failed"
+    PRINCIPAL_MAPPING_RESOLUTION_FAILED = "principal_mapping_resolution_failed"
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,8 +78,5 @@ class PrincipalActorMappingResult:
             return
         if self.actor is not None:
             raise ValueError("Failed principal mapping forbids an actor.")
-        if (
-            self.error_code
-            is not PrincipalActorMappingErrorCode.PRINCIPAL_MAPPING_FAILED
-        ):
-            raise ValueError("Failed principal mapping requires the valid error.")
+        if type(self.error_code) is not PrincipalActorMappingErrorCode:
+            raise ValueError("Failed principal mapping requires a valid error.")

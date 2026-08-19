@@ -303,6 +303,7 @@ def test_knowledge_discovery_exact_binary_order_kind_workspace_and_cap(
         "list_items",
         "knowledge_records",
         "actor_workspace_memberships",
+        "principal_actor_mappings",
     }
     assert indexes == set()
 
@@ -385,7 +386,9 @@ def test_sqlite_discovery_boundary_matrix_through_real_capability(
         storage.close()
 
 
-def test_fresh_v2_schema_contains_only_approved_membership_shape(tmp_path) -> None:
+def test_fresh_v3_schema_contains_approved_membership_and_mapping_shapes(
+    tmp_path,
+) -> None:
     path = tmp_path / "fresh.sqlite3"
     with SQLiteLocalStorage(path) as storage:
         storage.initialize()
@@ -395,11 +398,11 @@ def test_fresh_v2_schema_contains_only_approved_membership_shape(tmp_path) -> No
         assert storage.read_knowledge(workspace, "record").record is None
 
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone() == (2,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (SCHEMA_VERSION,)
         assert connection.execute(
             "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
             ("local_storage",),
-        ).fetchone() == (2,)
+        ).fetchone() == (SCHEMA_VERSION,)
         columns = connection.execute(
             "PRAGMA table_info(actor_workspace_memberships)"
         ).fetchall()
@@ -413,6 +416,34 @@ def test_fresh_v2_schema_contains_only_approved_membership_shape(tmp_path) -> No
             ("actor_workspace_memberships",),
         ).fetchone()[0]
         assert "status IN ('active', 'inactive')" in sql
+
+        mapping_columns = connection.execute(
+            "PRAGMA table_info(principal_actor_mappings)"
+        ).fetchall()
+
+        assert tuple(
+            (row[1], row[2], row[3], row[5])
+            for row in mapping_columns
+        ) == (
+            ("principal_id", "TEXT", 1, 1),
+            ("actor_id", "TEXT", 1, 0),
+        )
+
+        mapping_sql = connection.execute(
+            "SELECT sql FROM sqlite_master WHERE name = ?",
+            ("principal_actor_mappings",),
+        ).fetchone()[0]
+
+        normalized_mapping_sql = " ".join(
+            mapping_sql.split()
+        ).lower()
+
+        assert (
+            "principal_id text not null collate binary primary key"
+            in normalized_mapping_sql
+        )
+        assert "actor_id text not null" in normalized_mapping_sql
+        assert "unique (actor_id)" not in normalized_mapping_sql
 
 
 def test_v1_migration_is_additive_and_preserves_semantic_values(tmp_path) -> None:
@@ -437,7 +468,7 @@ def test_v1_migration_is_additive_and_preserves_semantic_values(tmp_path) -> Non
         assert (recovered.key, recovered.value) == ("family.value", "exact")
 
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone() == (2,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (SCHEMA_VERSION,)
         assert connection.execute(
             "SELECT workspace_id, list_id, normalized_item, display_item, position "
             "FROM list_items"
@@ -499,11 +530,11 @@ def test_v1_migration_failure_rolls_back_ddl_versions_and_preserves_data(
             WorkspaceIdentity("home"), "record"
         ).record.value == "exact"
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone() == (2,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (SCHEMA_VERSION,)
         assert connection.execute(
             "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
             ("local_storage",),
-        ).fetchone() == (2,)
+        ).fetchone() == (SCHEMA_VERSION,)
         assert connection.execute(
             "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = ?",
             ("actor_workspace_memberships",),
