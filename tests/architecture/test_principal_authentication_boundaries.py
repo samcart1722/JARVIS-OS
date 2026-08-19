@@ -9,6 +9,12 @@ PRINCIPAL_AUTH_ROOT = APP_ROOT / "principal_authentication"
 ROUTING_PATH = PRINCIPAL_AUTH_ROOT / "routing.py"
 MODELS_PATH = PRINCIPAL_AUTH_ROOT / "models.py"
 CONTAINER_PATH = APP_ROOT / "core" / "container.py"
+SQLITE_STORAGE_PATH = (
+    APP_ROOT
+    / "infrastructure"
+    / "local_storage"
+    / "sqlite_storage.py"
+)
 TRUSTED_ARCHITECTURE_PATH = (
     REPOSITORY_ROOT / "tests" / "architecture" / "test_trusted_context_boundaries.py"
 )
@@ -20,6 +26,7 @@ PRINCIPAL_AUTH_FILES = frozenset(
         "configured_mapper.py",
         "contracts.py",
         "models.py",
+        "repository_mapper.py",
         "routing.py",
     )
 )
@@ -29,6 +36,7 @@ CORE_AUTH_FILES = frozenset(
         "configured_mapper.py",
         "contracts.py",
         "models.py",
+        "repository_mapper.py",
     )
 )
 CORE_FORBIDDEN_IMPORT_PREFIXES = (
@@ -78,9 +86,11 @@ AUTH_BOUNDARY_SYMBOLS = frozenset(
         "LocalAuthenticationProof",
         "LocalPrincipalAuthenticator",
         "PrincipalActorMapper",
+        "PrincipalActorMappingRepository",
         "PrincipalActorMappingResult",
         "PrincipalAuthenticationResult",
         "PrincipalIdentity",
+        "RepositoryPrincipalActorMapper",
     )
 )
 DOWNSTREAM_FORBIDDEN_SYMBOLS = frozenset(
@@ -101,6 +111,7 @@ COMPOSED_AUTH_TYPES = frozenset(
         "ConfiguredLocalPrincipalAuthenticator",
         "ConfiguredPrincipalActorMapper",
         "RejectingLocalPrincipalAuthenticator",
+        "RepositoryPrincipalActorMapper",
     )
 )
 
@@ -474,6 +485,40 @@ def test_core_authentication_imports_preserve_dependency_direction() -> None:
     assert not violations, f"Forbidden core-authentication imports: {violations}"
 
 
+def test_principal_mapping_storage_dependency_is_outward_only() -> None:
+    tree = _tree(SQLITE_STORAGE_PATH)
+
+    authentication_modules = {
+        module
+        for module in _import_modules(tree)
+        if _module_matches_prefix(
+            module,
+            "app.principal_authentication",
+        )
+    }
+
+    assert authentication_modules == {
+        "app.principal_authentication.contracts",
+        "app.principal_authentication.models",
+    }
+
+    forbidden_symbols = {
+        "AuthenticatedLocalCommandRoutingService",
+        "AuthenticatedPrincipal",
+        "LocalAuthenticationProof",
+        "LocalPrincipalAuthenticator",
+        "PrincipalActorMapper",
+        "PrincipalActorMappingResult",
+        "PrincipalAuthenticationResult",
+        "RepositoryPrincipalActorMapper",
+    }
+
+    assert not (
+        _referenced_names(tree)
+        & forbidden_symbols
+    )
+
+
 def test_authenticated_routing_imports_are_exactly_scoped() -> None:
     imports = _import_modules(_tree(ROUTING_PATH))
     assert imports == ROUTING_ALLOWED_IMPORTS, (
@@ -741,6 +786,7 @@ def test_container_build_order_and_falsey_injection_are_explicit() -> None:
     assert is_not_none_attributes == {
         "_injected_local_principal_authenticator",
         "_injected_principal_actor_mapper",
+        "_injected_principal_actor_mapping_repository",
     }
     builder_imports = {
         origin

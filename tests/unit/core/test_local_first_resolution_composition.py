@@ -45,6 +45,7 @@ from app.principal_authentication import (
     LocalAuthenticationProof,
     PrincipalIdentity,
     RejectingLocalPrincipalAuthenticator,
+    RepositoryPrincipalActorMapper,
 )
 
 
@@ -70,6 +71,17 @@ class FalseyMapper:
 
     def map(self, principal):
         raise AssertionError("Construction must not map.")
+
+
+class FalseyPrincipalActorMappingRepository:
+    def __bool__(self) -> bool:
+        return False
+
+    def get(self, principal):
+        raise AssertionError("Construction must not resolve a mapping.")
+
+    def create(self, principal, actor):
+        raise AssertionError("Construction must not create a mapping.")
 
 
 def _proof_binding() -> ConfiguredPrincipalProofBinding:
@@ -170,6 +182,45 @@ def test_container_preserves_falsey_injected_authenticator_and_mapper() -> None:
     assert service._mapper is mapper
 
 
+def test_container_composes_injected_principal_mapping_repository() -> None:
+    repository = FalseyPrincipalActorMappingRepository()
+
+    container = Container(
+        Settings(_env_file=None),
+        principal_actor_mapping_repository=repository,
+    )
+
+    assert isinstance(
+        container.principal_actor_mapper,
+        RepositoryPrincipalActorMapper,
+    )
+    assert container.principal_actor_mapper._repository is repository
+    assert (
+        container.authenticated_local_command_routing_service._mapper
+        is container.principal_actor_mapper
+    )
+
+
+def test_operational_authentication_accepts_repository_backed_mapper() -> None:
+    repository = FalseyPrincipalActorMappingRepository()
+
+    container = Container(
+        Settings(_env_file=None),
+        principal_proof_bindings=(_proof_binding(),),
+        principal_actor_mapping_repository=repository,
+    )
+
+    assert isinstance(
+        container.local_principal_authenticator,
+        ConfiguredLocalPrincipalAuthenticator,
+    )
+    assert isinstance(
+        container.principal_actor_mapper,
+        RepositoryPrincipalActorMapper,
+    )
+    assert container.principal_actor_mapper._repository is repository
+
+
 def test_container_supports_valid_mixed_authentication_ownership() -> None:
     mapper = FalseyMapper()
     configured_auth = Container(
@@ -202,6 +253,22 @@ def test_container_rejects_ambiguous_or_incomplete_authentication_ownership() ->
             principal_actor_mappings=(_actor_mapping(),),
             principal_actor_mapper=FalseyMapper(),
         )
+    repository = FalseyPrincipalActorMappingRepository()
+
+    with pytest.raises(ValueError, match="mapper ownership"):
+        Container(
+            Settings(_env_file=None),
+            principal_actor_mappings=(_actor_mapping(),),
+            principal_actor_mapping_repository=repository,
+        )
+
+    with pytest.raises(ValueError, match="mapper ownership"):
+        Container(
+            Settings(_env_file=None),
+            principal_actor_mapping_repository=repository,
+            principal_actor_mapper=FalseyMapper(),
+        )
+
     with pytest.raises(ValueError, match="requires a principal mapper"):
         Container(
             Settings(_env_file=None),

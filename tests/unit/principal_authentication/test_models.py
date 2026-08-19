@@ -96,12 +96,19 @@ def test_authentication_result_accepts_only_valid_closed_states() -> None:
 def test_mapping_result_accepts_only_valid_closed_states() -> None:
     actor = ActorIdentity("actor")
     success = PrincipalActorMappingResult(True, actor)
-    failure = PrincipalActorMappingResult(
+    missing = PrincipalActorMappingResult(
         False,
         error_code=PrincipalActorMappingErrorCode.PRINCIPAL_MAPPING_FAILED,
     )
+    resolution_failure = PrincipalActorMappingResult(
+        False,
+        error_code=(
+            PrincipalActorMappingErrorCode.PRINCIPAL_MAPPING_RESOLUTION_FAILED
+        ),
+    )
     assert success.actor is actor and success.error_code is None
-    assert not failure.success and failure.actor is None
+    assert not missing.success and missing.actor is None
+    assert not resolution_failure.success and resolution_failure.actor is None
 
     invalid = (
         {"success": 1, "actor": actor},
@@ -114,6 +121,7 @@ def test_mapping_result_accepts_only_valid_closed_states() -> None:
         {"success": False, "actor": actor},
         {"success": False},
         {"success": False, "error_code": "principal_mapping_failed"},
+        {"success": False, "error_code": "principal_mapping_resolution_failed"},
     )
     for values in invalid:
         with pytest.raises(ValueError):
@@ -127,4 +135,5 @@ def test_error_sets_are_exact() -> None:
     )
     assert tuple(PrincipalActorMappingErrorCode) == (
         PrincipalActorMappingErrorCode.PRINCIPAL_MAPPING_FAILED,
+        PrincipalActorMappingErrorCode.PRINCIPAL_MAPPING_RESOLUTION_FAILED,
     )

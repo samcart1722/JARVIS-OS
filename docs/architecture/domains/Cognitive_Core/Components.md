@@ -272,3 +272,51 @@ implementation, and `MembershipDecisionService`. `SQLiteLocalStorage` is the
 outward durable implementation. Trusted routing requires membership before
 text routing. Container defaults to in-memory and accepts caller-owned durable
 injection. The durable demo is an operations proof, not authentication or RBAC.
+
+
+## Sprint 29 local principal authentication components
+
+`app/principal_authentication` owns the transport-neutral local authentication
+models, authenticator and mapper ports, configured process-local
+implementations, and `AuthenticatedLocalCommandRoutingService`.
+
+The authenticated application path is deliberately separate from the Sprint 27
+trusted-binding path. Authentication produces a `PrincipalIdentity`; explicit
+principal-to-actor mapping produces an `ActorIdentity`; only then is workspace
+selected and membership evaluated. `PermissionPolicy` remains downstream
+action authorization.
+
+`Container` is the sole composition root for the authenticated routing service.
+Configured authentication and mapping are local development/test/demo
+facilities and contain no durable credential technology.
+
+## Sprint 30 durable principal-actor mapping candidate components
+
+The Sprint 30 candidate adds durability only to the
+`PrincipalIdentity -> ActorIdentity` association.
+
+`PrincipalActorMappingRepository` is the Core-facing persistence port.
+`RepositoryPrincipalActorMapper` adapts that port to the existing
+`PrincipalActorMapper` contract. Neither owns authentication, workspace
+selection, membership, or action authorization.
+
+`SQLitePrincipalActorMappingRepository` is the outward infrastructure adapter
+backed by `SQLiteLocalStorage`. SQLite schema v3 adds only the
+`principal_actor_mappings` table with exact case-sensitive `principal_id` and
+non-null `actor_id`.
+
+`Container` accepts explicit repository injection and constructs
+`RepositoryPrincipalActorMapper` only when that repository is the selected
+mapping source. Configured mappings, an explicitly injected mapper, and an
+injected mapping repository are mutually exclusive ownership choices.
+Default composition remains configured-empty/no-I/O.
+
+The durable principal-actor demo is operational proof outside the public API.
+It persists mappings in one process, reopens them in another, and demonstrates
+authenticated local routing with zero model, provider, readiness, or network
+calls.
+
+The candidate adds no credential/proof persistence, public authentication API,
+session, role, permission, workspace, membership, token, or account-lifecycle
+storage. `CognitiveEngine`, the trusted route, membership semantics, and
+`PermissionPolicy` remain unchanged.

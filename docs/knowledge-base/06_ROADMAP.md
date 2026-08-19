@@ -190,3 +190,62 @@ or change the HTTP surface.
 Sprint 29 is reviewed, merged, validated, tagged, and authoritatively backed up.
 The next sprint is only a planning and contract-definition boundary; no Sprint
 30 blocks, acceptance criteria, branch, base, or date are established here.
+
+
+## Sprint 30 governed candidate — active implementation state
+
+This section supersedes the earlier Sprint 30 planning-boundary statement above
+for the current governed branch only.
+
+Sprint 30 is now frozen as:
+
+**Sprint 30 — Durable Principal–Actor Mapping Foundation v1**
+
+Governed base:
+
+`267691e4b9e8fac4efb22f4223121a355b0cc6e5`
+
+Governed feature branch:
+
+`feat/sprint-30-durable-principal-actor-mapping-foundation`
+
+Implemented candidate scope:
+
+- Core `PrincipalActorMappingRepository` contract;
+- append-only exact principal/actor mapping semantics;
+- `RepositoryPrincipalActorMapper`;
+- distinct fail-closed repository-resolution failure;
+- SQLite schema v3;
+- additive v2 -> v3 migration;
+- `SQLitePrincipalActorMappingRepository`;
+- explicit Container repository injection;
+- default no-I/O composition;
+- architecture enforcement;
+- deterministic two-process durable mapping demo;
+- candidate documentation synchronization.
+
+Still explicitly out of scope:
+
+- credential/proof/verifier/secret/token persistence;
+- public authentication transport;
+- JWT/OAuth/session/device/account lifecycle;
+- mapping update/delete/audit history;
+- roles/RBAC/durable permissions;
+- membership semantic changes;
+- `PermissionPolicy` changes;
+- `CognitiveEngine` changes;
+- trusted-route changes;
+- remote identity providers or cloud synchronization.
+
+The current candidate is not yet released. Remaining governed work includes
+full repository validation, review, staged/index verification, feature commit,
+push, remote review, PR, merge, post-merge validation, immutable governed
+release tagging, backup/recovery verification, release-truth metadata
+synchronization, metadata review/PR/merge, final validation, branch cleanup,
+and formal closure.
+
+A historical unrelated annotated tag named `sprint-30` predates the current
+governed sprint-numbering sequence. It is preserved and explicitly excluded
+from current Sprint 30 lifecycle inference. The current governed release must
+use a distinct tag name; no such current governed release tag is claimed in
+this candidate document.

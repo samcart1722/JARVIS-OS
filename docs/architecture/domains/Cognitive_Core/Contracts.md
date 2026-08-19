@@ -395,3 +395,89 @@ exact case-sensitive actor/workspace pair. `MembershipDecision` uses
 `membership_resolution_failed`. `MembershipRepository` exposes only `get`,
 `create`, `activate`, and `deactivate`. Create never reactivates; only activate
 does, and there is no delete. Membership is separate from `PermissionPolicy`.
+
+
+## Sprint 29 local principal authentication contracts
+
+`LocalAuthenticationProof` is opaque application input.
+`LocalPrincipalAuthenticator.authenticate(...)` resolves that proof to an
+authenticated `PrincipalIdentity` or a stable authentication failure.
+`PrincipalActorMapper.map(...)` resolves an authenticated principal to an
+`ActorIdentity` or a stable mapping failure.
+
+`AuthenticatedLocalCommandRoutingService` executes one strict sequence:
+
+```text
+authentication
+-> principal-to-actor mapping
+-> explicit workspace selection
+-> membership decision
+-> local text routing
+-> downstream PermissionPolicy
+```
+
+Every unsuccessful stage short-circuits all later stages. Authentication,
+mapping, membership admission, and action authorization are distinct contracts.
+
+## Sprint 30 durable principal-actor mapping candidate contracts
+
+The Core-facing repository contract is:
+
+```python
+PrincipalActorMappingRepository.get(
+    principal: PrincipalIdentity,
+) -> ActorIdentity | None
+
+PrincipalActorMappingRepository.create(
+    principal: PrincipalIdentity,
+    actor: ActorIdentity,
+) -> ActorIdentity
+```
+
+`get` is exact and case-sensitive. Absence returns `None`.
+`create` is append-only for one principal identity: if that principal already
+exists, creation fails with `PrincipalActorMappingConflict`, even when the
+existing actor is identical. Multiple different principals may map to the same
+actor. There is no update, delete, upsert, role, workspace, credential, or
+permission operation.
+
+Repository operational failures surface as
+`PrincipalActorMappingRepositoryError`.
+
+`RepositoryPrincipalActorMapper.map(principal)` calls repository `get` once.
+Missing mapping becomes `principal_mapping_failed`. Repository failure or
+invalid stored actor data becomes
+`principal_mapping_resolution_failed`. Unexpected programming exceptions not
+declared as repository failures propagate.
+
+SQLite schema v3 contains:
+
+```sql
+CREATE TABLE principal_actor_mappings (
+    principal_id TEXT NOT NULL COLLATE BINARY PRIMARY KEY,
+    actor_id TEXT NOT NULL
+)
+```
+
+The table stores no authentication proof, credential, verifier, secret, token,
+workspace, membership, role, permission, session, status, timestamp, or audit
+history.
+
+Schema migration is additive: v2 -> v3 creates the mapping table in an explicit
+transaction while preserving existing list, knowledge, and membership data.
+Opening v3 verifies the mapping schema. Versions above v3 remain unsupported.
+
+`Container` mapping ownership is exclusive:
+
+- explicit `PrincipalActorMapper`, or
+- configured principal/actor mappings, or
+- explicit `PrincipalActorMappingRepository`.
+
+Repository injection causes `Container` to construct
+`RepositoryPrincipalActorMapper`. Supplying more than one mapping source is
+invalid. Supplying none preserves the existing empty configured mapper and
+performs no storage I/O.
+
+This remains an implementation-candidate contract until governed Sprint 30
+merge, release tagging, backup verification, and release-truth synchronization
+are complete.

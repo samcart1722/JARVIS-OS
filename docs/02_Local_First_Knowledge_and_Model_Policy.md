@@ -3,6 +3,34 @@
 Version: 1.0
 Status: Normative
 
+## Sprint 30 durable principal-to-actor mapping candidate
+
+The Sprint 30 candidate implementation adds durable local persistence only for
+the exact `PrincipalIdentity -> ActorIdentity` association. Authentication
+still occurs first; workspace selection, membership admission, and downstream
+`PermissionPolicy` remain later and separate boundaries.
+
+The Core-facing `PrincipalActorMappingRepository` owns only `get` and `create`.
+A missing mapping fails closed. Repository failure or invalid stored actor data
+fails closed separately as `principal_mapping_resolution_failed`. Creation
+never overwrites an existing principal, even when the requested actor is the
+same. Multiple principals may map to one actor. Matching is exact and
+case-sensitive.
+
+SQLite schema v3 stores only `principal_id` and `actor_id`. It stores no
+credential, proof, verifier, secret, token, workspace, role, permission,
+membership status, session, or authentication state. Default `Container`
+composition remains no-I/O; durable mapping requires explicit repository
+injection.
+
+The durable two-process demo proves persistence and successful local routing
+with model/provider/readiness/network counts of zero. Public HTTP,
+`CognitiveEngine`, the trusted route, membership semantics, and action
+authorization remain unchanged.
+
+This is an implementation candidate on the governed Sprint 30 feature branch;
+it is not yet a merged, tagged, or backed-up Sprint 30 release.
+
 ## Sprint 27 trusted request-context boundary
 
 For supported internal local text commands, deterministic trusted-context

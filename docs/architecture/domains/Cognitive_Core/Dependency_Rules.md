@@ -269,3 +269,68 @@ probe. Operations runtime consumes probes and engines only.
 depend on permissions, routing, Container, SQLite, API, authentication,
 providers, or networking. SQLite remains outward infrastructure. Public API
 and `CognitiveEngine` do not own membership.
+
+
+## Sprint 29 local principal authentication boundary
+
+`app/principal_authentication` may depend on its own contracts/models and the
+minimum existing identity, workspace, membership, and text-routing contracts
+needed by authenticated orchestration. It must not own SQLite, FastAPI,
+credential transport, provider/networking, membership persistence, or
+`PermissionPolicy` implementation.
+
+`Container` alone composes
+`AuthenticatedLocalCommandRoutingService`. Public API and `CognitiveEngine` do
+not construct or invoke this authenticated local route.
+
+## Sprint 30 durable principal-actor mapping candidate boundary
+
+The Core-facing principal-actor repository contract and
+`RepositoryPrincipalActorMapper` remain under `app/principal_authentication`
+and must not import `sqlite3` or concrete local-storage infrastructure.
+
+Dependency direction preserves the inward Core boundary:
+
+```text
+Core mapping side:
+
+RepositoryPrincipalActorMapper
+        |
+        v
+PrincipalActorMappingRepository
+
+Infrastructure side:
+
+SQLitePrincipalActorMappingRepository
+        |
+        v
+SQLiteLocalStorage
+        |
+        v
+principal-authentication contracts/models
+```
+
+The two adapter paths are separate.
+`SQLitePrincipalActorMappingRepository` does not depend on
+`RepositoryPrincipalActorMapper`.
+
+`app/infrastructure/local_storage` may depend inward on
+`PrincipalIdentity`, `ActorIdentity`, and principal-actor repository errors and
+contracts needed to implement persistence. Core principal-authentication code
+must not depend outward on SQLite.
+
+SQLite principal-actor storage must not import or own authenticators,
+authentication proofs, authenticated routing services, workspace selection,
+membership decisions, permissions, providers, networking, or public API
+transport.
+
+Only `Container` may construct `RepositoryPrincipalActorMapper` for application
+composition. Explicit repository injection must perform no I/O at Container
+construction beyond retaining and wiring the caller-owned object.
+
+Public HTTP, `CognitiveEngine`, and the Sprint 27 trusted route remain unaware
+of durable principal-actor mapping infrastructure.
+
+The durable demo may explicitly construct local SQLite infrastructure because it
+is an operations proof. Its CLI remains thin and delegates to the operations
+runtime; it does not import SQLite, Container, or cognition modules directly.

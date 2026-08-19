@@ -163,3 +163,33 @@ def test_durable_demo_cli_delegates_to_operations_runtime() -> None:
     assert "app.operations.durable_local_knowledge_demo_runtime" in imported
     assert "sqlite3" not in imported
     assert not any(module.startswith("app.cognition") for module in imported)
+
+
+
+def test_durable_principal_actor_demo_is_separate_from_public_runtime() -> None:
+    demo_name = "durable_principal_actor_mapping_demo"
+
+    for path in (
+        "app/cognition/engine.py",
+        "app/api/routes/brain.py",
+        "app/main.py",
+    ):
+        source = (ROOT / path).read_text(encoding="utf-8")
+        assert demo_name not in source
+
+
+def test_durable_principal_actor_demo_cli_is_thin() -> None:
+    path = "scripts/demo_durable_principal_actor_mapping.py"
+    imported = imports(path)
+
+    assert (
+        "app.operations.durable_principal_actor_mapping_demo_runtime"
+        in imported
+    )
+    assert "sqlite3" not in imported
+    assert "app.core.container" not in imported
+    assert "app.infrastructure.local_storage" not in imported
+    assert not any(
+        module.startswith("app.cognition")
+        for module in imported
+    )

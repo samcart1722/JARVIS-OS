@@ -12,6 +12,9 @@ from app.principal_authentication.configured_mapper import (
 from app.principal_authentication.contracts import (
     LocalPrincipalAuthenticator,
     PrincipalActorMapper,
+    PrincipalActorMappingConflict,
+    PrincipalActorMappingRepository,
+    PrincipalActorMappingRepositoryError,
 )
 from app.principal_authentication.models import (
     AuthenticatedPrincipal,
@@ -21,6 +24,9 @@ from app.principal_authentication.models import (
     PrincipalAuthenticationErrorCode,
     PrincipalAuthenticationResult,
     PrincipalIdentity,
+)
+from app.principal_authentication.repository_mapper import (
+    RepositoryPrincipalActorMapper,
 )
 from app.principal_authentication.routing import (
     AuthenticatedLocalCommandRequest,
@@ -44,10 +50,14 @@ __all__ = [
     "LocalAuthenticationProof",
     "LocalPrincipalAuthenticator",
     "PrincipalActorMapper",
+    "PrincipalActorMappingConflict",
     "PrincipalActorMappingErrorCode",
+    "PrincipalActorMappingRepository",
+    "PrincipalActorMappingRepositoryError",
     "PrincipalActorMappingResult",
     "PrincipalAuthenticationErrorCode",
     "PrincipalAuthenticationResult",
     "PrincipalIdentity",
     "RejectingLocalPrincipalAuthenticator",
+    "RepositoryPrincipalActorMapper",
 ]

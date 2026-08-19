@@ -23,8 +23,13 @@ from app.cognition.local_resolution.models import (
 )
 from app.membership.contracts import MembershipRepositoryError
 from app.membership.models import ActorWorkspaceMembership, MembershipStatus
+from app.principal_authentication.contracts import (
+    PrincipalActorMappingConflict,
+    PrincipalActorMappingRepositoryError,
+)
+from app.principal_authentication.models import PrincipalIdentity
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class LocalStorageError(LocalRepositoryError):
@@ -69,10 +74,19 @@ class SQLiteLocalStorage:
         if current_version > SCHEMA_VERSION:
             raise UnsupportedSchemaVersion("Local database schema is unsupported.")
         if current_version == SCHEMA_VERSION:
-            self._verify_schema(connection, SCHEMA_VERSION, require_memberships=True)
+            self._verify_schema(
+                connection,
+                SCHEMA_VERSION,
+                require_memberships=True,
+                require_principal_mappings=True,
+            )
+            return
+        if current_version == 2:
+            self._migrate_v2_to_v3(connection)
             return
         if current_version == 1:
             self._migrate_v1_to_v2(connection)
+            self._migrate_v2_to_v3(connection)
             return
         if current_version != 0:
             raise LocalStorageError("Local database schema cannot be initialized.")
@@ -98,6 +112,7 @@ class SQLiteLocalStorage:
                 "PRIMARY KEY (workspace_id, record_id))"
             )
             self._create_membership_table(connection)
+            self._create_principal_actor_mapping_table(connection)
             connection.execute(
                 "INSERT INTO schema_metadata (schema_key, schema_version) "
                 "VALUES (?, ?)",
@@ -106,10 +121,36 @@ class SQLiteLocalStorage:
             connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
     def _migrate_v1_to_v2(self, connection: sqlite3.Connection) -> None:
-        self._verify_schema(connection, 1, require_memberships=False)
+        self._verify_schema(
+            connection,
+            1,
+            require_memberships=False,
+            require_principal_mappings=False,
+        )
         try:
             connection.execute("BEGIN IMMEDIATE")
             self._create_membership_table(connection)
+            connection.execute(
+                "UPDATE schema_metadata SET schema_version = ? "
+                "WHERE schema_key = ?",
+                (2, "local_storage"),
+            )
+            connection.execute("PRAGMA user_version = 2")
+            connection.commit()
+        except sqlite3.DatabaseError as error:
+            connection.rollback()
+            raise LocalStorageError("Local database migration failed.") from error
+
+    def _migrate_v2_to_v3(self, connection: sqlite3.Connection) -> None:
+        self._verify_schema(
+            connection,
+            2,
+            require_memberships=True,
+            require_principal_mappings=False,
+        )
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            self._create_principal_actor_mapping_table(connection)
             connection.execute(
                 "UPDATE schema_metadata SET schema_version = ? "
                 "WHERE schema_key = ?",
@@ -128,6 +169,16 @@ class SQLiteLocalStorage:
             "actor_id TEXT NOT NULL, workspace_id TEXT NOT NULL, "
             "status TEXT NOT NULL CHECK (status IN ('active', 'inactive')), "
             "PRIMARY KEY (actor_id, workspace_id))"
+        )
+
+    @staticmethod
+    def _create_principal_actor_mapping_table(
+        connection: sqlite3.Connection,
+    ) -> None:
+        connection.execute(
+            "CREATE TABLE principal_actor_mappings ("
+            "principal_id TEXT NOT NULL COLLATE BINARY PRIMARY KEY, "
+            "actor_id TEXT NOT NULL)"
         )
 
     def close(self) -> None:
@@ -445,6 +496,69 @@ class SQLiteLocalStorage:
         except ValueError as error:
             raise MembershipRepositoryError("Membership data is invalid.") from error
 
+    def read_principal_actor_mapping(
+        self,
+        principal: PrincipalIdentity,
+    ) -> ActorIdentity | None:
+        if type(principal) is not PrincipalIdentity:
+            raise ValueError("Principal identity is invalid.")
+        try:
+            connection = self._require_initialized_connection()
+            row = connection.execute(
+                "SELECT actor_id FROM principal_actor_mappings "
+                "WHERE principal_id = ?",
+                (principal.principal_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            try:
+                return ActorIdentity(row[0])
+            except ValueError as error:
+                raise PrincipalActorMappingRepositoryError(
+                    "Principal actor mapping data is invalid."
+                ) from error
+        except PrincipalActorMappingRepositoryError:
+            raise
+        except (sqlite3.DatabaseError, LocalStorageError) as error:
+            raise PrincipalActorMappingRepositoryError(
+                "Principal actor mapping read failed."
+            ) from error
+
+    def create_principal_actor_mapping(
+        self,
+        principal: PrincipalIdentity,
+        actor: ActorIdentity,
+    ) -> ActorIdentity:
+        if type(principal) is not PrincipalIdentity:
+            raise ValueError("Principal identity is invalid.")
+        if type(actor) is not ActorIdentity:
+            raise ValueError("Actor identity is invalid.")
+        try:
+            connection = self._require_initialized_connection()
+            connection.execute("BEGIN IMMEDIATE")
+            connection.execute(
+                "INSERT INTO principal_actor_mappings "
+                "(principal_id, actor_id) VALUES (?, ?)",
+                (principal.principal_id, actor.actor_id),
+            )
+            connection.commit()
+            return actor
+        except sqlite3.IntegrityError:
+            self._rollback_principal_actor_mapping_write()
+            raise PrincipalActorMappingConflict(
+                "Principal actor mapping already exists."
+            ) from None
+        except (sqlite3.DatabaseError, LocalStorageError) as error:
+            self._rollback_principal_actor_mapping_write()
+            raise PrincipalActorMappingRepositoryError(
+                "Principal actor mapping write failed."
+            ) from error
+
+    def _rollback_principal_actor_mapping_write(self) -> None:
+        connection = self._connection
+        if connection is not None and connection.in_transaction:
+            connection.rollback()
+
     def _require_connection(self) -> sqlite3.Connection:
         if self._connection is None:
             raise LocalStorageError("Local storage is not open.")
@@ -463,42 +577,123 @@ class SQLiteLocalStorage:
         expected_version: int,
         *,
         require_memberships: bool,
+        require_principal_mappings: bool,
     ) -> None:
+        membership_columns: tuple[tuple[object, ...], ...] = ()
+        membership_table_row: tuple[object, ...] | None = None
+        mapping_columns: tuple[tuple[object, ...], ...] = ()
+        mapping_table_row: tuple[object, ...] | None = None
+        mapping_has_unapproved_unique_index = False
+
         try:
             row = connection.execute(
                 "SELECT schema_version FROM schema_metadata WHERE schema_key = ?",
                 ("local_storage",),
             ).fetchone()
-            actual_columns: tuple[tuple[object, ...], ...] = ()
+
             if require_memberships:
                 columns = connection.execute(
                     "PRAGMA table_info(actor_workspace_memberships)"
                 ).fetchall()
-                table_row = connection.execute(
+                membership_table_row = connection.execute(
                     "SELECT sql FROM sqlite_master "
                     "WHERE type = 'table' AND name = ?",
                     ("actor_workspace_memberships",),
                 ).fetchone()
-                actual_columns = tuple(
+                membership_columns = tuple(
                     (column[1], column[2], column[3], column[5])
                     for column in columns
                 )
+
+            if require_principal_mappings:
+                columns = connection.execute(
+                    "PRAGMA table_info(principal_actor_mappings)"
+                ).fetchall()
+                mapping_table_row = connection.execute(
+                    "SELECT sql FROM sqlite_master "
+                    "WHERE type = 'table' AND name = ?",
+                    ("principal_actor_mappings",),
+                ).fetchone()
+                mapping_columns = tuple(
+                    (column[1], column[2], column[3], column[5])
+                    for column in columns
+                )
+
+                mapping_indexes = connection.execute(
+                    "PRAGMA index_list(principal_actor_mappings)"
+                ).fetchall()
+
+                for index in mapping_indexes:
+                    if not bool(index[2]):
+                        continue
+
+                    index_name = str(index[1]).replace(
+                        '"',
+                        '""',
+                    )
+                    index_origin = (
+                        str(index[3])
+                        if len(index) > 3
+                        else ""
+                    )
+
+                    index_columns = tuple(
+                        row[2]
+                        for row in connection.execute(
+                            f'PRAGMA index_info("{index_name}")'
+                        ).fetchall()
+                    )
+
+                    if (
+                        index_origin == "pk"
+                        and index_columns == ("principal_id",)
+                    ):
+                        continue
+
+                    mapping_has_unapproved_unique_index = True
+                    break
+
         except sqlite3.DatabaseError as error:
             raise LocalStorageError("Local database schema is invalid.") from error
+
         if row is None or int(row[0]) != expected_version:
             raise LocalStorageError("Local database schema is invalid.")
-        expected_columns = (
+
+        expected_membership_columns = (
             ("actor_id", "TEXT", 1, 1),
             ("workspace_id", "TEXT", 1, 2),
             ("status", "TEXT", 1, 0),
         )
-        if require_memberships and actual_columns != expected_columns:
+        if require_memberships and membership_columns != expected_membership_columns:
             raise LocalStorageError("Local database schema is invalid.")
         if require_memberships and (
-            table_row is None
-            or "status IN ('active', 'inactive')" not in str(table_row[0])
+            membership_table_row is None
+            or "status IN ('active', 'inactive')"
+            not in str(membership_table_row[0])
         ):
             raise LocalStorageError("Local database schema is invalid.")
+
+        expected_mapping_columns = (
+            ("principal_id", "TEXT", 1, 1),
+            ("actor_id", "TEXT", 1, 0),
+        )
+        if (
+            require_principal_mappings
+            and mapping_columns != expected_mapping_columns
+        ):
+            raise LocalStorageError("Local database schema is invalid.")
+        if require_principal_mappings:
+            if mapping_table_row is None:
+                raise LocalStorageError("Local database schema is invalid.")
+            mapping_sql = " ".join(str(mapping_table_row[0]).split()).lower()
+            if (
+                "principal_id text not null collate binary primary key"
+                not in mapping_sql
+                or "actor_id text not null" not in mapping_sql
+                or "unique (actor_id)" in mapping_sql
+                or mapping_has_unapproved_unique_index
+            ):
+                raise LocalStorageError("Local database schema is invalid.")
 
 
 class SQLiteKnowledgeRecordRepository:
@@ -520,3 +715,20 @@ class SQLiteKnowledgeRecordRepository:
         kind: KnowledgeKind | None = None,
     ) -> tuple[KnowledgeRecord, ...]:
         return self._storage.find_knowledge_by_key(workspace, key, kind)
+
+
+class SQLitePrincipalActorMappingRepository:
+    """Narrow principal-to-actor view over explicitly owned SQLite storage."""
+
+    def __init__(self, storage: SQLiteLocalStorage) -> None:
+        self._storage = storage
+
+    def get(self, principal: PrincipalIdentity) -> ActorIdentity | None:
+        return self._storage.read_principal_actor_mapping(principal)
+
+    def create(
+        self,
+        principal: PrincipalIdentity,
+        actor: ActorIdentity,
+    ) -> ActorIdentity:
+        return self._storage.create_principal_actor_mapping(principal, actor)

@@ -125,7 +125,9 @@ from app.principal_authentication import (
     ConfiguredPrincipalProofBinding,
     LocalPrincipalAuthenticator,
     PrincipalActorMapper,
+    PrincipalActorMappingRepository,
     RejectingLocalPrincipalAuthenticator,
+    RepositoryPrincipalActorMapper,
 )
 
 
@@ -152,6 +154,8 @@ class Container:
         membership_repository: MembershipRepository | None = None,
         principal_proof_bindings: tuple[ConfiguredPrincipalProofBinding, ...] = (),
         principal_actor_mappings: tuple[ConfiguredPrincipalActorMapping, ...] = (),
+        principal_actor_mapping_repository: PrincipalActorMappingRepository
+        | None = None,
         local_principal_authenticator: LocalPrincipalAuthenticator | None = None,
         principal_actor_mapper: PrincipalActorMapper | None = None,
     ) -> None:
@@ -186,14 +190,24 @@ class Container:
             raise ValueError("Configured principal actor mapping is invalid.")
         if local_principal_authenticator is not None and principal_proof_bindings:
             raise ValueError("Principal authenticator ownership is ambiguous.")
-        if principal_actor_mapper is not None and principal_actor_mappings:
+        if (
+            principal_actor_mapping_repository is not None
+            and principal_actor_mappings
+        ):
+            raise ValueError("Principal mapper ownership is ambiguous.")
+        if principal_actor_mapper is not None and (
+            principal_actor_mappings
+            or principal_actor_mapping_repository is not None
+        ):
             raise ValueError("Principal mapper ownership is ambiguous.")
         operational_authentication = (
             bool(principal_proof_bindings)
             or local_principal_authenticator is not None
         )
         mapper_configured = (
-            bool(principal_actor_mappings) or principal_actor_mapper is not None
+            bool(principal_actor_mappings)
+            or principal_actor_mapping_repository is not None
+            or principal_actor_mapper is not None
         )
         if operational_authentication and not mapper_configured:
             raise ValueError("Operational authentication requires a principal mapper.")
@@ -215,6 +229,9 @@ class Container:
         self._injected_membership_repository = membership_repository
         self._principal_proof_bindings = tuple(principal_proof_bindings)
         self._principal_actor_mappings = tuple(principal_actor_mappings)
+        self._injected_principal_actor_mapping_repository = (
+            principal_actor_mapping_repository
+        )
         self._injected_local_principal_authenticator = local_principal_authenticator
         self._injected_principal_actor_mapper = principal_actor_mapper
         self._build_memory()
@@ -485,11 +502,16 @@ class Container:
                 else RejectingLocalPrincipalAuthenticator()
             )
         )
-        self.principal_actor_mapper = (
-            self._injected_principal_actor_mapper
-            if self._injected_principal_actor_mapper is not None
-            else ConfiguredPrincipalActorMapper(self._principal_actor_mappings)
-        )
+        if self._injected_principal_actor_mapper is not None:
+            self.principal_actor_mapper = self._injected_principal_actor_mapper
+        elif self._injected_principal_actor_mapping_repository is not None:
+            self.principal_actor_mapper = RepositoryPrincipalActorMapper(
+                self._injected_principal_actor_mapping_repository
+            )
+        else:
+            self.principal_actor_mapper = ConfiguredPrincipalActorMapper(
+                self._principal_actor_mappings
+            )
         self.authenticated_local_command_routing_service = (
             AuthenticatedLocalCommandRoutingService(
                 self.local_principal_authenticator,
