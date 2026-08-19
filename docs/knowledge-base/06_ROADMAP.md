@@ -1,12 +1,13 @@
 # Roadmap
 
-## Sprint 29 candidate
+## Sprint 29 released / complete
 
-The current unreleased candidate establishes a bounded local-principal
-authentication boundary and authenticated internal routing. Public transport,
-production credential technology, secure durability, sessions/devices, and
-remote identity integration remain future work. This candidate is not yet
-released, closed, tagged, or backed up; no future sprint contract is implied.
+Local Principal Authentication Foundation v1 is released through PR #34 at
+`9590beca0ddfce544f774ffc1327d01f8044a420`, tag `sprint-29-complete`.
+Public transport, production credential technology, secure durability,
+sessions/devices, and remote identity integration remain future work.
+Release-truth metadata synchronization remains in progress on its governed
+documentation branch; no metadata commit, PR, or merge is claimed here.
 
 ## Sprint 28 implementation released
 
@@ -16,11 +17,6 @@ commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`. The independently verified
 annotated tag is `sprint-28-complete` (object
 `986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`), with recoverable backup
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`.
-
-Authentication, durable permissions, roles/invitations, audit history, and
-public transport remain deferred. Sprint 29 is now authorized and scoped as
-Local Principal Authentication Foundation v1, and its unreleased implementation
-candidate exists; release governance remains pending.
 
 ## Sprint 27 fully released
 
@@ -133,7 +129,7 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 28 is the latest immutable implementation release at
+Sprint 28 is the prior immutable implementation release at
 `be22ffddda6d6961497c338caadf4c85e0fcb3ed`, tag `sprint-28-complete`. Sprint
 27 remains the prior completed tagged capability release at
 `1501183b4c40faaba278f8d61f875d65954223a7`, tag `sprint-27-complete`. The
@@ -188,13 +184,8 @@ failure, and a comparative local demo. It does not verify truth, semantically
 fact-check claims, retry, repair JSON, fall back to free text, persist memory,
 or change the HTTP surface.
 
-## Sprint 28 release closure in progress
+## Next planning boundary
 
-The implementation is reviewed, merged, validated, tagged, and backed up.
-Release-truth metadata synchronization and later branch cleanup remain governed
-closure work. The future sequence
-remains trusted context → durable membership → future local authentication and
-principal mapping → future durable permissions → future trusted/public
-transport. Sprint 29's current feature scope and contract are authorized and
-frozen for the active implementation candidate. Release governance remains
-incomplete: it is not merged, tagged, backed up, released, or closed.
+Sprint 29 is reviewed, merged, validated, tagged, and authoritatively backed up.
+The next sprint is only a planning and contract-definition boundary; no Sprint
+30 blocks, acceptance criteria, branch, base, or date are established here.

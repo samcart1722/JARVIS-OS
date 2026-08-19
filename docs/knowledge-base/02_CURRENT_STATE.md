@@ -1,5 +1,25 @@
 # Current State
 
+## Sprint 29 released implementation state
+
+Local Principal Authentication Foundation v1 is released through PR #34 at
+`9590beca0ddfce544f774ffc1327d01f8044a420`, tag `sprint-29-complete` (object
+`c3a204555cc512ae9404039aeb8be8d6aa421550`). It provides local authenticated
+routing while keeping Sprint 28 membership, Sprint 27 non-authenticated trusted
+context, and `PermissionPolicy` action authorization separate. Configured
+authentication is process-local/nonpersistent, not production authentication.
+Authentication is neither membership nor action authorization;
+`PrincipalIdentity` is distinct from `ActorIdentity`; trusted binding is
+neither authentication nor durable membership; workspace selection is not
+membership admission; membership is workspace admission only; and
+`PermissionPolicy` remains action authorization. Public authentication APIs,
+JWT/OAuth, sessions, production password/PIN/device/biometric authentication,
+durable authentication or credential state, and production account lifecycle
+remain deferred.
+Validation passed 1,035 repository tests and 8/8 authenticated plus 7/7 trusted
+demos. The authoritative backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260818_141402`.
+
 ## Sprint 28 released implementation state
 
 Sprint 28 Durable Actor–Workspace Membership Foundation v1 was independently
@@ -15,13 +35,13 @@ The independently recoverable backup is
 Validation passed 28 SQLite, 41 membership, 29 Container, 130 trusted-context,
 156 focused Sprint 28, 78 architecture, and 915 repository tests; Ruff and
 diff checks were clean. Both demos passed with
-model/provider/readiness/network calls of `0 / 0 / 0 / 0`. Release-truth
-synchronization is occurring in a separately reviewed metadata tree; final
-metadata merge and branch cleanup have not occurred. Sprint 29 is now authorized
-and scoped as Local Principal Authentication Foundation v1. Its Blocks A-D
-implementation candidate exists, but final staging, feature commit, push,
-merge, tag, backup, release-truth synchronization, release, and closure remain
-pending.
+model/provider/readiness/network calls of `0 / 0 / 0 / 0`. Sprint 29 Local
+Principal Authentication Foundation v1 is released and implementation-complete
+through PR #34 at `9590beca0ddfce544f774ffc1327d01f8044a420`. Its immutable
+tag `sprint-29-complete`, object
+`c3a204555cc512ae9404039aeb8be8d6aa421550`, peels to that released commit; its
+verified authoritative backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260818_141402`.
 
 ## Sprint 27 fully released state
 
@@ -321,9 +341,9 @@ verification, and recoverable backup verification are complete. This candidate
 tree synchronizes repository release truth; it still requires independent
 documentation review and a later governed metadata commit, push, PR, and
 merge. Feature-branch cleanup and final release closure remain pending.
-# Sprint 29 feature candidate
+# Sprint 29 released feature
 
-The working candidate implements a local principal-authentication foundation
+The released implementation provides a local principal-authentication foundation
 and authenticated internal routing. Its configured deterministic authenticator
 is non-production, process-local, and nonpersistent. Principal-to-actor mapping
 is explicit; workspace selection, membership admission, and permission
@@ -332,4 +352,4 @@ non-authenticated.
 
 Public transport authentication, production credential technology, and
 durable credential/principal/mapping storage are not integrated. Sprint 29 is
-not yet released, tagged, backed up, or closed.
+released, tagged, authoritatively backed up, and implementation-complete.

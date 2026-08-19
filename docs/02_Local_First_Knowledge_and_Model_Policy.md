@@ -28,8 +28,8 @@ network, ranking, inference, or external access. The functional implementation
 merged at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical
 release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
 fully released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
-released trusted request context, and Sprint 28 is now the latest immutable
-implementation release at `sprint-28-complete`.
+released trusted request context, Sprint 28 released durable membership, and
+Sprint 29 is now the latest immutable release at `sprint-29-complete`.
 
 ## Policy
 
@@ -103,3 +103,11 @@ This architecture is released at `sprint-28-complete`, peeled commit
 `be22ffddda6d6961497c338caadf4c85e0fcb3ed`. Membership is not authentication
 or action authorization; identities are not proof, trusted binding is not
 durable membership, and `PermissionPolicy` remains downstream.
+
+## Sprint 29 local authentication foundation
+
+Released tag `sprint-29-complete` adds deterministic local, process-local,
+nonpersistent proof authentication and explicit principal-to-actor mapping.
+It precedes workspace selection and membership and leaves `PermissionPolicy`
+as action authorization. This development/test/demo foundation makes no
+model/provider/network calls and chooses no production credential technology.

@@ -62,7 +62,7 @@ governance without weakening the released boundaries.
 - Default Container is in-memory/no-I/O; durability is explicit injection.
 - Schema v1→v2 migration is additive and explicitly transactional.
 - Public transport and authentication remain deferred.
-# Sprint 29 candidate decisions and guardrails
+# Sprint 29 released decisions and guardrails
 
 - Authentication proof is opaque.
 - `PrincipalIdentity` and `ActorIdentity` are distinct; mapping is explicit.
@@ -71,3 +71,11 @@ governance without weakening the released boundaries.
 - A trusted binding selector is not authentication.
 - No public transport or production credential technology is included.
 - No SQLite authentication persistence is included.
+- Configured authentication is local, process-local, nonpersistent, and
+  development/test/demo oriented; production credentials remain deferred.
+- Authentication is separate from membership and action authorization;
+  workspace selection is not admission, membership is workspace admission
+  only, and `PermissionPolicy` is action authorization.
+- On the verified Windows `core.autocrlf=true` configuration, `git archive`
+  converted LF blobs to CRLF. Sprint 29 byte-identical backup used
+  `RAW_GIT_BLOB_BYTES`; this guardrail is limited to the verified evidence.
