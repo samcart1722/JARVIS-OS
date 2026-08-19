@@ -121,10 +121,13 @@ the tag.
 
 ## 12. Current deliberate deferrals and technical debt
 
-Authentication and principal proof, durable action-permission storage,
-roles/invitations, transition/audit history, public trusted/membership
-transport, encryption/retention/synchronization policy, and broader semantic
-retrieval remain deferred. These are not implied Sprint 29 commitments.
+Production/public/durable authentication, production credential/proof
+technology, durable action-permission storage, roles/invitations,
+transition/audit history, public trusted/membership transport,
+encryption/retention/synchronization policy, and broader semantic retrieval
+remain deferred. Sprint 29 released the local, deterministic, process-local,
+nonpersistent principal-authentication foundation; these broader capabilities
+are not implied Sprint 30 commitments.
 
 ## 13. Governance workflow
 
@@ -141,7 +144,8 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Do not begin Sprint 29 without explicit authorization.
+6. Do not begin Sprint 30 implementation without explicit authorization; Sprint 30
+   remains an unfrozen planning and contract-definition boundary.
 
 ## 15. Repository checkpoint synchronization policy
 
@@ -155,9 +159,9 @@ as a conversational scratchpad or mirror every external-ledger update.
 - Merged and post-merge validated
 - Immutable release tag independently verified
 - Release backup independently recovered and verified
-- Release-truth documentation synchronized in this candidate tree
-- Metadata change still requires independent review and later governed
-  commit/push/PR/merge
+- Release-truth metadata governance completed through metadata commit
+  `854e767d86443db860eb8e23b75a736d1266b394`, branch push, PR `#35`, and
+  ordinary merge `9a441706280b22d6471b0ecff5b47ff78617a467` into `master`
 - Feature-branch cleanup not performed
 - Final release closure not yet declared
 - Sprint 29 Local Principal Authentication Foundation v1 is released and complete

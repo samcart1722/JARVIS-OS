@@ -50,7 +50,7 @@ through PR #30; and annotated tag `sprint-27-complete`, object
 `1501183b4c40faaba278f8d61f875d65954223a7`. The verified release backup is
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260807_160935`.
 
-Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the latest
+Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the prior
 immutable completed tagged implementation release. Its annotated tag
 `sprint-28-complete`, object
 `986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`, points to implementation release
