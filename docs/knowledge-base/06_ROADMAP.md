@@ -187,10 +187,7 @@ or change the HTTP surface.
 
 ## Sprint 30 governance closure boundary
 
-Sprint 30 implementation is merged, post-merge validated, immutably tagged,
-and authoritatively backed up. The remaining Sprint 30 work is governance-only:
-release-truth review and metadata integration, mandatory final validation,
-branch cleanup, final review, and formal closure.
+Sprint 30 implementation is merged, post-merge validated, immutably tagged, and authoritatively backed up. Release-truth metadata integration completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation. That validation identified this bounded closure-truth correction as required. Remaining Sprint 30 governance is limited to review and integration of this correction, exact branch cleanup, final review, and formal closure.
 
 ## Sprint 30 implementation release complete; governance closure in progress
 
@@ -248,9 +245,6 @@ membership semantic changes, `PermissionPolicy` changes, `CognitiveEngine`
 changes, trusted-route changes, remote identity providers, or cloud
 synchronization.
 
-Release-truth metadata synchronization is now the remaining governance cycle:
-review, exact staging/fingerprint, metadata commit and review, push and remote
-review, metadata PR and pre-merge review, ordinary merge, mandatory final
-post-merge validation, exact branch cleanup, final review, and formal closure.
+Release-truth metadata synchronization completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation on canonical `master`. That validation required this bounded closure-truth correction mini-cycle. Remaining work is review and integration of this correction, exact branch cleanup, final review, and formal closure.
 
 Manual same-assistant reviews are not represented as independent review.

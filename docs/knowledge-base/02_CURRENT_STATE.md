@@ -420,10 +420,7 @@ explicitly excluded from the governed Sprint 30 lifecycle. Its tag object
 remains `d5794405f4a0c70dc750e7e4438ca7c10a198b04` and it peels to `a37dc884bd7b9962a5842037b52f2bf202f16b34`. It was not moved,
 deleted, or reused.
 
-The implementation release, immutable tag, and authoritative backup are
-complete. Release-truth metadata synchronization and its own governed
-review/commit/PR/merge/final-validation cycle remain in progress; Sprint 30 is
-not formally governance-closed until that cycle and branch cleanup complete.
+The implementation release, immutable tag, authoritative backup, release-truth metadata integration, and mandatory final post-merge validation are complete. Metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a` merged through PR #38 at ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`. Final validation on canonical `master` passed 1,059 repository tests, Ruff, and the governed Sprint 27, 28, 29, and 30 operational regressions. The post-merge release-truth scan correctly required this bounded closure-truth correction mini-cycle. Sprint 30 is not formally governance-closed until this correction is reviewed and integrated, exact branch cleanup is complete, and the final governance review and formal closure are recorded.
 
 Manual same-assistant governance reviews performed during this release cycle
 are not represented as independent review.
