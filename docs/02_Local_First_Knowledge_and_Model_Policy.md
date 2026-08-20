@@ -3,9 +3,9 @@
 Version: 1.0
 Status: Normative
 
-## Sprint 30 durable principal-to-actor mapping candidate
+## Sprint 30 durable principal-to-actor mapping release
 
-The Sprint 30 candidate implementation adds durable local persistence only for
+The governed Sprint 30 release adds durable local persistence only for
 the exact `PrincipalIdentity -> ActorIdentity` association. Authentication
 still occurs first; workspace selection, membership admission, and downstream
 `PermissionPolicy` remain later and separate boundaries.
@@ -28,8 +28,9 @@ with model/provider/readiness/network counts of zero. Public HTTP,
 `CognitiveEngine`, the trusted route, membership semantics, and action
 authorization remain unchanged.
 
-This is an implementation candidate on the governed Sprint 30 feature branch;
-it is not yet a merged, tagged, or backed-up Sprint 30 release.
+The governed implementation merged through PR #37 at `6181f549c12195c69708ee2cfa53399a46fa4b29` and is
+released at `governed-sprint-30-complete`. Its authoritative recoverable backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314`.
 
 ## Sprint 27 trusted request-context boundary
 
@@ -57,7 +58,7 @@ merged at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical
 release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
 fully released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
 released trusted request context, Sprint 28 released durable membership, and
-Sprint 29 is now the latest immutable release at `sprint-29-complete`.
+Sprint 30 is now the latest governed implementation release at `governed-sprint-30-complete`.
 
 ## Policy
 

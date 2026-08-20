@@ -80,11 +80,10 @@ governance without weakening the released boundaries.
   converted LF blobs to CRLF. Sprint 29 byte-identical backup used
   `RAW_GIT_BLOB_BYTES`; this guardrail is limited to the verified evidence.
 
+## Sprint 30 released decisions and guardrails
 
-## Sprint 30 candidate decisions and guardrails
-
-The following decisions are implemented in the current governed Sprint 30
-candidate but are not yet release-truth claims:
+These decisions are implemented in the governed Sprint 30 release at
+`6181f549c12195c69708ee2cfa53399a46fa4b29`, immutable annotated tag `governed-sprint-30-complete` (tag object `cd410e5e0ddad708cd3b1a8b91b0fe4dc38e5f35`).
 
 - Durable persistence is added only for
   `PrincipalIdentity -> ActorIdentity`.
@@ -96,8 +95,8 @@ candidate but are not yet release-truth claims:
 - Multiple principals may map to the same actor.
 - Principal lookup is exact and case-sensitive.
 - Missing mapping fails closed.
-- Repository/storage failure fails closed with a distinct mapping-resolution
-  failure.
+- Repository/storage failure fails closed with the distinct
+  `principal_mapping_resolution_failed` outcome.
 - Durable mapping storage never authenticates a principal.
 - Durable mapping storage never proves workspace membership.
 - Durable mapping storage never grants an action permission.
@@ -114,9 +113,17 @@ candidate but are not yet release-truth claims:
   downstream `PermissionPolicy` remain unchanged.
 - The deterministic durable demo is operational proof, not a public product
   authentication surface.
-- The historical legacy tag `sprint-30` is preserved as historical evidence
-  only and must not be mutated or reused by the current governed Sprint 30.
+- SQLite schema v3 permits only the primary-key UNIQUE constraint on exact
+  `principal_id`; additional UNIQUE indexes, including expression indexes, are
+  rejected by schema verification.
+- The authoritative release backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314` and was recovered through
+  both a full Git bundle and a byte-identical raw-Git-blob source ZIP.
+- The historical legacy tag `sprint-30` remains historical evidence only. Its
+  object `d5794405f4a0c70dc750e7e4438ca7c10a198b04` still peels to `a37dc884bd7b9962a5842037b52f2bf202f16b34` and must never be
+  mutated or reused for the governed release.
 
-Release naming, merge SHA, immutable governed tag, backup evidence, and final
-release-truth synchronization remain future governance steps and must not be
-invented in this candidate tree.
+The release passed 1,059 post-merge repository tests plus Ruff and the governed
+deterministic operational/SQLite validations.
+
+Manual same-assistant governance reviews in this cycle are explicitly distinct
+from independent review.

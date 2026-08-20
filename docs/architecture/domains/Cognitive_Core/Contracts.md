@@ -419,7 +419,7 @@ authentication
 Every unsuccessful stage short-circuits all later stages. Authentication,
 mapping, membership admission, and action authorization are distinct contracts.
 
-## Sprint 30 durable principal-actor mapping candidate contracts
+## Sprint 30 durable principal-actor mapping released contracts
 
 The Core-facing repository contract is:
 
@@ -478,6 +478,6 @@ Repository injection causes `Container` to construct
 invalid. Supplying none preserves the existing empty configured mapper and
 performs no storage I/O.
 
-This remains an implementation-candidate contract until governed Sprint 30
-merge, release tagging, backup verification, and release-truth synchronization
-are complete.
+This contract is released in governed Sprint 30 at
+`governed-sprint-30-complete`. Merge, immutable release tagging, and authoritative backup
+verification are complete; release-truth governance closure remains in progress.
