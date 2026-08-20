@@ -341,10 +341,7 @@ consumer in the public cognitive route. Other historical modules under
 
 Implementation, review, merge, post-merge validation, immutable tagging, tag
 verification, and recoverable backup verification are complete.
-Sprint 29 release-truth metadata governance completed through metadata commit
-`854e767d86443db860eb8e23b75a736d1266b394`, branch push, PR #35, and ordinary
-merge `9a441706280b22d6471b0ecff5b47ff78617a467` into `master`.
-Feature-branch cleanup and final release closure remain pending.
+Sprint 29 release-truth metadata governance completed through metadata commit `854e767d86443db860eb8e23b75a736d1266b394`, branch push, PR #35, and ordinary merge `9a441706280b22d6471b0ecff5b47ff78617a467` into `master`. Final Sprint 29 release closure and branch cleanup subsequently completed before the governed Sprint 30 base.
 # Sprint 29 released feature
 
 The released implementation provides a local principal-authentication foundation
@@ -354,60 +351,79 @@ is explicit; workspace selection, membership admission, and permission
 authorization remain separate stages. The trusted route remains separate and
 non-authenticated.
 
-Public transport authentication, production credential technology, and
-durable credential/principal/mapping storage are not integrated. Sprint 29 is
-released, tagged, authoritatively backed up, and implementation-complete.
+Public transport authentication, production credential technology, and durable credential or principal-account storage remain unintegrated. Sprint 29 is released, tagged, authoritatively backed up, and implementation-complete. Sprint 30 subsequently adds durable principal-to-actor mapping only.
 
+## Sprint 30 released implementation state
 
-## Sprint 30 candidate implementation state
+**Sprint 30 — Durable Principal–Actor Mapping Foundation v1** is released.
 
-Sprint 30 — Durable Principal–Actor Mapping Foundation v1 is currently an
-implementation candidate on branch
-`feat/sprint-30-durable-principal-actor-mapping-foundation`, based on
-`267691e4b9e8fac4efb22f4223121a355b0cc6e5`.
+The governed feature commit is `4516dfb13d1fc27eecdb3ae0090fb1f786130c4c`. It merged through PR #37 using
+ordinary merge commit `6181f549c12195c69708ee2cfa53399a46fa4b29` with release tree `ab1d67907fddcce178559514f4efef533144e067`.
 
-The candidate adds durable persistence only for the exact
-`PrincipalIdentity -> ActorIdentity` association. Authentication remains a
-separate preceding boundary; workspace selection, actor/workspace membership,
-and downstream `PermissionPolicy` action authorization remain separate later
-boundaries.
+The immutable governed annotated release tag is `governed-sprint-30-complete`. Its tag object is
+`cd410e5e0ddad708cd3b1a8b91b0fe4dc38e5f35` and it peels to `6181f549c12195c69708ee2cfa53399a46fa4b29`.
 
-The Core-facing `PrincipalActorMappingRepository` exposes only exact
-case-sensitive `get` and append-only `create`. One principal maps to at most one
-actor; different principals may map to the same actor. Missing mapping fails
-closed as `principal_mapping_failed`. Repository failure or invalid durable
-actor data fails closed as `principal_mapping_resolution_failed`.
+Sprint 30 adds durable persistence only for the exact
+`PrincipalIdentity -> ActorIdentity` association while preserving the
+separation between authentication, principal mapping, workspace selection,
+membership admission, and downstream action authorization.
 
-SQLite schema v3 adds only:
+The durable mapping contract remains:
 
-```text
-principal_actor_mappings(
-    principal_id TEXT NOT NULL COLLATE BINARY PRIMARY KEY,
-    actor_id TEXT NOT NULL
-)
-```
+- one principal maps to at most one actor;
+- multiple principals may map to the same actor;
+- principal matching is exact and case-sensitive;
+- missing mappings fail closed;
+- repository/storage failures fail closed through the distinct
+  `principal_mapping_resolution_failed` path;
+- mapping creation does not overwrite, update, delete, or upsert an existing
+  principal mapping;
+- mapping persistence stores no credential, proof, verifier, secret, token,
+  workspace, role, permission, membership state, or session;
+- default `Container` composition remains no-I/O;
+- SQLite durability requires explicit repository injection;
+- public HTTP, `CognitiveEngine`, trusted routing, membership semantics, and
+  `PermissionPolicy` remain unchanged.
 
-No authentication proof, credential, verifier, secret, token, workspace,
-membership state, role, permission, session, status, timestamp, or audit
-history is persisted by this mapping table.
+SQLite local storage is schema v3 and includes
+`principal_actor_mappings(principal_id TEXT NOT NULL COLLATE BINARY PRIMARY KEY,
+actor_id TEXT NOT NULL)` with no unique actor constraint.
 
-Default `Container` composition remains no-I/O. Durable mapping exists only
-through explicit repository injection. Public HTTP, `CognitiveEngine`, the
-Sprint 27 trusted route, membership semantics, and action authorization remain
-unchanged.
+Post-merge validation on canonical `master` passed 1,059 repository tests,
+Ruff, the Sprint 27 trusted-context demo, Sprint 29 local-principal
+authentication demo, Sprint 28 durable-membership seed/verify proof, Sprint 30
+durable principal/actor seed/verify proof, and direct SQLite-v3 contract
+verification. Model/provider/readiness/network calls remained zero in the
+required deterministic proofs.
 
-The deterministic two-process demo has proven seed/close/reopen/verify behavior
-against caller-owned SQLite outside the repository. Primary and secondary
-principals recover the same actor and route locally; an exact case-variant
-principal remains unmapped and fails before membership or routing. Model,
-provider, readiness, network, and cognitive-call counts remain zero where
-required.
+The authoritative recoverable backup is:
 
-This is not yet a governed Sprint 30 release. No current governed Sprint 30
-release tag, merge commit, release backup, or release-truth metadata is claimed
-here.
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314`
 
-A historical legacy tag named `sprint-30` already exists from an earlier,
-unrelated numbering lineage. It must not be moved, deleted, reused, or treated
-as evidence of this governed Sprint 30. Current governed release naming must
-use a distinct immutable tag after merge.
+Verified backup hashes:
+
+- Git bundle SHA-256:
+  `d70c758f760facf878e178c6adbd76a33246fa745c5d014512e9c320d8563514`
+- raw-Git-blob source ZIP SHA-256:
+  `1ab03cfa263822626e6c39e1385353cecdbb8a2e620ff2b70bf2c79949f07a22`
+- source-blob manifest SHA-256:
+  `3acb73b2c57fb9aabfae3dc9cfa1115040acdbf3b286776067a907c354f93a5a`
+- backup manifest SHA-256:
+  `52667d244182f0448270d76a145837baee8989cdbfc1b7ec605801aad68033a9`
+
+Bundle recovery reproduced the exact released master/tree, governed tag object
+and peel, and historical legacy tag. The source ZIP reproduced all 526 tracked
+Git blobs byte-for-byte with matching per-file SHA-256 values.
+
+The unrelated historical annotated tag `sprint-30` remains preserved and is
+explicitly excluded from the governed Sprint 30 lifecycle. Its tag object
+remains `d5794405f4a0c70dc750e7e4438ca7c10a198b04` and it peels to `a37dc884bd7b9962a5842037b52f2bf202f16b34`. It was not moved,
+deleted, or reused.
+
+The implementation release, immutable tag, and authoritative backup are
+complete. Release-truth metadata synchronization and its own governed
+review/commit/PR/merge/final-validation cycle remain in progress; Sprint 30 is
+not formally governance-closed until that cycle and branch cleanup complete.
+
+Manual same-assistant governance reviews performed during this release cycle
+are not represented as independent review.

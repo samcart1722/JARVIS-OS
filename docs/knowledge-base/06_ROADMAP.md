@@ -130,10 +130,10 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 28 is the prior immutable implementation release at
-`be22ffddda6d6961497c338caadf4c85e0fcb3ed`, tag `sprint-28-complete`. Sprint
-27 remains the prior completed tagged capability release at
-`1501183b4c40faaba278f8d61f875d65954223a7`, tag `sprint-27-complete`. The
+Sprint 30 is the latest governed implementation release at
+`6181f549c12195c69708ee2cfa53399a46fa4b29`, tag `governed-sprint-30-complete`. Sprint 29 remains the immediately
+preceding governed principal-authentication release at
+`9590beca0ddfce544f774ffc1327d01f8044a420`, tag `sprint-29-complete`. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
@@ -185,67 +185,72 @@ failure, and a comparative local demo. It does not verify truth, semantically
 fact-check claims, retry, repair JSON, fall back to free text, persist memory,
 or change the HTTP surface.
 
-## Next planning boundary
+## Sprint 30 governance closure boundary
 
-Sprint 29 is reviewed, merged, validated, tagged, and authoritatively backed up.
-The next sprint is only a planning and contract-definition boundary; no Sprint
-30 blocks, acceptance criteria, branch, base, or date are established here.
+Sprint 30 implementation is merged, post-merge validated, immutably tagged,
+and authoritatively backed up. The remaining Sprint 30 work is governance-only:
+release-truth review and metadata integration, mandatory final validation,
+branch cleanup, final review, and formal closure.
 
+## Sprint 30 implementation release complete; governance closure in progress
 
-## Sprint 30 governed candidate — active implementation state
+**Sprint 30 — Durable Principal–Actor Mapping Foundation v1** has completed its implementation release.
 
-This section supersedes the earlier Sprint 30 planning-boundary statement above
-for the current governed branch only.
+Governed feature commit:
 
-Sprint 30 is now frozen as:
+`4516dfb13d1fc27eecdb3ae0090fb1f786130c4c`
 
-**Sprint 30 — Durable Principal–Actor Mapping Foundation v1**
+PR #37 ordinary merge:
 
-Governed base:
+`6181f549c12195c69708ee2cfa53399a46fa4b29`
 
-`267691e4b9e8fac4efb22f4223121a355b0cc6e5`
+Release tree:
 
-Governed feature branch:
+`ab1d67907fddcce178559514f4efef533144e067`
 
-`feat/sprint-30-durable-principal-actor-mapping-foundation`
+Immutable governed release tag:
 
-Implemented candidate scope:
+`governed-sprint-30-complete`
 
-- Core `PrincipalActorMappingRepository` contract;
-- append-only exact principal/actor mapping semantics;
-- `RepositoryPrincipalActorMapper`;
-- distinct fail-closed repository-resolution failure;
-- SQLite schema v3;
-- additive v2 -> v3 migration;
-- `SQLitePrincipalActorMappingRepository`;
-- explicit Container repository injection;
-- default no-I/O composition;
-- architecture enforcement;
-- deterministic two-process durable mapping demo;
-- candidate documentation synchronization.
+Annotated tag object:
 
-Still explicitly out of scope:
+`cd410e5e0ddad708cd3b1a8b91b0fe4dc38e5f35`
 
-- credential/proof/verifier/secret/token persistence;
-- public authentication transport;
-- JWT/OAuth/session/device/account lifecycle;
-- mapping update/delete/audit history;
-- roles/RBAC/durable permissions;
-- membership semantic changes;
-- `PermissionPolicy` changes;
-- `CognitiveEngine` changes;
-- trusted-route changes;
-- remote identity providers or cloud synchronization.
+The release implements the bounded durable principal-to-actor mapping
+foundation: core repository contract, repository-backed mapper, fail-closed
+mapping-resolution failure, SQLite schema v3 and additive migration, explicit
+Container repository injection with default no-I/O behavior, architecture
+enforcement, and deterministic two-process durable mapping proof.
 
-The current candidate is not yet released. Remaining governed work includes
-full repository validation, review, staged/index verification, feature commit,
-push, remote review, PR, merge, post-merge validation, immutable governed
-release tagging, backup/recovery verification, release-truth metadata
-synchronization, metadata review/PR/merge, final validation, branch cleanup,
-and formal closure.
+Post-merge validation passed 1,059 repository tests, Ruff, the Sprint
+27/28/29/30 operational regressions, and direct SQLite-v3 contract
+verification.
 
-A historical unrelated annotated tag named `sprint-30` predates the current
-governed sprint-numbering sequence. It is preserved and explicitly excluded
-from current Sprint 30 lifecycle inference. The current governed release must
-use a distinct tag name; no such current governed release tag is claimed in
-this candidate document.
+Authoritative recoverable backup:
+
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314`
+
+Backup SHA-256 evidence:
+
+- bundle: `d70c758f760facf878e178c6adbd76a33246fa745c5d014512e9c320d8563514`
+- raw-Git-blob source ZIP: `1ab03cfa263822626e6c39e1385353cecdbb8a2e620ff2b70bf2c79949f07a22`
+- source-blob manifest: `3acb73b2c57fb9aabfae3dc9cfa1115040acdbf3b286776067a907c354f93a5a`
+- backup manifest: `52667d244182f0448270d76a145837baee8989cdbfc1b7ec605801aad68033a9`
+
+The historical unrelated tag `sprint-30` remains immutable at tag object
+`d5794405f4a0c70dc750e7e4438ca7c10a198b04`, peeling to `a37dc884bd7b9962a5842037b52f2bf202f16b34`, and is not part of the governed
+Sprint 30 lifecycle.
+
+Sprint 30 does not add credential/proof/verifier/secret/token persistence,
+production authentication transport, JWT/OAuth/session/device lifecycle,
+mapping update/delete/audit history, roles/RBAC, durable action permissions,
+membership semantic changes, `PermissionPolicy` changes, `CognitiveEngine`
+changes, trusted-route changes, remote identity providers, or cloud
+synchronization.
+
+Release-truth metadata synchronization is now the remaining governance cycle:
+review, exact staging/fingerprint, metadata commit and review, push and remote
+review, metadata PR and pre-merge review, ordinary merge, mandatory final
+post-merge validation, exact branch cleanup, final review, and formal closure.
+
+Manual same-assistant reviews are not represented as independent review.

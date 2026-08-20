@@ -290,9 +290,9 @@ action authorization.
 Configured authentication and mapping are local development/test/demo
 facilities and contain no durable credential technology.
 
-## Sprint 30 durable principal-actor mapping candidate components
+## Sprint 30 durable principal-actor mapping released components
 
-The Sprint 30 candidate adds durability only to the
+The Sprint 30 release at `governed-sprint-30-complete` adds durability only to the
 `PrincipalIdentity -> ActorIdentity` association.
 
 `PrincipalActorMappingRepository` is the Core-facing persistence port.
@@ -316,7 +316,7 @@ It persists mappings in one process, reopens them in another, and demonstrates
 authenticated local routing with zero model, provider, readiness, or network
 calls.
 
-The candidate adds no credential/proof persistence, public authentication API,
+The release adds no credential/proof persistence, public authentication API,
 session, role, permission, workspace, membership, token, or account-lifecycle
 storage. `CognitiveEngine`, the trusted route, membership semantics, and
 `PermissionPolicy` remain unchanged.

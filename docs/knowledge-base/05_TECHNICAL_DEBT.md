@@ -241,18 +241,17 @@ The manual Sprint 29 backup required raw Git-blob ZIP construction for byte
 identity under the verified Windows `core.autocrlf=true` configuration. No
 automated backup subsystem is claimed.
 
+## Sprint 30 post-release classification
 
-## Sprint 30 candidate classification
-
-No new uncontrolled technical debt has been identified in the bounded durable
-principal-actor mapping candidate.
+No new uncontrolled technical debt was identified in the bounded durable
+principal-actor mapping release.
 
 Sprint 30 resolves the Sprint 29 deferral for durable
 `PrincipalIdentity -> ActorIdentity` mapping only. It does not resolve
 production authentication or credential security.
 
 The following remain deliberate future work rather than capabilities claimed
-by this candidate:
+by Sprint 30:
 
 - production/public authentication transport;
 - production password, PIN, device, biometric, API-key, JWT, OAuth, or remote
@@ -271,9 +270,19 @@ These concerns must not be folded into `principal_actor_mappings`. That table
 is intentionally limited to exact principal/actor association.
 
 The legacy `sprint-30` tag collision is governance history, not implementation
-debt. It must remain immutable and excluded from current governed release
-inference.
+debt. The historical object `d5794405f4a0c70dc750e7e4438ca7c10a198b04` peeling to `a37dc884bd7b9962a5842037b52f2bf202f16b34`
+remains immutable and excluded from the current governed release.
 
-Governance maintenance: keep schema-v3 verification, architecture provenance
-checks, demo boundaries, Container composition rules, and byte-identical backup
-requirements synchronized as the candidate moves through review and release.
+The authoritative Sprint 30 release tag is `governed-sprint-30-complete`, object `cd410e5e0ddad708cd3b1a8b91b0fe4dc38e5f35`,
+peeling to `6181f549c12195c69708ee2cfa53399a46fa4b29`. The verified authoritative backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314`.
+
+The backup recovered the exact Git repository identity and all 526 source blobs
+byte-for-byte. This preserves the existing Windows `core.autocrlf=true`
+backup guardrail without introducing a new runtime subsystem.
+
+Governance maintenance remains: preserve schema-v3 verification, architecture
+provenance checks, demo boundaries, Container composition rules, immutable tag
+history, and byte-identical backup requirements as later capabilities evolve.
+
+This post-release classification does not claim zero project-wide technical
+debt.

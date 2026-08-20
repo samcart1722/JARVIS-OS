@@ -12,11 +12,14 @@ En la ruta local autenticada, una autenticacion exitosa produce primero un
 `ActorIdentity` mediante un mapper explicito antes de seleccionar workspace,
 evaluar membership o autorizar una accion.
 
-La implementacion candidata de Sprint 30 permite que ese mapeo sea durable
+La implementacion liberada de Sprint 30 permite que ese mapeo sea durable
 mediante un repositorio SQLite inyectado explicitamente. La persistencia no
 autentica al principal, no prueba membership y no concede permisos. Un mapeo
 ausente falla antes de workspace y membership; un fallo del repositorio tambien
 falla cerrado.
+
+Esta capacidad forma parte del release gobernado `governed-sprint-30-complete`, cuyo merge de
+implementacion es `6181f549c12195c69708ee2cfa53399a46fa4b29`.
 
 La secuencia permanece separada:
 
@@ -601,9 +604,9 @@ actor/workspace membership admission → text routing → interpretation and
 coordination → `PermissionPolicy` → capability/repository. Trust failure skips
 membership; membership failure skips routing and downstream authorization.
 Active membership grants no action by itself and requires no model call.
-# Sprint 29 candidate: authenticated internal entry
+# Sprint 29 released: authenticated internal entry
 
-The candidate authenticated internal sequence is strictly ordered:
+The released authenticated internal sequence is strictly ordered:
 
 `LocalAuthenticationProof` → authenticated `PrincipalIdentity` → explicit
 principal-to-`ActorIdentity` mapping → explicit `WorkspaceIdentity` selection

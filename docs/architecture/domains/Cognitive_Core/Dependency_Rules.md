@@ -283,7 +283,9 @@ credential transport, provider/networking, membership persistence, or
 `AuthenticatedLocalCommandRoutingService`. Public API and `CognitiveEngine` do
 not construct or invoke this authenticated local route.
 
-## Sprint 30 durable principal-actor mapping candidate boundary
+## Sprint 30 durable principal-actor mapping released boundary
+
+The `governed-sprint-30-complete` release preserves the following boundary.
 
 The Core-facing principal-actor repository contract and
 `RepositoryPrincipalActorMapper` remain under `app/principal_authentication`

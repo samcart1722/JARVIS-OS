@@ -47,8 +47,7 @@ to cognition. The feature merged at
 `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
 released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
-released trusted request context; Sprint 28 released durable membership; Sprint
-29 is now the latest immutable implementation release at `sprint-29-complete`.
+released trusted request context; Sprint 28 released durable membership; Sprint 30 is now the latest governed implementation release at `governed-sprint-30-complete`.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -490,7 +489,7 @@ membership is workspace admission only. The binding-key trusted route remains
 internal, separate, and non-authenticated.
 
 
-## Sprint 30 candidate durable principal-actor mapping flow
+## Sprint 30 released durable principal-actor mapping flow
 
 The Sprint 29 authenticated local route remains the application boundary.
 Sprint 30 changes only the mapper implementation selected by explicit
