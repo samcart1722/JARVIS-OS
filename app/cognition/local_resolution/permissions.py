@@ -2,6 +2,10 @@
 
 from dataclasses import dataclass
 
+from app.cognition.local_resolution.contracts import (
+    PermissionGrantRepository,
+    PermissionGrantRepositoryError,
+)
 from app.cognition.local_resolution.models import ActorIdentity, WorkspaceIdentity
 
 LIST_ITEMS_ADD = "list.items.add"
@@ -53,3 +57,52 @@ class ExplicitPermissionPolicy:
             and action in grant.actions
             for grant in self._grants
         )
+
+
+class RepositoryPermissionPolicy:
+    """Fail-closed permission policy backed by one injected repository."""
+
+    __slots__ = ("_repository",)
+
+    def __init__(
+        self,
+        repository: PermissionGrantRepository,
+    ) -> None:
+        if repository is None:
+            raise ValueError(
+                "A permission grant repository is required."
+            )
+        self._repository = repository
+
+    def is_allowed(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> bool:
+        if type(actor) is not ActorIdentity:
+            raise TypeError(
+                "A valid actor identity is required."
+            )
+        if type(workspace) is not WorkspaceIdentity:
+            raise TypeError(
+                "A valid workspace identity is required."
+            )
+        if type(action) is not str or not action.strip():
+            raise ValueError(
+                "A non-empty action is required."
+            )
+
+        try:
+            granted = self._repository.is_granted(
+                actor,
+                workspace,
+                action,
+            )
+        except PermissionGrantRepositoryError:
+            return False
+
+        if type(granted) is not bool:
+            return False
+
+        return granted

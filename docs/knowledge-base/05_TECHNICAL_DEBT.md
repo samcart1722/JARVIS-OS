@@ -286,3 +286,46 @@ history, and byte-identical backup requirements as later capabilities evolve.
 
 This post-release classification does not claim zero project-wide technical
 debt.
+
+## Sprint 31 feature-branch classification
+
+The current Sprint 31 candidate addresses the previously deferred durable
+action-permission policy through one narrow repository contract, one
+repository-backed policy, explicit SQLite injection, schema v4, architecture
+enforcement, and a deterministic cross-process proof.
+
+No new uncontrolled technical debt has been identified by the current
+implementation and test evidence. This statement remains provisional until
+governed review and release.
+
+The following remain deliberate future work and are not capabilities claimed
+by Sprint 31:
+
+- permission revoke, delete, update, or audit history;
+- roles, groups, invitations, role hierarchy, inheritance, or broader RBAC;
+- wildcard or prefix permissions;
+- deny-rule precedence;
+- permission expiry or temporal authorization;
+- public permission-management APIs;
+- production or public authentication transport;
+- password, PIN, biometric, API-key, JWT, OAuth, or remote IdP technology;
+- durable credential, proof, verifier, secret, or token storage;
+- sessions and device lifecycle;
+- account recovery;
+- encryption, retention, synchronization, and multi-device authorization
+  policy.
+
+These concerns must not be folded into action_permission_grants. That table is
+intentionally limited to exact current actor/workspace/action grants.
+
+Governance maintenance must preserve:
+
+- schema-v4 verification;
+- exact case-sensitive authorization keys;
+- fail-closed repository semantics;
+- Core/infrastructure dependency direction;
+- default Container no-I/O;
+- operations-demo isolation;
+- permission ownership separate from membership and authentication.
+
+Sprint 31 remains a feature-branch candidate and is not yet release truth.

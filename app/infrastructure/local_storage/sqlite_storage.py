@@ -8,6 +8,8 @@ from pathlib import Path
 from app.cognition.local_resolution.contracts import (
     KnowledgeRecordConflict,
     LocalRepositoryError,
+    PermissionGrantConflict,
+    PermissionGrantRepositoryError,
 )
 from app.cognition.local_resolution.models import (
     KNOWLEDGE_DISCOVERY_LOOKAHEAD,
@@ -29,7 +31,7 @@ from app.principal_authentication.contracts import (
 )
 from app.principal_authentication.models import PrincipalIdentity
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 
 class LocalStorageError(LocalRepositoryError):
@@ -79,14 +81,20 @@ class SQLiteLocalStorage:
                 SCHEMA_VERSION,
                 require_memberships=True,
                 require_principal_mappings=True,
+                require_permission_grants=True,
             )
+            return
+        if current_version == 3:
+            self._migrate_v3_to_v4(connection)
             return
         if current_version == 2:
             self._migrate_v2_to_v3(connection)
+            self._migrate_v3_to_v4(connection)
             return
         if current_version == 1:
             self._migrate_v1_to_v2(connection)
             self._migrate_v2_to_v3(connection)
+            self._migrate_v3_to_v4(connection)
             return
         if current_version != 0:
             raise LocalStorageError("Local database schema cannot be initialized.")
@@ -113,6 +121,7 @@ class SQLiteLocalStorage:
             )
             self._create_membership_table(connection)
             self._create_principal_actor_mapping_table(connection)
+            self._create_action_permission_grant_table(connection)
             connection.execute(
                 "INSERT INTO schema_metadata (schema_key, schema_version) "
                 "VALUES (?, ?)",
@@ -154,13 +163,44 @@ class SQLiteLocalStorage:
             connection.execute(
                 "UPDATE schema_metadata SET schema_version = ? "
                 "WHERE schema_key = ?",
-                (SCHEMA_VERSION, "local_storage"),
+                (3, "local_storage"),
             )
-            connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+            connection.execute("PRAGMA user_version = 3")
             connection.commit()
         except sqlite3.DatabaseError as error:
             connection.rollback()
             raise LocalStorageError("Local database migration failed.") from error
+
+    def _migrate_v3_to_v4(
+        self,
+        connection: sqlite3.Connection,
+    ) -> None:
+        self._verify_schema(
+            connection,
+            3,
+            require_memberships=True,
+            require_principal_mappings=True,
+            require_permission_grants=False,
+        )
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            self._create_action_permission_grant_table(
+                connection
+            )
+            connection.execute(
+                "UPDATE schema_metadata SET schema_version = ? "
+                "WHERE schema_key = ?",
+                (SCHEMA_VERSION, "local_storage"),
+            )
+            connection.execute(
+                f"PRAGMA user_version = {SCHEMA_VERSION}"
+            )
+            connection.commit()
+        except sqlite3.DatabaseError as error:
+            connection.rollback()
+            raise LocalStorageError(
+                "Local database migration failed."
+            ) from error
 
     @staticmethod
     def _create_membership_table(connection: sqlite3.Connection) -> None:
@@ -179,6 +219,19 @@ class SQLiteLocalStorage:
             "CREATE TABLE principal_actor_mappings ("
             "principal_id TEXT NOT NULL COLLATE BINARY PRIMARY KEY, "
             "actor_id TEXT NOT NULL)"
+        )
+
+    @staticmethod
+    def _create_action_permission_grant_table(
+        connection: sqlite3.Connection,
+    ) -> None:
+        connection.execute(
+            "CREATE TABLE action_permission_grants ("
+            "actor_id TEXT NOT NULL COLLATE BINARY, "
+            "workspace_id TEXT NOT NULL COLLATE BINARY, "
+            "action TEXT NOT NULL COLLATE BINARY, "
+            "PRIMARY KEY "
+            "(actor_id, workspace_id, action))"
         )
 
     def close(self) -> None:
@@ -559,6 +612,148 @@ class SQLiteLocalStorage:
         if connection is not None and connection.in_transaction:
             connection.rollback()
 
+    def is_permission_granted(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> bool:
+        key = self._permission_key(
+            actor,
+            workspace,
+            action,
+        )
+
+        try:
+            connection = (
+                self._require_initialized_connection()
+            )
+
+            row = connection.execute(
+                "SELECT 1 "
+                "FROM action_permission_grants "
+                "WHERE actor_id = ? "
+                "AND workspace_id = ? "
+                "AND action = ? "
+                "LIMIT 1",
+                key,
+            ).fetchone()
+
+            return row is not None
+
+        except PermissionGrantRepositoryError:
+            raise
+
+        except (
+            sqlite3.DatabaseError,
+            LocalStorageError,
+        ) as error:
+            raise PermissionGrantRepositoryError(
+                "Permission grant read failed."
+            ) from error
+
+    def create_permission_grant(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> None:
+        key = self._permission_key(
+            actor,
+            workspace,
+            action,
+        )
+
+        try:
+            connection = (
+                self._require_initialized_connection()
+            )
+
+            connection.execute(
+                "BEGIN IMMEDIATE"
+            )
+
+            connection.execute(
+                "INSERT INTO action_permission_grants "
+                "(actor_id, workspace_id, action) "
+                "VALUES (?, ?, ?)",
+                key,
+            )
+
+            connection.commit()
+
+        except sqlite3.IntegrityError as error:
+            self._rollback_permission_grant_write()
+
+            if (
+                getattr(
+                    error,
+                    "sqlite_errorcode",
+                    None,
+                )
+                == sqlite3.SQLITE_CONSTRAINT_PRIMARYKEY
+            ):
+                raise PermissionGrantConflict(
+                    "Permission grant already exists."
+                ) from None
+
+            raise PermissionGrantRepositoryError(
+                "Permission grant write failed."
+            ) from error
+
+        except PermissionGrantRepositoryError:
+            self._rollback_permission_grant_write()
+            raise
+
+        except (
+            sqlite3.DatabaseError,
+            LocalStorageError,
+        ) as error:
+            self._rollback_permission_grant_write()
+
+            raise PermissionGrantRepositoryError(
+                "Permission grant write failed."
+            ) from error
+
+    def _rollback_permission_grant_write(self) -> None:
+        connection = self._connection
+
+        if (
+            connection is not None
+            and connection.in_transaction
+        ):
+            connection.rollback()
+
+    @staticmethod
+    def _permission_key(
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> tuple[str, str, str]:
+        if type(actor) is not ActorIdentity:
+            raise ValueError(
+                "Permission actor is invalid."
+            )
+
+        if type(workspace) is not WorkspaceIdentity:
+            raise ValueError(
+                "Permission workspace is invalid."
+            )
+
+        if (
+            type(action) is not str
+            or not action.strip()
+        ):
+            raise ValueError(
+                "Permission action is invalid."
+            )
+
+        return (
+            actor.actor_id,
+            workspace.workspace_id,
+            action,
+        )
+
     def _require_connection(self) -> sqlite3.Connection:
         if self._connection is None:
             raise LocalStorageError("Local storage is not open.")
@@ -578,12 +773,16 @@ class SQLiteLocalStorage:
         *,
         require_memberships: bool,
         require_principal_mappings: bool,
+        require_permission_grants: bool = False,
     ) -> None:
         membership_columns: tuple[tuple[object, ...], ...] = ()
         membership_table_row: tuple[object, ...] | None = None
         mapping_columns: tuple[tuple[object, ...], ...] = ()
         mapping_table_row: tuple[object, ...] | None = None
         mapping_has_unapproved_unique_index = False
+        permission_columns: tuple[tuple[object, ...], ...] = ()
+        permission_table_row: tuple[object, ...] | None = None
+        permission_has_unapproved_unique_index = False
 
         try:
             row = connection.execute(
@@ -653,6 +852,72 @@ class SQLiteLocalStorage:
                     mapping_has_unapproved_unique_index = True
                     break
 
+            if require_permission_grants:
+                columns = connection.execute(
+                    "PRAGMA table_info("
+                    "action_permission_grants)"
+                ).fetchall()
+
+                permission_table_row = connection.execute(
+                    "SELECT sql FROM sqlite_master "
+                    "WHERE type = 'table' AND name = ?",
+                    ("action_permission_grants",),
+                ).fetchone()
+
+                permission_columns = tuple(
+                    (
+                        column[1],
+                        column[2],
+                        column[3],
+                        column[5],
+                    )
+                    for column in columns
+                )
+
+                permission_indexes = connection.execute(
+                    "PRAGMA index_list("
+                    "action_permission_grants)"
+                ).fetchall()
+
+                for index in permission_indexes:
+                    if not bool(index[2]):
+                        continue
+
+                    index_name = str(index[1]).replace(
+                        '"',
+                        '""',
+                    )
+
+                    index_origin = (
+                        str(index[3])
+                        if len(index) > 3
+                        else ""
+                    )
+
+                    index_columns = tuple(
+                        item[2]
+                        for item in connection.execute(
+                            f'PRAGMA index_info('
+                            f'"{index_name}")'
+                        ).fetchall()
+                    )
+
+                    if (
+                        index_origin == "pk"
+                        and index_columns
+                        == (
+                            "actor_id",
+                            "workspace_id",
+                            "action",
+                        )
+                    ):
+                        continue
+
+                    permission_has_unapproved_unique_index = (
+                        True
+                    )
+                    break
+
         except sqlite3.DatabaseError as error:
             raise LocalStorageError("Local database schema is invalid.") from error
 
@@ -693,7 +958,51 @@ class SQLiteLocalStorage:
                 or "unique (actor_id)" in mapping_sql
                 or mapping_has_unapproved_unique_index
             ):
-                raise LocalStorageError("Local database schema is invalid.")
+                raise LocalStorageError(
+                    "Local database schema is invalid."
+                )
+
+        expected_permission_columns = (
+            ("actor_id", "TEXT", 1, 1),
+            ("workspace_id", "TEXT", 1, 2),
+            ("action", "TEXT", 1, 3),
+        )
+
+        if (
+            require_permission_grants
+            and permission_columns
+            != expected_permission_columns
+        ):
+            raise LocalStorageError(
+                "Local database schema is invalid."
+            )
+
+        if require_permission_grants:
+            if permission_table_row is None:
+                raise LocalStorageError(
+                    "Local database schema is invalid."
+                )
+
+            permission_sql = " ".join(
+                str(permission_table_row[0]).split()
+            ).lower()
+
+            expected_permission_sql = (
+                "create table action_permission_grants "
+                "(actor_id text not null collate binary, "
+                "workspace_id text not null collate binary, "
+                "action text not null collate binary, "
+                "primary key "
+                "(actor_id, workspace_id, action))"
+            )
+
+            if (
+                permission_sql != expected_permission_sql
+                or permission_has_unapproved_unique_index
+            ):
+                raise LocalStorageError(
+                    "Local database schema is invalid."
+                )
 
 
 class SQLiteKnowledgeRecordRepository:
@@ -732,3 +1041,44 @@ class SQLitePrincipalActorMappingRepository:
         actor: ActorIdentity,
     ) -> ActorIdentity:
         return self._storage.create_principal_actor_mapping(principal, actor)
+
+
+class SQLitePermissionGrantRepository:
+    """Narrow action-permission view over explicitly owned SQLite storage."""
+
+    __slots__ = ("_storage",)
+
+    def __init__(
+        self,
+        storage: SQLiteLocalStorage,
+    ) -> None:
+        if storage is None:
+            raise ValueError(
+                "A local storage instance is required."
+            )
+
+        self._storage = storage
+
+    def is_granted(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> bool:
+        return self._storage.is_permission_granted(
+            actor,
+            workspace,
+            action,
+        )
+
+    def create(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> None:
+        self._storage.create_permission_grant(
+            actor,
+            workspace,
+            action,
+        )

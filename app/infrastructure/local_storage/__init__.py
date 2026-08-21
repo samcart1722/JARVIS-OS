@@ -3,6 +3,7 @@
 from app.infrastructure.local_storage.sqlite_storage import (
     SCHEMA_VERSION,
     SQLiteLocalStorage,
+    SQLitePermissionGrantRepository,
     SQLitePrincipalActorMappingRepository,
     UnsupportedSchemaVersion,
 )
@@ -10,6 +11,7 @@ from app.infrastructure.local_storage.sqlite_storage import (
 __all__ = [
     "SCHEMA_VERSION",
     "SQLiteLocalStorage",
+    "SQLitePermissionGrantRepository",
     "SQLitePrincipalActorMappingRepository",
     "UnsupportedSchemaVersion",
 ]

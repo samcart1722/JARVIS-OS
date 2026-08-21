@@ -47,6 +47,7 @@ from app.cognition.local_resolution.capability import StructuredListCapability
 from app.cognition.local_resolution.contracts import (
     KnowledgeRecordRepository,
     ListItemRepository,
+    PermissionGrantRepository,
 )
 from app.cognition.local_resolution.knowledge_capability import (
     StructuredKnowledgeCapability,
@@ -55,6 +56,7 @@ from app.cognition.local_resolution.models import WorkspaceIdentity
 from app.cognition.local_resolution.permissions import (
     ExplicitPermissionPolicy,
     PermissionGrant,
+    RepositoryPermissionPolicy,
 )
 from app.cognition.local_resolution.repository import (
     InMemoryKnowledgeRecordRepository,
@@ -144,6 +146,8 @@ class Container:
         *,
         scoped_memory_records: Iterable[ScopedMemoryRecord] = (),
         local_permission_grants: tuple[PermissionGrant, ...] = (),
+        local_permission_grant_repository: PermissionGrantRepository
+        | None = None,
         local_list_repository: ListItemRepository | None = None,
         local_knowledge_repository: KnowledgeRecordRepository | None = None,
         trusted_host_bindings: tuple[ConfiguredTrustedHostBinding, ...] = (),
@@ -178,6 +182,13 @@ class Container:
             raise ValueError("Configured membership is invalid.")
         if membership_repository is not None and memberships:
             raise ValueError("Membership repository ownership is ambiguous.")
+        if (
+            local_permission_grant_repository is not None
+            and local_permission_grants
+        ):
+            raise ValueError(
+                "Permission policy ownership is ambiguous."
+            )
         if any(
             type(binding) is not ConfiguredPrincipalProofBinding
             for binding in principal_proof_bindings
@@ -218,6 +229,9 @@ class Container:
         self._settings = app_settings
         self._scoped_memory_records = tuple(scoped_memory_records)
         self._local_permission_grants = local_permission_grants
+        self._injected_local_permission_grant_repository = (
+            local_permission_grant_repository
+        )
         self._injected_local_list_repository = local_list_repository
         self._injected_local_knowledge_repository = local_knowledge_repository
         self._trusted_host_bindings = tuple(trusted_host_bindings)
@@ -292,9 +306,26 @@ class Container:
             if self._injected_local_knowledge_repository is not None
             else InMemoryKnowledgeRecordRepository()
         )
-        self.local_permission_policy = ExplicitPermissionPolicy(
-            self._local_permission_grants
-        )
+        if (
+            self._injected_local_permission_grant_repository
+            is not None
+        ):
+            self.local_permission_grant_repository = (
+                self._injected_local_permission_grant_repository
+            )
+            self.local_permission_policy = (
+                RepositoryPermissionPolicy(
+                    self.local_permission_grant_repository
+                )
+            )
+        else:
+            self.local_permission_grant_repository = None
+            self.local_permission_policy = (
+                ExplicitPermissionPolicy(
+                    self._local_permission_grants
+                )
+            )
+
         self.structured_list_capability = StructuredListCapability(
             self.local_list_repository,
             self.local_permission_policy,

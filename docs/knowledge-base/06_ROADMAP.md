@@ -248,3 +248,64 @@ synchronization.
 Release-truth metadata synchronization completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation on canonical `master`. That validation required this bounded closure-truth correction mini-cycle. Remaining work is review and integration of this correction, exact branch cleanup, final review, and formal closure.
 
 Manual same-assistant reviews are not represented as independent review.
+
+## Sprint 31 implementation candidate - governance pending
+
+Sprint 31 - Durable Action Permission Foundation v1 is implemented on feature
+branch feat/sprint-31-durable-action-permission-foundation from frozen base
+a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9.
+
+The candidate addresses the bounded durable action-permission deferral left by
+Sprint 30.
+
+It adds:
+
+- exact actor/workspace/action grant persistence;
+- PermissionGrantRepository;
+- RepositoryPermissionPolicy;
+- SQLite schema v4;
+- SQLitePermissionGrantRepository;
+- explicit Container repository injection;
+- architecture enforcement;
+- deterministic two-process operational proof.
+
+Post-correction validation records 1,119 repository tests, including 117
+architecture tests, global Ruff, diff hygiene, and successful seed/verify
+operations with zero model, provider, readiness, network, and cognitive calls.
+
+This is not complete release work.
+
+Completed pre-commit governance includes:
+
+- same-assistant technical review;
+- adversarial corrective review and post-correction validation;
+- independent review unavailable; no independent review is claimed;
+- exact staging and index fingerprint.
+
+Remaining governance begins with:
+
+- feature commit;
+- commit review;
+- push;
+- remote review;
+- pull request;
+- pre-merge review;
+- merge;
+- post-merge validation;
+- immutable governed release tag;
+- tag verification;
+- recoverable backup and verification;
+- release-truth documentation synchronization;
+- final post-merge validation;
+- branch cleanup;
+- final governance review;
+- formal closure;
+- final canonical continuity update.
+
+Sprint 31 deliberately does not add roles or RBAC, permission inheritance,
+grant/revoke management, audit history, production authentication, sessions,
+JWT/OAuth, credential persistence, public authorization transport, remote IdP,
+or cloud synchronization.
+
+Sprint 30 remains the latest governed release until Sprint 31 completes the
+governed release lifecycle.

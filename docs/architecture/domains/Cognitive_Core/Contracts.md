@@ -481,3 +481,34 @@ performs no storage I/O.
 This contract is released in governed Sprint 30 at
 `governed-sprint-30-complete`. Merge, immutable release tagging, and authoritative backup
 verification are complete; release-truth governance closure remains in progress.
+
+## Sprint 31 candidate durable action-permission contracts
+
+The Core-facing persistence port is PermissionGrantRepository.
+
+Its supported operations are:
+
+- is_granted(actor, workspace, action) -> bool
+- create(actor, workspace, action) -> None
+
+Stable repository exceptions are PermissionGrantRepositoryError and its exact
+duplicate-grant subtype PermissionGrantConflict.
+
+The authorization key is exact and case-sensitive across actor, workspace, and
+action. Action text is not trimmed, case-folded, wildcarded, inherited, or
+otherwise normalized into another permission.
+
+Absence is denial.
+
+RepositoryPermissionPolicy returns a repository result only when its exact type
+is bool. A declared repository failure or invalid repository result denies.
+Unexpected programming errors propagate.
+
+create is append-only. An exact duplicate conflicts. There is no update,
+delete, revoke, overwrite, INSERT OR IGNORE, replace, or upsert contract.
+
+These contracts add durability to action authorization only. They do not define
+roles, groups, inheritance, authentication, membership, credential storage,
+sessions, public grant management, or account lifecycle.
+
+This is Sprint 31 feature-branch contract truth, not release metadata.

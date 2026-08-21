@@ -320,3 +320,35 @@ The release adds no credential/proof persistence, public authentication API,
 session, role, permission, workspace, membership, token, or account-lifecycle
 storage. `CognitiveEngine`, the trusted route, membership semantics, and
 `PermissionPolicy` remain unchanged.
+
+## Sprint 31 candidate durable action-permission components
+
+The Sprint 31 feature branch preserves PermissionPolicy as the Core-facing
+authorization boundary and adds one optional repository-backed implementation.
+
+PermissionGrantRepository owns exact lookup and append-only creation for one
+actor/workspace/action grant. It is a Core-facing contract and owns no SQLite,
+transport, authentication, membership, role, or runtime behavior.
+
+RepositoryPermissionPolicy adapts that repository to the existing
+PermissionPolicy contract. Missing grants and declared repository failures deny
+access.
+
+SQLitePermissionGrantRepository is the outward infrastructure adapter over an
+explicitly owned SQLiteLocalStorage instance.
+
+SQLite schema v4 stores exact actor_id, workspace_id, and action values only.
+It is not RBAC, credential storage, or permission-history storage.
+
+Container selects either the existing configured ExplicitPermissionPolicy or an
+explicitly injected repository-backed policy. Default construction remains
+no-I/O.
+
+The same composed permission policy continues to be shared by the structured
+list and structured knowledge capabilities; Sprint 31 does not create a second
+authorization path.
+
+The durable action-permission runtime remains an operations proof outside the
+public API and CognitiveEngine.
+
+This section describes the feature branch before governed merge or release.

@@ -45,6 +45,30 @@ class KnowledgeRecordRepository(Protocol):
         ...
 
 
+class PermissionGrantRepositoryError(RuntimeError):
+    """Signal a safe action-permission repository failure."""
+
+
+class PermissionGrantConflict(PermissionGrantRepositoryError):
+    """Signal an attempted duplicate exact action permission grant."""
+
+
+class PermissionGrantRepository(Protocol):
+    def is_granted(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> bool: ...
+
+    def create(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> None: ...
+
+
 class PermissionPolicy(Protocol):
     def is_allowed(
         self,
