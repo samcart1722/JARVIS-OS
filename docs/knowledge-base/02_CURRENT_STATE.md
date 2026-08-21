@@ -424,3 +424,43 @@ The implementation release, immutable tag, authoritative backup, release-truth m
 
 Manual same-assistant governance reviews performed during this release cycle
 are not represented as independent review.
+
+## Sprint 31 feature-branch implementation candidate
+
+Sprint 31 - Durable Action Permission Foundation v1 is implemented and
+technically validated on feature branch
+feat/sprint-31-durable-action-permission-foundation, based on
+a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9.
+
+The current candidate adds:
+
+- PermissionGrantRepository;
+- PermissionGrantRepositoryError;
+- PermissionGrantConflict;
+- RepositoryPermissionPolicy;
+- SQLite schema v4 with action_permission_grants;
+- additive rollback-safe v3 -> v4 migration;
+- SQLitePermissionGrantRepository;
+- explicit Container repository injection;
+- architecture enforcement;
+- deterministic seed/verify durable authorization proof.
+
+The exact authorization dimensions are actor, workspace, and action.
+
+A missing grant is denial. Declared repository/storage failure is denial.
+Invalid repository boolean output is denial. Membership does not imply action
+permission.
+
+Post-correction validation passed 1,119 repository tests, including 117
+architecture tests, plus global Ruff and git diff --check.
+
+The operational proof passed with zero model, provider, readiness, network, and
+cognitive-fallback calls.
+
+This is not canonical release truth. Independent review was unavailable and
+no independent review is claimed. Same-assistant technical and adversarial
+reviews, corrective validation, governed staging, and exact index fingerprint
+have completed. Commit, push, merge, tag, backup, and formal closure remain
+pending.
+
+Sprint 30 therefore remains the latest governed release.

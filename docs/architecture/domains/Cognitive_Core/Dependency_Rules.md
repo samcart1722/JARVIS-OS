@@ -336,3 +336,36 @@ of durable principal-actor mapping infrastructure.
 The durable demo may explicitly construct local SQLite infrastructure because it
 is an operations proof. Its CLI remains thin and delegates to the operations
 runtime; it does not import SQLite, Container, or cognition modules directly.
+
+## Sprint 31 candidate durable action-permission boundary
+
+The dependency direction remains inward:
+
+Structured capability -> PermissionPolicy.
+
+RepositoryPermissionPolicy implements that boundary by depending on
+PermissionGrantRepository.
+
+SQLitePermissionGrantRepository is outward infrastructure and depends on
+SQLiteLocalStorage plus inward local-resolution contracts/models.
+
+app/cognition/local_resolution must not import sqlite3 or concrete local
+storage. Container may depend on PermissionGrantRepository and
+RepositoryPermissionPolicy but must not import SQLitePermissionGrantRepository.
+
+Authentication and membership domains do not own permission persistence.
+Authentication identifies a principal, principal mapping resolves an actor,
+membership admits actor/workspace participation, and PermissionPolicy remains
+the separate action-authorization boundary.
+
+Configured permission grants and an injected repository are mutually exclusive
+composition sources. Falsey injected repositories are preserved through
+explicit is-not-None selection. Default Container composition performs no
+repository or filesystem I/O.
+
+The durable action-permission demo remains under operations and is absent from
+public HTTP and CognitiveEngine. Its CLI delegates to the operations runtime
+instead of constructing SQLite or cognitive components itself.
+
+Architecture tests enforce these feature-branch boundaries. This section does
+not claim governed release.

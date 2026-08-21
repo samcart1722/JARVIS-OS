@@ -615,3 +615,29 @@ principal-to-`ActorIdentity` mapping → explicit `WorkspaceIdentity` selection
 
 The trusted internal compatibility path remains separate and
 non-authenticated. Sprint 29 adds no public HTTP authentication integration.
+
+## Sprint 31 implementation candidate: durable action authorization
+
+The current Sprint 31 feature-branch implementation extends the authenticated
+local lifecycle only at the existing downstream authorization boundary.
+
+The supported sequence remains:
+
+AuthenticationProof -> authentication -> PrincipalIdentity ->
+principal/actor mapping -> ActorIdentity -> explicit WorkspaceIdentity ->
+membership -> PermissionPolicy -> local capability.
+
+When explicitly composed with a PermissionGrantRepository, PermissionPolicy
+may now read durable local authorization state. The exact authorization key is
+ActorIdentity + WorkspaceIdentity + action.
+
+Membership remains workspace admission and does not imply action permission.
+A missing grant or declared repository failure denies the action before
+capability data access.
+
+Default Container composition remains no-I/O. Sprint 31 adds no public
+authentication, credentials, sessions, roles, RBAC, inheritance, wildcard
+permissions, or automatic authorization from membership.
+
+This section records feature-branch implementation truth only. Sprint 31 is not
+yet merged, tagged, released, or governance-closed.

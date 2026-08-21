@@ -140,3 +140,38 @@ nonpersistent proof authentication and explicit principal-to-actor mapping.
 It precedes workspace selection and membership and leaves `PermissionPolicy`
 as action authorization. This development/test/demo foundation makes no
 model/provider/network calls and chooses no production credential technology.
+
+## Sprint 31 working-tree durable action-permission candidate
+
+The Sprint 31 feature branch adds an optional durable local implementation of
+the existing action-authorization boundary without changing local-first order.
+
+Authorization still occurs after authentication, principal-to-actor mapping,
+explicit workspace selection, and membership admission.
+
+PermissionGrantRepository exposes only exact is_granted and append-only create.
+RepositoryPermissionPolicy denies a missing grant, declared repository failure,
+or invalid non-boolean repository result. Unexpected programming errors are not
+silently converted into authorization outcomes.
+
+SQLite schema v4 adds only:
+
+action_permission_grants(actor_id, workspace_id, action)
+
+All three values use exact binary/case-sensitive matching and the composite
+primary key is (actor_id, workspace_id, action). Migration v3 -> v4 is additive,
+uses BEGIN IMMEDIATE, and is rollback-safe.
+
+Existing list, knowledge, membership, and principal/actor mapping state is
+preserved.
+
+Default Container composition remains no-I/O. Durable authorization requires
+explicit repository injection. Configured grants and an injected permission
+repository are mutually exclusive ownership choices.
+
+The deterministic two-process proof demonstrates durable authorization success
+plus fail-closed wrong-workspace, wrong-action, wrong-actor, and repository
+failure scenarios with zero model, provider, readiness, network, and cognitive
+fallback calls.
+
+This is implementation-candidate truth, not a Sprint 31 release claim.

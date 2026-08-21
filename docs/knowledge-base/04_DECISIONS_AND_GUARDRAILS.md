@@ -127,3 +127,37 @@ deterministic operational/SQLite validations.
 
 Manual same-assistant governance reviews in this cycle are explicitly distinct
 from independent review.
+
+## Sprint 31 feature-branch decisions and guardrails
+
+The following guardrails are implemented candidates pending governed review and
+release:
+
+- Action authorization remains separate from authentication.
+- Action authorization remains separate from principal-to-actor mapping.
+- Action authorization remains separate from membership admission.
+- Membership never implies an action grant.
+- Durable grant identity is exactly actor + workspace + action.
+- Matching is exact and case-sensitive.
+- No wildcard permission matching is introduced.
+- No inheritance or role hierarchy is introduced.
+- Missing grant fails closed.
+- Declared permission-repository failure fails closed.
+- Invalid repository output fails closed.
+- Unexpected programming errors are not silently swallowed.
+- Exact duplicate creation raises PermissionGrantConflict.
+- Creation is append-only.
+- No update, delete, revoke, overwrite, replace, ignore, or upsert path exists.
+- SQLite stores no role, credential, proof, secret, token, session, expiry, or
+  permission history.
+- Default Container remains no-I/O.
+- Durable permission state requires explicit repository injection.
+- Configured grants and an injected repository cannot be mixed.
+- Core local-resolution code does not import SQLite.
+- Authentication and membership domains do not own permission persistence.
+- Public HTTP and CognitiveEngine remain unchanged.
+- The trusted route remains unchanged.
+- The durable demo is operational proof, not a public permission-management API.
+
+These statements are feature-branch implementation truth. They must not be
+represented as released Sprint 31 decisions until governance completes.

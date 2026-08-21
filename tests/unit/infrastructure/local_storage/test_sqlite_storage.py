@@ -76,6 +76,37 @@ def _create_v1_database(path: Path) -> None:
         connection.execute("PRAGMA user_version = 1")
 
 
+def _create_v3_database(path: Path) -> None:
+    _create_v1_database(path)
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "CREATE TABLE actor_workspace_memberships ("
+            "actor_id TEXT NOT NULL, "
+            "workspace_id TEXT NOT NULL, "
+            "status TEXT NOT NULL "
+            "CHECK (status IN ('active', 'inactive')), "
+            "PRIMARY KEY (actor_id, workspace_id))"
+        )
+
+        connection.execute(
+            "CREATE TABLE principal_actor_mappings ("
+            "principal_id TEXT NOT NULL "
+            "COLLATE BINARY PRIMARY KEY, "
+            "actor_id TEXT NOT NULL)"
+        )
+
+        connection.execute(
+            "UPDATE schema_metadata "
+            "SET schema_version = 3 "
+            "WHERE schema_key = 'local_storage'"
+        )
+
+        connection.execute(
+            "PRAGMA user_version = 3"
+        )
+
+
 def test_constructor_is_inert_and_initialization_is_explicit(tmp_path) -> None:
     path = tmp_path / "nested" / "local.sqlite3"
     storage = SQLiteLocalStorage(path)
@@ -304,6 +335,7 @@ def test_knowledge_discovery_exact_binary_order_kind_workspace_and_cap(
         "knowledge_records",
         "actor_workspace_memberships",
         "principal_actor_mappings",
+        "action_permission_grants",
     }
     assert indexes == set()
 
@@ -386,7 +418,7 @@ def test_sqlite_discovery_boundary_matrix_through_real_capability(
         storage.close()
 
 
-def test_fresh_v3_schema_contains_approved_membership_and_mapping_shapes(
+def test_fresh_v4_schema_contains_approved_identity_and_permission_shapes(
     tmp_path,
 ) -> None:
     path = tmp_path / "fresh.sqlite3"
@@ -444,6 +476,415 @@ def test_fresh_v3_schema_contains_approved_membership_and_mapping_shapes(
         )
         assert "actor_id text not null" in normalized_mapping_sql
         assert "unique (actor_id)" not in normalized_mapping_sql
+
+        permission_columns = connection.execute(
+            "PRAGMA table_info(action_permission_grants)"
+        ).fetchall()
+
+        assert tuple(
+            (
+                row[1],
+                row[2],
+                row[3],
+                row[5],
+            )
+            for row in permission_columns
+        ) == (
+            ("actor_id", "TEXT", 1, 1),
+            ("workspace_id", "TEXT", 1, 2),
+            ("action", "TEXT", 1, 3),
+        )
+
+        permission_sql = connection.execute(
+            "SELECT sql FROM sqlite_master "
+            "WHERE type = 'table' AND name = ?",
+            ("action_permission_grants",),
+        ).fetchone()[0]
+
+        normalized_permission_sql = " ".join(
+            permission_sql.split()
+        ).lower()
+
+        assert (
+            "actor_id text not null collate binary"
+            in normalized_permission_sql
+        )
+        assert (
+            "workspace_id text not null collate binary"
+            in normalized_permission_sql
+        )
+        assert (
+            "action text not null collate binary"
+            in normalized_permission_sql
+        )
+        assert (
+            "primary key "
+            "(actor_id, workspace_id, action)"
+            in normalized_permission_sql
+        )
+
+
+def test_v3_to_v4_migration_is_additive_and_preserves_data(
+    tmp_path,
+) -> None:
+    path = tmp_path / "v3-to-v4.sqlite3"
+
+    _create_v3_database(path)
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "INSERT INTO list_items "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                "home",
+                "shopping",
+                "milk",
+                "Milk",
+                0,
+            ),
+        )
+
+        connection.execute(
+            "INSERT INTO knowledge_records "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                "home",
+                "record",
+                "fact",
+                "family.value",
+                "exact",
+                "reviewed",
+                "source",
+            ),
+        )
+
+        connection.execute(
+            "INSERT INTO actor_workspace_memberships "
+            "VALUES (?, ?, ?)",
+            (
+                "actor",
+                "home",
+                "active",
+            ),
+        )
+
+        connection.execute(
+            "INSERT INTO principal_actor_mappings "
+            "VALUES (?, ?)",
+            (
+                "principal",
+                "actor",
+            ),
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute(
+            "PRAGMA user_version"
+        ).fetchone() == (
+            SCHEMA_VERSION,
+        )
+
+        assert connection.execute(
+            "SELECT schema_version "
+            "FROM schema_metadata "
+            "WHERE schema_key = ?",
+            ("local_storage",),
+        ).fetchone() == (
+            SCHEMA_VERSION,
+        )
+
+        assert connection.execute(
+            "SELECT * FROM list_items"
+        ).fetchone() == (
+            "home",
+            "shopping",
+            "milk",
+            "Milk",
+            0,
+        )
+
+        assert connection.execute(
+            "SELECT * FROM knowledge_records"
+        ).fetchone() == (
+            "home",
+            "record",
+            "fact",
+            "family.value",
+            "exact",
+            "reviewed",
+            "source",
+        )
+
+        assert connection.execute(
+            "SELECT * "
+            "FROM actor_workspace_memberships"
+        ).fetchone() == (
+            "actor",
+            "home",
+            "active",
+        )
+
+        assert connection.execute(
+            "SELECT * "
+            "FROM principal_actor_mappings"
+        ).fetchone() == (
+            "principal",
+            "actor",
+        )
+
+        assert connection.execute(
+            "SELECT count(*) "
+            "FROM action_permission_grants"
+        ).fetchone() == (
+            0,
+        )
+
+
+def test_v3_to_v4_migration_failure_rolls_back_atomically(
+    tmp_path,
+) -> None:
+    path = tmp_path / "v3-to-v4-failure.sqlite3"
+
+    _create_v3_database(path)
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "INSERT INTO principal_actor_mappings "
+            "VALUES (?, ?)",
+            (
+                "principal",
+                "actor",
+            ),
+        )
+
+        connection.execute(
+            "CREATE TRIGGER fail_v4_metadata_update "
+            "BEFORE UPDATE ON schema_metadata "
+            "BEGIN "
+            "SELECT RAISE("
+            "ABORT, 'forced v4 migration failure'"
+            "); "
+            "END"
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        with pytest.raises(
+            LocalStorageError,
+            match="migration failed",
+        ):
+            storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute(
+            "PRAGMA user_version"
+        ).fetchone() == (
+            3,
+        )
+
+        assert connection.execute(
+            "SELECT schema_version "
+            "FROM schema_metadata "
+            "WHERE schema_key = ?",
+            ("local_storage",),
+        ).fetchone() == (
+            3,
+        )
+
+        assert connection.execute(
+            "SELECT count(*) "
+            "FROM sqlite_master "
+            "WHERE type = 'table' "
+            "AND name = ?",
+            ("action_permission_grants",),
+        ).fetchone() == (
+            0,
+        )
+
+        assert connection.execute(
+            "SELECT * "
+            "FROM principal_actor_mappings"
+        ).fetchone() == (
+            "principal",
+            "actor",
+        )
+
+        connection.execute(
+            "DROP TRIGGER fail_v4_metadata_update"
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute(
+            "PRAGMA user_version"
+        ).fetchone() == (
+            SCHEMA_VERSION,
+        )
+
+        assert connection.execute(
+            "SELECT count(*) "
+            "FROM sqlite_master "
+            "WHERE type = 'table' "
+            "AND name = ?",
+            ("action_permission_grants",),
+        ).fetchone() == (
+            1,
+        )
+
+
+def test_v4_permission_primary_key_is_exact_and_case_sensitive(
+    tmp_path,
+) -> None:
+    path = tmp_path / "permission-key.sqlite3"
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        rows = (
+            (
+                "Actor",
+                "Workspace",
+                "list.items.read",
+            ),
+            (
+                "actor",
+                "Workspace",
+                "list.items.read",
+            ),
+            (
+                "Actor",
+                "workspace",
+                "list.items.read",
+            ),
+            (
+                "Actor",
+                "Workspace",
+                "LIST.ITEMS.READ",
+            ),
+        )
+
+        for row in rows:
+            connection.execute(
+                "INSERT INTO action_permission_grants "
+                "(actor_id, workspace_id, action) "
+                "VALUES (?, ?, ?)",
+                row,
+            )
+
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute(
+                "INSERT INTO action_permission_grants "
+                "(actor_id, workspace_id, action) "
+                "VALUES (?, ?, ?)",
+                rows[0],
+            )
+
+        assert connection.execute(
+            "SELECT count(*) "
+            "FROM action_permission_grants"
+        ).fetchone() == (
+            4,
+        )
+
+
+@pytest.mark.parametrize(
+    "index_sql",
+    (
+        (
+            "CREATE UNIQUE INDEX "
+            "invalid_permission_actor "
+            "ON action_permission_grants(actor_id)"
+        ),
+        (
+            "CREATE UNIQUE INDEX "
+            "invalid_permission_expression "
+            "ON action_permission_grants(lower(action))"
+        ),
+    ),
+)
+def test_v4_permission_schema_rejects_extra_unique_indexes(
+    tmp_path,
+    index_sql,
+) -> None:
+    path = tmp_path / "invalid-permission-index.sqlite3"
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(index_sql)
+
+    with SQLiteLocalStorage(path) as storage:
+        with pytest.raises(
+            LocalStorageError,
+            match="schema is invalid",
+        ):
+            storage.initialize()
+
+
+def test_v4_permission_schema_rejects_collation_spoofed_by_comment(
+    tmp_path,
+) -> None:
+    path = tmp_path / "invalid-permission-collation.sqlite3"
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "ALTER TABLE action_permission_grants "
+            "RENAME TO action_permission_grants_original"
+        )
+
+        connection.execute(
+            "CREATE TABLE action_permission_grants ("
+            "actor_id TEXT NOT NULL COLLATE NOCASE, "
+            "workspace_id TEXT NOT NULL COLLATE BINARY, "
+            "action TEXT NOT NULL COLLATE BINARY, "
+            "PRIMARY KEY (actor_id, workspace_id, action), "
+            "CHECK ("
+            "/* actor_id TEXT NOT NULL COLLATE BINARY */ "
+            "length(actor_id) >= 0"
+            "))"
+        )
+
+        connection.execute(
+            "DROP TABLE action_permission_grants_original"
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        with pytest.raises(
+            LocalStorageError,
+            match="schema is invalid",
+        ):
+            storage.initialize()
+
+
+
+def test_v4_permission_schema_requires_permission_table(
+    tmp_path,
+) -> None:
+    path = tmp_path / "missing-permission-table.sqlite3"
+
+    with SQLiteLocalStorage(path) as storage:
+        storage.initialize()
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "DROP TABLE action_permission_grants"
+        )
+
+    with SQLiteLocalStorage(path) as storage:
+        with pytest.raises(
+            LocalStorageError,
+            match="schema is invalid",
+        ):
+            storage.initialize()
 
 
 def test_v1_migration_is_additive_and_preserves_semantic_values(tmp_path) -> None:

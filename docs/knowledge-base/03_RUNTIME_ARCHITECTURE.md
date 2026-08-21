@@ -556,3 +556,61 @@ of this operations proof.
 `CognitiveEngine` is unchanged. The Sprint 27 trusted request-context route is
 unchanged and remains non-authentication. Membership remains workspace
 admission. `PermissionPolicy` remains action authorization.
+
+## Sprint 31 candidate durable action-permission flow
+
+Sprint 31 changes only the implementation available behind the existing
+downstream PermissionPolicy.
+
+Configured path:
+
+ActorIdentity + WorkspaceIdentity + action
+-> ExplicitPermissionPolicy
+-> configured exact grants
+-> local capability.
+
+Explicit durable path:
+
+ActorIdentity + WorkspaceIdentity + action
+-> RepositoryPermissionPolicy
+-> PermissionGrantRepository
+-> SQLitePermissionGrantRepository
+-> caller-owned SQLiteLocalStorage
+-> action_permission_grants
+-> local capability.
+
+The complete authenticated deterministic route remains:
+
+LocalAuthenticationProof
+-> LocalPrincipalAuthenticator
+-> PrincipalIdentity
+-> PrincipalActorMapper
+-> ActorIdentity
+-> explicit WorkspaceIdentity
+-> MembershipDecisionService
+-> LocalCommandTextRouter
+-> PermissionPolicy
+-> local capability.
+
+SQLite schema v4 extends schema v3 additively with only the exact
+action-permission table.
+
+Existing list, knowledge, membership, and principal/actor mapping state is
+preserved through migration.
+
+Container performs no SQLite construction and imports no concrete local-storage
+implementation. Caller-owned durability enters through the Core-facing
+repository contract.
+
+The same composed PermissionPolicy is shared by the list and knowledge
+capabilities.
+
+The operations proof seeds an external SQLite database, closes storage, reopens
+it during verification, and demonstrates durable success and fail-closed
+authorization without model, provider, readiness, network, or cognitive
+execution.
+
+Public HTTP, CognitiveEngine, trusted routing, authentication semantics,
+membership semantics, and principal-mapping semantics remain unchanged.
+
+This is feature-branch architecture, not yet a governed Sprint 31 release.
