@@ -161,5 +161,7 @@ The following guardrails are implemented in the governed Sprint 31 release:
 These statements are governed Sprint 31 implementation-release truth at
 `governed-sprint-31-complete`. Independent implementation review was unavailable
 and is not claimed. Release-truth integration and canonical validation are
-complete; this final closure-truth correction still requires governed
-integration before formal Sprint 31 closure is claimed.
+complete. Closure-truth PR #42, final canonical validation, and governed
+working-branch cleanup also completed. Formal Sprint 31 governance closure
+conditions were satisfied at canonical checkpoint
+`fa90defc44ad756a33f11e470105db57a440e201`; all guardrails remain unchanged.

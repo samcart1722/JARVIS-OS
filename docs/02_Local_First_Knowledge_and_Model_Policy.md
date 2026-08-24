@@ -177,5 +177,6 @@ fallback calls.
 
 This implementation merged through PR #40 at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be` and is released at
-`governed-sprint-31-complete`. Final release-truth governance closure remains
-pending.
+`governed-sprint-31-complete`. Formal Sprint 31 governance closure was
+subsequently completed at canonical checkpoint
+`fa90defc44ad756a33f11e470105db57a440e201`.

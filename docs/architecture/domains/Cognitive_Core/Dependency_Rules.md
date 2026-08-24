@@ -368,5 +368,6 @@ public HTTP and CognitiveEngine. Its CLI delegates to the operations runtime
 instead of constructing SQLite or cognitive components itself.
 
 Architecture tests enforce these governed implementation boundaries. They are
-released at `governed-sprint-31-complete`; final release-truth governance
-closure remains pending.
+released at `governed-sprint-31-complete`; formal Sprint 31 governance closure
+was subsequently completed at canonical checkpoint
+`fa90defc44ad756a33f11e470105db57a440e201`.

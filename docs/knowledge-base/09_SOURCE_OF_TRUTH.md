@@ -93,15 +93,17 @@ passed 117 architecture and 1,119 repository tests, Ruff, and
 `git diff --check`. The merged implementation and release-truth branches were
 deleted locally and remotely. The RT2B documentation diff received independent
 post-edit approval, and PR #41 received independent pre-merge approval; neither
-is independent implementation review. PR #42 is the governed final
-closure-truth integration vehicle. Its original bounded diff received
-independent post-edit approval, and its first independent pre-merge review
-identified this bounded documentation correction. Formal Sprint 31 closure is
-established only after the final PR #42 state receives independent pre-merge
-approval, is integrated by ordinary merge commit, passes canonical post-merge
-validation, has its closure branch cleaned, and receives final governance
-verification. No Sprint 32 implementation is authorized and no Sprint 32 scope
-is frozen.
+is independent implementation review. PR #42 received final independent
+pre-merge approval and merged through ordinary two-parent merge commit
+`fa90defc44ad756a33f11e470105db57a440e201`. Final canonical validation passed
+117 architecture and 1,119 repository tests, Ruff, and `git diff --check`. All
+governed Sprint 31 implementation, release-truth, and closure working branches
+were merged and cleaned locally and remotely before this post-closure
+documentation record. Final governance verification confirmed the closure
+conditions. Sprint 31 is formally governance-closed at canonical closure
+checkpoint `fa90defc44ad756a33f11e470105db57a440e201`. This record reflects the
+already-established closure state and does not create or condition it. No
+Sprint 32 implementation is authorized and no Sprint 32 scope is frozen.
 
 For immutable release facts, Git objects, refs, and immutable release tags take
 precedence, followed by verified release-backup evidence, active reviewed

@@ -327,6 +327,9 @@ Governance maintenance must preserve:
 - operations-demo isolation;
 - permission ownership separate from membership and authentication.
 
-Sprint 31 is released at `governed-sprint-31-complete`. Release-truth
-integration and canonical validation are complete; this final closure-truth
-correction remains pending before formal Sprint 31 closure can be declared.
+Sprint 31 is released at `governed-sprint-31-complete`. Release-truth and
+closure-truth integration, final canonical validation, governed working-branch
+cleanup, and final governance verification are complete. Formal Sprint 31
+governance closure conditions were satisfied at canonical checkpoint
+`fa90defc44ad756a33f11e470105db57a440e201`; closure governance is no longer
+outstanding debt.

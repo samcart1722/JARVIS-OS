@@ -58,10 +58,15 @@ merged through PR #41 at canonical merge
 `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`. Canonical validation passed 117
 architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
 merged implementation and release-truth branches were cleaned locally and
-remotely. The current `chore/sprint-31-closure-truth-finalization` branch remains
-for this bounded final correction; its governed integration and formal Sprint
-31 closure are still pending. No subsequent implementation sprint is
-authorized by this checkpoint.
+remotely. PR #42 then merged through ordinary two-parent merge commit
+`fa90defc44ad756a33f11e470105db57a440e201`; final canonical validation passed
+117 architecture and 1,119 repository tests, Ruff, and `git diff --check`.
+All governed Sprint 31 implementation, release-truth, and closure working
+branches were merged and cleaned locally and remotely before this post-closure
+documentation record. Sprint 31 is formally governance-closed at that canonical
+checkpoint. This document records the already-established closure and does not
+create it. No subsequent implementation sprint is authorized by this
+checkpoint, and Sprint 32 scope remains unfrozen.
 
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`

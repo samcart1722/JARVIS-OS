@@ -616,6 +616,8 @@ Public HTTP, CognitiveEngine, trusted routing, authentication semantics,
 membership semantics, and principal-mapping semantics remain unchanged.
 
 This architecture is released in governed Sprint 31 at
-`governed-sprint-31-complete`. Release-truth integration and canonical
-validation are complete; this final closure-truth correction still requires
-governed integration before formal Sprint 31 closure is claimed.
+`governed-sprint-31-complete`. Release-truth and closure-truth integration,
+final canonical validation, and governed working-branch cleanup are complete.
+Formal Sprint 31 governance closure conditions were satisfied at canonical
+checkpoint `fa90defc44ad756a33f11e470105db57a440e201` without changing these
+runtime semantics.
