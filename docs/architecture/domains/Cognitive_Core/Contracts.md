@@ -512,5 +512,6 @@ roles, groups, inheritance, authentication, membership, credential storage,
 sessions, public grant management, or account lifecycle.
 
 These contracts are released in governed Sprint 31 at
-`governed-sprint-31-complete`. Final release-truth governance closure remains
-pending.
+`governed-sprint-31-complete`. Release-truth integration and canonical
+validation are complete; this final closure-truth correction still requires
+governed integration before formal Sprint 31 closure is claimed.

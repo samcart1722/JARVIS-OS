@@ -84,9 +84,24 @@ implementation release. PR #40 merged at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, and immutable governed tag
 `governed-sprint-31-complete` peels to that commit. Authoritative backup
 `LUXIOM_20260821_095503` is verified and recoverable. Independent review was
-unavailable and no independent review is claimed. Release-truth metadata
-governance, final governance review, and formal Sprint 31 closure remain
-pending. No Sprint 32 implementation is authorized.
+unavailable and no independent implementation review is claimed.
+
+Release-truth synchronization commit
+`d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd` merged through PR #41 at ordinary
+canonical merge `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`. Mandatory canonical validation
+passed 117 architecture and 1,119 repository tests, Ruff, and
+`git diff --check`. The merged implementation and release-truth branches were
+deleted locally and remotely. The RT2B documentation diff received independent
+post-edit approval, and PR #41 received independent pre-merge approval; neither
+is independent implementation review. PR #42 is the governed final
+closure-truth integration vehicle. Its original bounded diff received
+independent post-edit approval, and its first independent pre-merge review
+identified this bounded documentation correction. Formal Sprint 31 closure is
+established only after the final PR #42 state receives independent pre-merge
+approval, is integrated by ordinary merge commit, passes canonical post-merge
+validation, has its closure branch cleaned, and receives final governance
+verification. No Sprint 32 implementation is authorized and no Sprint 32 scope
+is frozen.
 
 For immutable release facts, Git objects, refs, and immutable release tags take
 precedence, followed by verified release-backup evidence, active reviewed

@@ -48,10 +48,14 @@
     reviews were performed; one schema-verification defect was found and
     corrected before release.
 
-15. **Governance state:** implementation merge, post-merge validation,
-    immutable release tagging, backup verification, and bundle recovery are
-    complete. Release-truth metadata integration and formal Sprint 31 closure
-    remain in progress.
+15. **Governance state:** implementation merge, immutable release tagging,
+    backup verification, and bundle recovery are complete. Release-truth commit
+    `d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd` merged through PR #41 at canonical
+    merge `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`; canonical validation passed 117
+    architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
+    merged implementation and release-truth branches were cleaned locally and
+    remotely. This final closure-truth branch remains pending governed
+    integration; formal Sprint 31 closure is not yet claimed.
 
 16. **Next implementation:** no Sprint 32 implementation is authorized.
     Any next sprint remains an unfrozen planning and contract-definition
@@ -82,7 +86,10 @@
 
 ## Resume instruction
 
-Resume from the Git-verified current state, not from historical recovery text.
-At this checkpoint Sprint 31 is the latest governed implementation release, but
-its release-truth metadata governance and formal closure are still in progress.
-Do not begin a subsequent implementation sprint without explicit authorization.
+Resume from canonical `master` at
+`7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`, not from historical recovery text.
+Sprint 31 implementation and release-truth integration are complete. The final
+bounded closure-truth correction on
+`chore/sprint-31-closure-truth-finalization` is the remaining governance work;
+formal closure is not yet claimed. Do not begin a subsequent implementation
+sprint without explicit authorization.
