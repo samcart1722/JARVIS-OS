@@ -52,10 +52,16 @@ Independent review was unavailable for Sprint 31 and no independent review is
 claimed. Same-assistant technical and adversarial reviews were performed and
 identified and corrected a schema-verification defect before release.
 
-This checkpoint records the Sprint 31 implementation release. Release-truth
-metadata integration, branch cleanup, and formal governance closure are separate
-governed gates and are not implied by the implementation release itself. No
-subsequent implementation sprint is authorized by this checkpoint.
+Sprint 31 implementation and release-truth integration are complete.
+Documentation synchronization commit `d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd`
+merged through PR #41 at canonical merge
+`7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`. Canonical validation passed 117
+architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
+merged implementation and release-truth branches were cleaned locally and
+remotely. The current `chore/sprint-31-closure-truth-finalization` branch remains
+for this bounded final correction; its governed integration and formal Sprint
+31 closure are still pending. No subsequent implementation sprint is
+authorized by this checkpoint.
 
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`

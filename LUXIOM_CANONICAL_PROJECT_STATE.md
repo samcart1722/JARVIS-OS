@@ -106,8 +106,16 @@ Independent review was unavailable and no independent review is claimed.
 Same-assistant technical and adversarial reviews identified and corrected a
 schema-verification defect before release.
 
-Release-truth metadata synchronization and formal governance closure remain in
-progress. No Sprint 32 implementation is authorized.
+Release-truth synchronization commit
+`d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd` merged through PR #41 at ordinary
+merge `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`. Canonical post-merge validation
+passed 117 architecture tests, 1,119 repository tests, Ruff, and
+`git diff --check`. The merged implementation and release-truth branches were
+deleted locally and remotely. The RT2B documentation diff received independent
+post-edit approval, and PR #41 received independent pre-merge approval; neither
+is an independent review of the Sprint 31 implementation. This final bounded
+closure-truth correction still requires its own governed integration; formal
+Sprint 31 closure is not yet claimed. No Sprint 32 implementation is authorized.
 
 The immediately preceding governed implementation release is Sprint 30 —
 Durable Principal–Actor Mapping Foundation v1, released at
@@ -219,9 +227,15 @@ as a conversational scratchpad or mirror every external-ledger update.
 - Immutable governed tag `governed-sprint-31-complete` is verified.
 - Authoritative backup `LUXIOM_20260821_095503` is verified and recoverable.
 - Independent review was unavailable; no independent review is claimed.
-- Release-truth metadata governance is in progress.
-- Metadata merge, mandatory final validation, exact branch cleanup, final
-  review, and formal Sprint 31 closure remain pending.
+- Release-truth PR #41 merged through ordinary merge commit
+  `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`.
+- Mandatory canonical validation passed 117 architecture and 1,119 repository
+  tests, Ruff, and `git diff --check`.
+- The merged implementation and release-truth branches were deleted locally and
+  remotely; this final closure branch remains until its governed integration.
+- Independent post-edit review, commit/push, PR, independent pre-merge review,
+  ordinary merge, canonical validation, and cleanup of this final closure-truth
+  correction remain pending before formal Sprint 31 closure can be declared.
 - No subsequent implementation sprint is authorized by this checkpoint.
 
 ## 17. Sprint 29 immutable release checkpoint

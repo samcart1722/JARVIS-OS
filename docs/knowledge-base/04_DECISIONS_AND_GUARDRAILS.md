@@ -159,5 +159,7 @@ The following guardrails are implemented in the governed Sprint 31 release:
 - The durable demo is operational proof, not a public permission-management API.
 
 These statements are governed Sprint 31 implementation-release truth at
-`governed-sprint-31-complete`. Independent review was unavailable and is not
-claimed; final release-truth governance closure remains pending.
+`governed-sprint-31-complete`. Independent implementation review was unavailable
+and is not claimed. Release-truth integration and canonical validation are
+complete; this final closure-truth correction still requires governed
+integration before formal Sprint 31 closure is claimed.

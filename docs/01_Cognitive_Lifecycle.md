@@ -641,5 +641,7 @@ permissions, or automatic authorization from membership.
 
 This section records governed implementation-release truth. Sprint 31 merged
 through PR #40 at `9cad78ed22f0a6aef26eda0623d0f544cf65e5be` and is tagged
-`governed-sprint-31-complete`; final release-truth governance closure remains
-pending.
+`governed-sprint-31-complete`. Release-truth PR #41, canonical validation, and
+cleanup of the merged implementation/release-truth branches are complete. This
+final closure-truth correction still requires governed integration before
+formal Sprint 31 closure is claimed.

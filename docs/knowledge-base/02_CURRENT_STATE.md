@@ -12,8 +12,18 @@ Sprint 31 adds durable exact actor/workspace/action permission grants behind the
 existing `PermissionPolicy` boundary. It does not add roles/RBAC, inheritance,
 wildcards, public permission administration, production authentication, or
 sessions. Independent review was unavailable and no independent review is
-claimed. Release-truth metadata governance, final governance review, and formal
-Sprint 31 closure remain pending. No Sprint 32 implementation is authorized.
+claimed. Release-truth synchronization commit
+`d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd` merged through PR #41 at canonical
+merge `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`. Canonical validation passed 117
+architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
+merged implementation and release-truth branches were deleted locally and
+remotely. The full suite's initial Windows TEMP permission failure was
+environmental; its controlled-basetemp rerun passed all 1,119 tests. The RT2B
+documentation diff and PR #41 received independent post-edit and pre-merge
+approval respectively; neither is an independent implementation review. This
+final bounded closure-truth correction still requires independent post-edit
+review and governed integration before formal Sprint 31 closure. No Sprint 32
+implementation is authorized.
 
 ## Sprint 29 released implementation state
 
@@ -475,9 +485,14 @@ Independent review was unavailable and no independent review is claimed.
 Same-assistant technical and adversarial reviews must not be represented as
 independent review. Commit, push, PR #40 merge, post-merge validation, immutable
 tag `governed-sprint-31-complete`, tag verification, and authoritative backup
-verification have completed. Release-truth metadata integration, mandatory
-final validation, branch cleanup, final governance review, and formal closure
-remain pending.
+verification have completed. Release-truth PR #41 merged at
+`7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`; mandatory canonical validation
+passed 117 architecture and 1,119 repository tests, Ruff, and
+`git diff --check`. The merged implementation and release-truth branches were
+cleaned locally and remotely. Independent post-edit review, commit/push, PR,
+independent pre-merge review, ordinary merge, canonical validation, and cleanup
+of this final closure-truth correction remain pending before formal closure can
+be declared.
 
 Sprint 31 is the latest governed implementation release. No Sprint 32
 implementation is authorized.

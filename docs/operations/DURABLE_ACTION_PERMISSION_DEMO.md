@@ -70,5 +70,6 @@ The demo database may be deleted by the caller after the proof.
 This document records governed Sprint 31 operational behavior.
 
 Sprint 31 merged through PR #40 and is released at
-`governed-sprint-31-complete`. Formal release-truth governance closure remains
-pending.
+`governed-sprint-31-complete`. Release-truth integration and canonical
+validation are complete; this final closure-truth correction still requires
+governed integration before formal Sprint 31 closure is claimed.
