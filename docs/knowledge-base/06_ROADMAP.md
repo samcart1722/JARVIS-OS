@@ -253,7 +253,7 @@ Release-truth metadata synchronization completed through metadata commit `a8bce2
 
 Manual same-assistant reviews are not represented as independent review.
 
-## Sprint 31 release and release-truth integration complete - final closure pending
+## Sprint 31 formal governance closure complete
 
 Sprint 31 - Durable Action Permission Foundation v1 was implemented from frozen
 base `a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9` and merged through PR #40 at
@@ -299,20 +299,21 @@ Completed review and release work includes:
 - local and remote cleanup of the merged implementation and release-truth
   branches.
 
-PR #42 is the governed final closure-truth integration vehicle. Its original
-bounded diff received independent post-edit approval, and its first independent
-pre-merge review identified this bounded documentation correction. Formal
-Sprint 31 closure is established only from the final independently approved PR
-state after ordinary-merge integration, mandatory validation on canonical
-`master`, cleanup of `chore/sprint-31-closure-truth-finalization`, and final
-governance verification of those conditions.
+PR #42 received final independent pre-merge approval and merged through ordinary
+two-parent merge commit `fa90defc44ad756a33f11e470105db57a440e201`.
+Mandatory validation on canonical `master` passed 117 architecture and 1,119
+repository tests, Ruff, and `git diff --check`. All governed Sprint 31
+implementation, release-truth, and closure working branches were merged and
+cleaned locally and remotely before this post-closure documentation record.
+Final governance verification confirmed the closure conditions. Sprint 31 is
+formally governance-closed at that canonical checkpoint; this record reflects
+that already-established state and does not create or condition it.
 
 Sprint 31 deliberately does not add roles or RBAC, permission inheritance,
 grant/revoke management, audit history, production authentication, sessions,
 JWT/OAuth, credential persistence, public authorization transport, remote IdP,
 or cloud synchronization.
 
-Sprint 31 is the latest governed implementation release. Implementation and
-release-truth integration are complete, but formal closure remains pending on
-the final correction lifecycle above. No Sprint 32 implementation is
-authorized, and no Sprint 32 scope is frozen or implied here.
+Sprint 31 is the latest governed implementation release and is formally
+governance-closed. No Sprint 32 implementation is authorized, and no Sprint 32
+scope is frozen or implied here.

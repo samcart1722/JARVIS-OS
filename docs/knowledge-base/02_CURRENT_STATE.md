@@ -21,13 +21,16 @@ remotely. The full suite's initial Windows TEMP permission failure was
 environmental; its controlled-basetemp rerun passed all 1,119 tests. The RT2B
 documentation diff and PR #41 received independent post-edit and pre-merge
 approval respectively; neither is an independent implementation review. This
-final closure-truth work is governed through PR #42. Its original bounded diff
-received independent post-edit approval, and its first independent pre-merge
-review identified this bounded documentation correction. Formal Sprint 31
-closure depends on independent approval of the final PR #42 state, ordinary
-merge integration, successful canonical post-merge validation, closure-branch
-cleanup, and final governance verification. No Sprint 32 implementation is
-authorized.
+closure-truth work merged through PR #42 at ordinary two-parent merge
+`fa90defc44ad756a33f11e470105db57a440e201` after final independent pre-merge
+approval. Final canonical validation passed 117 architecture and 1,119
+repository tests, Ruff, and `git diff --check`. All governed Sprint 31
+implementation, release-truth, and closure working branches were merged and
+cleaned locally and remotely before this post-closure documentation record.
+Final governance verification confirmed the closure conditions, so Sprint 31
+is formally governance-closed at that canonical checkpoint. This record reports
+the already-established state and does not create it. No Sprint 32
+implementation is authorized, and Sprint 32 scope remains unfrozen.
 
 ## Sprint 29 released implementation state
 
@@ -493,12 +496,13 @@ verification have completed. Release-truth PR #41 merged at
 `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`; mandatory canonical validation
 passed 117 architecture and 1,119 repository tests, Ruff, and
 `git diff --check`. The merged implementation and release-truth branches were
-cleaned locally and remotely. PR #42 is the governed final closure-truth
-integration vehicle and is undergoing its corrective governance cycle after
-the first independent pre-merge review identified this bounded documentation
-correction. Formal closure is established only from an independently approved
-final PR state integrated by ordinary merge, successful canonical post-merge
-validation, cleanup of the closure branch, and final governance verification.
+cleaned locally and remotely. PR #42 received final independent pre-merge
+approval and merged through ordinary two-parent merge commit
+`fa90defc44ad756a33f11e470105db57a440e201`. Final canonical validation passed,
+the closure working branch was cleaned locally and remotely, and final
+governance verification confirmed the closure conditions. Sprint 31 is formally
+governance-closed at that canonical checkpoint; this post-closure documentation
+record does not establish or condition that closure.
 
 Sprint 31 is the latest governed implementation release. No Sprint 32
 implementation is authorized.

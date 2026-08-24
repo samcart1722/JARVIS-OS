@@ -54,8 +54,12 @@
     merge `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`; canonical validation passed 117
     architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
     merged implementation and release-truth branches were cleaned locally and
-    remotely. This final closure-truth branch remains pending governed
-    integration; formal Sprint 31 closure is not yet claimed.
+    remotely. PR #42 merged through ordinary two-parent merge commit
+    `fa90defc44ad756a33f11e470105db57a440e201`; final canonical validation passed,
+    the closure working branch was cleaned locally and remotely, and final
+    governance verification confirmed the closure conditions. Sprint 31 is
+    formally governance-closed at that canonical checkpoint. This post-closure
+    documentation record reports, rather than establishes, that state.
 
 16. **Next implementation:** no Sprint 32 implementation is authorized.
     Any next sprint remains an unfrozen planning and contract-definition
@@ -87,9 +91,9 @@
 ## Resume instruction
 
 Resume from canonical `master` at
-`7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`, not from historical recovery text.
-Sprint 31 implementation and release-truth integration are complete. The final
-bounded closure-truth correction on
-`chore/sprint-31-closure-truth-finalization` is the remaining governance work;
-formal closure is not yet claimed. Do not begin a subsequent implementation
-sprint without explicit authorization.
+`fa90defc44ad756a33f11e470105db57a440e201`, not from historical recovery text.
+Sprint 31 implementation, release-truth integration, closure-truth integration,
+final validation, governed working-branch cleanup, and formal governance
+closure are complete. This post-closure documentation record does not establish
+or condition that closure. Do not begin a subsequent implementation sprint
+without explicit authorization; Sprint 32 scope remains unfrozen.

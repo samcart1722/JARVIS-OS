@@ -351,5 +351,6 @@ authorization path.
 The durable action-permission runtime remains an operations proof outside the
 public API and CognitiveEngine.
 
-These components are released at `governed-sprint-31-complete`; final
-release-truth governance closure remains pending.
+These components remain released at `governed-sprint-31-complete`; formal
+Sprint 31 governance closure was subsequently completed at canonical checkpoint
+`fa90defc44ad756a33f11e470105db57a440e201`.
