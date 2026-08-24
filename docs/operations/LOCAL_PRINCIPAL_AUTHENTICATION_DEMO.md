@@ -6,7 +6,7 @@
 
 ## Purpose and scope
 
-This demo exercises the Sprint 29 candidate's existing authenticated internal
+This demo exercises the released Sprint 29 authenticated internal
 routing boundary without Internet, Ollama, an external model, a server, a
 database file, filesystem persistence, environment credentials, time, or
 randomness.

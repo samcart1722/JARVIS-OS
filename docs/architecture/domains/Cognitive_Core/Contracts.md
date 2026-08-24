@@ -479,10 +479,10 @@ invalid. Supplying none preserves the existing empty configured mapper and
 performs no storage I/O.
 
 This contract is released in governed Sprint 30 at
-`governed-sprint-30-complete`. Merge, immutable release tagging, and authoritative backup
-verification are complete; release-truth governance closure remains in progress.
+`governed-sprint-30-complete`. Merge, immutable release tagging, authoritative backup
+verification, and release-truth governance closure are complete.
 
-## Sprint 31 candidate durable action-permission contracts
+## Sprint 31 governed durable action-permission contracts
 
 The Core-facing persistence port is PermissionGrantRepository.
 
@@ -511,4 +511,6 @@ These contracts add durability to action authorization only. They do not define
 roles, groups, inheritance, authentication, membership, credential storage,
 sessions, public grant management, or account lifecycle.
 
-This is Sprint 31 feature-branch contract truth, not release metadata.
+These contracts are released in governed Sprint 31 at
+`governed-sprint-31-complete`. Final release-truth governance closure remains
+pending.

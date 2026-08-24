@@ -2,86 +2,87 @@
 
 ## Recovery brief
 
-1. **Identity:** Luxiom is a domain-independent Cognitive Operating System, not
-   a chatbot, LLM wrapper, conventional agent, or single-industry product.
-   HealthBridge is its first planned consumer, not part of the Core.
-2. **Exact checkpoint:** branch `docs/engineering-platform`, commit
-   `74637ab126c6dc2942bb5ae01cea0f9db7cd1d30`, tag
-   `sprint-3-complete`, as verified on 2026-07-29.
-3. **Runtime:** `Brain → Orchestrator → CognitiveEngine → Goal/CognitiveContext
-   → classifier → specialist → Plan → CapabilityExecutor → ExecutionResult
-   → ResponseStage`.
-4. **Important components:** `app/cognition/engine.py`,
-   `app/core/container.py`, classification, specialists, planning,
-   capabilities, response stage, and the separately composed cognitive memory
-   pipeline.
-5. **Completed work:** Sprints 0–3 are tagged and summarized under
-   [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
-6. **Non-negotiable guardrails:** models are providers, Core is
-   domain-independent, specialists plan, capabilities are reusable,
-   `CognitiveEngine` orchestrates, and `Container` composes dependencies.
-7. **Known debt:** executor lacks context; classification/default planning and
-   response are minimal; no concrete capability executes; memory is outside the
-   active cycle; legacy paths and identity inconsistencies remain; configured
-   tests exclude `app/tests`.
-8. **Changes requiring architectural review:** Core/domain coupling, lifecycle
-   changes, collaborator responsibilities, executor/capability contracts,
-   memory ownership, legacy removal, product-specific exceptions, or replacing
-   provider independence.
-9. **Reading order:** Product North Star → Cognitive Lifecycle →
-   [Knowledge Base index](00_INDEX.md) → Current State → Runtime Architecture →
-   Decisions/Guardrails → Technical Debt → Roadmap.
-10. **Validation:** inspect `git status`, branch, HEAD, tags, recent log, runtime
-    code and test configuration; then run the configured pytest suite. Do not
-    rely on this snapshot if the repository has moved.
-11. **Recommended next step:** formally define Sprint 4. Candidate scope exists,
-    but no approval was found and no implementation should be assumed.
-12. **Do not assume:** that draft architecture is approved; that interfaces are
-    integrated features; that all repository tests are collected; that the
-    Ollama reasoning stage is active; that memory updates occur; that
-    HealthBridge belongs in Core; or that JARVIS naming means the product is not
-    Luxiom.
+1. **Identity:** Luxiom is a domain-independent Cognitive Operating System.
+   HealthBridge is a product/client, not part of the Core.
 
-## Questions to answer from code before proposing changes
+2. **Canonical branch:** `master`.
 
-- What commit, branch, tags, and working-tree changes now exist?
-- Which API/CLI entry point actually reaches `CognitiveEngine`?
-- Which stages are constructed and which are called at runtime?
-- Does the executor receive enough context for the `Capability` contract?
-- Which concrete capabilities are registered and invoked?
-- Where is memory composed, and does the request lifecycle call it?
-- Which tests does `pyproject.toml` collect, and what is excluded?
-- Which legacy modules are still imported by active paths?
-- What normative documents are approved versus Draft?
-- Is there now an ADR directory or a formal Sprint 4 decision?
-- Have identity/configuration strings been deliberately migrated?
+3. **Latest governed implementation release:** Sprint 31 — Durable Action
+   Permission Foundation v1.
 
-## Copy-Paste Recovery Prompt
+4. **Release commit:**
+   `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
 
-```text
-You are taking over the Luxiom repository without access to previous chats.
-Treat the repository and Git history as the primary evidence.
+5. **Release tree:**
+   `5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
 
-First read LUXIOM_START_HERE.md. Then read docs/00_Product_North_Star.md,
-docs/01_Cognitive_Lifecycle.md, and every document linked from
-docs/knowledge-base/00_INDEX.md. Review foundation and architecture documents,
-preserving their status (Approved, Draft, RFC, etc.), and inspect any ADRs.
+6. **Governed tag:** `governed-sprint-31-complete`
 
-Before proposing or changing anything:
-1. Run git status, identify branch/HEAD/tags, and inspect recent history.
-2. Inspect the executable Cognitive Core, Container, public entry points, test
-   configuration, and legacy imports.
-3. Run the configured tests and report the exact result.
-4. Compare documented architecture with the runtime and record discrepancies.
+7. **Annotated tag object:**
+   `2f52c2973bd349bd4302d7bb1e59307f5b14708c`
 
-Do not redesign the architecture, rebrand the project, resolve technical debt,
-or treat a scaffold/interface as completed functionality without explicit
-scope and architectural review. Models are replaceable providers, not the
-Core; the Core remains domain-independent; specialists plan; capabilities are
-reusable; CognitiveEngine orchestrates; Container is the Composition Root.
+8. **Validation:** 117/117 architecture tests and 1119/1119 repository tests
+   passed. Ruff and `git diff --check` passed.
 
-Confirm the current state before continuing. Resume from the latest sprint that
-Git and tests confirm. At the recovery-pack checkpoint this was Sprint 3 at
-74637ab (tag sprint-3-complete), while Sprint 4 was not approved or started;
-verify that this remains true rather than assuming it.
-```
+9. **Authoritative recoverable backup:**
+   `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260821_095503`
+
+10. **Architecture boundary:** authentication, principal-to-actor mapping,
+    workspace selection, membership admission, and action authorization remain
+    separate. Membership does not imply permission.
+
+11. **Sprint 31 permission semantics:** durable grants match the exact
+    `(ActorIdentity, WorkspaceIdentity, Action)` triple. Absence of a grant
+    denies access. Known repository failures fail closed.
+
+12. **Composition:** default `Container` remains no-I/O. Durable permission
+    storage exists only through explicit repository injection.
+
+13. **Not added by Sprint 31:** roles/RBAC, groups, inheritance, wildcards,
+    explicit deny rules, public grant/revoke APIs, production authentication
+    transport, credential persistence, JWT/OAuth, sessions, device lifecycle,
+    remote identity providers, or cloud synchronization.
+
+14. **Review truth:** independent review was unavailable for Sprint 31 and no
+    independent review is claimed. Same-assistant technical and adversarial
+    reviews were performed; one schema-verification defect was found and
+    corrected before release.
+
+15. **Governance state:** implementation merge, post-merge validation,
+    immutable release tagging, backup verification, and bundle recovery are
+    complete. Release-truth metadata integration and formal Sprint 31 closure
+    remain in progress.
+
+16. **Next implementation:** no Sprint 32 implementation is authorized.
+    Any next sprint remains an unfrozen planning and contract-definition
+    boundary until explicitly approved.
+
+## Required recovery order
+
+1. Read `LUXIOM_CANONICAL_PROJECT_STATE.md`.
+2. Read `LUXIOM_START_HERE.md`.
+3. Verify Git branch, HEAD, `origin/master`, tag object, tag peel, and worktree.
+4. Read Product North Star and Cognitive Lifecycle.
+5. Read Current State, Runtime Architecture, Decisions and Guardrails,
+   Technical Debt, and Roadmap.
+6. Run the configured architecture and repository test suites.
+7. Compare documentation against executable runtime before proposing changes.
+
+## Non-negotiable guardrails
+
+- The model is not the Core.
+- The Core remains domain-independent and infrastructure-independent.
+- Local deterministic capability is preferred when sufficient.
+- Memory and knowledge belong to Luxiom, not to a model.
+- Identity, workspace, membership, and action authorization remain explicit
+  and separate.
+- Public transport does not silently acquire internal capabilities.
+- Do not infer architecture or release truth from old sprint-number collisions.
+- Do not move, recreate, delete, or retarget immutable governed release tags.
+
+## Resume instruction
+
+Resume from the Git-verified current state, not from historical recovery text.
+At this checkpoint Sprint 31 is the latest governed implementation release, but
+its release-truth metadata governance and formal closure are still in progress.
+Do not begin a subsequent implementation sprint without explicit authorization.

@@ -378,7 +378,7 @@ Its intelligence does not reside inside a language model.
 Its intelligence emerges from the collaboration of multiple cognitive domains operating under a deterministic and observable architecture.
 
 This document is the foundation of that architecture.
-# Sprint 29 candidate authentication boundary
+# Sprint 29 released authentication boundary
 
 The internal principal-authentication boundary authenticates an opaque local
 proof into `PrincipalIdentity`, then uses a distinct mapper to obtain the

@@ -128,10 +128,9 @@ deterministic operational/SQLite validations.
 Manual same-assistant governance reviews in this cycle are explicitly distinct
 from independent review.
 
-## Sprint 31 feature-branch decisions and guardrails
+## Sprint 31 governed decisions and guardrails
 
-The following guardrails are implemented candidates pending governed review and
-release:
+The following guardrails are implemented in the governed Sprint 31 release:
 
 - Action authorization remains separate from authentication.
 - Action authorization remains separate from principal-to-actor mapping.
@@ -159,5 +158,6 @@ release:
 - The trusted route remains unchanged.
 - The durable demo is operational proof, not a public permission-management API.
 
-These statements are feature-branch implementation truth. They must not be
-represented as released Sprint 31 decisions until governance completes.
+These statements are governed Sprint 31 implementation-release truth at
+`governed-sprint-31-complete`. Independent review was unavailable and is not
+claimed; final release-truth governance closure remains pending.

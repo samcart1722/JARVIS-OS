@@ -73,6 +73,21 @@ SHA-256 values are `21f6ede11b901891f871854182aa7998ad9fd16f3ab269adf8d01436ea67
 NON_AUTHORITATIVE_RELEASE_BACKUP`; its hashes and LF-to-CRLF diagnostic
 fingerprint are forensic only.
 
+Sprint 30 Git release truth is governed tag
+`governed-sprint-30-complete`, which peels to ordinary PR #37 merge commit
+`6181f549c12195c69708ee2cfa53399a46fa4b29`. Its authoritative recoverable
+backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314`.
+Sprint 30 release-truth governance closure completed before the Sprint 31 base.
+
+Sprint 31 - Durable Action Permission Foundation v1 is the latest governed
+implementation release. PR #40 merged at
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, and immutable governed tag
+`governed-sprint-31-complete` peels to that commit. Authoritative backup
+`LUXIOM_20260821_095503` is verified and recoverable. Independent review was
+unavailable and no independent review is claimed. Release-truth metadata
+governance, final governance review, and formal Sprint 31 closure remain
+pending. No Sprint 32 implementation is authorized.
+
 For immutable release facts, Git objects, refs, and immutable release tags take
 precedence, followed by verified release-backup evidence, active reviewed
 repository documentation, the repository canonical checkpoint, and then any

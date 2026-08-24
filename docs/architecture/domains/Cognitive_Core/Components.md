@@ -321,9 +321,9 @@ session, role, permission, workspace, membership, token, or account-lifecycle
 storage. `CognitiveEngine`, the trusted route, membership semantics, and
 `PermissionPolicy` remain unchanged.
 
-## Sprint 31 candidate durable action-permission components
+## Sprint 31 governed durable action-permission components
 
-The Sprint 31 feature branch preserves PermissionPolicy as the Core-facing
+The governed Sprint 31 release preserves PermissionPolicy as the Core-facing
 authorization boundary and adds one optional repository-backed implementation.
 
 PermissionGrantRepository owns exact lookup and append-only creation for one
@@ -351,4 +351,5 @@ authorization path.
 The durable action-permission runtime remains an operations proof outside the
 public API and CognitiveEngine.
 
-This section describes the feature branch before governed merge or release.
+These components are released at `governed-sprint-31-complete`; final
+release-truth governance closure remains pending.

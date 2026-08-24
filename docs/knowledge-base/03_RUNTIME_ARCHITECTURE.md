@@ -47,7 +47,9 @@ to cognition. The feature merged at
 `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
 released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
-released trusted request context; Sprint 28 released durable membership; Sprint 30 is now the latest governed implementation release at `governed-sprint-30-complete`.
+released trusted request context; Sprint 28 released durable membership; Sprint
+31 is now the latest governed implementation release at
+`governed-sprint-31-complete`.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -557,7 +559,7 @@ of this operations proof.
 unchanged and remains non-authentication. Membership remains workspace
 admission. `PermissionPolicy` remains action authorization.
 
-## Sprint 31 candidate durable action-permission flow
+## Sprint 31 governed durable action-permission flow
 
 Sprint 31 changes only the implementation available behind the existing
 downstream PermissionPolicy.
@@ -613,4 +615,6 @@ execution.
 Public HTTP, CognitiveEngine, trusted routing, authentication semantics,
 membership semantics, and principal-mapping semantics remain unchanged.
 
-This is feature-branch architecture, not yet a governed Sprint 31 release.
+This architecture is released in governed Sprint 31 at
+`governed-sprint-31-complete`; final release-truth governance closure remains
+pending.

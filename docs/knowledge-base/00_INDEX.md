@@ -5,9 +5,9 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 29 Local Principal Authentication Foundation v1 is the latest immutable
-implementation release at `9590beca0ddfce544f774ffc1327d01f8044a420`, tag
-`sprint-29-complete`. Start with the repository-owned
+Sprint 31 Durable Action Permission Foundation v1 is the latest governed
+implementation release at `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, tag
+`governed-sprint-31-complete`. Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and
 [Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md).
