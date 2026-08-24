@@ -233,9 +233,14 @@ as a conversational scratchpad or mirror every external-ledger update.
   tests, Ruff, and `git diff --check`.
 - The merged implementation and release-truth branches were deleted locally and
   remotely; this final closure branch remains until its governed integration.
-- Independent post-edit review, commit/push, PR, independent pre-merge review,
-  ordinary merge, canonical validation, and cleanup of this final closure-truth
-  correction remain pending before formal Sprint 31 closure can be declared.
+- PR #42 is the governed final closure-truth integration vehicle. Its original
+  bounded diff received independent post-edit approval; the first independent
+  pre-merge review identified a bounded documentation correction, so PR #42 is
+  undergoing its corrective governance cycle. Formal Sprint 31 closure is
+  established only when the final PR #42 state receives independent pre-merge
+  approval, is integrated by ordinary merge commit, passes mandatory canonical
+  post-merge validation, has its closure branch cleaned, and receives final
+  governance verification.
 - No subsequent implementation sprint is authorized by this checkpoint.
 
 ## 17. Sprint 29 immutable release checkpoint

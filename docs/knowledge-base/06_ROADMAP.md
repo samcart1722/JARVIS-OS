@@ -299,14 +299,13 @@ Completed review and release work includes:
 - local and remote cleanup of the merged implementation and release-truth
   branches.
 
-Remaining governance is limited to this final bounded closure-truth correction:
-
-- independent post-edit review;
-- commit, push, and final closure PR;
-- independent pre-merge review and ordinary merge;
-- mandatory validation of the final closure merge on canonical `master`;
-- cleanup of `chore/sprint-31-closure-truth-finalization`;
-- final governance review and formal Sprint 31 closure declaration.
+PR #42 is the governed final closure-truth integration vehicle. Its original
+bounded diff received independent post-edit approval, and its first independent
+pre-merge review identified this bounded documentation correction. Formal
+Sprint 31 closure is established only from the final independently approved PR
+state after ordinary-merge integration, mandatory validation on canonical
+`master`, cleanup of `chore/sprint-31-closure-truth-finalization`, and final
+governance verification of those conditions.
 
 Sprint 31 deliberately does not add roles or RBAC, permission inheritance,
 grant/revoke management, audit history, production authentication, sessions,

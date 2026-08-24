@@ -21,9 +21,13 @@ remotely. The full suite's initial Windows TEMP permission failure was
 environmental; its controlled-basetemp rerun passed all 1,119 tests. The RT2B
 documentation diff and PR #41 received independent post-edit and pre-merge
 approval respectively; neither is an independent implementation review. This
-final bounded closure-truth correction still requires independent post-edit
-review and governed integration before formal Sprint 31 closure. No Sprint 32
-implementation is authorized.
+final closure-truth work is governed through PR #42. Its original bounded diff
+received independent post-edit approval, and its first independent pre-merge
+review identified this bounded documentation correction. Formal Sprint 31
+closure depends on independent approval of the final PR #42 state, ordinary
+merge integration, successful canonical post-merge validation, closure-branch
+cleanup, and final governance verification. No Sprint 32 implementation is
+authorized.
 
 ## Sprint 29 released implementation state
 
@@ -489,10 +493,12 @@ verification have completed. Release-truth PR #41 merged at
 `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`; mandatory canonical validation
 passed 117 architecture and 1,119 repository tests, Ruff, and
 `git diff --check`. The merged implementation and release-truth branches were
-cleaned locally and remotely. Independent post-edit review, commit/push, PR,
-independent pre-merge review, ordinary merge, canonical validation, and cleanup
-of this final closure-truth correction remain pending before formal closure can
-be declared.
+cleaned locally and remotely. PR #42 is the governed final closure-truth
+integration vehicle and is undergoing its corrective governance cycle after
+the first independent pre-merge review identified this bounded documentation
+correction. Formal closure is established only from an independently approved
+final PR state integrated by ordinary merge, successful canonical post-merge
+validation, cleanup of the closure branch, and final governance verification.
 
 Sprint 31 is the latest governed implementation release. No Sprint 32
 implementation is authorized.

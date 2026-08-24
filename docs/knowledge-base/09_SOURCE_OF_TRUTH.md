@@ -93,11 +93,15 @@ passed 117 architecture and 1,119 repository tests, Ruff, and
 `git diff --check`. The merged implementation and release-truth branches were
 deleted locally and remotely. The RT2B documentation diff received independent
 post-edit approval, and PR #41 received independent pre-merge approval; neither
-is independent implementation review. This final bounded closure-truth
-correction still requires independent post-edit review and governed integration,
-including validation and cleanup of its own branch, before formal Sprint 31
-closure is declared. No Sprint 32 implementation is authorized and no Sprint 32
-scope is frozen.
+is independent implementation review. PR #42 is the governed final
+closure-truth integration vehicle. Its original bounded diff received
+independent post-edit approval, and its first independent pre-merge review
+identified this bounded documentation correction. Formal Sprint 31 closure is
+established only after the final PR #42 state receives independent pre-merge
+approval, is integrated by ordinary merge commit, passes canonical post-merge
+validation, has its closure branch cleaned, and receives final governance
+verification. No Sprint 32 implementation is authorized and no Sprint 32 scope
+is frozen.
 
 For immutable release facts, Git objects, refs, and immutable release tags take
 precedence, followed by verified release-backup evidence, active reviewed
