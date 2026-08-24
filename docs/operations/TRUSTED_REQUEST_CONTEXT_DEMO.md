@@ -68,7 +68,7 @@ neither this demo nor Sprint 28 authenticates public HTTP.
 
 ## Sprint 29 separation update
 
-The Sprint 29 candidate introduces a separate internal local-principal
+The released Sprint 29 implementation introduces a separate internal local-principal
 authenticated entry boundary. This trusted-host demo remains
 **non-authenticated**: its configured binding key is an opaque lookup selector,
 not an authentication proof, and `TrustedLocalCommandRoutingService` is not

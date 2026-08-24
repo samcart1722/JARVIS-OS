@@ -58,7 +58,8 @@ merged at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical
 release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
 fully released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
 released trusted request context, Sprint 28 released durable membership, and
-Sprint 30 is now the latest governed implementation release at `governed-sprint-30-complete`.
+Sprint 31 is now the latest governed implementation release at
+`governed-sprint-31-complete`.
 
 ## Policy
 
@@ -141,9 +142,9 @@ It precedes workspace selection and membership and leaves `PermissionPolicy`
 as action authorization. This development/test/demo foundation makes no
 model/provider/network calls and chooses no production credential technology.
 
-## Sprint 31 working-tree durable action-permission candidate
+## Sprint 31 governed durable action-permission release
 
-The Sprint 31 feature branch adds an optional durable local implementation of
+The governed Sprint 31 release adds an optional durable local implementation of
 the existing action-authorization boundary without changing local-first order.
 
 Authorization still occurs after authentication, principal-to-actor mapping,
@@ -174,4 +175,7 @@ plus fail-closed wrong-workspace, wrong-action, wrong-actor, and repository
 failure scenarios with zero model, provider, readiness, network, and cognitive
 fallback calls.
 
-This is implementation-candidate truth, not a Sprint 31 release claim.
+This implementation merged through PR #40 at
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be` and is released at
+`governed-sprint-31-complete`. Final release-truth governance closure remains
+pending.

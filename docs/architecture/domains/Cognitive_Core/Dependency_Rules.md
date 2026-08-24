@@ -337,7 +337,7 @@ The durable demo may explicitly construct local SQLite infrastructure because it
 is an operations proof. Its CLI remains thin and delegates to the operations
 runtime; it does not import SQLite, Container, or cognition modules directly.
 
-## Sprint 31 candidate durable action-permission boundary
+## Sprint 31 governed durable action-permission boundary
 
 The dependency direction remains inward:
 
@@ -367,5 +367,6 @@ The durable action-permission demo remains under operations and is absent from
 public HTTP and CognitiveEngine. Its CLI delegates to the operations runtime
 instead of constructing SQLite or cognitive components itself.
 
-Architecture tests enforce these feature-branch boundaries. This section does
-not claim governed release.
+Architecture tests enforce these governed implementation boundaries. They are
+released at `governed-sprint-31-complete`; final release-truth governance
+closure remains pending.

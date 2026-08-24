@@ -287,16 +287,15 @@ history, and byte-identical backup requirements as later capabilities evolve.
 This post-release classification does not claim zero project-wide technical
 debt.
 
-## Sprint 31 feature-branch classification
+## Sprint 31 post-release classification
 
-The current Sprint 31 candidate addresses the previously deferred durable
+The governed Sprint 31 release addresses the previously deferred durable
 action-permission policy through one narrow repository contract, one
 repository-backed policy, explicit SQLite injection, schema v4, architecture
 enforcement, and a deterministic cross-process proof.
 
-No new uncontrolled technical debt has been identified by the current
-implementation and test evidence. This statement remains provisional until
-governed review and release.
+No new uncontrolled technical debt has been identified by the governed
+implementation and test evidence.
 
 The following remain deliberate future work and are not capabilities claimed
 by Sprint 31:
@@ -328,4 +327,5 @@ Governance maintenance must preserve:
 - operations-demo isolation;
 - permission ownership separate from membership and authentication.
 
-Sprint 31 remains a feature-branch candidate and is not yet release truth.
+Sprint 31 is released at `governed-sprint-31-complete`. Final release-truth
+governance closure remains pending.

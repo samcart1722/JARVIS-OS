@@ -1,5 +1,20 @@
 # Current State
 
+## Sprint 31 governed implementation state
+
+Sprint 31 - Durable Action Permission Foundation v1 is the latest governed
+implementation release. PR #40 merged at
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, and the immutable governed tag is
+`governed-sprint-31-complete`. The implementation, post-merge validation, tag
+verification, and authoritative backup `LUXIOM_20260821_095503` are complete.
+
+Sprint 31 adds durable exact actor/workspace/action permission grants behind the
+existing `PermissionPolicy` boundary. It does not add roles/RBAC, inheritance,
+wildcards, public permission administration, production authentication, or
+sessions. Independent review was unavailable and no independent review is
+claimed. Release-truth metadata governance, final governance review, and formal
+Sprint 31 closure remain pending. No Sprint 32 implementation is authorized.
+
 ## Sprint 29 released implementation state
 
 Local Principal Authentication Foundation v1 is released through PR #34 at
@@ -420,19 +435,18 @@ explicitly excluded from the governed Sprint 30 lifecycle. Its tag object
 remains `d5794405f4a0c70dc750e7e4438ca7c10a198b04` and it peels to `a37dc884bd7b9962a5842037b52f2bf202f16b34`. It was not moved,
 deleted, or reused.
 
-The implementation release, immutable tag, authoritative backup, release-truth metadata integration, and mandatory final post-merge validation are complete. Metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a` merged through PR #38 at ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`. Final validation on canonical `master` passed 1,059 repository tests, Ruff, and the governed Sprint 27, 28, 29, and 30 operational regressions. The post-merge release-truth scan correctly required this bounded closure-truth correction mini-cycle. Sprint 30 is not formally governance-closed until this correction is reviewed and integrated, exact branch cleanup is complete, and the final governance review and formal closure are recorded.
+The implementation release, immutable tag, authoritative backup, release-truth metadata integration, and mandatory final post-merge validation are complete. Metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a` merged through PR #38 at ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`. Final validation on canonical `master` passed 1,059 repository tests, Ruff, and the governed Sprint 27, 28, 29, and 30 operational regressions. The bounded closure-truth correction subsequently completed before the governed Sprint 31 base.
 
 Manual same-assistant governance reviews performed during this release cycle
 are not represented as independent review.
 
-## Sprint 31 feature-branch implementation candidate
+## Sprint 31 released feature
 
-Sprint 31 - Durable Action Permission Foundation v1 is implemented and
-technically validated on feature branch
-feat/sprint-31-durable-action-permission-foundation, based on
-a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9.
+Sprint 31 - Durable Action Permission Foundation v1 was implemented from frozen
+base `a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9` and merged through PR #40 at
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`.
 
-The current candidate adds:
+The governed release adds:
 
 - PermissionGrantRepository;
 - PermissionGrantRepositoryError;
@@ -457,10 +471,13 @@ architecture tests, plus global Ruff and git diff --check.
 The operational proof passed with zero model, provider, readiness, network, and
 cognitive-fallback calls.
 
-This is not canonical release truth. Independent review was unavailable and
-no independent review is claimed. Same-assistant technical and adversarial
-reviews, corrective validation, governed staging, and exact index fingerprint
-have completed. Commit, push, merge, tag, backup, and formal closure remain
-pending.
+Independent review was unavailable and no independent review is claimed.
+Same-assistant technical and adversarial reviews must not be represented as
+independent review. Commit, push, PR #40 merge, post-merge validation, immutable
+tag `governed-sprint-31-complete`, tag verification, and authoritative backup
+verification have completed. Release-truth metadata integration, mandatory
+final validation, branch cleanup, final governance review, and formal closure
+remain pending.
 
-Sprint 30 therefore remains the latest governed release.
+Sprint 31 is the latest governed implementation release. No Sprint 32
+implementation is authorized.

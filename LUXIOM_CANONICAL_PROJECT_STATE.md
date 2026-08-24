@@ -54,13 +54,68 @@ provenance-aware.
 - Runtime: Python 3.12 or newer; release validation used Python 3.14.6 on
   Windows PowerShell.
 
-## 5. Recent release lineage
+## 5. Current governed release — Sprint 31
 
-Sprint 27 released Trusted Request Context Foundation v1 at
-`sprint-27-complete`. Sprint 28 builds on it with durable actor/workspace
-membership admission. Earlier sprint summaries preserve historical lineage.
+Sprint 31 — Durable Action Permission Foundation v1 is the latest governed
+implementation release.
 
-## 6. Prior immutable release — Sprint 28
+Frozen base:
+`a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9`
+
+Feature commit:
+`0796cb54ee1d570852a85722af43b1b41a3b4881`
+
+PR #40 ordinary merge:
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
+
+Release tree:
+`5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
+
+Governed tag:
+`governed-sprint-31-complete`
+
+Annotated tag object:
+`2f52c2973bd349bd4302d7bb1e59307f5b14708c`
+
+The tag peels to the release commit above.
+
+Post-merge validation passed 117 architecture tests and 1,119 repository
+tests. Global Ruff and `git diff --check` passed.
+
+Authoritative recoverable backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260821_095503`
+
+Bundle SHA-256:
+`5FD5D98735DA2C770F685B813C4777200E4D5DE3E3902E6EBD0FE459A56C7022`
+
+Source ZIP SHA-256:
+`485BCC969008BD841EAA4F34A2BCA8E6DDE8EB96208CCB4A64605B06FC1E73C6`
+
+Manifest SHA-256:
+`5996D7AA4D2181C79AC7409E48E7A654C19D0691BC809BCB5C6678B28D1D6BBF`
+
+Bundle recovery reproduced the exact release commit, tag object, tag peel,
+release tree, `master`, and clean worktree.
+
+Sprint 31 releases durable exact actor/workspace/action permission persistence
+behind the existing `PermissionPolicy` boundary. Authentication,
+principal-to-actor mapping, workspace selection, membership admission, and
+action authorization remain distinct. Membership alone grants no action.
+
+Independent review was unavailable and no independent review is claimed.
+Same-assistant technical and adversarial reviews identified and corrected a
+schema-verification defect before release.
+
+Release-truth metadata synchronization and formal governance closure remain in
+progress. No Sprint 32 implementation is authorized.
+
+The immediately preceding governed implementation release is Sprint 30 —
+Durable Principal–Actor Mapping Foundation v1, released at
+`6181f549c12195c69708ee2cfa53399a46fa4b29` under immutable tag
+`governed-sprint-30-complete` (annotated tag object
+`cd410e5e0ddad708cd3b1a8b91b0fe4dc38e5f35`).
+
+## 6. Historical immutable release — Sprint 28
 
 Sprint 28 Durable Actor–Workspace Membership Foundation v1 is implemented,
 independently approved, merged, post-merge validated, tagged, tag-verified, and
@@ -121,13 +176,14 @@ the tag.
 
 ## 12. Current deliberate deferrals and technical debt
 
-Production/public/durable authentication, production credential/proof
-technology, durable action-permission storage, roles/invitations,
-transition/audit history, public trusted/membership transport,
-encryption/retention/synchronization policy, and broader semantic retrieval
-remain deferred. Sprint 29 released the local, deterministic, process-local,
-nonpersistent principal-authentication foundation; these broader capabilities
-are not implied Sprint 30 commitments.
+Roles/RBAC, groups, inheritance, wildcards, explicit deny rules, permission
+revoke/update/expiry/audit history, public authentication transport, production
+credential technology, sessions/devices, public permission administration,
+encryption/retention/synchronization, remote identity providers, cloud sync,
+and broader semantic retrieval remain deferred.
+
+Durable exact action-permission persistence itself is no longer deferred:
+Sprint 31 releases that bounded capability.
 
 ## 13. Governance workflow
 
@@ -144,8 +200,8 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Do not begin Sprint 30 implementation without explicit authorization; Sprint 30
-   remains an unfrozen planning and contract-definition boundary.
+6. Do not begin Sprint 32 implementation without explicit authorization;
+   Sprint 32 remains an unfrozen planning and contract-definition boundary.
 
 ## 15. Repository checkpoint synchronization policy
 
@@ -155,18 +211,20 @@ as a conversational scratchpad or mirror every external-ledger update.
 
 ## 16. Current closure state
 
-- Implementation complete and final independent review approved
-- Merged and post-merge validated
-- Immutable release tag independently verified
-- Release backup independently recovered and verified
-- Release-truth metadata governance completed through metadata commit
-  `854e767d86443db860eb8e23b75a736d1266b394`, branch push, PR `#35`, and
-  ordinary merge `9a441706280b22d6471b0ecff5b47ff78617a467` into `master`
-- Feature-branch cleanup not performed
-- Final release closure not yet declared
-- Sprint 29 Local Principal Authentication Foundation v1 is released and complete
+- Sprint 31 implementation is complete.
+- PR #40 is merged through ordinary merge commit
+  `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`.
+- Post-merge validation passed 117 architecture and 1,119 repository tests,
+  Ruff, and `git diff --check`.
+- Immutable governed tag `governed-sprint-31-complete` is verified.
+- Authoritative backup `LUXIOM_20260821_095503` is verified and recoverable.
+- Independent review was unavailable; no independent review is claimed.
+- Release-truth metadata governance is in progress.
+- Metadata merge, mandatory final validation, exact branch cleanup, final
+  review, and formal Sprint 31 closure remain pending.
+- No subsequent implementation sprint is authorized by this checkpoint.
 
-## 18. Sprint 29 immutable release checkpoint
+## 17. Sprint 29 immutable release checkpoint
 
 PR `#34` merged feature `8f08583701571e69b6d18a0cfea64d073201a217`
 (base `779a2719eaf83de2f98134cc76027dd6f2e7d945`) at

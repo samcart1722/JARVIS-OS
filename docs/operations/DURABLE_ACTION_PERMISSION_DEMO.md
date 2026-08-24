@@ -1,6 +1,6 @@
 ﻿# Durable Action Permission Demo
 
-Status: Sprint 31 feature-branch operational proof.
+Status: Sprint 31 governed-release operational proof.
 
 This internal two-process proof demonstrates exact SQLite-backed action
 authorization while preserving authentication, principal mapping, workspace
@@ -67,6 +67,8 @@ permission expiry, audit history, wildcard, or inheritance rule.
 
 The demo database may be deleted by the caller after the proof.
 
-This document records feature-branch operational behavior only.
+This document records governed Sprint 31 operational behavior.
 
-Sprint 31 is not yet merged, tagged, released, or formally closed.
+Sprint 31 merged through PR #40 and is released at
+`governed-sprint-31-complete`. Formal release-truth governance closure remains
+pending.

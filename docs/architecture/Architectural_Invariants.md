@@ -250,7 +250,7 @@ Implementations may change.
 Technologies may be replaced.
 
 These architectural invariants must remain true throughout the lifetime of the project.
-# Sprint 29 candidate invariants
+# Sprint 29 released invariants
 
 - Authentication is neither membership nor permission authorization.
 - `PrincipalIdentity` is not `ActorIdentity`; `ActorIdentity` is not identity

@@ -130,9 +130,13 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 30 is the latest governed implementation release at
-`6181f549c12195c69708ee2cfa53399a46fa4b29`, tag `governed-sprint-30-complete`. Sprint 29 remains the immediately
-preceding governed principal-authentication release at
+Sprint 31 is the latest governed implementation release at
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, tag
+`governed-sprint-31-complete`. Sprint 30 remains the immediately preceding
+governed durable principal-to-actor mapping release at
+`6181f549c12195c69708ee2cfa53399a46fa4b29`, tag
+`governed-sprint-30-complete`. Sprint 29 is the preceding governed
+principal-authentication release at
 `9590beca0ddfce544f774ffc1327d01f8044a420`, tag `sprint-29-complete`. The
 typed resolver remains separate from the public HTTP/CognitiveEngine path. The
 Core preserves validated
@@ -187,9 +191,9 @@ or change the HTTP surface.
 
 ## Sprint 30 governance closure boundary
 
-Sprint 30 implementation is merged, post-merge validated, immutably tagged, and authoritatively backed up. Release-truth metadata integration completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation. That validation identified this bounded closure-truth correction as required. Remaining Sprint 30 governance is limited to review and integration of this correction, exact branch cleanup, final review, and formal closure.
+Sprint 30 implementation is merged, post-merge validated, immutably tagged, and authoritatively backed up. Release-truth metadata integration completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation. The bounded closure-truth correction and Sprint 30 governance closure subsequently completed before the governed Sprint 31 base.
 
-## Sprint 30 implementation release complete; governance closure in progress
+## Sprint 30 implementation release and governance closure complete
 
 **Sprint 30 — Durable Principal–Actor Mapping Foundation v1** has completed its implementation release.
 
@@ -245,17 +249,17 @@ membership semantic changes, `PermissionPolicy` changes, `CognitiveEngine`
 changes, trusted-route changes, remote identity providers, or cloud
 synchronization.
 
-Release-truth metadata synchronization completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation on canonical `master`. That validation required this bounded closure-truth correction mini-cycle. Remaining work is review and integration of this correction, exact branch cleanup, final review, and formal closure.
+Release-truth metadata synchronization completed through metadata commit `a8bce2df7aa6903f29d7b88b6a976e504ba9268a`, PR #38, ordinary merge `89d303407d0da4b2d2d12509fc8b5aef6d7fcb46`, and mandatory final post-merge validation on canonical `master`. The required bounded closure-truth correction and final Sprint 30 governance closure subsequently completed before Sprint 31 began.
 
 Manual same-assistant reviews are not represented as independent review.
 
-## Sprint 31 implementation candidate - governance pending
+## Sprint 31 governed implementation release - release-truth governance pending
 
-Sprint 31 - Durable Action Permission Foundation v1 is implemented on feature
-branch feat/sprint-31-durable-action-permission-foundation from frozen base
-a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9.
+Sprint 31 - Durable Action Permission Foundation v1 was implemented from frozen
+base `a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9` and merged through PR #40 at
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`.
 
-The candidate addresses the bounded durable action-permission deferral left by
+The governed release addresses the bounded durable action-permission deferral left by
 Sprint 30.
 
 It adds:
@@ -273,28 +277,23 @@ Post-correction validation records 1,119 repository tests, including 117
 architecture tests, global Ruff, diff hygiene, and successful seed/verify
 operations with zero model, provider, readiness, network, and cognitive calls.
 
-This is not complete release work.
+The implementation release, post-merge validation, immutable governed tag
+`governed-sprint-31-complete`, tag verification, and authoritative backup
+verification are complete.
 
-Completed pre-commit governance includes:
+Completed review and release work includes:
 
 - same-assistant technical review;
 - adversarial corrective review and post-correction validation;
 - independent review unavailable; no independent review is claimed;
-- exact staging and index fingerprint.
-
-Remaining governance begins with:
-
-- feature commit;
-- commit review;
-- push;
-- remote review;
-- pull request;
-- pre-merge review;
-- merge;
+- exact staging and index fingerprint;
+- feature commit, push, PR #40, and governed merge;
 - post-merge validation;
-- immutable governed release tag;
-- tag verification;
-- recoverable backup and verification;
+- immutable governed release tag and tag verification;
+- authoritative backup verification.
+
+Remaining governance is limited to:
+
 - release-truth documentation synchronization;
 - final post-merge validation;
 - branch cleanup;
@@ -307,5 +306,6 @@ grant/revoke management, audit history, production authentication, sessions,
 JWT/OAuth, credential persistence, public authorization transport, remote IdP,
 or cloud synchronization.
 
-Sprint 30 remains the latest governed release until Sprint 31 completes the
-governed release lifecycle.
+Sprint 31 is the latest governed implementation release. Its final
+release-truth governance closure remains pending. No Sprint 32 implementation
+is authorized, and no Sprint 32 scope is implied here.

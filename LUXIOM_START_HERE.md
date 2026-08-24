@@ -8,27 +8,54 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 28 Durable Actor–Workspace Membership Foundation v1 is the prior
-immutable implementation release. Feature commit
-`95341198145f84d80c7cf37bf73b707cfe574a21` merged through PR #32 as normal
-two-parent merge commit `be22ffddda6d6961497c338caadf4c85e0fcb3ed`.
-The annotated tag `sprint-28-complete` points to that commit; its tag object is
-`986ae13ca8fefcbd6197db8a723e25ae4e3dc62a`. Validation passed 915 repository,
-78 architecture, and 156 focused tests, Ruff, and both demos. The independently
-recovered backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260817_190455`.
-The full release record is the
-[Sprint 28 summary](docs/knowledge-base/history/sprints/SPRINT_28_SUMMARY.md).
-Sprint 29 Local Principal Authentication Foundation v1 is now released through
-PR #34 at `9590beca0ddfce544f774ffc1327d01f8044a420`, annotated tag
-`sprint-29-complete` (object `c3a204555cc512ae9404039aeb8be8d6aa421550`).
-Its authoritative backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260818_141402`;
-see the [Sprint 29 summary](docs/knowledge-base/history/sprints/SPRINT_29_SUMMARY.md).
+Sprint 31 — Durable Action Permission Foundation v1 is the latest governed
+implementation release.
 
-Membership is workspace admission, not authentication or action authorization.
-Identities are typed values, not proof; trusted binding is not durable
-membership; `PermissionPolicy` remains downstream. Default `Container` remains
-in-memory/no-I/O, and no public membership/authentication transport was added.
-Sprint 27 remains the prior completed tagged capability release.
+Feature commit:
+`0796cb54ee1d570852a85722af43b1b41a3b4881`
+
+PR #40 merged through ordinary two-parent merge commit:
+`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
+
+Release tree:
+`5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
+
+Immutable governed annotated tag:
+`governed-sprint-31-complete`
+
+Annotated tag object:
+`2f52c2973bd349bd4302d7bb1e59307f5b14708c`
+
+The tag peels to the release commit above.
+
+Post-merge validation passed 117 architecture tests and 1,119 repository
+tests. Ruff and `git diff --check` passed.
+
+The authoritative recoverable backup is:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260821_095503`
+
+Bundle recovery reproduced the exact release commit, governed tag object,
+tag peel, release tree, `master`, and a clean worktree.
+
+Sprint 31 makes exact actor/workspace/action permission durability available
+through explicit repository injection while preserving authentication,
+principal-to-actor mapping, workspace selection, membership admission, and
+action authorization as separate boundaries. Membership alone does not grant
+an action. Missing or known repository-failure permission state denies access.
+
+Default `Container` composition remains no-I/O. Sprint 31 adds no public
+authentication transport, roles/RBAC, wildcard or inherited permissions,
+grant/revoke API, session/device lifecycle, credential persistence, or public
+HTTP exposure.
+
+Independent review was unavailable for Sprint 31 and no independent review is
+claimed. Same-assistant technical and adversarial reviews were performed and
+identified and corrected a schema-verification defect before release.
+
+This checkpoint records the Sprint 31 implementation release. Release-truth
+metadata integration, branch cleanup, and formal governance closure are separate
+governed gates and are not implied by the implementation release itself. No
+subsequent implementation sprint is authorized by this checkpoint.
 
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
@@ -50,9 +77,10 @@ parsing. Default `Container` construction remains in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The latest immutable implementation release tag is `sprint-29-complete`; its
-  tag object is `c3a204555cc512ae9404039aeb8be8d6aa421550` and it peels to
-  `9590beca0ddfce544f774ffc1327d01f8044a420`.
+- The latest immutable governed implementation release tag is
+  `governed-sprint-31-complete`; its annotated tag object is
+  `2f52c2973bd349bd4302d7bb1e59307f5b14708c` and it peels to
+  `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`.
 - The public HTTP path remains the historical `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by
