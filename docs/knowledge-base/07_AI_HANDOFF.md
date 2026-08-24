@@ -90,10 +90,11 @@
 
 ## Resume instruction
 
-Resume from canonical `master` at
-`fa90defc44ad756a33f11e470105db57a440e201`, not from historical recovery text.
-Sprint 31 implementation, release-truth integration, closure-truth integration,
-final validation, governed working-branch cleanup, and formal governance
-closure are complete. This post-closure documentation record does not establish
-or condition that closure. Do not begin a subsequent implementation sprint
-without explicit authorization; Sprint 32 scope remains unfrozen.
+Resume from canonical `master` and verify that local `HEAD` equals
+`origin/master` before continuing. Sprint 31 implementation, release-truth
+integration, closure-truth integration, final validation, governed
+working-branch cleanup, and formal governance closure are complete. The
+immutable formal-closure checkpoint for Sprint 31 remains
+`fa90defc44ad756a33f11e470105db57a440e201`. This instruction does not reopen or
+condition that closure. Do not begin a subsequent implementation sprint without
+explicit authorization; Sprint 32 scope remains unfrozen.
