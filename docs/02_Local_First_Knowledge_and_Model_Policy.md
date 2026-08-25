@@ -180,3 +180,90 @@ This implementation merged through PR #40 at
 `governed-sprint-31-complete`. Formal Sprint 31 governance closure was
 subsequently completed at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`.
+
+## Sprint 32 authenticated local-command application gateway
+
+Sprint 32 introduces a bounded, transport-independent application gateway for
+authenticated local commands and one thin local-use HTTP adapter at
+`POST /local/command`.
+
+The application gateway does not create a new authentication, identity,
+membership, permission, interpretation, local-resolution, or cognitive-routing
+authority. It delegates exactly once to the existing
+`AuthenticatedLocalCommandRoutingService`, which preserves the established
+order:
+
+authentication -> principal-to-actor mapping -> explicit workspace selection
+-> membership admission -> deterministic text interpretation -> downstream
+`PermissionPolicy` -> local capability resolution -> cognitive fallback only
+when local insufficiency and explicit fallback authorization permit it.
+
+`LocalCommandApplicationRequest` contains only the opaque authentication proof,
+requested workspace, text, and explicit cognitive-fallback consent. The proof
+is excluded from generic dataclass serialization and from request
+representation. The HTTP transport uses a secret-aware proof field and unwraps
+the secret exactly once when constructing the application request.
+
+Application results expose only the closed public fields `success`, `route`,
+`response`, and `error`. They do not expose principal, actor, membership,
+repository, provider, routing, or other internal domain objects. The application
+error taxonomy is closed and uses fixed public messages.
+
+The local HTTP adapter validates its JSON body inside the adapter rather than
+using automatic FastAPI request-body validation. Invalid JSON, malformed
+transport input, missing required fields, forbidden extra fields, blank
+workspace or text, invalid proof input, and non-boolean fallback values return
+the controlled `invalid_request` envelope without exposing validation internals
+or the authentication proof.
+
+HTTP status ownership is explicit: successful local or cognitive results return
+200; invalid requests return 400; access or local permission denial returns 403;
+missing local knowledge returns 404; local knowledge conflict or unauthorized
+cognitive fallback returns 409; local validation failure, controlled cognitive
+failure, and service-resolution failure return 503; unexpected adapter
+exceptions return a fixed sanitized 500 `internal_error` envelope.
+
+`local_validation_failed` intentionally maps to HTTP 503 rather than 400 because
+the existing local-resolution boundary uses that governed error for more than
+caller-caused input validation, including declared local repository failure and
+other terminal local-resolution failures.
+
+The default `Container` composes exactly one
+`LocalCommandApplicationGateway` from the already composed
+`AuthenticatedLocalCommandRoutingService`. Default composition remains
+fail-closed and performs no authentication attempt, SQLite open, durable
+credential lookup, model invocation, provider readiness check, or network
+request merely by constructing the container.
+
+Sprint 32 does not introduce production authentication, durable credentials,
+sessions, JWT, OAuth, device identity, RBAC, permission administration,
+membership administration, principal-mapping administration, operational
+SQLite runtime composition, cloud synchronization, public-Internet exposure,
+CORS expansion, UI, desktop packaging, or automatic cognitive fallback.
+
+The existing `/brain/think` and legacy `/knowledge` surfaces remain unchanged.
+Sprint 32 does not claim that every existing HTTP route is authenticated. The
+new `/local/command` endpoint is a bounded local-use development surface over
+the authenticated local-command chain.
+
+The local-first invariants remain unchanged: a sufficient deterministic local
+result is terminal; local permission denial, local validation failure,
+knowledge not-found, and knowledge conflict are terminal local outcomes; only
+local insufficiency may proceed toward cognition; and cognition still requires
+explicit fallback authorization. A supported deterministic local request must
+not invoke model, provider, readiness, or network paths.
+
+Sprint 32 architecture enforcement fixes these boundaries automatically:
+`app/local_command` has exact topology and no transport/infrastructure/provider
+coupling; the gateway owns exactly one authenticated-routing dependency; the
+HTTP adapter cannot import lower authentication, membership, permission,
+interpretation, local-resolution, coordinator, repository, or cognitive-engine
+internals; the proof remains secret-aware; the HTTP status map is closed; the
+adapter owns fixed unexpected-exception sanitization; and the pre-existing
+brain, knowledge, main, and lifespan surfaces remain unchanged.
+
+This section describes the Sprint 32 implementation state on its governed
+implementation branch. It does not declare Sprint 32 merged, released, tagged,
+or governance-closed; those statements require completion of the remaining
+validation, independent review, merge, immutable release tag, and backup
+lifecycle.

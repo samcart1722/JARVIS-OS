@@ -3,9 +3,11 @@ from fastapi import APIRouter
 from app.api.routes.brain import router as brain_router
 from app.api.routes.health import router as health_router
 from app.api.routes.knowledge import router as knowledge_router
+from app.api.routes.local_command import router as local_command_router
 
 api_router = APIRouter()
 
 api_router.include_router(health_router)
 api_router.include_router(brain_router)
 api_router.include_router(knowledge_router)
+api_router.include_router(local_command_router)
