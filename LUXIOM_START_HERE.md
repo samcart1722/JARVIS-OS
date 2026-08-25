@@ -8,65 +8,67 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 31 — Durable Action Permission Foundation v1 is the latest governed
-implementation release.
+Sprint 32 — Authenticated Local Command Application Gateway v1 is the latest
+governed implementation release.
 
-Feature commit:
-`0796cb54ee1d570852a85722af43b1b41a3b4881`
+Frozen base and implementation commit:
+`7aa29bdc894fe646d9e76cb0466d2e26fd44bc88` and
+`a56a11f1b92b08df5e310aea749d9cda07570b65`
 
-PR #40 merged through ordinary two-parent merge commit:
-`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
+PR #45 merged through ordinary two-parent merge commit:
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
 
-Release tree:
-`5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
+Release tree: `d9e31be190d8077886ce6f85642f9b89d1fd8529`
 
-Immutable governed annotated tag:
-`governed-sprint-31-complete`
+Immutable governed tag: `governed-sprint-32-complete`
 
-Annotated tag object:
-`2f52c2973bd349bd4302d7bb1e59307f5b14708c`
+Annotated tag object: `c1f4267177d316d303c8c4c0e7fd3728afdcad32`
 
-The tag peels to the release commit above.
+The tag peels to the merge checkpoint above. Later documentation commits may
+advance `master` without moving that immutable tag.
 
-Post-merge validation passed 117 architecture tests and 1,119 repository
-tests. Ruff and `git diff --check` passed.
+Post-merge validation passed 129 architecture tests and 1,273 repository tests.
+Ruff and `compileall app tests` passed.
 
 The authoritative recoverable backup is:
-`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260821_095503`
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260825_103049`
 
-Bundle recovery reproduced the exact release commit, governed tag object,
-tag peel, release tree, `master`, and a clean worktree.
+Complete bundle, source ZIP, and backup-manifest SHA-256 values are:
+`F1A1CC107C9D2864E767F03BFECB19EE4BE3D03C4061535FBDF30F66B268A07B`,
+`D6F91E1E9B66064CB3928A08D0D8F8B115B69632D20D66C85F77291608868B2F`, and
+`46F4612172505B5AAAC93AEB58CBFF0411C5BB038DBBCC352F122AFA1FAE37CA`.
+Backup verification passed.
 
-Sprint 31 makes exact actor/workspace/action permission durability available
-through explicit repository injection while preserving authentication,
-principal-to-actor mapping, workspace selection, membership admission, and
-action authorization as separate boundaries. Membership alone does not grant
-an action. Missing or known repository-failure permission state denies access.
+Sprint 32 adds a framework-independent `app/local_command` boundary and a
+bounded local-use `POST /local/command` development surface. The dependency
+direction is `app/api` → `app/local_command` →
+`AuthenticatedLocalCommandRoutingService` → the existing governed downstream
+chain. Its closed application contracts require strict explicit cognitive
+fallback, secret-aware proof handling, pickle rejection, and fixed sanitized
+unexpected-error responses.
 
-Default `Container` composition remains no-I/O. Sprint 31 adds no public
-authentication transport, roles/RBAC, wildcard or inherited permissions,
-grant/revoke API, session/device lifecycle, credential persistence, or public
-HTTP exposure.
+The historical `/brain/think` endpoint remains the separate `CognitiveEngine`
+route, and legacy `/knowledge` remains separate. Sprint 32 does not make either
+route authenticated. It adds no production authentication, durable credentials,
+JWT/OAuth, sessions, devices, RBAC, administration, public Internet exposure,
+CORS, UI, runtime SQLite credential composition, or automatic fallback.
 
-Independent review was unavailable for Sprint 31 and no independent review is
-claimed. Same-assistant technical and adversarial reviews were performed and
-identified and corrected a schema-verification defect before release.
+The first independent implementation review found two HIGH issues: proof was
+pickle-serializable and the initial manifest hash semantics were incorrect.
+Both were corrected and explicitly closed by the approving second review. The
+staged-index attestation and final pre-merge review also approved the exact
+release. Approved worktree and committed snapshot SHA-256 values are
+`47A5B64330FB2DE1502CD32D77593E2389ECF594D1187560FDA08DF15E552A33` and
+`2F28B3527701E73986A14331E4763629EDB439EF4A1B5E958FD125EB1F4CAE7E`;
+manifest v2 and staged manifest v3 SHA-256 values are
+`97F4E58613511999429D114483821EC110A35C6EACD0F2A4DF8359CE3C59D28C` and
+`2ACA626A456D9A8989268C7796D693DFC0654C00A2E08F9D14A7752490FB1043`.
 
-Sprint 31 implementation and release-truth integration are complete.
-Documentation synchronization commit `d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd`
-merged through PR #41 at canonical merge
-`7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`. Canonical validation passed 117
-architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
-merged implementation and release-truth branches were cleaned locally and
-remotely. PR #42 then merged through ordinary two-parent merge commit
-`fa90defc44ad756a33f11e470105db57a440e201`; final canonical validation passed
-117 architecture and 1,119 repository tests, Ruff, and `git diff --check`.
-All governed Sprint 31 implementation, release-truth, and closure working
-branches were merged and cleaned locally and remotely before this post-closure
-documentation record. Sprint 31 is formally governance-closed at that canonical
-checkpoint. This document records the already-established closure and does not
-create it. No subsequent implementation sprint is authorized by this
-checkpoint, and Sprint 32 scope remains unfrozen.
+The feature branch was cleaned locally and remotely after merge, validation,
+tag verification, and backup. Sprint 32 is formally governance-closed at
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`. This later documentation patch
+reports that already-established closure; it does not establish or move it.
+No subsequent implementation sprint is authorized merely by this checkpoint.
 
 Sprint 25 is completed through merged PR #24 at
 `1f2da9cfb60a06cb323f30f200720be6437e10a9`, tag `sprint-25-complete`
@@ -83,28 +85,40 @@ intent first. Handled local success or failure is terminal; only
 `not_handled`, explicit fallback authorization, and valid cognitive input can
 select the existing cognitive path.
 
-The coordinator is not used by public HTTP and performs no natural-language
-parsing. Default `Container` construction remains in-memory and inert.
+Before Sprint 32, the coordinator/local-first command path was not exposed
+through HTTP. Sprint 32 now exposes the governed authenticated local-command
+path through the LOCAL-USE `POST /local/command` endpoint. That endpoint reaches
+`LocalCommandTextRouter`, deterministic interpretation,
+`LocalFirstCognitiveCoordinator`, and the governed downstream local capability
+path only after authentication, principal-to-actor mapping, workspace selection,
+and membership admission. The coordinator itself performs no general
+natural-language parsing, and cognitive fallback remains explicit and is never
+automatic. The historical `/brain/think` `CognitiveEngine` route and legacy
+`/knowledge` remain separate. Default `Container` construction remains
+in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
 - The latest immutable governed implementation release tag is
-  `governed-sprint-31-complete`; its annotated tag object is
-  `2f52c2973bd349bd4302d7bb1e59307f5b14708c` and it peels to
-  `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`.
-- The public HTTP path remains the historical `CognitiveEngine` route: input
+  `governed-sprint-32-complete`; its annotated tag object is
+  `c1f4267177d316d303c8c4c0e7fd3728afdcad32` and it peels to
+  `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`.
+- The historical `/brain/think` path remains a `CognitiveEngine` route: input
   becomes a `Goal` and `CognitiveContext`, is classified,
   routed to a specialist, converted to a `Plan`, traversed by
   `CapabilityExecutor`, and formatted by `ResponseStage`.
-- Sprint 21 separately provides a typed, authorized, deterministic local list
-  path with zero model calls. It is not exposed through public HTTP and there
-  is no automatic natural-language routing or resolve-or-reason bridge.
+- Sprint 21 originally introduced a typed, authorized, deterministic local list
+  path with zero model calls and without HTTP exposure. Sprint 32 later exposes
+  the governed authenticated local-command chain through the LOCAL-USE
+  `POST /local/command` endpoint. There is no automatic natural-language routing
+  or resolve-or-reason bridge.
   Classification within the historical path still falls back
   to `Domain.UNKNOWN`. The public `CognitiveEngine` path uses
   `CapabilityExecutor` and registered concrete capabilities; its default policy
   selects `NormalizedInputCapability` unless reasoning is explicitly enabled.
-  Public HTTP supplies no explicit scope and therefore does not use the
-  separate Sprint 21 local resolver.
+  `/brain/think` supplies no explicit scope and therefore does not use the
+  separate Sprint 21 local resolver. Sprint 32 separately exposes the bounded
+  local-use `POST /local/command` authenticated local-command surface.
 
 ## Essential guardrails
 

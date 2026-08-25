@@ -54,28 +54,101 @@ provenance-aware.
 - Runtime: Python 3.12 or newer; release validation used Python 3.14.6 on
   Windows PowerShell.
 
-## 5. Current governed release — Sprint 31
+## 5. Current governed release — Sprint 32
 
-Sprint 31 — Durable Action Permission Foundation v1 is the latest governed
-implementation release.
+Sprint 32 — Authenticated Local Command Application Gateway v1 is the latest
+governed implementation release.
 
-Frozen base:
-`a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9`
+Frozen base: `7aa29bdc894fe646d9e76cb0466d2e26fd44bc88`
 
-Feature commit:
+Implementation commit: `a56a11f1b92b08df5e310aea749d9cda07570b65`
+
+PR #45 ordinary two-parent merge:
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
+
+Merge parents: `7aa29bdc894fe646d9e76cb0466d2e26fd44bc88` and
+`a56a11f1b92b08df5e310aea749d9cda07570b65`
+
+Release tree: `d9e31be190d8077886ce6f85642f9b89d1fd8529`
+
+Governed tag: `governed-sprint-32-complete`
+
+Annotated tag object: `c1f4267177d316d303c8c4c0e7fd3728afdcad32`
+
+The tag peels to immutable Sprint 32 checkpoint
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`. Later documentation commits may
+advance `master` without moving, recreating, or retargeting that tag.
+
+Post-merge validation passed 129 architecture tests and 1,273 repository tests.
+Ruff and `compileall app tests` passed; the worktree was clean and local
+`master` equaled `origin/master`.
+
+Authoritative recoverable backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260825_103049`
+
+Complete Git bundle SHA-256:
+`F1A1CC107C9D2864E767F03BFECB19EE4BE3D03C4061535FBDF30F66B268A07B`
+
+Source ZIP SHA-256:
+`D6F91E1E9B66064CB3928A08D0D8F8B115B69632D20D66C85F77291608868B2F`
+
+Backup manifest SHA-256:
+`46F4612172505B5AAAC93AEB58CBFF0411C5BB038DBBCC352F122AFA1FAE37CA`
+
+Backup verification passed. The feature branch was deleted locally and
+remotely only after merge, post-merge validation, tag verification, and backup.
+
+Sprint 32 releases this dependency direction:
+
+`app/api` → `app/local_command` →
+`AuthenticatedLocalCommandRoutingService` → existing governed downstream chain.
+
+It adds a framework-independent `app/local_command` boundary, the bounded
+local-use `POST /local/command` development surface, closed application request,
+result, and error contracts, strict explicit cognitive-fallback authorization,
+fixed sanitized unexpected-error handling, secret-aware proof handling, and
+explicit rejection of pickle serialization. Default `Container` composition
+remains rejecting, fail-closed, in-memory, and construction-time no-I/O.
+
+Sprint 32 does not add production authentication, durable credentials,
+JWT/OAuth, sessions, device lifecycle, RBAC, public administration, public
+Internet exposure, CORS, UI, runtime SQLite credential composition, or
+automatic cognitive fallback. Historical `/brain/think` and legacy
+`/knowledge` remain separate and were not made authenticated by Sprint 32.
+
+The first independent implementation review required correction because proof
+material remained pickle-serializable and the initial external manifest hash
+semantics were incorrect. Both HIGH findings were corrected and explicitly
+closed by the approving second independent review. Independent staged-index
+attestation and final independent pre-merge review also approved the release.
+The approved worktree and committed snapshot SHA-256 values are respectively
+`47A5B64330FB2DE1502CD32D77593E2389ECF594D1187560FDA08DF15E552A33` and
+`2F28B3527701E73986A14331E4763629EDB439EF4A1B5E958FD125EB1F4CAE7E`.
+Approved manifest v2 and staged manifest v3 file SHA-256 values are respectively
+`97F4E58613511999429D114483821EC110A35C6EACD0F2A4DF8359CE3C59D28C` and
+`2ACA626A456D9A8989268C7796D693DFC0654C00A2E08F9D14A7752490FB1043`.
+
+Sprint 32 is formally governance-closed at the immutable checkpoint above.
+This later documentation synchronization reports that already-established
+closure; it does not establish, condition, or move the release checkpoint.
+
+### Historical governed release — Sprint 31
+
+Sprint 31 — Durable Action Permission Foundation v1 is the immediately
+preceding governed implementation release.
+
+Frozen base: `a2ba79dc5deb70e6929cf4164ea8a0636ffc0dc9`
+
+Feature implementation commit:
 `0796cb54ee1d570852a85722af43b1b41a3b4881`
 
-PR #40 ordinary merge:
-`9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
+PR #40 ordinary merge: `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
 
-Release tree:
-`5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
+Release tree: `5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
 
-Governed tag:
-`governed-sprint-31-complete`
+Governed tag: `governed-sprint-31-complete`
 
-Annotated tag object:
-`2f52c2973bd349bd4302d7bb1e59307f5b14708c`
+Annotated tag object: `2f52c2973bd349bd4302d7bb1e59307f5b14708c`
 
 The tag peels to the release commit above.
 
@@ -97,14 +170,16 @@ Manifest SHA-256:
 Bundle recovery reproduced the exact release commit, tag object, tag peel,
 release tree, `master`, and clean worktree.
 
-Sprint 31 releases durable exact actor/workspace/action permission persistence
+Sprint 31 released durable exact actor/workspace/action permission persistence
 behind the existing `PermissionPolicy` boundary. Authentication,
 principal-to-actor mapping, workspace selection, membership admission, and
-action authorization remain distinct. Membership alone grants no action.
+action authorization remained distinct. Membership alone granted no action.
+Default `Container` composition remained no-I/O; durable permission storage
+required explicit repository injection.
 
-Independent review was unavailable and no independent review is claimed.
-Same-assistant technical and adversarial reviews identified and corrected a
-schema-verification defect before release.
+Independent implementation review was unavailable and no independent review is
+claimed. Same-assistant technical and adversarial reviews identified and
+corrected a schema-verification defect before release.
 
 Release-truth synchronization commit
 `d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd` merged through PR #41 at ordinary
@@ -113,20 +188,22 @@ passed 117 architecture tests, 1,119 repository tests, Ruff, and
 `git diff --check`. The merged implementation and release-truth branches were
 deleted locally and remotely. The RT2B documentation diff received independent
 post-edit approval, and PR #41 received independent pre-merge approval; neither
-is an independent review of the Sprint 31 implementation. PR #42 merged through
-ordinary two-parent merge commit
+is an independent review of the Sprint 31 implementation.
+
+PR #42 merged through ordinary two-parent merge commit
 `fa90defc44ad756a33f11e470105db57a440e201`. Final canonical validation passed
 117 architecture tests, 1,119 repository tests, Ruff, and `git diff --check`.
 All governed Sprint 31 implementation, release-truth, and closure working
-branches were merged and cleaned locally and remotely before this post-closure
+branches were merged and cleaned locally and remotely before the post-closure
 documentation record. Formal Sprint 31 governance closure conditions were
 satisfied at that canonical checkpoint. Independent implementation review
-remains unavailable and is not claimed. No Sprint 32 implementation is
-authorized.
+remains unavailable and is not claimed.
 
-The immediately preceding governed implementation release is Sprint 30 —
-Durable Principal–Actor Mapping Foundation v1, released at
-`6181f549c12195c69708ee2cfa53399a46fa4b29` under immutable tag
+### Historical predecessor — Sprint 30
+
+Sprint 30 — Durable Principal–Actor Mapping Foundation v1 was released at
+governed implementation release commit
+`6181f549c12195c69708ee2cfa53399a46fa4b29` under immutable governed tag
 `governed-sprint-30-complete` (annotated tag object
 `cd410e5e0ddad708cd3b1a8b91b0fe4dc38e5f35`).
 
@@ -215,8 +292,9 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Do not begin Sprint 32 implementation without explicit authorization;
-   Sprint 32 remains an unfrozen planning and contract-definition boundary.
+6. Sprint 32 is formally closed. Do not begin any subsequent implementation
+   sprint without explicit authorization; the next implementation remains a
+   planning and contract-definition boundary until explicitly approved.
 
 ## 15. Repository checkpoint synchronization policy
 
@@ -226,33 +304,24 @@ as a conversational scratchpad or mirror every external-ledger update.
 
 ## 16. Current closure state
 
-- Sprint 31 implementation is complete.
-- PR #40 is merged through ordinary merge commit
-  `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`.
-- Post-merge validation passed 117 architecture and 1,119 repository tests,
-  Ruff, and `git diff --check`.
-- Immutable governed tag `governed-sprint-31-complete` is verified.
-- Authoritative backup `LUXIOM_20260821_095503` is verified and recoverable.
-- Independent review was unavailable; no independent review is claimed.
-- Release-truth PR #41 merged through ordinary merge commit
-  `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`.
-- Mandatory canonical validation passed 117 architecture and 1,119 repository
-  tests, Ruff, and `git diff --check`.
-- PR #42 merged through ordinary two-parent merge commit
-  `fa90defc44ad756a33f11e470105db57a440e201` after final independent pre-merge
-  approval.
-- Final canonical validation passed 117 architecture and 1,119 repository
-  tests, Ruff, and `git diff --check`.
-- All governed Sprint 31 implementation, release-truth, and closure working
-  branches were merged and cleaned locally and remotely before this
-  post-closure documentation record.
-- Final governance verification confirmed canonical identity, clean worktree,
-  governed-tag immutability, branch cleanup, and release evidence.
-- Sprint 31 is formally governance-closed. Canonical closure checkpoint:
-  `fa90defc44ad756a33f11e470105db57a440e201`.
-- This post-closure documentation record reflects that already-established
-  state; it does not establish or condition closure.
-- No subsequent implementation sprint is authorized by this checkpoint.
+- Sprint 32 implementation is complete.
+- PR #45 merged through ordinary two-parent merge commit
+  `08c15e3ee225c4cdb2f382af5464da01d33d3f6d` with release tree
+  `d9e31be190d8077886ce6f85642f9b89d1fd8529`.
+- Post-merge validation passed 129 architecture and 1,273 repository tests,
+  Ruff, and `compileall app tests`.
+- Immutable governed tag `governed-sprint-32-complete`, annotated object
+  `c1f4267177d316d303c8c4c0e7fd3728afdcad32`, peels to the merge checkpoint.
+- Authoritative backup `LUXIOM_20260825_103049` is verified and recoverable.
+- Independent correction review, staged-index attestation, and final pre-merge
+  review are complete and approved; both earlier HIGH findings were closed.
+- The Sprint 32 feature branch was cleaned locally and remotely after release
+  evidence and recovery were verified.
+- Sprint 32 is formally governance-closed. Immutable canonical checkpoint:
+  `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`.
+- This later post-closure documentation synchronization reflects that
+  already-established state; it does not establish, condition, or move closure.
+- No subsequent implementation sprint is authorized merely by this checkpoint.
 
 ## 17. Sprint 29 immutable release checkpoint
 
@@ -284,5 +353,5 @@ oriented; production credentials and durable/public/multidevice authentication
 remain deferred. SQLite remains schema v2. Validation passed 75 authentication,
 39 Container, 9 demo-unit, 104 architecture, 129 trusted/membership, 278 focused,
 and 1,035 repository tests; Ruff, the 8/8 authenticated demo, and the 7/7 trusted
-demo passed with zero remote calls. The next sprint remains an unfrozen planning
-and contract-definition boundary.
+demo passed with zero remote calls. At the Sprint 29 checkpoint, the next sprint
+remained an unfrozen planning and contract-definition boundary.

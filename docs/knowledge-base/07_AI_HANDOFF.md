@@ -7,63 +7,76 @@
 
 2. **Canonical branch:** `master`.
 
-3. **Latest governed implementation release:** Sprint 31 — Durable Action
-   Permission Foundation v1.
+3. **Latest governed implementation release:** Sprint 32 — Authenticated Local
+   Command Application Gateway v1.
 
-4. **Release commit:**
-   `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`
+4. **Frozen base and implementation commit:**
+   `7aa29bdc894fe646d9e76cb0466d2e26fd44bc88` and
+   `a56a11f1b92b08df5e310aea749d9cda07570b65`.
 
-5. **Release tree:**
-   `5ad6dc854c546e82cdab6c6fd5a5c48072b7fc0d`
+5. **PR and ordinary merge commit:** PR #45 merged at
+   `08c15e3ee225c4cdb2f382af5464da01d33d3f6d` with parents
+   `7aa29bdc894fe646d9e76cb0466d2e26fd44bc88` and
+   `a56a11f1b92b08df5e310aea749d9cda07570b65`.
 
-6. **Governed tag:** `governed-sprint-31-complete`
+6. **Release tree:** `d9e31be190d8077886ce6f85642f9b89d1fd8529`.
 
-7. **Annotated tag object:**
-   `2f52c2973bd349bd4302d7bb1e59307f5b14708c`
+7. **Governed tag, object, and peel:** `governed-sprint-32-complete`, annotated
+   object `c1f4267177d316d303c8c4c0e7fd3728afdcad32`, peeling to
+   `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`.
 
-8. **Validation:** 117/117 architecture tests and 1119/1119 repository tests
-   passed. Ruff and `git diff --check` passed.
+8. **Validation:** 129/129 architecture tests and 1273/1273 repository tests
+   passed. Ruff and `compileall app tests` passed; closure worktree was clean
+   and local `master` equaled `origin/master`.
 
 9. **Authoritative recoverable backup:**
-   `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260821_095503`
+   `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260825_103049`. Complete bundle,
+   source ZIP, and manifest SHA-256 values are
+   `F1A1CC107C9D2864E767F03BFECB19EE4BE3D03C4061535FBDF30F66B268A07B`,
+   `D6F91E1E9B66064CB3928A08D0D8F8B115B69632D20D66C85F77291608868B2F`, and
+   `46F4612172505B5AAAC93AEB58CBFF0411C5BB038DBBCC352F122AFA1FAE37CA`.
+   Backup verification passed.
 
-10. **Architecture boundary:** authentication, principal-to-actor mapping,
-    workspace selection, membership admission, and action authorization remain
-    separate. Membership does not imply permission.
+10. **Application boundary:** `app/api` → `app/local_command` →
+    `AuthenticatedLocalCommandRoutingService` → existing governed downstream
+    chain. `POST /local/command` is a bounded local-use development surface;
+    historical `/brain/think` and legacy `/knowledge` remain separate.
 
-11. **Sprint 31 permission semantics:** durable grants match the exact
-    `(ActorIdentity, WorkspaceIdentity, Action)` triple. Absence of a grant
-    denies access. Known repository failures fail closed.
+11. **Secret and fallback semantics:** the proof is secret-aware, never returned,
+    and explicitly rejects pickle serialization. Cognitive fallback is a strict,
+    required per-request authorization and is never automatic. Unexpected HTTP
+    failures use a fixed sanitized envelope.
 
-12. **Composition:** default `Container` remains no-I/O. Durable permission
-    storage exists only through explicit repository injection.
+12. **Composition:** default `Container` remains rejecting, fail-closed,
+    in-memory, and construction-time no-I/O. Sprint 32 adds no operational
+    SQLite credential composition.
 
-13. **Not added by Sprint 31:** roles/RBAC, groups, inheritance, wildcards,
-    explicit deny rules, public grant/revoke APIs, production authentication
-    transport, credential persistence, JWT/OAuth, sessions, device lifecycle,
-    remote identity providers, or cloud synchronization.
+13. **Non-goals:** no production authentication, durable credentials, JWT/OAuth,
+    sessions, devices, RBAC, public administration, public Internet exposure,
+    CORS, UI, runtime SQLite credential composition, or automatic fallback.
 
-14. **Review truth:** independent review was unavailable for Sprint 31 and no
-    independent review is claimed. Same-assistant technical and adversarial
-    reviews were performed; one schema-verification defect was found and
-    corrected before release.
+14. **Review truth:** the first independent implementation review found two
+    HIGH issues: pickle serialization of proof and incorrect initial manifest
+    hash semantics. Both were corrected and explicitly closed by the approving
+    second review. Independent staged-index attestation and final independent
+    pre-merge review also approved the release.
 
-15. **Governance state:** implementation merge, immutable release tagging,
-    backup verification, and bundle recovery are complete. Release-truth commit
-    `d79552f9ab19d7b2da9f2a60be4ef48b8b9608cd` merged through PR #41 at canonical
-    merge `7f73ffe1686cb069e3b1ec93283ffda9cdd485ca`; canonical validation passed 117
-    architecture and 1,119 repository tests, Ruff, and `git diff --check`. The
-    merged implementation and release-truth branches were cleaned locally and
-    remotely. PR #42 merged through ordinary two-parent merge commit
-    `fa90defc44ad756a33f11e470105db57a440e201`; final canonical validation passed,
-    the closure working branch was cleaned locally and remotely, and final
-    governance verification confirmed the closure conditions. Sprint 31 is
-    formally governance-closed at that canonical checkpoint. This post-closure
-    documentation record reports, rather than establishes, that state.
+15. **Approved snapshot evidence:** worktree snapshot
+    `47A5B64330FB2DE1502CD32D77593E2389ECF594D1187560FDA08DF15E552A33`;
+    staged/committed snapshot
+    `2F28B3527701E73986A14331E4763629EDB439EF4A1B5E958FD125EB1F4CAE7E`;
+    manifest v2 file
+    `97F4E58613511999429D114483821EC110A35C6EACD0F2A4DF8359CE3C59D28C`;
+    staged manifest v3 file
+    `2ACA626A456D9A8989268C7796D693DFC0654C00A2E08F9D14A7752490FB1043`.
 
-16. **Next implementation:** no Sprint 32 implementation is authorized.
-    Any next sprint remains an unfrozen planning and contract-definition
-    boundary until explicitly approved.
+16. **Governance and next implementation:** Sprint 32 is formally closed at
+    immutable checkpoint `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`; the
+    feature branch was cleaned locally and remotely after verification and
+    backup. This later documentation synchronization reports, rather than
+    establishes or moves, that closure. No subsequent implementation sprint is
+    authorized merely by Sprint 32 closure; any next implementation remains a
+    planning and contract-definition boundary until explicitly approved.
 
 ## Required recovery order
 
@@ -91,10 +104,12 @@
 ## Resume instruction
 
 Resume from canonical `master` and verify that local `HEAD` equals
-`origin/master` before continuing. Sprint 31 implementation, release-truth
-integration, closure-truth integration, final validation, governed
-working-branch cleanup, and formal governance closure are complete. The
-immutable formal-closure checkpoint for Sprint 31 remains
-`fa90defc44ad756a33f11e470105db57a440e201`. This instruction does not reopen or
-condition that closure. Do not begin a subsequent implementation sprint without
-explicit authorization; Sprint 32 scope remains unfrozen.
+`origin/master` before continuing. Sprint 32 implementation, ordinary merge,
+final validation, immutable tagging, backup verification, feature-branch
+cleanup, and formal governance closure are complete. The immutable Sprint 32
+checkpoint remains `08c15e3ee225c4cdb2f382af5464da01d33d3f6d` under
+`governed-sprint-32-complete`; later documentation commits may advance `master`
+without moving it. This instruction does not reopen or condition that closure.
+Do not begin a subsequent implementation sprint without explicit authorization;
+any next implementation remains a planning and contract-definition boundary
+until explicitly approved.
