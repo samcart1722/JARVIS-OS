@@ -111,6 +111,7 @@ from app.cognition.trusted_context import (
 )
 from app.core.compatibility.legacy_memory_adapter import LegacyMemoryAdapter
 from app.core.config import Settings, settings
+from app.local_command import LocalCommandApplicationGateway
 from app.membership import (
     ActorWorkspaceMembership,
     InMemoryMembershipRepository,
@@ -255,6 +256,7 @@ class Container:
         self._build_local_command_interpretation()
         self._build_membership()
         self._build_principal_authentication()
+        self._build_local_command_application_gateway()
         self._build_trusted_request_context()
         self._build_context()
         self._build_prompt()
@@ -552,6 +554,13 @@ class Container:
             )
         )
 
+    def _build_local_command_application_gateway(self) -> None:
+        """Compose one application gateway over the authenticated route."""
+        self.local_command_application_gateway = (
+            LocalCommandApplicationGateway(
+                self.authenticated_local_command_routing_service
+            )
+        )
     def _build_membership(self) -> None:
         """Compose one deterministic membership decision boundary."""
         self.membership_repository = (
