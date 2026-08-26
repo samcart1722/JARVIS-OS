@@ -715,6 +715,64 @@ class SQLiteLocalStorage:
                 "Permission grant write failed."
             ) from error
 
+    def revoke_permission_grant(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> None:
+        key = self._permission_key(
+            actor,
+            workspace,
+            action,
+        )
+
+        try:
+            connection = (
+                self._require_initialized_connection()
+            )
+
+            connection.execute(
+                "BEGIN IMMEDIATE"
+            )
+
+            connection.execute(
+                "DELETE FROM action_permission_grants "
+                "WHERE actor_id = ? "
+                "AND workspace_id = ? "
+                "AND action = ?",
+                key,
+            )
+
+            connection.commit()
+
+        except (
+            sqlite3.DatabaseError,
+            LocalStorageError,
+        ) as error:
+            try:
+                self._rollback_permission_grant_revocation()
+            except PermissionGrantRepositoryError:
+                raise
+
+            raise PermissionGrantRepositoryError(
+                "Permission grant revocation failed."
+            ) from error
+
+    def _rollback_permission_grant_revocation(self) -> None:
+        connection = self._connection
+
+        if (
+            connection is not None
+            and connection.in_transaction
+        ):
+            try:
+                connection.rollback()
+            except sqlite3.DatabaseError as error:
+                raise PermissionGrantRepositoryError(
+                    "Permission grant revocation failed."
+                ) from error
+
     def _rollback_permission_grant_write(self) -> None:
         connection = self._connection
 
@@ -1078,6 +1136,18 @@ class SQLitePermissionGrantRepository:
         action: str,
     ) -> None:
         self._storage.create_permission_grant(
+            actor,
+            workspace,
+            action,
+        )
+
+    def revoke(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> None:
+        self._storage.revoke_permission_grant(
             actor,
             workspace,
             action,
