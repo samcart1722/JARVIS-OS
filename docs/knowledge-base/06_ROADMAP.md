@@ -130,7 +130,10 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 31 is the latest governed implementation release at
+Sprint 32 is the latest governed implementation release at
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`, tag
+`governed-sprint-32-complete`. Sprint 31 is the immediately preceding governed
+durable action-permission foundation release at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, tag
 `governed-sprint-31-complete`. Sprint 30 remains the immediately preceding
 governed durable principal-to-actor mapping release at
@@ -314,6 +317,38 @@ grant/revoke management, audit history, production authentication, sessions,
 JWT/OAuth, credential persistence, public authorization transport, remote IdP,
 or cloud synchronization.
 
-Sprint 31 is the latest governed implementation release and is formally
-governance-closed. No Sprint 32 implementation is authorized, and no Sprint 32
-scope is frozen or implied here.
+## Sprint 32 formal governance closure complete
+
+Sprint 32 - Authenticated Local Command Application Gateway v1 is the latest
+governed implementation release.
+
+It connects the previously governed authentication, principal mapping,
+workspace membership, local command routing, and action authorization
+foundations through one bounded application gateway while preserving their
+separate ownership and fail-closed semantics.
+
+The governed implementation is released at ordinary two-parent merge:
+
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
+
+under immutable tag:
+
+`governed-sprint-32-complete`
+
+Sprint 32 adds the bounded local-use `POST /local/command` development surface.
+It does not establish production/public authentication, credential
+persistence, sessions, device lifecycle, RBAC, role administration, public
+permission management, public Internet exposure, CORS, UI, or automatic
+cognitive fallback.
+
+Post-merge validation, immutable tag verification, authoritative backup,
+independent review gates, post-closure canonical synchronization, and branch
+cleanup are complete.
+
+The later canonical documentation merge at
+`2a2639334ad1e75ccd9db1d7c640f1e07297a54e` does not move the immutable Sprint
+32 implementation checkpoint.
+
+No Sprint 33 implementation scope is frozen or implied by this roadmap.
+The next implementation remains a planning and contract-definition boundary
+until explicitly reviewed and authorized.
