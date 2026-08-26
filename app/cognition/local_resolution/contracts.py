@@ -69,6 +69,15 @@ class PermissionGrantRepository(Protocol):
     ) -> None: ...
 
 
+class PermissionGrantRevocationRepository(Protocol):
+    def revoke(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        action: str,
+    ) -> None: ...
+
+
 class PermissionPolicy(Protocol):
     def is_allowed(
         self,
