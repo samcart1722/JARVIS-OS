@@ -8,66 +8,56 @@ agent, or a product tied to one industry.
 
 ## Current checkpoint
 
-Sprint 32 — Authenticated Local Command Application Gateway v1 is the latest
+Sprint 33 — Durable Action Permission Revocation Foundation v1 is the latest
 governed implementation release.
 
-Frozen base and implementation commit:
-`7aa29bdc894fe646d9e76cb0466d2e26fd44bc88` and
-`a56a11f1b92b08df5e310aea749d9cda07570b65`
+Frozen baseline and implementation commit:
+`f1e1519eedd6f021cb98c6ac8a9242f6b946b645` and
+`9f4b86beddaa1e2550e054a55e6c743c87f2723c`
 
-PR #45 merged through ordinary two-parent merge commit:
-`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
+PR #48 merged through ordinary two-parent merge commit:
+`9af9984691b034710243e1da487767108915ce3a`
 
-Release tree: `d9e31be190d8077886ce6f85642f9b89d1fd8529`
+Release tree: `3a1317dc1a1c295ae5e2b77947a149cf138134ba`
 
-Immutable governed tag: `governed-sprint-32-complete`
+Immutable governed tag: `governed-sprint-33-complete`
 
-Annotated tag object: `c1f4267177d316d303c8c4c0e7fd3728afdcad32`
+Annotated tag object: `4d0774ee5172da9eff0ee246011775980aac367f`
 
 The tag peels to the merge checkpoint above. Later documentation commits may
 advance `master` without moving that immutable tag.
 
-Post-merge validation passed 129 architecture tests and 1,273 repository tests.
-Ruff and `compileall app tests` passed.
+Post-merge validation passed 134 architecture tests and 1,293 repository tests.
+Ruff, `compileall`, and `git diff --check` passed. GitHub reported no CI/status
+checks; this is not a claim that CI passed.
 
 The authoritative recoverable backup is:
-`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260825_103049`
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260826_122727`
 
 Complete bundle, source ZIP, and backup-manifest SHA-256 values are:
-`F1A1CC107C9D2864E767F03BFECB19EE4BE3D03C4061535FBDF30F66B268A07B`,
-`D6F91E1E9B66064CB3928A08D0D8F8B115B69632D20D66C85F77291608868B2F`, and
-`46F4612172505B5AAAC93AEB58CBFF0411C5BB038DBBCC352F122AFA1FAE37CA`.
+`E3CEE9B8156248D3627872D3558DBB56B923BD791E2B9FDE2EB951CBFC8AB7E4`,
+`BB18BDF291BD9DB02C2F19B8AF886187A750A65EDBC98CB0926DC46F68D49576`, and
+`E92D45BA2EA7CB8E8D20C226343308AC55887E1E9FE40F0D726A45550BAF3803`.
 Backup verification passed.
 
-Sprint 32 adds a framework-independent `app/local_command` boundary and a
-bounded local-use `POST /local/command` development surface. The dependency
-direction is `app/api` → `app/local_command` →
-`AuthenticatedLocalCommandRoutingService` → the existing governed downstream
-chain. Its closed application contracts require strict explicit cognitive
-fallback, secret-aware proof handling, pickle rejection, and fixed sanitized
-unexpected-error responses.
+Sprint 33 preserves `PermissionGrantRepository` as exact lookup/create and adds
+a separate `PermissionGrantRevocationRepository` with exactly `revoke`.
+Revocation performs exact, case-sensitive physical removal of the current
+actor/workspace/action grant. Present and absent revocations both return `None`;
+re-grant remains possible. Schema version remains 4, and no audit history,
+soft delete, expiry, RBAC, Container management, or public revoke endpoint was
+added. Authentication, mapping, membership, and action authorization remain
+separate.
 
-The historical `/brain/think` endpoint remains the separate `CognitiveEngine`
-route, and legacy `/knowledge` remains separate. Sprint 32 does not make either
-route authenticated. It adds no production authentication, durable credentials,
-JWT/OAuth, sessions, devices, RBAC, administration, public Internet exposure,
-CORS, UI, runtime SQLite credential composition, or automatic fallback.
-
-The first independent implementation review found two HIGH issues: proof was
-pickle-serializable and the initial manifest hash semantics were incorrect.
-Both were corrected and explicitly closed by the approving second review. The
-staged-index attestation and final pre-merge review also approved the exact
-release. Approved worktree and committed snapshot SHA-256 values are
-`47A5B64330FB2DE1502CD32D77593E2389ECF594D1187560FDA08DF15E552A33` and
-`2F28B3527701E73986A14331E4763629EDB439EF4A1B5E958FD125EB1F4CAE7E`;
-manifest v2 and staged manifest v3 SHA-256 values are
-`97F4E58613511999429D114483821EC110A35C6EACD0F2A4DF8359CE3C59D28C` and
-`2ACA626A456D9A8989268C7796D693DFC0654C00A2E08F9D14A7752490FB1043`.
+The operational proof uses separate `revoke` and `verify` Python processes
+against the same external SQLite database. The second process opens fresh
+storage and proves the exact grant remains absent and authorization denied.
 
 The feature branch was cleaned locally and remotely after merge, validation,
-tag verification, and backup. Sprint 32 is formally governance-closed at
-`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`. This later documentation patch
-reports that already-established closure; it does not establish or move it.
+tag verification, and backup. Sprint 33 is formally governance-closed at
+`9af9984691b034710243e1da487767108915ce3a`. This later documentation patch
+reports that already-established closure; it is not part of or a movement of
+the immutable release.
 No subsequent implementation sprint is authorized merely by this checkpoint.
 
 Sprint 25 is completed through merged PR #24 at

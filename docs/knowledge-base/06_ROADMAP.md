@@ -130,9 +130,12 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 32 is the latest governed implementation release at
+Sprint 33 is the latest governed implementation release at
+`9af9984691b034710243e1da487767108915ce3a`, tag
+`governed-sprint-33-complete`. Sprint 32 is the immediately preceding governed
+authenticated local-command application gateway release at
 `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`, tag
-`governed-sprint-32-complete`. Sprint 31 is the immediately preceding governed
+`governed-sprint-32-complete`. Sprint 31 is the preceding governed
 durable action-permission foundation release at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, tag
 `governed-sprint-31-complete`. Sprint 30 remains the immediately preceding
@@ -319,8 +322,8 @@ or cloud synchronization.
 
 ## Sprint 32 formal governance closure complete
 
-Sprint 32 - Authenticated Local Command Application Gateway v1 is the latest
-governed implementation release.
+Sprint 32 - Authenticated Local Command Application Gateway v1 is a completed
+historical governed implementation release.
 
 It connects the previously governed authentication, principal mapping,
 workspace membership, local command routing, and action authorization
@@ -349,6 +352,34 @@ The later canonical documentation merge at
 `2a2639334ad1e75ccd9db1d7c640f1e07297a54e` does not move the immutable Sprint
 32 implementation checkpoint.
 
-No Sprint 33 implementation scope is frozen or implied by this roadmap.
-The next implementation remains a planning and contract-definition boundary
-until explicitly reviewed and authorized.
+At Sprint 32 closure, no Sprint 33 implementation scope was frozen or implied
+by this roadmap. Sprint 33 was subsequently selected, frozen, implemented, and
+released through its own governance gates.
+
+## Sprint 33 formal governance closure complete
+
+Sprint 33 - Durable Action Permission Revocation Foundation v1 is the latest
+governed implementation release.
+
+It preserves `PermissionGrantRepository` as exact lookup/create and adds the
+separate `PermissionGrantRevocationRepository` with exactly `revoke`. Exact
+current-state revocation physically deletes the actor/workspace/action grant;
+present and absent revocations both commit and return `None`. Re-grant remains
+available through the existing creation contract.
+
+Implementation commit `9f4b86beddaa1e2550e054a55e6c743c87f2723c`
+merged through PR #48 at ordinary release merge
+`9af9984691b034710243e1da487767108915ce3a`, tree
+`3a1317dc1a1c295ae5e2b77947a149cf138134ba`, under immutable tag
+`governed-sprint-33-complete`.
+
+The release passed 134 architecture and 1,293 repository tests, Ruff,
+`compileall`, and `git diff --check`; GitHub reported no CI/status checks. The
+verified backup is `LUXIOM_20260826_122727`. The feature branch was cleaned
+locally and remotely.
+
+Exact durable revocation is no longer candidate work. General permission
+update/lifecycle administration, audit/history, soft delete, expiry, revoker
+identity, RBAC, roles/groups, wildcards, deny rules, public administration, and
+synchronization remain candidates only. No Sprint 34 scope is authorized or
+frozen.

@@ -371,3 +371,29 @@ Architecture tests enforce these governed implementation boundaries. They are
 released at `governed-sprint-31-complete`; formal Sprint 31 governance closure
 was subsequently completed at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`.
+
+## Sprint 33 governed action-permission revocation boundary
+
+The inward revocation contract lives in local resolution and imports no SQLite
+or concrete infrastructure. `SQLitePermissionGrantRepository` remains outward
+infrastructure and structurally implements the separate grant and revocation
+ports.
+
+The following ownership boundaries are enforced:
+
+- `RepositoryPermissionPolicy` may read grants but cannot invoke revocation.
+- API and `app/local_command` cannot import or own permission revocation.
+- Container cannot import SQLite permission infrastructure, accept a revocation
+  repository, or create/store a revocation-management service.
+- Authentication and membership cannot own grant or revocation persistence.
+- Membership remains admission; `PermissionPolicy` remains action authorization.
+- The Sprint 33 operations runtime directly owns its explicit SQLite proof and
+  is absent from public/product runtime.
+- The Sprint 33 CLI imports only its operations runtime and permitted standard
+  library modules; its phases are exactly `revoke` and `verify`.
+- The historical Sprint 31 grant-persistence runtime and CLI remain separate.
+
+Architecture enforcement scans production code for the combined
+`is_granted`/`create`/`revoke` adapter shape without treating test doubles as
+production implementations. These boundaries are released at
+`governed-sprint-33-complete`.

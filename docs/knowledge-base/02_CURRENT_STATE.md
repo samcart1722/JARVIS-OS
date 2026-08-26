@@ -1,8 +1,53 @@
 # Current State
 
+## Sprint 33 governed implementation state
+
+Sprint 33 - Durable Action Permission Revocation Foundation v1 is the latest
+governed implementation release. Implementation commit
+`9f4b86beddaa1e2550e054a55e6c743c87f2723c` merged through PR #48 at ordinary
+two-parent release commit `9af9984691b034710243e1da487767108915ce3a`,
+release tree `3a1317dc1a1c295ae5e2b77947a149cf138134ba`.
+
+The historical `PermissionGrantRepository` remains exactly `is_granted` and
+`create`. Sprint 33 adds the separate `PermissionGrantRevocationRepository`
+with exactly `revoke`. `SQLitePermissionGrantRepository` structurally
+implements both ports. `PermissionPolicy` remains exactly `is_allowed`, and
+`RepositoryPermissionPolicy` remains an authorization-read-only consumer.
+
+Revocation validates exact `ActorIdentity`, exact `WorkspaceIdentity`, and an
+exact nonblank string action without normalization. Matching remains
+case-sensitive and whitespace-bearing actions remain exact. One physical
+SQLite `DELETE` removes only the exact actor/workspace/action row. Present and
+absent revocations both commit and return `None`; prior existence and row count
+are not disclosed. Unrelated grants survive and later re-grant through
+`create` remains valid. Declared persistence failures use the stable
+`PermissionGrantRepositoryError` boundary.
+
+Schema version remains 4 with no migration or permission-schema change. Sprint
+33 adds no audit history, soft delete, expiry, revoker identity, RBAC, public
+permission administration, Container management composition, or public revoke
+endpoint. Authentication, mapping, workspace selection, membership, routing,
+and action authorization remain separate.
+
+The deterministic operations proof passed in two separate Python interpreter
+processes against the same external SQLite database: `revoke` proved create,
+allow, revoke, and deny; `verify` used fresh storage, schema verification,
+repository, and policy to prove the grant remained absent and authorization
+remained denied.
+
+Post-merge validation passed 134 architecture and 1,293 repository tests,
+Ruff, `compileall`, and `git diff --check`. GitHub reported no CI/status checks.
+The immutable tag is `governed-sprint-33-complete`, annotated object
+`4d0774ee5172da9eff0ee246011775980aac367f`, peeling to the release commit.
+The verified backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260826_122727`. Feature-branch cleanup
+completed locally and remotely. This documentation synchronization is later
+post-release reporting and does not move the immutable Sprint 33 checkpoint or
+authorize/freeze Sprint 34.
+
 ## Sprint 31 governed implementation state
 
-Sprint 31 - Durable Action Permission Foundation v1 is the immediately preceding governed implementation release. PR #40 merged at
+Sprint 31 - Durable Action Permission Foundation v1 is a historical governed implementation release. PR #40 merged at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, and the immutable governed tag is
 `governed-sprint-31-complete`. The implementation, post-merge validation, tag
 verification, and authoritative backup `LUXIOM_20260821_095503` are complete.
@@ -605,5 +650,6 @@ PR #46 at:
 That documentation merge advances canonical `master` but does not move,
 replace, retarget, or redefine the immutable Sprint 32 release checkpoint.
 
-Sprint 32 is the latest governed implementation release. No subsequent
-implementation sprint is authorized merely by its completion.
+Sprint 32 is the immediately preceding governed implementation release. Its
+completion did not itself authorize Sprint 33; Sprint 33 was separately frozen,
+implemented, and released as recorded in the current section above.

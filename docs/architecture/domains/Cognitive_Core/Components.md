@@ -354,3 +354,25 @@ public API and CognitiveEngine.
 These components remain released at `governed-sprint-31-complete`; formal
 Sprint 31 governance closure was subsequently completed at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`.
+
+## Sprint 33 governed revocation components
+
+Sprint 33 adds the separate `PermissionGrantRevocationRepository` port while
+preserving the historical `PermissionGrantRepository` lookup/create surface.
+
+`SQLitePermissionGrantRepository` is the sole production SQLite adapter with
+the combined structural shape `__init__`, `is_granted`, `create`, and `revoke`.
+Its `revoke` method delegates to caller-owned `SQLiteLocalStorage`, which
+validates the exact key and performs one physical exact `DELETE` from
+`action_permission_grants`. Present and absent rows share the same committed
+`None` result; row count and prior existence are not exposed.
+
+`RepositoryPermissionPolicy` remains authorization-only and invokes only
+`is_granted`. It does not depend on or invoke the revocation port. Container
+continues to compose permission authorization through the grant repository and
+does not construct, store, or expose revocation management.
+
+Schema version remains 4. No soft-delete state, audit history, revoker identity,
+expiry, role data, schema object, or migration was added. The Sprint 33
+revocation runtime is a separate operations proof outside API, local-command,
+authentication, membership, routing, and cognitive execution.

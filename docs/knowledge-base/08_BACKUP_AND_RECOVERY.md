@@ -42,6 +42,24 @@ Each real run creates `LUXIOM_yyyyMMdd_HHmmss` containing
 `luxiom-repository.bundle`, `luxiom-source.zip`, and `MANIFEST.txt`. It warns
 when the working tree is dirty. Use a destination outside the repository.
 
+## Sprint 33 verified recovery checkpoint
+
+The verified Sprint 33 release backup is:
+
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260826_122727`
+
+- Bundle SHA-256:
+  `E3CEE9B8156248D3627872D3558DBB56B923BD791E2B9FDE2EB951CBFC8AB7E4`
+- Source ZIP SHA-256:
+  `BB18BDF291BD9DB02C2F19B8AF886187A750A65EDBC98CB0926DC46F68D49576`
+- Manifest SHA-256:
+  `E92D45BA2EA7CB8E8D20C226343308AC55887E1E9FE40F0D726A45550BAF3803`
+
+The backup corresponds to immutable tag `governed-sprint-33-complete`, annotated
+object `4d0774ee5172da9eff0ee246011775980aac367f`, peeling to release commit
+`9af9984691b034710243e1da487767108915ce3a`. Verify these identities and hashes
+during recovery; do not move or recreate the governed tag.
+
 ## Secret safety
 
 The snapshot excludes `.env`, `.env.*` variants (while allowing the safe

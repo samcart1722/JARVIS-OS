@@ -48,8 +48,8 @@ to cognition. The feature merged at
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
 released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
 released trusted request context; Sprint 28 released durable membership; Sprint
-31 is now the latest governed implementation release at
-`governed-sprint-31-complete`.
+33 is now the latest governed implementation release at
+`governed-sprint-33-complete`.
 
 ## Deterministic knowledge commands (Sprint 25)
 
@@ -621,3 +621,46 @@ final canonical validation, and governed working-branch cleanup are complete.
 Formal Sprint 31 governance closure conditions were satisfied at canonical
 checkpoint `fa90defc44ad756a33f11e470105db57a440e201` without changing these
 runtime semantics.
+
+## Sprint 33 governed durable action-permission revocation flow
+
+Sprint 33 preserves the Sprint 31 grant contract and adds a separate lifecycle
+port:
+
+```text
+PermissionGrantRepository -> is_granted / create
+PermissionGrantRevocationRepository -> revoke
+PermissionPolicy -> is_allowed
+```
+
+`SQLitePermissionGrantRepository` structurally implements both persistence
+ports over caller-owned `SQLiteLocalStorage`. `RepositoryPermissionPolicy`
+depends only on `PermissionGrantRepository` and remains authorization-read-only;
+it never calls or owns revocation.
+
+The exact revocation path is operationally separate from request routing:
+
+```text
+ActorIdentity + WorkspaceIdentity + exact action
+-> SQLitePermissionGrantRepository.revoke
+-> SQLiteLocalStorage.revoke_permission_grant
+-> one exact physical DELETE from action_permission_grants
+-> commit
+```
+
+Validation precedes SQL. There is no SELECT-before-DELETE or public row-count
+branch. Present and absent revocation both commit and return `None`. DELETE or
+commit persistence failure attempts rollback and surfaces only the stable
+`PermissionGrantRepositoryError`; success is not reported before commit.
+
+Schema version remains 4 with unchanged DDL and verification. Container, API,
+`app/local_command`, authentication, mapping, membership, routing, and
+`PermissionPolicy` gain no revocation authority. No public revoke endpoint or
+permission-management API exists.
+
+The operations runtime and thin CLI expose exactly `revoke` and `verify`.
+Process 1 creates, authorizes, revokes, denies, closes, and exits. A separate
+Python process opens the same external database with fresh storage, repository,
+and policy, then verifies durable absence and denial. This proof is not wired
+into public runtime and remains separate from the historical Sprint 31 grant
+persistence demo.

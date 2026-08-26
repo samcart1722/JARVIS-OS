@@ -1,14 +1,55 @@
 # AI Handoff
 
-## Recovery brief
+## Current Sprint 33 recovery brief
+
+1. **Canonical branch and checkpoint:** `master` at
+   `9af9984691b034710243e1da487767108915ce3a`.
+2. **Latest governed release:** Sprint 33 — Durable Action Permission
+   Revocation Foundation v1.
+3. **Baseline, implementation, PR, and tree:** baseline
+   `f1e1519eedd6f021cb98c6ac8a9242f6b946b645`, implementation
+   `9f4b86beddaa1e2550e054a55e6c743c87f2723c`, PR #48, release tree
+   `3a1317dc1a1c295ae5e2b77947a149cf138134ba`.
+4. **Tag identity:** `governed-sprint-33-complete`, annotated object
+   `4d0774ee5172da9eff0ee246011775980aac367f`, peeling to canonical release
+   `9af9984691b034710243e1da487767108915ce3a`.
+5. **Capability:** historical `PermissionGrantRepository` remains exactly
+   lookup/create; the separate `PermissionGrantRevocationRepository` contains
+   exactly `revoke`. `PermissionPolicy` remains authorization-only.
+6. **Persistence:** exact, case-sensitive, unnormalized actor/workspace/action
+   revocation physically deletes only the exact row. Present and absent both
+   commit and return `None`; re-grant remains possible. Schema version is 4.
+7. **Boundaries:** no Container, API, `app/local_command`, authentication,
+   mapping, membership, routing, or cognitive-fallback revocation ownership.
+   No public revoke or permission-management endpoint exists.
+8. **Proof:** separate `revoke` and `verify` Python processes used the same
+   external SQLite database. Fresh verification storage proved durable absence
+   and authorization denial. Same-process tests are supplemental only.
+9. **Validation:** 134 architecture and 1,293 repository tests passed. Ruff,
+   `compileall`, and `git diff --check` passed. No GitHub CI/status checks were
+   present.
+10. **Backup:**
+    `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260826_122727`; bundle, source ZIP,
+    and manifest SHA-256 values are
+    `E3CEE9B8156248D3627872D3558DBB56B923BD791E2B9FDE2EB951CBFC8AB7E4`,
+    `BB18BDF291BD9DB02C2F19B8AF886187A750A65EDBC98CB0926DC46F68D49576`, and
+    `E92D45BA2EA7CB8E8D20C226343308AC55887E1E9FE40F0D726A45550BAF3803`.
+    Frozen design contract and sidecar SHA-256 values are
+    `A456AEA3F596B18CB2D2D20399845D0079358ACF2A1C13AB477AD553FFFA59F3` and
+    `0E34AC2B74FFA1EBAB5B638FBA628E804C60BC5D8F7BBEC01473E811CA44B411`.
+11. **Governance:** feature-branch cleanup completed locally and remotely.
+    Documentation synchronization is later reporting and cannot move the tag.
+    No Sprint 34 scope is authorized or frozen.
+
+## Historical Sprint 32 recovery brief
 
 1. **Identity:** Luxiom is a domain-independent Cognitive Operating System.
    HealthBridge is a product/client, not part of the Core.
 
 2. **Canonical branch:** `master`.
 
-3. **Latest governed implementation release:** Sprint 32 — Authenticated Local
-   Command Application Gateway v1.
+3. **Latest release at this historical checkpoint:** Sprint 32 — Authenticated
+   Local Command Application Gateway v1.
 
 4. **Frozen base and implementation commit:**
    `7aa29bdc894fe646d9e76cb0466d2e26fd44bc88` and
@@ -104,11 +145,11 @@
 ## Resume instruction
 
 Resume from canonical `master` and verify that local `HEAD` equals
-`origin/master` before continuing. Sprint 32 implementation, ordinary merge,
+`origin/master` before continuing. Sprint 33 implementation, ordinary merge,
 final validation, immutable tagging, backup verification, feature-branch
-cleanup, and formal governance closure are complete. The immutable Sprint 32
-checkpoint remains `08c15e3ee225c4cdb2f382af5464da01d33d3f6d` under
-`governed-sprint-32-complete`; later documentation commits may advance `master`
+cleanup, and formal governance closure are complete. The immutable Sprint 33
+checkpoint remains `9af9984691b034710243e1da487767108915ce3a` under
+`governed-sprint-33-complete`; later documentation commits may advance `master`
 without moving it. This instruction does not reopen or condition that closure.
 Do not begin a subsequent implementation sprint without explicit authorization;
 any next implementation remains a planning and contract-definition boundary

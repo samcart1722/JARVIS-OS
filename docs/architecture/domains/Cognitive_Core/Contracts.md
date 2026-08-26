@@ -516,3 +516,31 @@ These contracts are released in governed Sprint 31 at
 final canonical validation, and governed working-branch cleanup are complete.
 Formal Sprint 31 governance closure conditions were satisfied at canonical
 checkpoint `fa90defc44ad756a33f11e470105db57a440e201`.
+
+## Sprint 33 governed action-permission revocation contracts
+
+The active grant and revocation authorities remain separate.
+
+`PermissionGrantRepository` contains exactly:
+
+- `is_granted(actor, workspace, action) -> bool`
+- `create(actor, workspace, action) -> None`
+
+`PermissionGrantRevocationRepository` contains exactly:
+
+- `revoke(actor, workspace, action) -> None`
+
+`PermissionPolicy` remains exactly `is_allowed`. Revocation is not added to the
+grant repository or authorization policy. `RepositoryPermissionPolicy` depends
+only on the historical grant repository and owns no lifecycle mutation.
+
+Revocation accepts exact `ActorIdentity`, exact `WorkspaceIdentity`, and exact
+nonblank string action values. It performs no normalization; case and supplied
+whitespace remain significant. Present and absent revocation both return
+`None`, disclose no previous state, and preserve unrelated grants. Invalid
+boundaries raise `ValueError`; declared persistence failures surface as
+`PermissionGrantRepositoryError`, never `PermissionGrantConflict`.
+
+These contracts are released at `governed-sprint-33-complete`. They add exact
+current-state revocation only, not roles, audit history, expiry, public
+administration, or broader permission lifecycle management.
