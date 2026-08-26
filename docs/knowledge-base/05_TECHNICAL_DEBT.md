@@ -395,3 +395,30 @@ governance-closed.
 The post-closure documentation synchronization at
 `2a2639334ad1e75ccd9db1d7c640f1e07297a54e` does not constitute a new
 implementation release and does not move the Sprint 32 governed checkpoint.
+
+## Sprint 33 post-release classification
+
+Sprint 33 resolves the bounded deferral for exact durable action-permission
+revocation. The governed implementation now provides exact current-state
+physical removal, idempotent absent revocation, durable cross-process absence,
+safe declared persistence errors, and later re-grant compatibility.
+
+This does not create a general permission-management lifecycle. Broad
+administrative delete/update, audit history, soft-delete/history, expiry,
+revoker identity, roles/groups/RBAC, inheritance, wildcards, deny rules, public
+permission administration, and synchronization remain deliberate future work.
+
+The term permission delete therefore requires precision: governed exact
+revocation physically deletes the exact current grant row, while general
+administrative deletion and lifecycle/history management remain absent.
+
+Schema version remains 4. No new table, column, index, trigger, migration, or
+audit state was introduced. Governance maintenance must preserve separate grant
+and revocation ports, authorization-read-only policy composition, exact keys,
+safe failure ownership, no public management surface, and operations-proof
+isolation.
+
+Sprint 33 is released through PR #48 at
+`9af9984691b034710243e1da487767108915ce3a` under immutable tag
+`governed-sprint-33-complete`. No Sprint 34 work is authorized or frozen by this
+classification.

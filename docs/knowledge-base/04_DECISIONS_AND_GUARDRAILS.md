@@ -214,3 +214,34 @@ semantics. Both were corrected and explicitly closed before release.
 
 Sprint 32 is formally governance-closed. These released guardrails do not
 authorize any subsequent implementation sprint.
+
+## Sprint 33 governed decisions and guardrails
+
+The following guardrails are implemented in the governed Sprint 33 release at
+`governed-sprint-33-complete`:
+
+- Grant lookup/creation remains the exact historical
+  `PermissionGrantRepository` authority.
+- Revocation is owned by the separate `PermissionGrantRevocationRepository`
+  containing exactly `revoke`.
+- `PermissionPolicy` and `RepositoryPermissionPolicy` remain authorization-read-only.
+- Exact current-state revocation is a physical SQLite `DELETE`; no soft-delete,
+  audit, history, expiry, status, revoker, index, trigger, or migration is added.
+- Present and absent revocations are publicly indistinguishable successful
+  `None` results after commit.
+- Exact actor/workspace/action matching remains case-sensitive and unnormalized.
+- Revocation failure reports no success, absence, or denial. The affected
+  storage is closed/discarded and later observation requires a fresh instance.
+- Failure ownership does not inspect nested SQLite causes, rollback state, or
+  transaction internals.
+- Container, API, `app/local_command`, authentication, mapping, membership,
+  routing, and cognitive fallback own no revocation management.
+- Membership remains workspace admission, not action authorization.
+- No public revoke or permission-administration endpoint exists.
+- The deterministic proof remains operations-only and uses an external database.
+- The immutable release is ordinary merge
+  `9af9984691b034710243e1da487767108915ce3a`, tag object
+  `4d0774ee5172da9eff0ee246011775980aac367f`.
+
+Later documentation may advance `master` but cannot move or redefine the
+Sprint 33 release. Sprint 33 closure does not authorize or freeze Sprint 34.

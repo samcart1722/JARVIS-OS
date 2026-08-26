@@ -5,9 +5,9 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 31 Durable Action Permission Foundation v1 is the latest governed
-implementation release at `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, tag
-`governed-sprint-31-complete`. Start with the repository-owned
+Sprint 33 Durable Action Permission Revocation Foundation v1 is the latest
+governed implementation release at `9af9984691b034710243e1da487767108915ce3a`,
+tag `governed-sprint-33-complete`. Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and
 [Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md).
@@ -60,6 +60,10 @@ Before this sequence, read the normative
 
 - [Durable Local Knowledge Demo](../operations/DURABLE_LOCAL_KNOWLEDGE_DEMO.md)
   runs explicit `seed` and `verify` processes against a caller-supplied database.
+
+- [Durable Action Permission Revocation Demo](../operations/DURABLE_ACTION_PERMISSION_REVOCATION_DEMO.md)
+  proves exact revocation durability through separate `revoke` and `verify`
+  Python processes against the same external database.
 
 - [Functional Cognitive Demo v1](../operations/FUNCTIONAL_COGNITIVE_DEMO.md)
 - [Explicit Scoped Memory Update Demo v1](../operations/EXPLICIT_MEMORY_UPDATE_DEMO.md)

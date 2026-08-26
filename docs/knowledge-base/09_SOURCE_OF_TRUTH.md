@@ -79,7 +79,7 @@ Sprint 30 Git release truth is governed tag
 backup is `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_SPRINT30_20260819_173314`.
 Sprint 30 release-truth governance closure completed before the Sprint 31 base.
 
-Sprint 31 - Durable Action Permission Foundation v1 is the latest governed
+Sprint 31 - Durable Action Permission Foundation v1 is a historical governed
 implementation release. PR #40 merged at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, and immutable governed tag
 `governed-sprint-31-complete` peels to that commit. Authoritative backup
@@ -102,8 +102,27 @@ were merged and cleaned locally and remotely before this post-closure
 documentation record. Final governance verification confirmed the closure
 conditions. Sprint 31 is formally governance-closed at canonical closure
 checkpoint `fa90defc44ad756a33f11e470105db57a440e201`. This record reflects the
-already-established closure state and does not create or condition it. No
-Sprint 32 implementation is authorized and no Sprint 32 scope is frozen.
+already-established closure state and does not create or condition it.
+
+Sprint 32 - Authenticated Local Command Application Gateway v1 subsequently
+released through ordinary merge `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
+under immutable tag `governed-sprint-32-complete`. Its later documentation
+merges did not move that implementation checkpoint.
+
+Sprint 33 - Durable Action Permission Revocation Foundation v1 is the latest
+governed implementation release. Implementation commit
+`9f4b86beddaa1e2550e054a55e6c743c87f2723c` merged through PR #48 at ordinary
+release commit `9af9984691b034710243e1da487767108915ce3a`, tree
+`3a1317dc1a1c295ae5e2b77947a149cf138134ba`. Immutable tag
+`governed-sprint-33-complete`, annotated object
+`4d0774ee5172da9eff0ee246011775980aac367f`, peels to that release commit.
+Verified backup `LUXIOM_20260826_122727` is authoritative recovery evidence.
+
+Post-merge validation passed 134 architecture and 1,293 repository tests,
+Ruff, `compileall`, and `git diff --check`. GitHub reported no CI/status checks.
+The later documentation synchronization reports this release truth but is not
+part of the immutable Sprint 33 release and cannot move its tag. No Sprint 34
+implementation or scope is authorized or frozen by Sprint 33 closure.
 
 For immutable release facts, Git objects, refs, and immutable release tags take
 precedence, followed by verified release-backup evidence, active reviewed
