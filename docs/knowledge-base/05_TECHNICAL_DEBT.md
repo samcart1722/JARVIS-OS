@@ -333,3 +333,65 @@ cleanup, and final governance verification are complete. Formal Sprint 31
 governance closure conditions were satisfied at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`; closure governance is no longer
 outstanding debt.
+
+## Sprint 32 post-release classification
+
+Sprint 32 integrates the governed local authentication and authorization chain
+behind one bounded application gateway.
+
+It resolves the earlier deferral for a local-use authenticated application HTTP
+surface for supported local commands.
+
+No new uncontrolled technical debt was identified by the governed Sprint 32
+implementation and validation evidence.
+
+The following remain deliberate future work and are not capabilities claimed by
+Sprint 32:
+
+- production credential verification and credential-security design;
+- durable credential, proof, verifier, secret, or token persistence;
+- password, PIN, biometric, API-key, JWT, OAuth, or remote IdP technology;
+- sessions and device lifecycle;
+- account recovery and credential reset;
+- principal/account lifecycle management;
+- permission revoke, delete, update, expiry, or audit history;
+- roles, groups, invitations, hierarchy, inheritance, or broader RBAC;
+- wildcard or prefix permissions;
+- explicit deny-rule precedence;
+- public permission-management APIs;
+- public membership/account administration;
+- public Internet deployment of the local command surface;
+- CORS policy;
+- UI integration;
+- encryption, retention, synchronization, and multi-device authorization
+  policy;
+- automatic cognitive fallback;
+- broader conversational or semantic command interpretation.
+
+These concerns must not be folded opportunistically into
+`app/local_command`, authentication, membership, principal mapping, or
+`action_permission_grants`.
+
+The Sprint 32 gateway is an application boundary, not a new owner of identity,
+authorization, persistence, model selection, or knowledge semantics.
+
+Governance maintenance must preserve:
+
+- the `app/api` -> `app/local_command` -> governed downstream dependency
+  direction;
+- explicit authentication/mapping/workspace/membership/authorization
+  separation;
+- fail-closed outcomes;
+- explicit cognitive-fallback authorization;
+- proof secrecy and serialization rejection;
+- default `Container` construction-time no-I/O;
+- separation of `/local/command`, historical `/brain/think`, and legacy
+  `/knowledge`;
+- immutable Sprint 32 governed-tag identity.
+
+Sprint 32 is released at `governed-sprint-32-complete` and is formally
+governance-closed.
+
+The post-closure documentation synchronization at
+`2a2639334ad1e75ccd9db1d7c640f1e07297a54e` does not constitute a new
+implementation release and does not move the Sprint 32 governed checkpoint.

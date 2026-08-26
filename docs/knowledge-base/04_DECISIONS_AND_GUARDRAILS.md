@@ -165,3 +165,52 @@ complete. Closure-truth PR #42, final canonical validation, and governed
 working-branch cleanup also completed. Formal Sprint 31 governance closure
 conditions were satisfied at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`; all guardrails remain unchanged.
+
+## Sprint 32 governed decisions and guardrails
+
+The following guardrails are implemented in the governed Sprint 32 release at
+`governed-sprint-32-complete`.
+
+- The application boundary is `app/local_command`.
+- `app/api` may depend on `app/local_command`; the application boundary points
+  inward toward the existing governed routing service.
+- The application gateway does not own authentication, principal mapping,
+  membership, permission persistence, knowledge storage, model providers, or
+  network policy.
+- One application request produces exactly one governed routing invocation.
+- Authentication proof remains opaque and secret-aware.
+- Proof material must not be represented through ordinary repr,
+  serialization, logging, or tracing paths.
+- Pickle serialization of the application request is explicitly rejected.
+- Workspace selection remains explicit.
+- Membership remains workspace admission only.
+- `PermissionPolicy` remains downstream action authorization.
+- Membership never implies an action grant.
+- Cognitive fallback remains explicit and caller-authorized.
+- Cognitive fallback is never automatic.
+- Local validation failure maps to a controlled safe application outcome.
+- Unexpected application invariants are sanitized by the HTTP adapter.
+- `POST /local/command` is a bounded local-use development surface, not a
+  public-Internet authentication API.
+- Historical `/brain/think` remains a separate `CognitiveEngine` route.
+- Legacy `/knowledge` remains separate.
+- Sprint 21 is not retroactively redefined as an HTTP-exposed capability.
+- Default `Container` remains rejecting, fail-closed, in-memory, and
+  construction-time no-I/O.
+- Sprint 32 introduces no runtime SQLite credential composition.
+- Sprint 32 introduces no production credential technology.
+- Sprint 32 introduces no JWT/OAuth/session/device lifecycle.
+- Sprint 32 introduces no roles or RBAC.
+- Sprint 32 introduces no public permission-management surface.
+- Sprint 32 introduces no public Internet exposure, CORS, or UI.
+- The immutable governed implementation checkpoint remains
+  `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`.
+- Later documentation commits may advance `master` without moving or redefining
+  the governed Sprint 32 tag.
+
+The first independent implementation review identified two HIGH findings:
+pickle-serializable proof material and incorrect initial external-manifest hash
+semantics. Both were corrected and explicitly closed before release.
+
+Sprint 32 is formally governance-closed. These released guardrails do not
+authorize any subsequent implementation sprint.

@@ -2,8 +2,7 @@
 
 ## Sprint 31 governed implementation state
 
-Sprint 31 - Durable Action Permission Foundation v1 is the latest governed
-implementation release. PR #40 merged at
+Sprint 31 - Durable Action Permission Foundation v1 is the immediately preceding governed implementation release. PR #40 merged at
 `9cad78ed22f0a6aef26eda0623d0f544cf65e5be`, and the immutable governed tag is
 `governed-sprint-31-complete`. The implementation, post-merge validation, tag
 verification, and authoritative backup `LUXIOM_20260821_095503` are complete.
@@ -29,8 +28,7 @@ implementation, release-truth, and closure working branches were merged and
 cleaned locally and remotely before this post-closure documentation record.
 Final governance verification confirmed the closure conditions, so Sprint 31
 is formally governance-closed at that canonical checkpoint. This record reports
-the already-established state and does not create it. No Sprint 32
-implementation is authorized, and Sprint 32 scope remains unfrozen.
+the already-established state and does not create it.
 
 ## Sprint 29 released implementation state
 
@@ -504,5 +502,108 @@ governance verification confirmed the closure conditions. Sprint 31 is formally
 governance-closed at that canonical checkpoint; this post-closure documentation
 record does not establish or condition that closure.
 
-Sprint 31 is the latest governed implementation release. No Sprint 32
-implementation is authorized.
+## Sprint 32 released feature
+
+Sprint 32 - Authenticated Local Command Application Gateway v1 was implemented
+from frozen base `7aa29bdc894fe646d9e76cb0466d2e26fd44bc88`.
+
+Implementation commit:
+
+`a56a11f1b92b08df5e310aea749d9cda07570b65`
+
+PR #45 merged through ordinary two-parent merge commit:
+
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
+
+with release tree:
+
+`d9e31be190d8077886ce6f85642f9b89d1fd8529`
+
+The governed release adds the framework-independent `app/local_command`
+application boundary and the bounded local-use `POST /local/command`
+development surface.
+
+The supported dependency direction is:
+
+`app/api` -> `app/local_command` ->
+`AuthenticatedLocalCommandRoutingService` -> existing governed downstream
+routing, authorization, and local-capability chain.
+
+The application gateway preserves the existing separation of:
+
+- authentication proof;
+- principal authentication;
+- principal-to-actor mapping;
+- explicit workspace selection;
+- membership admission;
+- local command routing;
+- `PermissionPolicy` action authorization;
+- deterministic local capability resolution.
+
+Cognitive fallback remains explicit and caller-authorized. It is never
+automatic.
+
+The application request and result contracts are closed and validated. Proof
+material is treated as secret-aware opaque material and explicitly rejects
+pickle serialization.
+
+Unexpected application invariants are sanitized at the HTTP adapter rather than
+exposing internal details.
+
+Default `Container` composition remains rejecting, fail-closed, in-memory, and
+construction-time no-I/O.
+
+Sprint 32 does not add production authentication, durable credentials,
+password/PIN/biometric/API-key technology, JWT/OAuth, sessions, device
+lifecycle, RBAC, roles, public permission administration, public Internet
+exposure, CORS, UI, runtime SQLite credential composition, or automatic
+cognitive fallback.
+
+Historical `/brain/think` and legacy `/knowledge` remain separate surfaces and
+were not made authenticated by Sprint 32.
+
+The first independent implementation review required correction for two HIGH
+findings:
+
+- proof material remained pickle-serializable;
+- the initial external manifest hash semantics were incorrect.
+
+Both findings were corrected and explicitly closed by the approving second
+independent review. The staged-index attestation and final independent
+pre-merge review also approved the release.
+
+Post-merge validation passed:
+
+- 129 architecture tests;
+- 1,273 repository tests;
+- Ruff;
+- `compileall app tests`.
+
+The immutable governed release tag is:
+
+`governed-sprint-32-complete`
+
+Annotated tag object:
+
+`c1f4267177d316d303c8c4c0e7fd3728afdcad32`
+
+The tag peels to immutable Sprint 32 implementation checkpoint:
+
+`08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
+
+The authoritative recoverable backup is:
+
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260825_103049`
+
+Sprint 32 is formally governance-closed.
+
+A later post-closure canonical documentation synchronization merged through
+PR #46 at:
+
+`2a2639334ad1e75ccd9db1d7c640f1e07297a54e`
+
+That documentation merge advances canonical `master` but does not move,
+replace, retarget, or redefine the immutable Sprint 32 release checkpoint.
+
+Sprint 32 is the latest governed implementation release. No subsequent
+implementation sprint is authorized merely by its completion.
