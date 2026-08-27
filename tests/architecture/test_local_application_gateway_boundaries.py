@@ -416,6 +416,146 @@ def test_public_api_uses_only_application_gateway_boundary() -> None:
     }
 
 
+def test_http_gateway_injection_is_narrow_and_falls_back_to_container() -> None:
+    """Keep interactive injection additive to the ordinary app boundary."""
+
+    tree = _tree(HTTP_ROUTE_PATH)
+    resolver = _function(tree, "_resolve_gateway")
+
+    state_accesses = [
+        node
+        for node in ast.walk(resolver)
+        if isinstance(node, ast.Attribute)
+        and _attribute_parts(node)
+        == (
+            "request",
+            "app",
+            "state",
+        )
+    ]
+    assert len(state_accesses) == 1, (
+        "Gateway injection must inspect only request.app.state."
+    )
+
+    getattr_calls = [
+        node
+        for node in ast.walk(resolver)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "getattr"
+    ]
+    assert len(getattr_calls) == 1
+    call = getattr_calls[0]
+    assert len(call.args) == 3 and not call.keywords
+    assert _attribute_parts(call.args[0]) == (
+        "request",
+        "app",
+        "state",
+    )
+    assert (
+        isinstance(call.args[1], ast.Constant)
+        and call.args[1].value == "local_command_application_gateway"
+    )
+    assert isinstance(call.args[2], ast.Name)
+    assert call.args[2].id == "_MISSING_GATEWAY"
+
+    fallback = next(
+        node
+        for node in resolver.body
+        if isinstance(node, ast.If)
+        and isinstance(node.test, ast.Compare)
+        and ast.unparse(node.test) == "gateway is _MISSING_GATEWAY"
+    )
+    assert len(fallback.body) == 1
+    assert isinstance(fallback.body[0], ast.Return)
+    assert _attribute_parts(fallback.body[0].value) == (
+        "container",
+        "local_command_application_gateway",
+    ), "Container fallback must occur only when app state has no gateway."
+
+    container_gateway_accesses = [
+        node
+        for node in ast.walk(resolver)
+        if isinstance(node, ast.Attribute)
+        and _attribute_parts(node)
+        == ("container", "local_command_application_gateway")
+    ]
+    assert len(container_gateway_accesses) == 1, (
+        "The historical container gateway must remain the sole fallback."
+    )
+
+    type_checks = [
+        node
+        for node in ast.walk(resolver)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "isinstance"
+        and len(node.args) == 2
+        and isinstance(node.args[1], ast.Name)
+        and node.args[1].id == "LocalCommandApplicationGateway"
+    ]
+    assert len(type_checks) == 1, (
+        "An injected gateway must be validated against the application boundary."
+    )
+    assert any(
+        isinstance(node, ast.Raise)
+        and isinstance(node.exc, ast.Call)
+        and isinstance(node.exc.func, ast.Name)
+        and node.exc.func.id == "TypeError"
+        for node in ast.walk(resolver)
+    ), "Invalid injected gateways must be rejected explicitly."
+
+
+def test_only_approved_api_modules_may_access_interactive_gateway_state() -> None:
+    """Only the interactive composition pair may use the gateway state key."""
+
+    gateway_state_key = "local_command_application_gateway"
+    api_root = REPOSITORY_ROOT / "app" / "api"
+
+    allowed_paths = {
+        HTTP_ROUTE_PATH.resolve(),
+        (api_root / "interactive.py").resolve(),
+    }
+
+    violations: dict[str, list[str]] = {}
+
+    for path in _python_files(api_root):
+        if path.resolve() in allowed_paths:
+            continue
+
+        tree = _tree(path)
+        matches: set[str] = set()
+
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Attribute)
+                and node.attr == gateway_state_key
+            ):
+                matches.add(
+                    f"attribute access at line {node.lineno}"
+                )
+
+            if (
+                isinstance(node, ast.Constant)
+                and node.value == gateway_state_key
+            ):
+                matches.add(
+                    f"gateway state key at line {node.lineno}"
+                )
+
+        if matches:
+            violations[
+                path.relative_to(REPOSITORY_ROOT).as_posix()
+            ] = sorted(matches)
+
+    assert not violations, (
+        "Only app/api/interactive.py and "
+        "app/api/routes/local_command.py may access the "
+        "interactive LocalCommandApplicationGateway app-state key: "
+        f"{violations}"
+    )
+
+
 def test_application_result_contract_contains_no_internal_domain_types() -> None:
     tree = _tree(LOCAL_COMMAND_MODELS_PATH)
 

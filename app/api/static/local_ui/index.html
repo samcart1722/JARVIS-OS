@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="luxiom-csrf" content="__LUXIOM_CSRF_TOKEN__">
+  <title>LUXIOM Local Development Interface</title>
+  <link rel="stylesheet" href="/local/ui/styles.css">
+  <script src="/local/ui/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">LUXIOM</p>
+      <h1>Local Development Interface</h1>
+      <p class="warning">LOCAL DEVELOPMENT RUNTIME — NON-PRODUCTION AUTHENTICATION</p>
+    </header>
+
+    <section class="panel" aria-labelledby="command-heading">
+      <h2 id="command-heading">Governed local command</h2>
+      <p>Workspace: <code>luxiom-local-dev-workspace</code></p>
+      <form id="command-form">
+        <label for="proof">Development proof</label>
+        <input id="proof" name="proof" type="password" autocomplete="off" required>
+
+        <label for="command">Command</label>
+        <textarea id="command" name="command" rows="5" required></textarea>
+
+        <label class="checkbox" for="cognitive-fallback">
+          <input id="cognitive-fallback" type="checkbox">
+          Allow cognitive fallback
+        </label>
+
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <section class="panel results" aria-live="polite">
+      <h2>Result</h2>
+      <p>Status: <span id="status">Ready</span></p>
+      <p>Route: <span id="route">—</span></p>
+      <p id="response"></p>
+      <p id="error" role="alert"></p>
+    </section>
+
+    <section class="panel examples">
+      <h2>Examples</h2>
+      <code>list add groceries :: milk | eggs</code>
+      <code>list read groceries</code>
+      <p>Stop the runtime with Ctrl+C in the launcher console.</p>
+    </section>
+  </main>
+</body>
+</html>
