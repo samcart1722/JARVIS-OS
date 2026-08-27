@@ -14,6 +14,7 @@ from app.api.models.local_command import (
 from app.core.container import container
 from app.local_command import (
     LocalCommandApplicationErrorCode,
+    LocalCommandApplicationGateway,
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
@@ -49,12 +50,27 @@ _INTERNAL_ERROR_CONTENT = {
     },
 }
 
+_MISSING_GATEWAY = object()
+
 
 def _fixed_internal_error_response() -> JSONResponse:
     return JSONResponse(
         status_code=500,
         content=_INTERNAL_ERROR_CONTENT,
     )
+
+
+def _resolve_gateway(request: Request) -> LocalCommandApplicationGateway:
+    gateway = getattr(
+        request.app.state,
+        "local_command_application_gateway",
+        _MISSING_GATEWAY,
+    )
+    if gateway is _MISSING_GATEWAY:
+        return container.local_command_application_gateway
+    if not isinstance(gateway, LocalCommandApplicationGateway):
+        raise TypeError("The injected application gateway is invalid.")
+    return gateway
 
 
 def _failure_result(
@@ -151,9 +167,8 @@ async def execute_local_command(request: Request) -> JSONResponse:
         return _fixed_internal_error_response()
 
     try:
-        result = container.local_command_application_gateway.execute(
-            application_request
-        )
+        gateway = _resolve_gateway(request)
+        result = gateway.execute(application_request)
         return _render_result(result)
     except Exception:
         return _fixed_internal_error_response()
