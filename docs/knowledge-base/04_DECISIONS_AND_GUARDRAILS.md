@@ -1,5 +1,22 @@
 # Decisions and Guardrails
 
+## Sprint 34 governed decisions and guardrails
+
+- Development-only separate app at exact `127.0.0.1:8765`; exact POST Origin
+  `http://127.0.0.1:8765`; no alternate, LAN, or public bind.
+- For `POST /local/command`, transport middleware validates exact Host, exact
+  Origin, strict Content-Type, and runtime-scoped CSRF before the route parses
+  or processes the request body; invalid transport or CSRF is rejected before
+  command-body handling. CSP, no-store local assets, same-origin fetch, and no
+  CORS expansion remain enforced. CSRF is not production authentication.
+- UI owns no authentication, mapping, membership, permission, capability, or SQLite.
+- Proof comes from `getpass`, is manually re-entered, and never travels through
+  argv, environment, URL, persistence, or helper thread.
+- `Path.home()` is the sole application-level home resolver; schema v4, no migration.
+- Missing gateway preserves historical fallback; invalid injection fails closed.
+- Fallback cognition remains explicit/off by default; no structured projection,
+  production authentication, Spatial integration, or Hermes integration.
+
 No approved ADR records were found in the repository. The ADR standard itself
 is a draft and `docs/adr/` does not exist. The following consolidation therefore
 preserves the status and source of each statement rather than inventing ADRs.

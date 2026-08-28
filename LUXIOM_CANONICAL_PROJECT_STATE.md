@@ -54,10 +54,10 @@ provenance-aware.
 - Runtime: Python 3.12 or newer; release validation used Python 3.14.6 on
   Windows PowerShell.
 
-## 5. Current governed release — Sprint 33
+## 5. Historical governed release — Sprint 33
 
-Sprint 33 — Durable Action Permission Revocation Foundation v1 is the latest
-governed implementation release.
+Sprint 33 — Durable Action Permission Revocation Foundation v1 is a historical
+governed release immediately preceding Sprint 34.
 
 Frozen baseline: `f1e1519eedd6f021cb98c6ac8a9242f6b946b645`
 
@@ -364,7 +364,7 @@ Update this checkpoint only in a reviewed documentation/release-governance
 change when durable project or release truth materially changes. Do not use it
 as a conversational scratchpad or mirror every external-ledger update.
 
-## 16. Current Sprint 33 closure state
+## 16. Historical Sprint 33 closure state
 
 - Sprint 33 implementation is complete through PR #48 and ordinary merge
   `9af9984691b034710243e1da487767108915ce3a`.
@@ -380,7 +380,47 @@ as a conversational scratchpad or mirror every external-ledger update.
   already-established state; it does not establish, condition, or move closure.
 - No subsequent implementation sprint is authorized merely by this checkpoint.
 
-## 17. Sprint 29 immutable release checkpoint
+## 17. Current governed release — Sprint 34
+
+Sprint 34 — Local Interactive Runtime & Minimal UI Foundation v1 is current.
+Frozen baseline `227c03e4f5b824710aebea38c5c6dd705e4ec44a` and implementation
+`3f48e7fe9cf311df8b3bd2462a1987f8e732303d` reached PR #50, ordinary
+two-parent release `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
+`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, and immutable tag
+`governed-sprint-34-complete` (object
+`ae5557c26a719b4cdedef202a191fe92e15a57d3`, peeling to the release).
+
+The development-only Windows/Uvicorn runtime is a separate FastAPI composition
+fixed to `127.0.0.1:8765`. `/local/ui` uses exact Host, exact POST Origin
+`http://127.0.0.1:8765`, strict JSON, runtime CSRF, CSP, no-store local assets,
+no CORS, and same-origin `POST /local/command` through the existing gateway and
+downstream authorities. The ordinary app/router remain separate. Proof is read
+with `getpass`, entered again manually in the browser, and never transferred or
+persisted. Normal development storage is `Path.home() / ".luxiom" /
+"development" / "local-interactive" / "luxiom-local.sqlite3"`; `Path.home()`
+is the sole application-level OS-home resolver. Schema stays v4 with no
+migration. Lifecycle is `NEW -> STARTED -> CLOSED`, close is idempotent, failed
+startup ends closed, missing gateway uses historical fallback, and invalid
+explicit injection fails closed. Cognitive fallback stays off by default and
+there is no public structured list-result projection.
+
+Separate OS-process proof passed HTTP write/read for exact `alpha`, `beta`,
+membership 403 `access_denied`, and permission 403
+`local_permission_denied`, using controlled external databases. Post-merge:
+operational demo PASS, architecture 144, repository 1433, Ruff PASS, and
+`git diff --check` PASS; no GitHub checks were reported.
+
+Backup `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34` has bundle,
+ZIP, manifest, and sums hashes `23915918709261911ca01c11d90b3d35b6c240c95df6b709fc2b55e65df677a8`,
+`5ffdb1157b5bc333b97aed42175086f563b2eabcedc95bfa0bdba6d775925d9d`,
+`b8408b013857fb584af619681080a0c6fa4db98aa98b4c27a8302430e91d315d`,
+and `1ec182ebb47c34a9fc9eaf7e6499724aa8742e0626aa952f0e7c6f85b1bd794e`.
+Frozen design/sidecar hashes are `0e695aaa3f337187b0b5c503359afe6fadd4676d026aee87338b8103cf8cc01a`
+and `b905791ee11791c55417981473119b78486fdf42b72cf9ed8441daa4290b09b3`.
+This docs sync is outside the immutable release, cannot move its tag, and
+authorizes no Sprint 35.
+
+## 18. Sprint 29 immutable release checkpoint
 
 PR `#34` merged feature `8f08583701571e69b6d18a0cfea64d073201a217`
 (base `779a2719eaf83de2f98134cc76027dd6f2e7d945`) at

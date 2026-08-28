@@ -1,6 +1,23 @@
 # AI Handoff
 
-## Current Sprint 33 recovery brief
+## Current Sprint 34 recovery brief
+
+Release baseline `227c03e4f5b824710aebea38c5c6dd705e4ec44a`, implementation
+`3f48e7fe9cf311df8b3bd2462a1987f8e732303d`, PR #50, merge
+`adbd17d564962c6d22617b5857aaaec7da051b08`, tree
+`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag
+`governed-sprint-34-complete`, object `ae5557c26a719b4cdedef202a191fe92e15a57d3`.
+Development runtime is separate and fixed-loopback; `/local/ui` calls governed
+`POST /local/command`. Exact Host/Origin, JSON, CSRF, CSP, no-store, no CORS,
+and separate nonpersistent proof entry apply. Storage is the `Path.home()`
+development path, schema v4. Two processes proved `alpha`, `beta`, membership
+and permission denial. Demo PASS; architecture 144; repository 1433; Ruff and
+diff-check PASS; no GitHub checks. Backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34`. Resume from the
+immutable checkpoint; docs may advance master but cannot move the tag or
+authorize Sprint 35.
+
+## Historical Sprint 33 recovery brief
 
 1. **Canonical branch and checkpoint:** `master` at
    `9af9984691b034710243e1da487767108915ce3a`.

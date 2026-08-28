@@ -372,6 +372,19 @@ released at `governed-sprint-31-complete`; formal Sprint 31 governance closure
 was subsequently completed at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`.
 
+## Sprint 34 local interactive dependency boundary
+
+Direction is `UI/transport -> local-command HTTP boundary ->
+LocalCommandApplicationGateway -> authentication/mapping/membership/routing ->
+PermissionPolicy -> local capabilities`. UI owns no capability, storage,
+authentication, mapping, membership, or permission logic; interactive API
+constructs no SQLite. Only interactive composition uses the narrow gateway
+state key: missing preserves container fallback, invalid explicit values fail
+closed. The ordinary app/router remain separate. The launcher imports no
+cognition/auth/membership/permission infrastructure or demo runtime. Its helper
+cannot reach Server, app, runtime, proof, CSRF, DB, or gateway. Internal
+structured results cannot become public UI projections.
+
 ## Sprint 33 governed action-permission revocation boundary
 
 The inward revocation contract lives in local resolution and imports no SQLite

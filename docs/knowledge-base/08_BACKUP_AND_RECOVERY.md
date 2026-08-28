@@ -42,6 +42,19 @@ Each real run creates `LUXIOM_yyyyMMdd_HHmmss` containing
 `luxiom-repository.bundle`, `luxiom-source.zip`, and `MANIFEST.txt`. It warns
 when the working tree is dirty. Use a destination outside the repository.
 
+## Sprint 34 verified recovery checkpoint
+
+Directory: `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34`.
+Bundle `23915918709261911ca01c11d90b3d35b6c240c95df6b709fc2b55e65df677a8`;
+release ZIP `5ffdb1157b5bc333b97aed42175086f563b2eabcedc95bfa0bdba6d775925d9d`;
+manifest `b8408b013857fb584af619681080a0c6fa4db98aa98b4c27a8302430e91d315d`;
+SHA256SUMS `1ec182ebb47c34a9fc9eaf7e6499724aa8742e0626aa952f0e7c6f85b1bd794e`.
+Frozen design/sidecar: `0e695aaa3f337187b0b5c503359afe6fadd4676d026aee87338b8103cf8cc01a`,
+`b905791ee11791c55417981473119b78486fdf42b72cf9ed8441daa4290b09b3`.
+The bundle contains complete history and tag. The ZIP came from
+`governed-sprint-34-complete`, object `ae5557c26a719b4cdedef202a191fe92e15a57d3`,
+peeling to `adbd17d564962c6d22617b5857aaaec7da051b08`.
+
 ## Sprint 33 verified recovery checkpoint
 
 The verified Sprint 33 release backup is:

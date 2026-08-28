@@ -1,5 +1,18 @@
 # Source of Truth
 
+## Sprint 34 governed implementation truth
+
+Latest release: implementation `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`,
+PR #50, merge `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
+`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag
+`governed-sprint-34-complete`, object `ae5557c26a719b4cdedef202a191fe92e15a57d3`.
+Demo, architecture 144, repository 1433, Ruff, and diff-check passed; no GitHub
+checks were reported. Backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34`.
+Precedence remains Git objects/refs/immutable tags -> verified release backup ->
+active reviewed docs -> canonical checkpoint -> external continuity context.
+This docs sync can advance master but cannot move or redefine the tag.
+
 ## Trust hierarchy
 
 1. Approved Product North Star and normative foundation/lifecycle documents:
@@ -109,8 +122,9 @@ released through ordinary merge `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`
 under immutable tag `governed-sprint-32-complete`. Its later documentation
 merges did not move that implementation checkpoint.
 
-Sprint 33 - Durable Action Permission Revocation Foundation v1 is the latest
-governed implementation release. Implementation commit
+At the Sprint 33 release checkpoint, Sprint 33 - Durable Action Permission
+Revocation Foundation v1 was the latest governed implementation release.
+Implementation commit
 `9f4b86beddaa1e2550e054a55e6c743c87f2723c` merged through PR #48 at ordinary
 release commit `9af9984691b034710243e1da487767108915ce3a`, tree
 `3a1317dc1a1c295ae5e2b77947a149cf138134ba`. Immutable tag

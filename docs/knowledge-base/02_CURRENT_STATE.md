@@ -1,9 +1,28 @@
 # Current State
 
-## Sprint 33 governed implementation state
+## Sprint 34 governed implementation state
 
-Sprint 33 - Durable Action Permission Revocation Foundation v1 is the latest
-governed implementation release. Implementation commit
+Sprint 34 is current: baseline `227c03e4f5b824710aebea38c5c6dd705e4ec44a`,
+implementation `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`, PR #50, merge
+`adbd17d564962c6d22617b5857aaaec7da051b08`, tree
+`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag
+`governed-sprint-34-complete`, object `ae5557c26a719b4cdedef202a191fe92e15a57d3`.
+The development-only separate Windows/Uvicorn app is fixed at
+`127.0.0.1:8765`; `/local/ui` uses exact Host/Origin, strict JSON, runtime CSRF,
+CSP, no-store, local assets, no CORS, and governed `POST /local/command`. UI
+owns no downstream authority. Proof is separately entered and never transferred
+or persisted. Storage is `Path.home()/.luxiom/development/local-interactive/
+luxiom-local.sqlite3`, schema v4, no migration. External two-process proof
+passed `alpha`, `beta`, 403 `access_denied`, and 403
+`local_permission_denied`. Validation passed demo, architecture 144, repository
+1433, Ruff, and diff-check; no GitHub checks. Backup:
+`LUXIOM_20260827_165704_SPRINT34`.
+
+## Historical Sprint 33 governed implementation state
+
+At the Sprint 33 release checkpoint, Sprint 33 - Durable Action Permission
+Revocation Foundation v1 was the latest governed implementation release.
+Implementation commit
 `9f4b86beddaa1e2550e054a55e6c743c87f2723c` merged through PR #48 at ordinary
 two-parent release commit `9af9984691b034710243e1da487767108915ce3a`,
 release tree `3a1317dc1a1c295ae5e2b77947a149cf138134ba`.

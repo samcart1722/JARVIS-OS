@@ -1,5 +1,21 @@
 # Runtime Architecture
 
+## Sprint 34 governed local interactive runtime and UI flow
+
+Latest release: Sprint 34, `adbd17d564962c6d22617b5857aaaec7da051b08`,
+tag `governed-sprint-34-complete`. Flow: `Windows launcher -> separate loopback
+FastAPI app -> /local/ui -> same-origin POST /local/command -> existing gateway
+-> authentication -> mapping -> membership -> routing -> PermissionPolicy ->
+local capability/storage`. Uvicorn binds only `127.0.0.1:8765`; exact Host and
+Origin `http://127.0.0.1:8765`, strict JSON, CSRF, CSP, no-store, local assets,
+and no CORS protect transport. For `POST /local/command`, transport middleware
+validates exact Host, exact Origin, strict Content-Type, and runtime-scoped CSRF
+before the route parses or processes the request body. Invalid transport or
+CSRF is rejected before command-body handling. Proof is entered independently
+in console and browser. Lifespan owns one runtime and SQLite at the `Path.home()` development
+path, schema v4. Narrow state injection preserves missing fallback and rejects
+invalid explicit values. Ordinary app/router and `CognitiveEngine` are unchanged.
+
 ## Trusted request-context boundary (Sprint 27 released)
 
 The supported internal local text-command path is:
@@ -48,8 +64,8 @@ to cognition. The feature merged at
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
 released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
 released trusted request context; Sprint 28 released durable membership; Sprint
-33 is now the latest governed implementation release at
-`governed-sprint-33-complete`.
+At the Sprint 33 release checkpoint, Sprint 33 was the latest governed
+implementation release at `governed-sprint-33-complete`; Sprint 34 is current.
 
 ## Deterministic knowledge commands (Sprint 25)
 

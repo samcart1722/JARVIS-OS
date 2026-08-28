@@ -1,5 +1,14 @@
 # Roadmap
 
+## Sprint 34 formal governance closure complete
+
+Sprint 34 is the latest governed implementation release through PR #50, merge
+`adbd17d564962c6d22617b5857aaaec7da051b08`, and tag
+`governed-sprint-34-complete`. Runtime/UI, operational proof, validation, and
+backup are complete. This does not authorize Sprint 35. Hermes Agent and the
+LUXIOM Spatial/Cognitive Interface remain separate controlled study lines, not
+implementation commitments.
+
 ## Sprint 29 released / complete
 
 Local Principal Authentication Foundation v1 is released through PR #34 at
@@ -130,9 +139,10 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 33 is the latest governed implementation release at
-`9af9984691b034710243e1da487767108915ce3a`, tag
-`governed-sprint-33-complete`. Sprint 32 is the immediately preceding governed
+Sprint 34 is latest at `adbd17d564962c6d22617b5857aaaec7da051b08`, tag
+`governed-sprint-34-complete`. Sprint 33 is the immediately preceding historical
+release at `9af9984691b034710243e1da487767108915ce3a`, tag
+`governed-sprint-33-complete`. Sprint 32 is the preceding governed
 authenticated local-command application gateway release at
 `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`, tag
 `governed-sprint-32-complete`. Sprint 31 is the preceding governed
@@ -358,8 +368,8 @@ released through its own governance gates.
 
 ## Sprint 33 formal governance closure complete
 
-Sprint 33 - Durable Action Permission Revocation Foundation v1 is the latest
-governed implementation release.
+At the Sprint 33 release checkpoint, Sprint 33 - Durable Action Permission
+Revocation Foundation v1 was the latest governed implementation release.
 
 It preserves `PermissionGrantRepository` as exact lookup/create and adds the
 separate `PermissionGrantRevocationRepository` with exactly `revoke`. Exact
