@@ -41,6 +41,34 @@
       <p>Route: <span id="route">—</span></p>
       <p id="response"></p>
       <p id="error" role="alert"></p>
+      <section id="list-projection" class="list-projection" hidden>
+        <h3>List details</h3>
+        <dl>
+          <div class="projection-row">
+            <dt>List</dt>
+            <dd id="projection-list-id"></dd>
+          </div>
+          <div id="projection-added-row" class="projection-row" hidden>
+            <dt>Added</dt>
+            <dd id="projection-added" class="projection-values"></dd>
+          </div>
+          <div
+            id="projection-already-present-row"
+            class="projection-row"
+            hidden
+          >
+            <dt>Already present</dt>
+            <dd
+              id="projection-already-present"
+              class="projection-values"
+            ></dd>
+          </div>
+          <div class="projection-row">
+            <dt>Items</dt>
+            <dd id="projection-items" class="projection-values"></dd>
+          </div>
+        </dl>
+      </section>
     </section>
 
     <section class="panel examples">

@@ -318,6 +318,14 @@ def test_real_runtime_http_add_read_wrong_proof_and_shutdown(
                 "route": "local",
                 "response": "List updated locally.",
                 "error": None,
+                "projection": {
+                    "kind": "list",
+                    "operation": "add",
+                    "list_id": "sprint34-b2",
+                    "added": ["alpha", "beta"],
+                    "already_present": [],
+                    "items": ["alpha", "beta"],
+                },
             }
 
             read_status, read = await _post(
@@ -331,6 +339,12 @@ def test_real_runtime_http_add_read_wrong_proof_and_shutdown(
                 "route": "local",
                 "response": "List read locally.",
                 "error": None,
+                "projection": {
+                    "kind": "list",
+                    "operation": "read",
+                    "list_id": "sprint34-b2",
+                    "items": ["alpha", "beta"],
+                },
             }
 
             proof = "wrong-proof-that-must-not-leak"
@@ -341,6 +355,7 @@ def test_real_runtime_http_add_read_wrong_proof_and_shutdown(
             )
             assert denied_status == 403
             assert denied["error"]["code"] == "access_denied"
+            assert "projection" not in denied
             assert proof not in json.dumps(denied)
 
     asyncio.run(exercise())
@@ -349,7 +364,7 @@ def test_real_runtime_http_add_read_wrong_proof_and_shutdown(
     assert id(default_container) == default_identity
 
 
-def test_public_results_have_no_structured_projection() -> None:
+def test_public_results_allow_only_closed_projection_not_generic_payloads() -> None:
     application_fields = {
         field.name for field in fields(LocalCommandApplicationResult)
     }
@@ -363,6 +378,20 @@ def test_public_results_have_no_structured_projection() -> None:
         "result_details",
     }
 
+    assert application_fields == {
+        "success",
+        "route",
+        "response",
+        "error",
+        "projection",
+    }
+    assert http_fields == {
+        "success",
+        "route",
+        "response",
+        "error",
+        "projection",
+    }
     assert application_fields.isdisjoint(prohibited)
     assert http_fields.isdisjoint(prohibited)
 

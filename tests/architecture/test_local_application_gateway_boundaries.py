@@ -96,6 +96,8 @@ APPLICATION_MODEL_FORBIDDEN_SYMBOLS = API_FORBIDDEN_SYMBOLS | frozenset(
     (
         "CognitiveOutcome",
         "CoordinatedResult",
+        "ListItemsAdded",
+        "ListItemsSnapshot",
         "LocalResolutionResult",
     )
 )
@@ -581,7 +583,14 @@ def test_application_result_contract_contains_no_internal_domain_types() -> None
         "route": "LocalCommandApplicationRoute | None",
         "response": "str | None",
         "error": "LocalCommandApplicationError | None",
+        "projection": "LocalListProjection | None",
     }
+
+    projection_union = _assignment(tree, "LocalListProjection")
+
+    assert ast.unparse(projection_union.value) == (
+        "LocalListAddProjection | LocalListReadProjection"
+    )
 
 
 def test_application_request_proof_has_no_generic_repr_or_dataclass_surface() -> None:

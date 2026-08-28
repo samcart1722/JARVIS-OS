@@ -9,6 +9,8 @@ from pydantic import ValidationError
 
 from app.api.models.local_command import (
     LocalCommandHttpError,
+    LocalCommandHttpListAddProjection,
+    LocalCommandHttpListReadProjection,
     LocalCommandHttpRequest,
     LocalCommandHttpResponse,
 )
@@ -21,6 +23,8 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalListAddProjection,
+    LocalListReadProjection,
     application_error,
 )
 
@@ -254,7 +258,139 @@ def test_http_response_has_closed_expected_shape() -> None:
             "code": "access_denied",
             "message": "Access denied.",
         },
+        "projection": None,
     }
+
+
+def test_http_add_projection_model_has_closed_exact_contract() -> None:
+    projection = LocalCommandHttpListAddProjection(
+        list_id="groceries",
+        added=("milk",),
+        already_present=("eggs",),
+        items=("eggs", "milk"),
+    )
+
+    assert projection.model_dump() == {
+        "kind": "list",
+        "operation": "add",
+        "list_id": "groceries",
+        "added": ("milk",),
+        "already_present": ("eggs",),
+        "items": ("eggs", "milk"),
+    }
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    (
+        {"kind": "knowledge"},
+        {"operation": "read"},
+        {"unexpected": "forbidden"},
+    ),
+)
+def test_http_add_projection_model_rejects_invalid_contract(overrides) -> None:
+    values = {
+        "list_id": "groceries",
+        "added": ("milk",),
+        "already_present": (),
+        "items": ("milk",),
+    }
+    values.update(overrides)
+
+    with pytest.raises(ValidationError):
+        LocalCommandHttpListAddProjection.model_validate(values)
+
+
+def test_http_read_projection_model_has_closed_exact_contract() -> None:
+    projection = LocalCommandHttpListReadProjection(
+        list_id="groceries",
+        items=(),
+    )
+
+    assert projection.model_dump() == {
+        "kind": "list",
+        "operation": "read",
+        "list_id": "groceries",
+        "items": (),
+    }
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    (
+        {"kind": "knowledge"},
+        {"operation": "add"},
+        {"unexpected": "forbidden"},
+    ),
+)
+def test_http_read_projection_model_rejects_invalid_contract(overrides) -> None:
+    values = {
+        "list_id": "groceries",
+        "items": (),
+    }
+    values.update(overrides)
+
+    with pytest.raises(ValidationError):
+        LocalCommandHttpListReadProjection.model_validate(values)
+
+
+@pytest.mark.parametrize(
+    ("projection", "expected_type"),
+    (
+        (
+            {
+                "kind": "list",
+                "operation": "add",
+                "list_id": "groceries",
+                "added": ["milk"],
+                "already_present": [],
+                "items": ["milk"],
+            },
+            LocalCommandHttpListAddProjection,
+        ),
+        (
+            {
+                "kind": "list",
+                "operation": "read",
+                "list_id": "groceries",
+                "items": [],
+            },
+            LocalCommandHttpListReadProjection,
+        ),
+    ),
+)
+def test_http_projection_union_selects_operation_variant(
+    projection,
+    expected_type,
+) -> None:
+    response = LocalCommandHttpResponse(
+        success=True,
+        route="local",
+        response="completed",
+        error=None,
+        projection=projection,
+    )
+
+    assert type(response.projection) is expected_type
+
+
+def test_http_projection_union_rejects_unknown_operation() -> None:
+    with pytest.raises(ValidationError):
+        LocalCommandHttpResponse(
+            success=True,
+            route="local",
+            response="completed",
+            error=None,
+            projection=cast(
+                Any,
+                {
+                    "kind": "list",
+                    "operation": "delete",
+                    "list_id": "groceries",
+                    "items": [],
+                },
+            ),
+        )
 
 
 @pytest.mark.parametrize(
@@ -490,6 +626,120 @@ def test_http_adapter_maps_success_to_200(
         "response": response,
         "error": None,
     }
+    assert "projection" not in payload
+
+
+@pytest.mark.parametrize(
+    ("added", "already_present", "items"),
+    (
+        (("milk", "eggs"), (), ("milk", "eggs")),
+        ((), ("milk", "eggs"), ("eggs", "milk")),
+    ),
+)
+def test_http_adapter_maps_add_projection_to_exact_wire_contract(
+    monkeypatch,
+    added,
+    already_present,
+    items,
+) -> None:
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="List updated locally.",
+            projection=LocalListAddProjection(
+                list_id="groceries",
+                added=added,
+                already_present=already_present,
+                items=items,
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container,
+        "local_command_application_gateway",
+        gateway,
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    assert payload == {
+        "success": True,
+        "route": "local",
+        "response": "List updated locally.",
+        "error": None,
+        "projection": {
+            "kind": "list",
+            "operation": "add",
+            "list_id": "groceries",
+            "added": list(added),
+            "already_present": list(already_present),
+            "items": list(items),
+        },
+    }
+
+
+@pytest.mark.parametrize("items", (("milk", "eggs"), ()))
+def test_http_adapter_maps_read_projection_to_exact_wire_contract(
+    monkeypatch,
+    items,
+) -> None:
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="List read locally.",
+            projection=LocalListReadProjection("groceries", items),
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container,
+        "local_command_application_gateway",
+        gateway,
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    assert payload == {
+        "success": True,
+        "route": "local",
+        "response": "List read locally.",
+        "error": None,
+        "projection": {
+            "kind": "list",
+            "operation": "read",
+            "list_id": "groceries",
+            "items": list(items),
+        },
+    }
+
+
+def test_http_adapter_omits_only_absent_projection(monkeypatch) -> None:
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="completed locally",
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container,
+        "local_command_application_gateway",
+        gateway,
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    assert payload == {
+        "success": True,
+        "route": "local",
+        "response": "completed locally",
+        "error": None,
+    }
+    assert "projection" not in payload
 
 
 @pytest.mark.parametrize(
@@ -574,6 +824,7 @@ def test_http_adapter_has_closed_failure_status_mapping(
             "message": _application_error_message(result),
         },
     }
+    assert "projection" not in payload
 
 
 def test_http_adapter_maps_safe_insufficiency_invalid_input_to_400(
@@ -675,6 +926,7 @@ def test_http_validation_is_400_not_fastapi_422_and_never_calls_gateway(
             "message": "The request is invalid.",
         },
     }
+    assert "projection" not in payload
     assert gateway.requests == []
 
 
@@ -794,6 +1046,7 @@ def test_unexpected_gateway_exception_is_fixed_sanitized_500(
             "message": "The request could not be completed.",
         },
     }
+    assert "projection" not in payload
 
     serialized = json.dumps(payload)
 
@@ -827,6 +1080,46 @@ def test_invalid_gateway_result_is_fixed_sanitized_500(
             "message": "The request could not be completed.",
         },
     }
+    assert "projection" not in payload
+
+
+def test_projection_mapping_failure_is_fixed_sanitized_500(
+    monkeypatch,
+) -> None:
+    detail = "projection detail that must not leak"
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="List read locally.",
+            projection=LocalListReadProjection("groceries", ("milk",)),
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container,
+        "local_command_application_gateway",
+        gateway,
+    )
+
+    def fail_mapping(projection):
+        raise RuntimeError(detail)
+
+    monkeypatch.setattr(local_command, "_map_projection", fail_mapping)
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 500
+    assert payload == {
+        "success": False,
+        "route": None,
+        "response": None,
+        "error": {
+            "code": "internal_error",
+            "message": "The request could not be completed.",
+        },
+    }
+    assert "projection" not in payload
+    assert detail not in json.dumps(payload)
 
 def test_http_workspace_limit_applies_after_trimming() -> None:
     workspace_id = " " + ("w" * WORKSPACE_ID_MAX_LENGTH) + " "

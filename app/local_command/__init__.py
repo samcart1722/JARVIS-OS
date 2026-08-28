@@ -9,6 +9,11 @@ from app.local_command.models import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalCommandProjectionKind,
+    LocalListAddProjection,
+    LocalListProjection,
+    LocalListProjectionOperation,
+    LocalListReadProjection,
     application_error,
 )
 
@@ -21,5 +26,10 @@ __all__ = [
     "LocalCommandApplicationRequest",
     "LocalCommandApplicationResult",
     "LocalCommandApplicationRoute",
+    "LocalCommandProjectionKind",
+    "LocalListAddProjection",
+    "LocalListProjection",
+    "LocalListProjectionOperation",
+    "LocalListReadProjection",
     "application_error",
 ]

@@ -8,6 +8,9 @@ from pydantic import ValidationError
 
 from app.api.models.local_command import (
     LocalCommandHttpError,
+    LocalCommandHttpListAddProjection,
+    LocalCommandHttpListProjection,
+    LocalCommandHttpListReadProjection,
     LocalCommandHttpRequest,
     LocalCommandHttpResponse,
 )
@@ -18,6 +21,8 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalListAddProjection,
+    LocalListReadProjection,
     application_error,
 )
 
@@ -84,6 +89,33 @@ def _failure_result(
     )
 
 
+def _map_projection(
+    projection: object | None,
+) -> LocalCommandHttpListProjection | None:
+    if projection is None:
+        return None
+    if type(projection) is LocalListAddProjection:
+        return LocalCommandHttpListAddProjection(
+            list_id=projection.list_id,
+            added=projection.added,
+            already_present=projection.already_present,
+            items=projection.items,
+        )
+    if type(projection) is LocalListReadProjection:
+        return LocalCommandHttpListReadProjection(
+            list_id=projection.list_id,
+            items=projection.items,
+        )
+    raise TypeError("Application projection type is invalid.")
+
+
+def _wire_payload(payload: LocalCommandHttpResponse) -> dict[str, object]:
+    content = payload.model_dump(mode="json")
+    if payload.projection is None:
+        content.pop("projection")
+    return content
+
+
 def _render_result(
     result: LocalCommandApplicationResult,
 ) -> JSONResponse:
@@ -98,10 +130,11 @@ def _render_result(
             route=result.route.value if result.route is not None else None,
             response=result.response,
             error=None,
+            projection=_map_projection(result.projection),
         )
         return JSONResponse(
             status_code=200,
-            content=payload.model_dump(),
+            content=_wire_payload(payload),
         )
 
     application_error = result.error
@@ -126,7 +159,7 @@ def _render_result(
         status_code=_HTTP_STATUS_BY_ERROR_CODE[
             application_error.code
         ],
-        content=payload.model_dump(),
+        content=_wire_payload(payload),
     )
 
 

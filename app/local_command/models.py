@@ -1,5 +1,5 @@
 """Public immutable contracts for the authenticated local-command gateway."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import NoReturn
 
@@ -11,6 +11,77 @@ class LocalCommandApplicationRoute(str, Enum):
     LOCAL = "local"
     COGNITIVE = "cognitive"
     SAFE_INSUFFICIENCY = "safe_insufficiency"
+
+
+class LocalCommandProjectionKind(str, Enum):
+    LIST = "list"
+
+
+class LocalListProjectionOperation(str, Enum):
+    ADD = "add"
+    READ = "read"
+
+
+def _projection_list_id(value: object) -> str:
+    if type(value) is not str:
+        raise ValueError("Projection list ID must be a string.")
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError("Projection list ID must be non-empty.")
+    return normalized
+
+
+def _projection_items(value: object, label: str) -> tuple[str, ...]:
+    if type(value) is not tuple:
+        raise ValueError(f"Projection {label} must be a tuple.")
+    if any(type(item) is not str or not item.strip() for item in value):
+        raise ValueError(
+            f"Projection {label} must contain non-empty strings."
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class LocalListAddProjection:
+    list_id: str
+    added: tuple[str, ...]
+    already_present: tuple[str, ...]
+    items: tuple[str, ...]
+    kind: LocalCommandProjectionKind = field(
+        default=LocalCommandProjectionKind.LIST,
+        init=False,
+    )
+    operation: LocalListProjectionOperation = field(
+        default=LocalListProjectionOperation.ADD,
+        init=False,
+    )
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "list_id", _projection_list_id(self.list_id))
+        _projection_items(self.added, "added items")
+        _projection_items(self.already_present, "already-present items")
+        _projection_items(self.items, "current items")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalListReadProjection:
+    list_id: str
+    items: tuple[str, ...]
+    kind: LocalCommandProjectionKind = field(
+        default=LocalCommandProjectionKind.LIST,
+        init=False,
+    )
+    operation: LocalListProjectionOperation = field(
+        default=LocalListProjectionOperation.READ,
+        init=False,
+    )
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "list_id", _projection_list_id(self.list_id))
+        _projection_items(self.items, "items")
+
+
+LocalListProjection = LocalListAddProjection | LocalListReadProjection
 
 
 class LocalCommandApplicationErrorCode(str, Enum):
@@ -213,6 +284,7 @@ class LocalCommandApplicationResult:
     route: LocalCommandApplicationRoute | None = None
     response: str | None = None
     error: LocalCommandApplicationError | None = None
+    projection: LocalListProjection | None = None
 
     def __post_init__(self) -> None:
         if type(self.success) is not bool:
@@ -223,6 +295,20 @@ class LocalCommandApplicationResult:
             and type(self.route) is not LocalCommandApplicationRoute
         ):
             raise ValueError("Application result route is invalid.")
+
+        if self.projection is not None:
+            if type(self.projection) not in (
+                LocalListAddProjection,
+                LocalListReadProjection,
+            ):
+                raise ValueError("Application result projection is invalid.")
+            if (
+                not self.success
+                or self.route is not LocalCommandApplicationRoute.LOCAL
+            ):
+                raise ValueError(
+                    "Application result projection requires local success."
+                )
 
         if self.success:
             if self.route not in (

@@ -103,6 +103,42 @@ button:disabled {
   color: #fca5a5;
 }
 
+.list-projection {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #30363d;
+}
+
+.list-projection dl {
+  margin-bottom: 0;
+}
+
+.projection-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.35fr) 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+#list-projection[hidden],
+.projection-row[hidden] {
+  display: none;
+}
+
+.projection-row dt {
+  font-weight: 700;
+}
+
+.projection-row dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.projection-values ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
 .examples code {
   display: block;
   margin-top: 0.5rem;

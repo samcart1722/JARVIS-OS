@@ -1,6 +1,6 @@
 """Secret-aware HTTP transport models for authenticated local commands."""
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import (
     BaseModel,
@@ -21,6 +21,42 @@ LocalCommandHttpRoute = Literal[
     "local",
     "cognitive",
     "safe_insufficiency",
+]
+
+
+class LocalCommandHttpListAddProjection(BaseModel):
+    """Closed HTTP projection for a successful local list addition."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+    )
+
+    kind: Literal["list"] = "list"
+    operation: Literal["add"] = "add"
+    list_id: str
+    added: tuple[str, ...]
+    already_present: tuple[str, ...]
+    items: tuple[str, ...]
+
+
+class LocalCommandHttpListReadProjection(BaseModel):
+    """Closed HTTP projection for a successful local list read."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+    )
+
+    kind: Literal["list"] = "list"
+    operation: Literal["read"] = "read"
+    list_id: str
+    items: tuple[str, ...]
+
+
+LocalCommandHttpListProjection = Annotated[
+    LocalCommandHttpListAddProjection | LocalCommandHttpListReadProjection,
+    Field(discriminator="operation"),
 ]
 
 
@@ -89,3 +125,4 @@ class LocalCommandHttpResponse(BaseModel):
     route: LocalCommandHttpRoute | None
     response: str | None
     error: LocalCommandHttpError | None
+    projection: LocalCommandHttpListProjection | None = None
