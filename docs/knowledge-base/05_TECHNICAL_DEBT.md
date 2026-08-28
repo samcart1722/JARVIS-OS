@@ -1,5 +1,14 @@
 # Technical Debt
 
+## Sprint 34 post-release classification
+
+RESOLVED: absence of a minimal user-operable local interactive development
+surface. Still future and unauthorized: production authentication;
+sessions/devices; LAN/public serving; packaging/service/tray; product-grade and
+final Spatial UI; structured result projection; synchronization, encryption,
+audit, and general permission lifecycle; and Hermes-derived integrations. The
+development database path and minimal UI are not final production architecture.
+
 ## Sprint 27 released classification
 
 No new uncontrolled technical debt is identified in the implemented trusted

@@ -355,6 +355,17 @@ These components remain released at `governed-sprint-31-complete`; formal
 Sprint 31 governance closure was subsequently completed at canonical checkpoint
 `fa90defc44ad756a33f11e470105db57a440e201`.
 
+## Sprint 34 local interactive outer components
+
+Sprint 34 adds outer composition/presentation, not new Core contracts:
+`LocalInteractiveRuntime` owns one development SQLite composition and
+`NEW -> STARTED -> CLOSED`; `app.api.interactive` creates the separate loopback
+FastAPI app and narrowly injects the existing gateway; `/local/ui` and local
+assets provide the browser surface; the Windows launcher owns fixed-loopback
+Uvicorn—the only new direct runtime dependency—and its secret-free helper; and the operations demo runtime/script are
+test/proof facilities, not product APIs or configuration. `CognitiveEngine`,
+schema v4, and the canonical public application result remain unchanged.
+
 ## Sprint 33 governed revocation components
 
 Sprint 33 adds the separate `PermissionGrantRevocationRepository` port while

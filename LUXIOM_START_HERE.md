@@ -6,10 +6,25 @@ capabilities, and replaceable tools/providers. HealthBridge is the first
 planned consumer. Luxiom is not a chatbot, an LLM wrapper, a conventional
 agent, or a product tied to one industry.
 
-## Current checkpoint
+## Current checkpoint — Sprint 34
 
-Sprint 33 — Durable Action Permission Revocation Foundation v1 is the latest
-governed implementation release.
+Sprint 34 — Local Interactive Runtime & Minimal UI Foundation v1 is the latest
+governed implementation release; Sprint 33 remains historical.
+
+Release identity: implementation `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`,
+PR #50, merge `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
+`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag
+`governed-sprint-34-complete`, object
+`ae5557c26a719b4cdedef202a191fe92e15a57d3`. The development-only separate
+runtime serves `/local/ui` and governed `POST /local/command` only at
+`127.0.0.1:8765`, preserving all downstream authorization. Its database is
+`Path.home()/.luxiom/development/local-interactive/luxiom-local.sqlite3`.
+Validation: operational demo PASS, architecture 144, repository 1433, Ruff and
+`git diff --check` PASS; no GitHub checks were reported. Backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34`. This docs sync
+may advance `master` but never the immutable tag.
+
+## Historical checkpoint — Sprint 33
 
 Frozen baseline and implementation commit:
 `f1e1519eedd6f021cb98c6ac8a9242f6b946b645` and

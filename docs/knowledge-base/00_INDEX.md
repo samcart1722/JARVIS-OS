@@ -5,9 +5,9 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 33 Durable Action Permission Revocation Foundation v1 is the latest
-governed implementation release at `9af9984691b034710243e1da487767108915ce3a`,
-tag `governed-sprint-33-complete`. Start with the repository-owned
+Sprint 34 Local Interactive Runtime & Minimal UI Foundation v1 is latest at
+`adbd17d564962c6d22617b5857aaaec7da051b08`, tag
+`governed-sprint-34-complete`; Sprint 33 remains historical. Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and
 [Sprint 27 summary](history/sprints/SPRINT_27_SUMMARY.md).
