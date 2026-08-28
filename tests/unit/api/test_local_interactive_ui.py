@@ -143,6 +143,7 @@ class _DocumentParser(HTMLParser):
         self.inputs: list[dict[str, str | None]] = []
         self.textareas: list[dict[str, str | None]] = []
         self.buttons: list[dict[str, str | None]] = []
+        self.elements_by_id: dict[str, dict[str, str | None]] = {}
         self.inline_styles = 0
 
     def handle_starttag(
@@ -151,6 +152,8 @@ class _DocumentParser(HTMLParser):
         attrs: list[tuple[str, str | None]],
     ) -> None:
         values = dict(attrs)
+        if values.get("id") is not None:
+            self.elements_by_id[cast(str, values["id"])] = values
         if values.get("style") is not None:
             self.inline_styles += 1
         if tag == "meta" and values.get("name") == "luxiom-csrf":
@@ -275,6 +278,22 @@ def test_ui_document_is_csp_compatible_and_has_minimal_controls(
     assert "checked" not in fallback
     assert any(item.get("id") == "command" for item in parsed.textareas)
     assert any(item.get("type") == "submit" for item in parsed.buttons)
+    projection_ids = {
+        "list-projection",
+        "projection-list-id",
+        "projection-added-row",
+        "projection-added",
+        "projection-already-present-row",
+        "projection-already-present",
+        "projection-items",
+    }
+    assert projection_ids <= set(parsed.elements_by_id)
+    assert "hidden" in parsed.elements_by_id["list-projection"]
+    assert "hidden" in parsed.elements_by_id["projection-added-row"]
+    assert "hidden" in parsed.elements_by_id["projection-already-present-row"]
+    assert {"status", "route", "response", "error"} <= set(
+        parsed.elements_by_id
+    )
     assert "http://" not in document
     assert "https://" not in document
 
@@ -295,6 +314,8 @@ def test_static_sources_follow_browser_security_contract() -> None:
     assert script.index("JSON.stringify") < script.index('proofInput.value = ""')
     assert script.index('proofInput.value = ""') < script.index("fetch(")
     assert ".textContent" in script
+    assert "document.createElement" in script
+    assert "replaceChildren" in script
 
     forbidden = (
         "innerHTML",
@@ -313,6 +334,61 @@ def test_static_sources_follow_browser_security_contract() -> None:
     )
     assert all(value not in html + css + script for value in forbidden)
     assert "console." not in script
+
+
+def test_list_projection_script_has_closed_safe_rendering_contract() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    rendering = script[
+        script.index("function renderListProjection"):
+        script.index("function renderResult")
+    ]
+
+    assert 'projection?.kind !== "list"' in rendering
+    assert 'projection.operation === "add"' in rendering
+    assert 'projection.operation === "read"' in rendering
+    assert "Array.isArray" in rendering
+    assert "projectionAddedRow.hidden = false" in rendering
+    assert "projectionAlreadyPresentRow.hidden = false" in rendering
+    assert "commandInput" not in rendering
+    assert "responseOutput" not in rendering
+    assert "innerHTML" not in rendering
+    assert 'output.textContent = "—"' in script
+    assert 'document.createElement("li")' in script
+    assert "item.textContent = value" in script
+    assert "projectionListId.textContent = projection.list_id" in rendering
+
+
+def test_projection_hidden_state_overrides_visible_grid_layout() -> None:
+    css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
+    visible_rule = ".projection-row {\n  display: grid;"
+    hidden_selector = (
+        "#list-projection[hidden],\n"
+        ".projection-row[hidden] {"
+    )
+    visible_position = css.index(visible_rule)
+    hidden_position = css.index(hidden_selector)
+    hidden_rule = css[
+        hidden_position:css.index("}", hidden_position)
+    ]
+
+    assert hidden_position > visible_position
+    assert "display: none;" in hidden_rule
+
+
+def test_list_projection_is_cleared_before_submit_can_exit_or_fetch() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    submit = script.index('form.addEventListener("submit"')
+    prevent = script.index("event.preventDefault()", submit)
+    clear = script.index("clearListProjection()", prevent)
+    csrf = script.index("const csrfMeta", clear)
+    fetch = script.index("fetch(", csrf)
+
+    assert submit < prevent < clear < csrf < fetch
+    assert "function renderLocalFailure() {\n  clearListProjection();" in script
+    assert (
+        "function renderListProjection(projection) {\n"
+        "  clearListProjection();"
+    ) in script
 
 
 def test_no_generic_static_path_or_extra_ui_endpoint(tmp_path: Path) -> None:
@@ -389,6 +465,14 @@ def test_delivered_token_drives_real_add_read_and_auth_boundaries(
             "route": "local",
             "response": "List updated locally.",
             "error": None,
+            "projection": {
+                "kind": "list",
+                "operation": "add",
+                "list_id": "sprint34-b4",
+                "added": ["alpha", "beta"],
+                "already_present": [],
+                "items": ["alpha", "beta"],
+            },
         },
     )
     assert read == (
@@ -398,11 +482,19 @@ def test_delivered_token_drives_real_add_read_and_auth_boundaries(
             "route": "local",
             "response": "List read locally.",
             "error": None,
+            "projection": {
+                "kind": "list",
+                "operation": "read",
+                "list_id": "sprint34-b4",
+                "items": ["alpha", "beta"],
+            },
         },
     )
     assert wrong_proof[0] == 403
     assert wrong_proof[1]["error"]["code"] == "access_denied"
+    assert "projection" not in wrong_proof[1]
     assert wrong_csrf == (403, TRANSPORT_REJECTION)
+    assert "projection" not in wrong_csrf[1]
 
 
 def test_fresh_runtime_rotates_token_and_rejects_old_token(tmp_path: Path) -> None:

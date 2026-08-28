@@ -71,6 +71,39 @@ class DemoOperationalError(RuntimeError):
     """Represent a sanitized failure in the operations demonstration."""
 
 
+_HISTORICAL_RESPONSE_FIELDS = (
+    "success",
+    "route",
+    "response",
+    "error",
+)
+_HISTORICAL_RESPONSE_FIELD_SET = frozenset(_HISTORICAL_RESPONSE_FIELDS)
+_ALLOWED_DEMO_RESPONSE_FIELDS = (
+    _HISTORICAL_RESPONSE_FIELD_SET | frozenset({"projection"})
+)
+
+
+def _historical_demo_response(
+    response: dict[str, object],
+) -> dict[str, object]:
+    """Extract the immutable Sprint 34 envelope from an additive HTTP result."""
+
+    fields = frozenset(response)
+
+    if (
+        not _HISTORICAL_RESPONSE_FIELD_SET.issubset(fields)
+        or not fields.issubset(_ALLOWED_DEMO_RESPONSE_FIELDS)
+    ):
+        raise DemoOperationalError(
+            "The demonstration response is invalid."
+        )
+
+    return {
+        field: response[field]
+        for field in _HISTORICAL_RESPONSE_FIELDS
+    }
+
+
 class _CsrfParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -278,11 +311,12 @@ def observe_durable_items(database_path: Path) -> tuple[str, ...]:
 def run_durability_write(database_path: str | Path) -> dict[str, object]:
     with DemoInteractiveSession(database_path) as session:
         status, response = session.post(DURABILITY_ADD)
-        if status != 200 or response != ADD_SUCCESS:
+        historical_response = _historical_demo_response(response)
+        if status != 200 or historical_response != ADD_SUCCESS:
             raise DemoOperationalError("Durability HTTP write failed.")
     if session.runtime.state is not LocalInteractiveRuntimeState.CLOSED:
         raise DemoOperationalError("Durability runtime cleanup failed.")
-    return response
+    return historical_response
 
 
 def run_durability_read_and_observe(
@@ -291,14 +325,15 @@ def run_durability_read_and_observe(
     path = validate_demo_database(database_path, _repository_root())
     with DemoInteractiveSession(path) as session:
         status, response = session.post(DURABILITY_READ)
-        if status != 200 or response != READ_SUCCESS:
+        historical_response = _historical_demo_response(response)
+        if status != 200 or historical_response != READ_SUCCESS:
             raise DemoOperationalError("Durability HTTP read failed.")
     if session.runtime.state is not LocalInteractiveRuntimeState.CLOSED:
         raise DemoOperationalError("Durability runtime cleanup failed.")
     items = observe_durable_items(path)
     if items != ("alpha", "beta"):
         raise DemoOperationalError("Durability observation failed.")
-    return response, items
+    return historical_response, items
 
 
 def run_membership_denial(

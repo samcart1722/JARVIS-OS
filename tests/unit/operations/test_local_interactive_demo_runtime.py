@@ -46,6 +46,38 @@ def test_actual_http_durability_across_fresh_runtimes(tmp_path: Path) -> None:
     assert items == ("alpha", "beta")
 
 
+def test_historical_demo_envelope_allows_only_projection_addition() -> None:
+    demo = _demo()
+
+    projected = {
+        **demo.ADD_SUCCESS,
+        "projection": {
+            "kind": "list",
+            "operation": "add",
+            "list_id": "sprint34-durability-proof",
+            "added": ["alpha", "beta"],
+            "already_present": [],
+            "items": ["alpha", "beta"],
+        },
+    }
+
+    assert demo._historical_demo_response(projected) == demo.ADD_SUCCESS
+
+    with pytest.raises(demo.DemoOperationalError):
+        demo._historical_demo_response(
+            {
+                **demo.ADD_SUCCESS,
+                "metadata": {"unexpected": True},
+            }
+        )
+
+    missing_historical_field = dict(demo.ADD_SUCCESS)
+    del missing_historical_field["error"]
+
+    with pytest.raises(demo.DemoOperationalError):
+        demo._historical_demo_response(missing_historical_field)
+
+
 def test_active_runtime_membership_denial_is_governed_http(tmp_path: Path) -> None:
     demo = _demo()
 

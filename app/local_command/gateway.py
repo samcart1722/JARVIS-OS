@@ -1,12 +1,23 @@
 """Application gateway over the governed authenticated local-command route."""
 
+from collections import Counter
+
 from app.cognition.domain.cognitive_outcome import COGNITIVE_ERROR_CODES
 from app.cognition.interpretation.models import LocalCommandInterpretationStatus
 from app.cognition.local_resolution.models import (
+    LOCAL_CAPABILITY_ROUTE,
     LOCAL_KNOWLEDGE_CONFLICT,
     LOCAL_KNOWLEDGE_NOT_FOUND,
     LOCAL_PERMISSION_DENIED,
     LOCAL_VALIDATION_FAILED,
+    AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
+    KnowledgeDiscoveryResolutionResult,
+    KnowledgeResolutionResult,
+    LocalResolutionResult,
+    ReadKnowledgeRecordQuery,
+    ReadListItemsQuery,
+    StoreKnowledgeRecordCommand,
 )
 from app.cognition.routing.models import (
     CognitiveFallbackAuthorization,
@@ -18,6 +29,8 @@ from app.local_command.models import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalListAddProjection,
+    LocalListReadProjection,
     application_error,
 )
 from app.membership.models import (
@@ -208,7 +221,10 @@ class LocalCommandApplicationGateway:
             )
 
         if coordinated.route is CoordinatedRoute.LOCAL:
-            return self._map_local_result(coordinated.local_result)
+            return self._map_local_result(
+                text_routing.interpretation.intent,
+                coordinated.local_result,
+            )
 
         if coordinated.route is CoordinatedRoute.SAFE_INSUFFICIENCY:
             return self._map_safe_insufficiency(
@@ -224,6 +240,7 @@ class LocalCommandApplicationGateway:
 
     def _map_local_result(
         self,
+        intent,
         local_result,
     ) -> LocalCommandApplicationResult:
         if local_result is None:
@@ -232,10 +249,15 @@ class LocalCommandApplicationGateway:
             )
 
         if local_result.success:
+            projection = self._map_local_success_projection(
+                intent,
+                local_result,
+            )
             return LocalCommandApplicationResult(
                 True,
                 route=LocalCommandApplicationRoute.LOCAL,
                 response=local_result.response,
+                projection=projection,
             )
 
         error_code = _LOCAL_ERROR_MAP.get(local_result.error_code)
@@ -248,6 +270,81 @@ class LocalCommandApplicationGateway:
             error_code,
             LocalCommandApplicationRoute.LOCAL,
         )
+
+    @classmethod
+    def _map_local_success_projection(
+        cls,
+        intent,
+        local_result,
+    ) -> LocalListAddProjection | LocalListReadProjection | None:
+        if type(intent) is AddListItemsCommand:
+            cls._require_list_success(local_result)
+            projection = LocalListAddProjection(
+                list_id=intent.list_id,
+                added=local_result.added,
+                already_present=local_result.already_present,
+                items=local_result.items,
+            )
+            cls._validate_add_projection(intent, projection)
+            return projection
+
+        if type(intent) is ReadListItemsQuery:
+            cls._require_list_success(local_result)
+            if local_result.added or local_result.already_present:
+                raise TypeError(
+                    "Read list result contains add classification data."
+                )
+            return LocalListReadProjection(
+                list_id=intent.list_id,
+                items=local_result.items,
+            )
+
+        if type(intent) in (
+            StoreKnowledgeRecordCommand,
+            ReadKnowledgeRecordQuery,
+        ):
+            if type(local_result) is not KnowledgeResolutionResult:
+                raise TypeError("Knowledge intent and local result are inconsistent.")
+            return None
+
+        if type(intent) is FindKnowledgeRecordsQuery:
+            if type(local_result) is not KnowledgeDiscoveryResolutionResult:
+                raise TypeError("Knowledge intent and local result are inconsistent.")
+            return None
+
+        raise TypeError("Successful local result has an unknown intent.")
+
+    @staticmethod
+    def _require_list_success(local_result) -> None:
+        if (
+            type(local_result) is not LocalResolutionResult
+            or local_result.handled is not True
+            or local_result.success is not True
+            or local_result.resolution_route != LOCAL_CAPABILITY_ROUTE
+        ):
+            raise TypeError("List intent and local result are inconsistent.")
+
+    @staticmethod
+    def _validate_add_projection(
+        intent: AddListItemsCommand,
+        projection: LocalListAddProjection,
+    ) -> None:
+        if not projection.items:
+            raise TypeError("Successful list add returned no final items.")
+        if Counter(projection.added + projection.already_present) != Counter(
+            intent.items
+        ):
+            raise TypeError("List add classifications are inconsistent.")
+        if any(item not in projection.items for item in projection.added):
+            raise TypeError("Added list item is absent from final items.")
+        final_casefolded = {item.casefold() for item in projection.items}
+        if any(
+            item.casefold() not in final_casefolded
+            for item in projection.already_present
+        ):
+            raise TypeError(
+                "Already-present list item is absent from final items."
+            )
 
     def _map_safe_insufficiency(
         self,

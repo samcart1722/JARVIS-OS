@@ -23,8 +23,17 @@ from app.cognition.local_resolution.models import (
     LOCAL_PERMISSION_DENIED,
     LOCAL_VALIDATION_FAILED,
     ActorIdentity,
+    AddListItemsCommand,
+    FindKnowledgeRecordsQuery,
+    KnowledgeDiscoveryResolutionResult,
+    KnowledgeKind,
+    KnowledgeProvenance,
+    KnowledgeRecord,
+    KnowledgeResolutionResult,
     LocalResolutionResult,
+    ReadKnowledgeRecordQuery,
     ReadListItemsQuery,
+    StoreKnowledgeRecordCommand,
     WorkspaceIdentity,
 )
 from app.cognition.routing.models import (
@@ -43,6 +52,10 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalCommandProjectionKind,
+    LocalListAddProjection,
+    LocalListProjectionOperation,
+    LocalListReadProjection,
     application_error,
 )
 from app.membership.models import (
@@ -368,10 +381,10 @@ def _membership_success() -> MembershipDecision:
     )
 
 
-def _interpreted() -> LocalCommandInterpretation:
+def _interpreted(intent=None) -> LocalCommandInterpretation:
     return LocalCommandInterpretation(
         LocalCommandInterpretationStatus.INTERPRETED,
-        ReadListItemsQuery("groceries"),
+        intent if intent is not None else ReadListItemsQuery("groceries"),
     )
 
 
@@ -398,16 +411,23 @@ def _local_text_result(
     success: bool,
     response: str,
     error_code: str | None = None,
+    intent=None,
+    added: tuple[str, ...] = (),
+    already_present: tuple[str, ...] = (),
+    items: tuple[str, ...] = (),
 ) -> TextRoutingResult:
     local_result = LocalResolutionResult(
         True,
         success,
         response,
         LOCAL_CAPABILITY_ROUTE,
+        added=added,
+        already_present=already_present,
+        items=items,
         error_code=error_code,
     )
     return TextRoutingResult(
-        _interpreted(),
+        _interpreted(intent),
         CoordinatedResult(
             CoordinatedRoute.LOCAL,
             local_result=local_result,
@@ -619,6 +639,233 @@ def test_gateway_maps_local_success() -> None:
     assert result.route is LocalCommandApplicationRoute.LOCAL
     assert result.response == "List read locally."
     assert result.error is None
+
+
+def _execute_successful_local(intent, local_result):
+    routed = _full_result(
+        TextRoutingResult(
+            _interpreted(intent),
+            CoordinatedResult(
+                CoordinatedRoute.LOCAL,
+                local_result=local_result,
+            ),
+        )
+    )
+    return _gateway(RecordingRoutingService(routed)).execute(_request())
+
+
+def _list_success(
+    response: str,
+    *,
+    added: tuple[str, ...] = (),
+    already_present: tuple[str, ...] = (),
+    items: tuple[str, ...] = (),
+    handled: bool = True,
+    route: str = LOCAL_CAPABILITY_ROUTE,
+) -> LocalResolutionResult:
+    return LocalResolutionResult(
+        handled,
+        True,
+        response,
+        route,
+        added=added,
+        already_present=already_present,
+        items=items,
+    )
+
+
+@pytest.mark.parametrize(
+    ("intent_items", "added", "already_present", "items"),
+    (
+        (("alpha", "beta"), ("alpha", "beta"), (), ("alpha", "beta")),
+        (("alpha", "beta"), (), ("alpha", "beta"), ("alpha", "beta")),
+        (("alpha", "alpha"), ("alpha",), ("alpha",), ("alpha",)),
+        (
+            ("alpha", "beta", "alpha", "gamma", "beta"),
+            ("alpha", "beta", "gamma"),
+            ("alpha", "beta"),
+            ("prior", "alpha", "beta", "gamma"),
+        ),
+        (("alpha",), (), ("alpha",), ("ALPHA",)),
+    ),
+)
+def test_gateway_maps_valid_add_classifications_without_rewriting(
+    intent_items,
+    added,
+    already_present,
+    items,
+) -> None:
+    intent = AddListItemsCommand("groceries", intent_items)
+    result = _execute_successful_local(
+        intent,
+        _list_success(
+            "List updated locally.",
+            added=added,
+            already_present=already_present,
+            items=items,
+        ),
+    )
+
+    assert result.success
+    assert result.route is LocalCommandApplicationRoute.LOCAL
+    assert result.response == "List updated locally."
+    assert result.error is None
+    assert type(result.projection) is LocalListAddProjection
+    assert result.projection == LocalListAddProjection(
+        list_id="groceries",
+        added=added,
+        already_present=already_present,
+        items=items,
+    )
+    assert result.projection.kind is LocalCommandProjectionKind.LIST
+    assert result.projection.operation is LocalListProjectionOperation.ADD
+
+
+@pytest.mark.parametrize(
+    ("added", "already_present", "items"),
+    (
+        (("alpha",), (), ("alpha",)),
+        (("alpha", "beta", "extra"), (), ("alpha", "beta", "extra")),
+        (("alpha", "beta"), (), ()),
+        (("alpha", "beta"), (), ("alpha",)),
+        ((), ("alpha", "beta"), ("alpha",)),
+    ),
+)
+def test_gateway_fails_closed_for_inconsistent_add_result(
+    added,
+    already_present,
+    items,
+) -> None:
+    intent = AddListItemsCommand("groceries", ("alpha", "beta"))
+
+    with pytest.raises(TypeError):
+        _execute_successful_local(
+            intent,
+            _list_success(
+                "List updated locally.",
+                added=added,
+                already_present=already_present,
+                items=items,
+            ),
+        )
+
+
+@pytest.mark.parametrize(
+    "local_result",
+    (
+        _list_success(
+            "List updated locally.",
+            added=("alpha",),
+            items=("alpha",),
+            route="wrong_route",
+        ),
+        KnowledgeDiscoveryResolutionResult(
+            True,
+            True,
+            "Knowledge records found locally.",
+            LOCAL_CAPABILITY_ROUTE,
+        ),
+    ),
+)
+def test_gateway_requires_exact_successful_list_result_contract(local_result) -> None:
+    with pytest.raises(TypeError):
+        _execute_successful_local(
+            AddListItemsCommand("groceries", ("alpha",)),
+            local_result,
+        )
+
+
+@pytest.mark.parametrize("items", (("beta", "alpha"), ()))
+def test_gateway_maps_read_projection_preserving_order_and_empty(items) -> None:
+    result = _execute_successful_local(
+        ReadListItemsQuery("groceries"),
+        _list_success("List read locally.", items=items),
+    )
+
+    assert result.success
+    assert result.route is LocalCommandApplicationRoute.LOCAL
+    assert result.response == "List read locally."
+    assert result.error is None
+    assert result.projection == LocalListReadProjection("groceries", items)
+    assert result.projection.operation is LocalListProjectionOperation.READ
+
+
+@pytest.mark.parametrize(
+    ("added", "already_present"),
+    ((('unexpected',), ()), ((), ('unexpected',))),
+)
+def test_gateway_fails_closed_for_read_classification_contamination(
+    added,
+    already_present,
+) -> None:
+    with pytest.raises(TypeError, match="classification"):
+        _execute_successful_local(
+            ReadListItemsQuery("groceries"),
+            _list_success(
+                "List read locally.",
+                added=added,
+                already_present=already_present,
+            ),
+        )
+
+
+def _knowledge_record() -> KnowledgeRecord:
+    return KnowledgeRecord(
+        "record",
+        WorkspaceIdentity("workspace"),
+        KnowledgeKind.FACT,
+        "key",
+        "value",
+        KnowledgeProvenance("test", "gateway"),
+    )
+
+
+@pytest.mark.parametrize("operation", ("store", "read", "find"))
+def test_gateway_preserves_successful_knowledge_without_projection(operation) -> None:
+    record = _knowledge_record()
+    if operation == "store":
+        intent = StoreKnowledgeRecordCommand(record)
+        local_result = KnowledgeResolutionResult(
+            True,
+            True,
+            "Knowledge record stored locally.",
+            LOCAL_CAPABILITY_ROUTE,
+            record=record,
+            created=True,
+        )
+    elif operation == "read":
+        intent = ReadKnowledgeRecordQuery(record.record_id)
+        local_result = KnowledgeResolutionResult(
+            True,
+            True,
+            "Knowledge record read locally.",
+            LOCAL_CAPABILITY_ROUTE,
+            record=record,
+        )
+    else:
+        intent = FindKnowledgeRecordsQuery(record.key)
+        local_result = KnowledgeDiscoveryResolutionResult(
+            True,
+            True,
+            "Knowledge records found locally.",
+            LOCAL_CAPABILITY_ROUTE,
+            records=(record,),
+        )
+
+    result = _execute_successful_local(intent, local_result)
+
+    assert result.success
+    assert result.route is LocalCommandApplicationRoute.LOCAL
+    assert result.response == local_result.response
+    assert result.projection is None
+
+
+def test_gateway_fails_closed_for_unknown_successful_local_intent() -> None:
+    with pytest.raises(TypeError, match="unknown intent"):
+        LocalCommandApplicationGateway._map_local_success_projection(
+            object(),
+            _list_success("Unexpected local success.", items=("alpha",)),
+        )
 
 
 @pytest.mark.parametrize(
