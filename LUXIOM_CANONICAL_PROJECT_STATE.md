@@ -354,9 +354,10 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Sprint 33 is formally closed. Do not begin any subsequent implementation
-   sprint without explicit authorization; the next implementation remains a
-   planning and contract-definition boundary until explicitly approved.
+6. Sprint 35 is formally closed. Do not begin Sprint 36 or any other subsequent
+   implementation sprint without explicit authorization; the next
+   implementation remains a planning and contract-definition boundary until
+   explicitly approved.
 
 ## 15. Repository checkpoint synchronization policy
 
@@ -380,9 +381,10 @@ as a conversational scratchpad or mirror every external-ledger update.
   already-established state; it does not establish, condition, or move closure.
 - No subsequent implementation sprint is authorized merely by this checkpoint.
 
-## 17. Current governed release — Sprint 34
+## 17. Historical governed release — Sprint 34
 
-Sprint 34 — Local Interactive Runtime & Minimal UI Foundation v1 is current.
+At its release checkpoint, Sprint 34 — Local Interactive Runtime & Minimal UI
+Foundation v1 was current.
 Frozen baseline `227c03e4f5b824710aebea38c5c6dd705e4ec44a` and implementation
 `3f48e7fe9cf311df8b3bd2462a1987f8e732303d` reached PR #50, ordinary
 two-parent release `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
@@ -420,7 +422,57 @@ and `b905791ee11791c55417981473119b78486fdf42b72cf9ed8441daa4290b09b3`.
 This docs sync is outside the immutable release, cannot move its tag, and
 authorizes no Sprint 35.
 
-## 18. Sprint 29 immutable release checkpoint
+## 18. Current governed release — Sprint 35
+
+Sprint 35 — Structured Local List Result Projection v1 is current. Baseline
+`ade9a28d45a34b01e1279bc406b7336234e173e2` and implementation
+`fd6ecb3a07c9b640892df40561006d79f531c622` reached PR #52 and ordinary
+two-parent release `c2dbab846cc7116568f59786233b64c0f01ab038`, with parents
+`ade9a28d45a34b01e1279bc406b7336234e173e2` and
+`fd6ecb3a07c9b640892df40561006d79f531c622`. The release tree is
+`c65d2bed9158e2630c0912e398bc09eb30a5405e`. Immutable tag
+`governed-sprint-35-complete`, annotated object
+`bae5bcc128d9df1e539952ff3e63183d31aeb6f9`, peels to the release merge.
+
+Successful authorized list operations now flow from the already interpreted
+typed intent and structured local result through the closed application union
+`LocalListAddProjection | LocalListReadProjection`, dedicated ADD/READ HTTP
+models, and safe minimal UI rendering. `LocalCommandApplicationGateway` alone
+owns semantic correlation and never reparses command text. ADD projects
+`list_id`, `added`, `already_present`, and `items`; READ projects `list_id` and
+`items`, including an empty list. When absent, HTTP omits only `projection` and
+preserves the historical explicit null behavior of the four-field envelope.
+Canonical responses remain `List updated locally.` and `List read locally.`
+
+The UI displays the applicable list fields, renders empty collections as exact
+em dash `—`, clears stale projection state synchronously before fetch or early
+CSRF return, hides ADD-only rows for READ, and renders hostile values literally via
+safe DOM/text operations. Sprint 34 authentication, mapping, workspace,
+membership, routing, `PermissionPolicy`, capability, loopback transport, CSRF,
+SQLite, local-first, and fallback boundaries remain unchanged. Sprint 35 adds
+no generic or knowledge projection, Cognitive Core contract, Core/schema,
+authentication/membership/permission, browser persistence, provider/network,
+Hermes, or Spatial expansion.
+
+Final validation passed 1,535 repository tests, Ruff, `compileall`, and release
+diff check. Post-merge operational proof and manual browser acceptance passed.
+The frozen design and sidecar SHA-256 values are
+`0FA3E67B5993799C0AAC4B699A50D74B66DF2BCB43AC67F16BCDDA77E40BF07B`
+and `157B7CD7270D57DD7D9AD1C445B6F24BB3CD39CDCD2CCF3956B09FE81A717CD1`.
+
+Governed backup
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260828_131542_SPRINT35` has bundle,
+release ZIP, manifest, and SHA256SUMS hashes
+`4B3548A22F13D134F7102950CA1EE559C7283C7BDEFC3C15F9EF7A09B8D57399`,
+`A09CECCC279805AB0EFEDFD5AE262DA61B82B8A8447DCCD6F71DDBD319E7B37D`,
+`002E82D659EE341D0EDE13A2D3F261A68AC0108404501BD82307B73A31696EF2`,
+and `9D4BE4D6EE69C23AA08B1C2E697E5BF8650746B1BA7C41E8ECBEDFFE7E342AD1`.
+This later documentation synchronization is outside the immutable release. It
+may advance `master`, but cannot move, recreate, or retarget its tag, creates no
+new Sprint 35 implementation tag or governed backup, and authorizes no Sprint
+36 or other implementation sprint.
+
+## 19. Sprint 29 immutable release checkpoint
 
 PR `#34` merged feature `8f08583701571e69b6d18a0cfea64d073201a217`
 (base `779a2719eaf83de2f98134cc76027dd6f2e7d945`) at

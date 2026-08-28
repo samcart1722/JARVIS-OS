@@ -385,6 +385,21 @@ cognition/auth/membership/permission infrastructure or demo runtime. Its helper
 cannot reach Server, app, runtime, proof, CSRF, DB, or gateway. Internal
 structured results cannot become public UI projections.
 
+## Sprint 35 list-projection dependency boundary
+
+Sprint 35 adds the bounded outward flow `typed interpreted list intent +
+successful authorized local result -> application list projection -> dedicated
+HTTP projection -> safe UI rendering`. The application gateway alone owns
+semantic correlation. It does not reparse command text, and HTTP/UI cannot
+infer operation identity or import Core/local-resolution result types.
+
+The application union is limited to list ADD/READ; no generic payload or
+knowledge projection is permitted. The UI owns no authentication, mapping,
+workspace, membership, permission, routing, capability, persistence, or
+fallback authority. Existing dependency direction through `PermissionPolicy`
+and local capabilities remains unchanged, and no Cognitive Core contract is
+added.
+
 ## Sprint 33 governed action-permission revocation boundary
 
 The inward revocation contract lives in local resolution and imports no SQLite

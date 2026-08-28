@@ -1,6 +1,30 @@
 # AI Handoff
 
-## Current Sprint 34 recovery brief
+## Current Sprint 35 recovery brief
+
+Release baseline `ade9a28d45a34b01e1279bc406b7336234e173e2`, implementation
+`fd6ecb3a07c9b640892df40561006d79f531c622`, PR #52, ordinary merge
+`c2dbab846cc7116568f59786233b64c0f01ab038`, tree
+`c65d2bed9158e2630c0912e398bc09eb30a5405e`, tag
+`governed-sprint-35-complete`, object
+`bae5bcc128d9df1e539952ff3e63183d31aeb6f9`, peeling to the merge.
+
+Sprint 35 releases closed list ADD/READ application projections, dedicated HTTP
+projections, and safe minimal UI rendering after successful authorized local
+resolution. Gateway semantic correlation uses typed intent/result data, not
+reparsed text. Canonical text and Sprint 34 transport, authority, persistence,
+local-first, and fallback boundaries remain unchanged. No generic/knowledge
+projection, Core contract, Hermes, or Spatial implementation was added.
+
+Final validation passed 1,535 repository tests, Ruff, `compileall`, release diff
+check, post-merge operational proof, and manual browser acceptance. Governed
+backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260828_131542_SPRINT35`.
+This later docs synchronization may advance `master` but cannot move, recreate,
+or retarget the tag, create a new Sprint 35 implementation tag/backup, or
+authorize Sprint 36.
+
+## Historical Sprint 34 recovery brief
 
 Release baseline `227c03e4f5b824710aebea38c5c6dd705e4ec44a`, implementation
 `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`, PR #50, merge
@@ -162,12 +186,12 @@ authorize Sprint 35.
 ## Resume instruction
 
 Resume from canonical `master` and verify that local `HEAD` equals
-`origin/master` before continuing. Sprint 33 implementation, ordinary merge,
-final validation, immutable tagging, backup verification, feature-branch
-cleanup, and formal governance closure are complete. The immutable Sprint 33
-checkpoint remains `9af9984691b034710243e1da487767108915ce3a` under
-`governed-sprint-33-complete`; later documentation commits may advance `master`
+`origin/master` before continuing. Sprint 35 implementation, ordinary merge,
+final validation, immutable tagging, and backup verification are complete. The
+immutable Sprint 35 checkpoint remains
+`c2dbab846cc7116568f59786233b64c0f01ab038` under
+`governed-sprint-35-complete`; later documentation commits may advance `master`
 without moving it. This instruction does not reopen or condition that closure.
-Do not begin a subsequent implementation sprint without explicit authorization;
-any next implementation remains a planning and contract-definition boundary
-until explicitly approved.
+Do not begin Sprint 36 or any subsequent implementation sprint without explicit
+authorization; any next implementation remains a planning and
+contract-definition boundary until explicitly approved.

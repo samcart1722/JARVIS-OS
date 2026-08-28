@@ -1,8 +1,33 @@
 # Source of Truth
 
-## Sprint 34 governed implementation truth
+## Sprint 35 governed implementation truth
 
-Latest release: implementation `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`,
+Latest release: implementation `fd6ecb3a07c9b640892df40561006d79f531c622`,
+PR #52, ordinary merge `c2dbab846cc7116568f59786233b64c0f01ab038`,
+tree `c65d2bed9158e2630c0912e398bc09eb30a5405e`, tag
+`governed-sprint-35-complete`, object
+`bae5bcc128d9df1e539952ff3e63183d31aeb6f9`, peeling to the merge. Full
+repository validation passed 1,535 tests; Ruff, `compileall`, release diff check,
+post-merge operational proof, and manual browser acceptance passed. This is not
+a claim of GitHub CI.
+
+The governed backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260828_131542_SPRINT35`, with bundle, ZIP,
+manifest, and SHA256SUMS hashes
+`4B3548A22F13D134F7102950CA1EE559C7283C7BDEFC3C15F9EF7A09B8D57399`,
+`A09CECCC279805AB0EFEDFD5AE262DA61B82B8A8447DCCD6F71DDBD319E7B37D`,
+`002E82D659EE341D0EDE13A2D3F261A68AC0108404501BD82307B73A31696EF2`, and
+`9D4BE4D6EE69C23AA08B1C2E697E5BF8650746B1BA7C41E8ECBEDFFE7E342AD1`.
+
+The immutable implementation release is distinct from this later documentation
+synchronization. A docs commit may advance `master` but cannot move, recreate,
+retarget, or redefine the Sprint 35 tag; it creates no new implementation tag
+or governed backup and authorizes no Sprint 36 or other implementation sprint.
+
+## Historical Sprint 34 governed implementation truth
+
+At its checkpoint, Sprint 34 release implementation
+`3f48e7fe9cf311df8b3bd2462a1987f8e732303d`,
 PR #50, merge `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
 `a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag
 `governed-sprint-34-complete`, object `ae5557c26a719b4cdedef202a191fe92e15a57d3`.

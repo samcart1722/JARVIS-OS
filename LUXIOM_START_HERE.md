@@ -6,23 +6,36 @@ capabilities, and replaceable tools/providers. HealthBridge is the first
 planned consumer. Luxiom is not a chatbot, an LLM wrapper, a conventional
 agent, or a product tied to one industry.
 
-## Current checkpoint — Sprint 34
+## Current checkpoint — Sprint 35
 
-Sprint 34 — Local Interactive Runtime & Minimal UI Foundation v1 is the latest
-governed implementation release; Sprint 33 remains historical.
+Sprint 35 — Structured Local List Result Projection v1 is the latest governed
+implementation release; Sprint 34 and earlier releases remain historical.
 
-Release identity: implementation `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`,
-PR #50, merge `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
-`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag
-`governed-sprint-34-complete`, object
-`ae5557c26a719b4cdedef202a191fe92e15a57d3`. The development-only separate
-runtime serves `/local/ui` and governed `POST /local/command` only at
-`127.0.0.1:8765`, preserving all downstream authorization. Its database is
-`Path.home()/.luxiom/development/local-interactive/luxiom-local.sqlite3`.
-Validation: operational demo PASS, architecture 144, repository 1433, Ruff and
-`git diff --check` PASS; no GitHub checks were reported. Backup:
-`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34`. This docs sync
-may advance `master` but never the immutable tag.
+Release identity: implementation `fd6ecb3a07c9b640892df40561006d79f531c622`,
+PR #52, merge `c2dbab846cc7116568f59786233b64c0f01ab038`, tree
+`c65d2bed9158e2630c0912e398bc09eb30a5405e`, tag
+`governed-sprint-35-complete`, object
+`bae5bcc128d9df1e539952ff3e63183d31aeb6f9`. Successful authorized local list
+results now pass from the typed intent through a closed application ADD/READ
+projection, dedicated HTTP projection, and safe minimal UI rendering. Canonical
+text remains authoritative; authentication, membership, permission, loopback
+security, SQLite, local-first routing, and fallback behavior remain unchanged.
+No generic/knowledge projection or Core, Hermes, or Spatial work was added.
+
+Validation: 1,535 repository tests, Ruff, `compileall`, release diff check,
+post-merge operational proof, and manual browser acceptance passed. Backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260828_131542_SPRINT35`. This later docs
+sync may advance `master` but cannot move the immutable tag, create another
+Sprint 35 implementation tag/backup, or authorize Sprint 36.
+
+## Historical checkpoint — Sprint 34
+
+Sprint 34 — Local Interactive Runtime & Minimal UI Foundation v1 was released
+through PR #50 at merge `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
+`a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, under immutable tag
+`governed-sprint-34-complete`. At that checkpoint the public UI exposed
+canonical text without structured list projection; its 1,433-test validation
+and governed release evidence remain historical truth.
 
 ## Historical checkpoint — Sprint 33
 

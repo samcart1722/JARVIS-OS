@@ -1,6 +1,27 @@
 # Decisions and Guardrails
 
-## Sprint 34 governed decisions and guardrails
+## Sprint 35 governed decisions and guardrails
+
+- Projection is list-specific and closed to immutable application ADD/READ
+  variants; no generic payload registry or knowledge projection exists.
+- `LocalCommandApplicationGateway` alone correlates the already interpreted
+  typed list intent with the authorized local result; command text is not
+  reparsed and Core/local-resolution result objects are not exposed.
+- HTTP owns dedicated ADD/READ models. An absent projection removes only the
+  `projection` member; historical explicit nulls remain and global
+  `exclude_none` behavior is forbidden.
+- Canonical list response text remains authoritative and unchanged.
+- UI projection state is cleared synchronously before fetch or early CSRF
+  return. Rendering uses safe DOM/text APIs, empty applicable arrays use exact
+  em dash `—`, and READ hides ADD-only rows.
+- Authentication, mapping, workspace selection, membership, routing,
+  `PermissionPolicy`, capabilities, loopback transport/CSRF, SQLite/schema v4,
+  local-first routing, and fallback defaults remain unchanged.
+- No Cognitive Core contract, browser persistence, external UI dependency,
+  provider/network expansion, Hermes implementation, or Spatial implementation
+  was added.
+
+## Historical Sprint 34 governed decisions and guardrails
 
 - Development-only separate app at exact `127.0.0.1:8765`; exact POST Origin
   `http://127.0.0.1:8765`; no alternate, LAN, or public bind.

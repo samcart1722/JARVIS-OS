@@ -1,8 +1,26 @@
 # Roadmap
 
-## Sprint 34 formal governance closure complete
+## Sprint 35 formal governance closure complete
 
-Sprint 34 is the latest governed implementation release through PR #50, merge
+Sprint 35 — Structured Local List Result Projection v1 is the latest governed
+implementation release through PR #52, ordinary two-parent merge
+`c2dbab846cc7116568f59786233b64c0f01ab038`, tree
+`c65d2bed9158e2630c0912e398bc09eb30a5405e`, and immutable tag
+`governed-sprint-35-complete`. Its bounded closed application ADD/READ
+projection, dedicated HTTP representation, and safe minimal UI presentation are
+complete. Validation, operational/browser proof, immutable tag verification,
+and governed backup are complete.
+
+Sprint 34 is historical. Sprint 35 closure does not select or authorize Sprint
+36 or any other implementation sprint. Knowledge/generic projection and
+product-grade presentation remain separately governed future candidates.
+Hermes Agent and the LUXIOM Spatial/Cognitive Interface remain separate
+controlled study lines, not implementation commitments.
+
+## Historical Sprint 34 formal governance closure
+
+At its checkpoint Sprint 34 was the latest governed implementation release
+through PR #50, merge
 `adbd17d564962c6d22617b5857aaaec7da051b08`, and tag
 `governed-sprint-34-complete`. Runtime/UI, operational proof, validation, and
 backup are complete. This does not authorize Sprint 35. Hermes Agent and the
@@ -139,8 +157,10 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 34 is latest at `adbd17d564962c6d22617b5857aaaec7da051b08`, tag
-`governed-sprint-34-complete`. Sprint 33 is the immediately preceding historical
+Sprint 35 is latest at `c2dbab846cc7116568f59786233b64c0f01ab038`,
+tag `governed-sprint-35-complete`. Sprint 34 is the immediately preceding
+historical release at `adbd17d564962c6d22617b5857aaaec7da051b08`, tag
+`governed-sprint-34-complete`. Sprint 33 is the preceding historical
 release at `9af9984691b034710243e1da487767108915ce3a`, tag
 `governed-sprint-33-complete`. Sprint 32 is the preceding governed
 authenticated local-command application gateway release at
@@ -154,8 +174,8 @@ governed durable principal-to-actor mapping release at
 `governed-sprint-30-complete`. Sprint 29 is the preceding governed
 principal-authentication release at
 `9590beca0ddfce544f774ffc1327d01f8044a420`, tag `sprint-29-complete`. The
-typed resolver remains separate from the public HTTP/CognitiveEngine path. The
-Core preserves validated
+ordinary `/brain` path and `CognitiveEngine` remain separate from the governed
+local-command HTTP/resolver path. The Core preserves validated
 `CognitiveOutcome`; controlled failures carry stable codes and are mapped by
 the API to safe HTTP 500/503 responses. The successful deterministic and
 reasoning paths retain their prior output.
