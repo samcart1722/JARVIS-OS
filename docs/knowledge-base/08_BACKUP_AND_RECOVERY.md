@@ -42,6 +42,30 @@ Each real run creates `LUXIOM_yyyyMMdd_HHmmss` containing
 `luxiom-repository.bundle`, `luxiom-source.zip`, and `MANIFEST.txt`. It warns
 when the working tree is dirty. Use a destination outside the repository.
 
+## Sprint 35 verified recovery checkpoint
+
+Directory:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260828_131542_SPRINT35`.
+
+- Governed bundle SHA-256:
+  `4B3548A22F13D134F7102950CA1EE559C7283C7BDEFC3C15F9EF7A09B8D57399`
+- Release ZIP SHA-256:
+  `A09CECCC279805AB0EFEDFD5AE262DA61B82B8A8447DCCD6F71DDBD319E7B37D`
+- Manifest SHA-256:
+  `002E82D659EE341D0EDE13A2D3F261A68AC0108404501BD82307B73A31696EF2`
+- SHA256SUMS SHA-256:
+  `9D4BE4D6EE69C23AA08B1C2E697E5BF8650746B1BA7C41E8ECBEDFFE7E342AD1`
+
+The backup records release merge
+`c2dbab846cc7116568f59786233b64c0f01ab038`, tree
+`c65d2bed9158e2630c0912e398bc09eb30a5405e`, and immutable tag
+`governed-sprint-35-complete`, annotated object
+`bae5bcc128d9df1e539952ff3e63183d31aeb6f9`, peeling to the release merge. The
+frozen design SHA-256 is
+`0FA3E67B5993799C0AAC4B699A50D74B66DF2BCB43AC67F16BCDDA77E40BF07B`.
+This is the governed Sprint 35 implementation backup; later documentation
+synchronization does not create or require another implementation backup.
+
 ## Sprint 34 verified recovery checkpoint
 
 Directory: `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260827_165704_SPRINT34`.

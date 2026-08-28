@@ -1,8 +1,42 @@
 # Current State
 
-## Sprint 34 governed implementation state
+## Sprint 35 governed implementation state
 
-Sprint 34 is current: baseline `227c03e4f5b824710aebea38c5c6dd705e4ec44a`,
+Sprint 35 is current: baseline `ade9a28d45a34b01e1279bc406b7336234e173e2`,
+implementation `fd6ecb3a07c9b640892df40561006d79f531c622`, PR #52, ordinary
+two-parent merge `c2dbab846cc7116568f59786233b64c0f01ab038`, tree
+`c65d2bed9158e2630c0912e398bc09eb30a5405e`, and immutable tag
+`governed-sprint-35-complete` (object
+`bae5bcc128d9df1e539952ff3e63183d31aeb6f9`, peeling to the merge).
+
+Successful authorized list ADD/READ results now cross the application boundary
+through the closed immutable union `LocalListAddProjection |
+LocalListReadProjection`. The gateway correlates the already interpreted typed
+intent with `LocalResolutionResult` without reparsing request text. ADD exposes
+`list_id`, `added`, `already_present`, and final `items`; READ exposes `list_id`
+and ordered `items`, including empty results. Dedicated HTTP models serialize
+the exact variants. When projection is absent, only that member is omitted;
+historical explicit nulls remain and no global `exclude_none` policy exists.
+
+The minimal UI renders ADD and READ fields safely with DOM/text operations,
+uses exact em dash `—` for applicable empty arrays, clears stale projection state
+synchronously before fetch and early CSRF return, and hides ADD-only rows for
+READ. Canonical `List updated locally.` and `List read locally.` responses stay
+unchanged. Authentication, mapping, workspace selection, membership,
+`PermissionPolicy`, routing, SQLite/schema v4, loopback transport, local-first
+behavior, and fallback defaults remain unchanged. No generic/knowledge
+projection, Cognitive Core contract, browser persistence, provider/network,
+Hermes, or Spatial implementation was added.
+
+Final validation passed 1,535 repository tests, Ruff, `compileall`, and release
+diff check; post-merge operational proof and manual browser acceptance passed.
+The governed backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260828_131542_SPRINT35`.
+
+## Historical Sprint 34 governed implementation state
+
+At its release checkpoint Sprint 34 was current: baseline
+`227c03e4f5b824710aebea38c5c6dd705e4ec44a`,
 implementation `3f48e7fe9cf311df8b3bd2462a1987f8e732303d`, PR #50, merge
 `adbd17d564962c6d22617b5857aaaec7da051b08`, tree
 `a82e5c4c56b9fdb8660ef0fd878ea89364514b54`, tag

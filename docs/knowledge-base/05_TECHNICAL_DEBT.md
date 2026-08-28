@@ -1,6 +1,20 @@
 # Technical Debt
 
-## Sprint 34 post-release classification
+## Sprint 35 post-release classification
+
+RESOLVED: the bounded local list ADD/READ structured projection gap. Sprint 35
+releases a closed application contract, dedicated HTTP representation, and safe
+minimal UI rendering while retaining canonical text and existing authority
+boundaries.
+
+Still future and unauthorized: knowledge projection; generic capability
+projections or payload registries; broader/product-grade presentation; and any
+future projection type not separately governed. Production authentication,
+sessions/devices, LAN/public serving, synchronization, encryption, audit,
+general permission lifecycle, and final Spatial/Hermes-derived work also remain
+future. The Sprint 35 UI is not final product or Spatial architecture.
+
+## Historical Sprint 34 post-release classification
 
 RESOLVED: absence of a minimal user-operable local interactive development
 surface. Still future and unauthorized: production authentication;

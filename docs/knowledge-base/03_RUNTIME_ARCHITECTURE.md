@@ -1,8 +1,28 @@
 # Runtime Architecture
 
-## Sprint 34 governed local interactive runtime and UI flow
+## Sprint 35 governed structured list-projection flow
 
-Latest release: Sprint 34, `adbd17d564962c6d22617b5857aaaec7da051b08`,
+Latest release: Sprint 35, `c2dbab846cc7116568f59786233b64c0f01ab038`,
+tag `governed-sprint-35-complete`. After existing authentication, mapping,
+workspace, membership, routing, `PermissionPolicy`, and local capability
+authority succeeds, the already interpreted typed list intent and structured
+local result flow through `LocalCommandApplicationGateway` into the closed
+application ADD/READ projection, dedicated HTTP projection, and safe minimal UI
+rendering. The gateway alone owns semantic correlation and never reparses
+command text.
+
+ADD carries `list_id`, `added`, `already_present`, and `items`; READ carries
+`list_id` and `items`, including an empty array. Projection is absent for
+failures and non-list successes. HTTP omits only absent `projection` while
+preserving historical explicit nulls. The UI clears prior projection state
+synchronously before fetch or early CSRF return, renders hostile content via
+safe DOM/text operations, and hides ADD-only rows for READ. Canonical response
+text remains visible and unchanged.
+
+## Historical Sprint 34 governed local interactive runtime and UI flow
+
+At its checkpoint Sprint 34 was released at
+`adbd17d564962c6d22617b5857aaaec7da051b08`,
 tag `governed-sprint-34-complete`. Flow: `Windows launcher -> separate loopback
 FastAPI app -> /local/ui -> same-origin POST /local/command -> existing gateway
 -> authentication -> mapping -> membership -> routing -> PermissionPolicy ->
@@ -63,9 +83,11 @@ to cognition. The feature merged at
 `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical release
 commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is fully
 released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
-released trusted request context; Sprint 28 released durable membership; Sprint
-At the Sprint 33 release checkpoint, Sprint 33 was the latest governed
-implementation release at `governed-sprint-33-complete`; Sprint 34 is current.
+released trusted request context; Sprint 28 released durable membership;
+Sprints 29–32 released authentication, durable mapping, durable permission, and
+the authenticated application gateway; Sprint 33 released permission
+revocation; Sprint 34 released the local interactive runtime; and Sprint 35 is
+the current governed structured list-projection release.
 
 ## Deterministic knowledge commands (Sprint 25)
 

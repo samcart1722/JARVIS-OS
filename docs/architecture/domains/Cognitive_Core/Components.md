@@ -366,6 +366,22 @@ Uvicorn—the only new direct runtime dependency—and its secret-free helper; a
 test/proof facilities, not product APIs or configuration. `CognitiveEngine`,
 schema v4, and the canonical public application result remain unchanged.
 
+## Sprint 35 outer application, HTTP, and UI projection components
+
+Sprint 35 adds no Cognitive Core component or contract. The application-owned
+immutable `LocalListAddProjection` and `LocalListReadProjection` form the only
+approved projection union, optionally carried by
+`LocalCommandApplicationResult`. `LocalCommandApplicationGateway` correlates
+the already interpreted typed list intent with the successful authorized local
+result; it does not reparse text or expose Core/local-resolution dataclasses.
+
+The HTTP layer owns dedicated closed ADD/READ projection models and omits only
+an absent `projection`. The existing minimal UI owns safe presentation using
+DOM nodes and `textContent`, clears stale state before asynchronous or early
+return paths, and hides ADD-only rows during READ. These outer components add
+no generic payload registry, knowledge projection, browser authority, storage,
+provider, Hermes, or Spatial component.
+
 ## Sprint 33 governed revocation components
 
 Sprint 33 adds the separate `PermissionGrantRevocationRepository` port while
