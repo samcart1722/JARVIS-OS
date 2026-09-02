@@ -96,9 +96,20 @@ APPLICATION_MODEL_FORBIDDEN_SYMBOLS = API_FORBIDDEN_SYMBOLS | frozenset(
     (
         "CognitiveOutcome",
         "CoordinatedResult",
+        "FindKnowledgeRecordsQuery",
+        "KnowledgeDiscoveryResolutionResult",
+        "KnowledgeKind",
+        "KnowledgeProvenance",
+        "KnowledgeRead",
+        "KnowledgeRecord",
+        "KnowledgeRecordsFound",
+        "KnowledgeResolutionResult",
+        "KnowledgeStored",
         "ListItemsAdded",
         "ListItemsSnapshot",
         "LocalResolutionResult",
+        "ReadKnowledgeRecordQuery",
+        "StoreKnowledgeRecordCommand",
     )
 )
 
@@ -583,13 +594,29 @@ def test_application_result_contract_contains_no_internal_domain_types() -> None
         "route": "LocalCommandApplicationRoute | None",
         "response": "str | None",
         "error": "LocalCommandApplicationError | None",
-        "projection": "LocalListProjection | None",
+        "projection": "LocalCommandProjection | None",
     }
 
     projection_union = _assignment(tree, "LocalListProjection")
 
     assert ast.unparse(projection_union.value) == (
         "LocalListAddProjection | LocalListReadProjection"
+    )
+
+    knowledge_projection_union = _assignment(
+        tree,
+        "LocalKnowledgeProjection",
+    )
+
+    assert ast.unparse(knowledge_projection_union.value) == (
+        "LocalKnowledgeStoreProjection | LocalKnowledgeReadProjection | "
+        "LocalKnowledgeFindProjection"
+    )
+
+    command_projection_union = _assignment(tree, "LocalCommandProjection")
+
+    assert ast.unparse(command_projection_union.value) == (
+        "LocalListProjection | LocalKnowledgeProjection"
     )
 
 

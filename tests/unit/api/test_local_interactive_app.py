@@ -13,6 +13,11 @@ from app.local_command import (
     LocalCommandApplicationGateway,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeFindProjection,
+    LocalKnowledgeReadProjection,
+    LocalKnowledgeRecordKind,
+    LocalKnowledgeRecordProjection,
+    LocalKnowledgeStoreProjection,
 )
 from app.operations.local_interactive_runtime import (
     DEVELOPMENT_WORKSPACE,
@@ -235,6 +240,88 @@ def test_explicit_valid_gateway_wins_and_executes_exactly_once(monkeypatch) -> N
     assert status == 200
     assert response["response"] == "injected result"
     assert calls == [injected]
+
+
+@pytest.mark.parametrize(
+    ("projection", "expected"),
+    (
+        (
+            LocalKnowledgeStoreProjection(
+                LocalKnowledgeRecordProjection(
+                    "record", LocalKnowledgeRecordKind.FACT, "key", "value"
+                ),
+                True,
+            ),
+            {
+                "kind": "knowledge",
+                "operation": "store",
+                "record": {
+                    "record_id": "record",
+                    "kind": "fact",
+                    "key": "key",
+                    "value": "value",
+                },
+                "created": True,
+            },
+        ),
+        (
+            LocalKnowledgeReadProjection(
+                LocalKnowledgeRecordProjection(
+                    "record", LocalKnowledgeRecordKind.STATE, "key", "value"
+                )
+            ),
+            {
+                "kind": "knowledge",
+                "operation": "read",
+                "record": {
+                    "record_id": "record",
+                    "kind": "state",
+                    "key": "key",
+                    "value": "value",
+                },
+            },
+        ),
+        (
+            LocalKnowledgeFindProjection((), False),
+            {
+                "kind": "knowledge",
+                "operation": "find",
+                "records": [],
+                "truncated": False,
+            },
+        ),
+    ),
+)
+def test_injected_gateway_knowledge_projection_crosses_interactive_boundary(
+    monkeypatch, projection, expected
+) -> None:
+    injected = LocalCommandApplicationGateway(object())
+
+    def execute(self, request):
+        del request
+        assert self is injected
+        return LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="knowledge result",
+            projection=projection,
+        )
+
+    monkeypatch.setattr(LocalCommandApplicationGateway, "execute", execute)
+    app = FastAPI()
+    app.state.local_command_application_gateway = injected
+    app.include_router(local_command.router)
+
+    status, response = asyncio.run(_post(app, _payload()))
+
+    assert status == 200
+    assert response == {
+        "success": True,
+        "route": "local",
+        "response": "knowledge result",
+        "error": None,
+        "projection": expected,
+    }
 
 
 def test_absent_injection_uses_historical_default_exactly_once(monkeypatch) -> None:
