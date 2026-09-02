@@ -8,9 +8,13 @@ from pydantic import ValidationError
 
 from app.api.models.local_command import (
     LocalCommandHttpError,
+    LocalCommandHttpKnowledgeFindProjection,
+    LocalCommandHttpKnowledgeReadProjection,
+    LocalCommandHttpKnowledgeRecord,
+    LocalCommandHttpKnowledgeStoreProjection,
     LocalCommandHttpListAddProjection,
-    LocalCommandHttpListProjection,
     LocalCommandHttpListReadProjection,
+    LocalCommandHttpProjection,
     LocalCommandHttpRequest,
     LocalCommandHttpResponse,
 )
@@ -21,6 +25,11 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeFindProjection,
+    LocalKnowledgeReadProjection,
+    LocalKnowledgeRecordKind,
+    LocalKnowledgeRecordProjection,
+    LocalKnowledgeStoreProjection,
     LocalListAddProjection,
     LocalListReadProjection,
     application_error,
@@ -91,7 +100,7 @@ def _failure_result(
 
 def _map_projection(
     projection: object | None,
-) -> LocalCommandHttpListProjection | None:
+) -> LocalCommandHttpProjection | None:
     if projection is None:
         return None
     if type(projection) is LocalListAddProjection:
@@ -106,7 +115,44 @@ def _map_projection(
             list_id=projection.list_id,
             items=projection.items,
         )
+    if type(projection) is LocalKnowledgeStoreProjection:
+        return LocalCommandHttpKnowledgeStoreProjection(
+            record=_map_knowledge_record(projection.record),
+            created=projection.created,
+        )
+    if type(projection) is LocalKnowledgeReadProjection:
+        return LocalCommandHttpKnowledgeReadProjection(
+            record=_map_knowledge_record(projection.record),
+        )
+    if type(projection) is LocalKnowledgeFindProjection:
+        return LocalCommandHttpKnowledgeFindProjection(
+            records=tuple(
+                _map_knowledge_record(record)
+                for record in projection.records
+            ),
+            truncated=projection.truncated,
+        )
     raise TypeError("Application projection type is invalid.")
+
+
+def _map_knowledge_record(
+    record: LocalKnowledgeRecordProjection,
+) -> LocalCommandHttpKnowledgeRecord:
+    if type(record) is not LocalKnowledgeRecordProjection:
+        raise TypeError("Application knowledge record type is invalid.")
+    kind_map = {
+        LocalKnowledgeRecordKind.FACT: "fact",
+        LocalKnowledgeRecordKind.CONCEPT: "concept",
+        LocalKnowledgeRecordKind.STATE: "state",
+    }
+    if type(record.kind) is not LocalKnowledgeRecordKind:
+        raise TypeError("Application knowledge record kind is invalid.")
+    return LocalCommandHttpKnowledgeRecord(
+        record_id=record.record_id,
+        kind=kind_map[record.kind],
+        key=record.key,
+        value=record.value,
+    )
 
 
 def _wire_payload(payload: LocalCommandHttpResponse) -> dict[str, object]:

@@ -103,13 +103,15 @@ button:disabled {
   color: #fca5a5;
 }
 
-.list-projection {
+.list-projection,
+.knowledge-projection {
   margin-top: 1rem;
   padding-top: 0.75rem;
   border-top: 1px solid #30363d;
 }
 
-.list-projection dl {
+.list-projection dl,
+.knowledge-projection dl {
   margin-bottom: 0;
 }
 
@@ -121,6 +123,8 @@ button:disabled {
 }
 
 #list-projection[hidden],
+#knowledge-projection[hidden],
+.knowledge-projection [hidden],
 .projection-row[hidden] {
   display: none;
 }
@@ -137,6 +141,17 @@ button:disabled {
 .projection-values ul {
   margin: 0;
   padding-left: 1.25rem;
+}
+
+.knowledge-record {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #30363d;
+  border-radius: 0.4rem;
+}
+
+.knowledge-record dl {
+  margin: 0;
 }
 
 .examples code {

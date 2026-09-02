@@ -13,11 +13,14 @@ from app.cognition.local_resolution.models import (
     AddListItemsCommand,
     FindKnowledgeRecordsQuery,
     KnowledgeDiscoveryResolutionResult,
+    KnowledgeKind,
+    KnowledgeRecord,
     KnowledgeResolutionResult,
     LocalResolutionResult,
     ReadKnowledgeRecordQuery,
     ReadListItemsQuery,
     StoreKnowledgeRecordCommand,
+    WorkspaceIdentity,
 )
 from app.cognition.routing.models import (
     CognitiveFallbackAuthorization,
@@ -29,6 +32,11 @@ from app.local_command.models import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeFindProjection,
+    LocalKnowledgeReadProjection,
+    LocalKnowledgeRecordKind,
+    LocalKnowledgeRecordProjection,
+    LocalKnowledgeStoreProjection,
     LocalListAddProjection,
     LocalListReadProjection,
     application_error,
@@ -224,6 +232,7 @@ class LocalCommandApplicationGateway:
             return self._map_local_result(
                 text_routing.interpretation.intent,
                 coordinated.local_result,
+                selection.workspace,
             )
 
         if coordinated.route is CoordinatedRoute.SAFE_INSUFFICIENCY:
@@ -242,6 +251,7 @@ class LocalCommandApplicationGateway:
         self,
         intent,
         local_result,
+        selected_workspace: WorkspaceIdentity,
     ) -> LocalCommandApplicationResult:
         if local_result is None:
             raise TypeError(
@@ -252,6 +262,7 @@ class LocalCommandApplicationGateway:
             projection = self._map_local_success_projection(
                 intent,
                 local_result,
+                selected_workspace,
             )
             return LocalCommandApplicationResult(
                 True,
@@ -276,7 +287,14 @@ class LocalCommandApplicationGateway:
         cls,
         intent,
         local_result,
-    ) -> LocalListAddProjection | LocalListReadProjection | None:
+        selected_workspace: WorkspaceIdentity,
+    ) -> (
+        LocalListAddProjection
+        | LocalListReadProjection
+        | LocalKnowledgeStoreProjection
+        | LocalKnowledgeReadProjection
+        | LocalKnowledgeFindProjection
+    ):
         if type(intent) is AddListItemsCommand:
             cls._require_list_success(local_result)
             projection = LocalListAddProjection(
@@ -299,18 +317,71 @@ class LocalCommandApplicationGateway:
                 items=local_result.items,
             )
 
-        if type(intent) in (
-            StoreKnowledgeRecordCommand,
-            ReadKnowledgeRecordQuery,
-        ):
-            if type(local_result) is not KnowledgeResolutionResult:
-                raise TypeError("Knowledge intent and local result are inconsistent.")
-            return None
+        if type(intent) is StoreKnowledgeRecordCommand:
+            cls._require_selected_workspace(selected_workspace)
+            cls._require_knowledge_success(local_result)
+            if (
+                type(intent.record) is not KnowledgeRecord
+                or intent.record.workspace != selected_workspace
+                or type(local_result.record) is not KnowledgeRecord
+                or local_result.record != intent.record
+                or type(local_result.created) is not bool
+            ):
+                raise TypeError(
+                    "Knowledge store intent and local result are inconsistent."
+                )
+            return LocalKnowledgeStoreProjection(
+                record=cls._map_knowledge_record(local_result.record),
+                created=local_result.created,
+            )
+
+        if type(intent) is ReadKnowledgeRecordQuery:
+            cls._require_selected_workspace(selected_workspace)
+            cls._require_knowledge_success(local_result)
+            if (
+                type(local_result.record) is not KnowledgeRecord
+                or local_result.record.record_id != intent.record_id
+                or local_result.record.workspace != selected_workspace
+                or local_result.created is not False
+            ):
+                raise TypeError(
+                    "Knowledge read intent and local result are inconsistent."
+                )
+            return LocalKnowledgeReadProjection(
+                record=cls._map_knowledge_record(local_result.record)
+            )
 
         if type(intent) is FindKnowledgeRecordsQuery:
-            if type(local_result) is not KnowledgeDiscoveryResolutionResult:
-                raise TypeError("Knowledge intent and local result are inconsistent.")
-            return None
+            cls._require_selected_workspace(selected_workspace)
+            cls._require_knowledge_discovery_success(local_result)
+            if (
+                (intent.kind is not None and type(intent.kind) is not KnowledgeKind)
+                or
+                type(local_result.records) is not tuple
+                or any(
+                    type(record) is not KnowledgeRecord
+                    or record.workspace != selected_workspace
+                    or record.key != intent.key
+                    or (intent.kind is not None and record.kind is not intent.kind)
+                    for record in local_result.records
+                )
+                or type(local_result.truncated) is not bool
+            ):
+                raise TypeError(
+                    "Knowledge find intent and local result are inconsistent."
+                )
+            try:
+                return LocalKnowledgeFindProjection(
+                    records=tuple(
+                        cls._map_knowledge_record(record)
+                        for record in local_result.records
+                    ),
+                    truncated=local_result.truncated,
+                )
+            except ValueError as error:
+                raise TypeError(
+                    "Knowledge find intent and local result are inconsistent."
+                ) from error
 
         raise TypeError("Successful local result has an unknown intent.")
 
@@ -323,6 +394,59 @@ class LocalCommandApplicationGateway:
             or local_result.resolution_route != LOCAL_CAPABILITY_ROUTE
         ):
             raise TypeError("List intent and local result are inconsistent.")
+
+    @staticmethod
+    def _require_selected_workspace(selected_workspace) -> None:
+        if type(selected_workspace) is not WorkspaceIdentity:
+            raise TypeError("Knowledge projection requires a selected workspace.")
+
+    @staticmethod
+    def _require_knowledge_success(local_result) -> None:
+        if (
+            type(local_result) is not KnowledgeResolutionResult
+            or local_result.handled is not True
+            or local_result.success is not True
+            or local_result.resolution_route != LOCAL_CAPABILITY_ROUTE
+            or local_result.model_used is not False
+            or local_result.external_access is not False
+        ):
+            raise TypeError(
+                "Knowledge intent and local result are inconsistent."
+            )
+
+    @staticmethod
+    def _require_knowledge_discovery_success(local_result) -> None:
+        if (
+            type(local_result) is not KnowledgeDiscoveryResolutionResult
+            or local_result.handled is not True
+            or local_result.success is not True
+            or local_result.resolution_route != LOCAL_CAPABILITY_ROUTE
+            or local_result.model_used is not False
+            or local_result.external_access is not False
+        ):
+            raise TypeError(
+                "Knowledge intent and local result are inconsistent."
+            )
+
+    @staticmethod
+    def _map_knowledge_record(
+        record: KnowledgeRecord,
+    ) -> LocalKnowledgeRecordProjection:
+        if type(record) is not KnowledgeRecord:
+            raise TypeError("Knowledge record is inconsistent.")
+        kind_map = {
+            KnowledgeKind.FACT: LocalKnowledgeRecordKind.FACT,
+            KnowledgeKind.CONCEPT: LocalKnowledgeRecordKind.CONCEPT,
+            KnowledgeKind.STATE: LocalKnowledgeRecordKind.STATE,
+        }
+        if type(record.kind) is not KnowledgeKind or record.kind not in kind_map:
+            raise TypeError("Knowledge record kind is inconsistent.")
+        return LocalKnowledgeRecordProjection(
+            record_id=record.record_id,
+            kind=kind_map[record.kind],
+            key=record.key,
+            value=record.value,
+        )
 
     @staticmethod
     def _validate_add_projection(

@@ -1,5 +1,7 @@
+import ast
 import pickle
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, cast
 from unittest.mock import patch
 
@@ -53,6 +55,11 @@ from app.local_command import (
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
     LocalCommandProjectionKind,
+    LocalKnowledgeFindProjection,
+    LocalKnowledgeProjectionOperation,
+    LocalKnowledgeReadProjection,
+    LocalKnowledgeRecordKind,
+    LocalKnowledgeStoreProjection,
     LocalListAddProjection,
     LocalListProjectionOperation,
     LocalListReadProjection,
@@ -363,19 +370,23 @@ def _mapping_success() -> PrincipalActorMappingResult:
     )
 
 
-def _selection_success() -> AuthenticatedWorkspaceSelectionResult:
+def _selection_success(
+    workspace: WorkspaceIdentity | None = None,
+) -> AuthenticatedWorkspaceSelectionResult:
     return AuthenticatedWorkspaceSelectionResult(
         True,
-        WorkspaceIdentity("workspace"),
+        workspace or WorkspaceIdentity("workspace"),
     )
 
 
-def _membership_success() -> MembershipDecision:
+def _membership_success(
+    workspace: WorkspaceIdentity | None = None,
+) -> MembershipDecision:
     return MembershipDecision(
         True,
         ActorWorkspaceMembership(
             ActorIdentity("actor"),
-            WorkspaceIdentity("workspace"),
+            workspace or WorkspaceIdentity("workspace"),
             MembershipStatus.ACTIVE,
         ),
     )
@@ -396,12 +407,14 @@ def _not_interpreted() -> LocalCommandInterpretation:
 
 def _full_result(
     text_routing: TextRoutingResult,
+    workspace: WorkspaceIdentity | None = None,
 ) -> AuthenticatedLocalCommandRoutingResult:
+    selected_workspace = workspace or WorkspaceIdentity("workspace")
     return AuthenticatedLocalCommandRoutingResult(
         _authentication_success(),
         _mapping_success(),
-        _selection_success(),
-        _membership_success(),
+        _selection_success(selected_workspace),
+        _membership_success(selected_workspace),
         text_routing,
     )
 
@@ -641,7 +654,11 @@ def test_gateway_maps_local_success() -> None:
     assert result.error is None
 
 
-def _execute_successful_local(intent, local_result):
+def _execute_successful_local(
+    intent,
+    local_result,
+    workspace: WorkspaceIdentity | None = None,
+):
     routed = _full_result(
         TextRoutingResult(
             _interpreted(intent),
@@ -649,7 +666,8 @@ def _execute_successful_local(intent, local_result):
                 CoordinatedRoute.LOCAL,
                 local_result=local_result,
             ),
-        )
+        ),
+        workspace,
     )
     return _gateway(RecordingRoutingService(routed)).execute(_request())
 
@@ -809,55 +827,382 @@ def test_gateway_fails_closed_for_read_classification_contamination(
         )
 
 
-def _knowledge_record() -> KnowledgeRecord:
+def _knowledge_record(
+    record_id: str = "record",
+    *,
+    workspace: str = "workspace",
+    kind: KnowledgeKind = KnowledgeKind.FACT,
+    key: str = "key",
+    value: str = "value",
+    source_reference: str = "gateway",
+) -> KnowledgeRecord:
     return KnowledgeRecord(
-        "record",
-        WorkspaceIdentity("workspace"),
-        KnowledgeKind.FACT,
-        "key",
-        "value",
-        KnowledgeProvenance("test", "gateway"),
+        record_id,
+        WorkspaceIdentity(workspace),
+        kind,
+        key,
+        value,
+        KnowledgeProvenance("test", source_reference),
     )
 
 
-@pytest.mark.parametrize("operation", ("store", "read", "find"))
-def test_gateway_preserves_successful_knowledge_without_projection(operation) -> None:
+@pytest.mark.parametrize("created", (True, False))
+def test_gateway_maps_store_projection_and_preserves_response(created) -> None:
     record = _knowledge_record()
-    if operation == "store":
-        intent = StoreKnowledgeRecordCommand(record)
-        local_result = KnowledgeResolutionResult(
-            True,
-            True,
-            "Knowledge record stored locally.",
-            LOCAL_CAPABILITY_ROUTE,
-            record=record,
-            created=True,
+    result = _execute_successful_local(
+        StoreKnowledgeRecordCommand(record),
+        KnowledgeResolutionResult(
+            True, True, "canonical store", LOCAL_CAPABILITY_ROUTE,
+            record=record, created=created,
+        ),
+    )
+
+    assert result.response == "canonical store"
+    assert type(result.projection) is LocalKnowledgeStoreProjection
+    assert result.projection.kind is LocalCommandProjectionKind.KNOWLEDGE
+    assert result.projection.operation is LocalKnowledgeProjectionOperation.STORE
+    assert result.projection.created is created
+    assert (
+        result.projection.record.record_id,
+        result.projection.record.kind,
+        result.projection.record.key,
+        result.projection.record.value,
+    ) == ("record", LocalKnowledgeRecordKind.FACT, "key", "value")
+    assert not hasattr(result.projection.record, "workspace")
+    assert not hasattr(result.projection.record, "provenance")
+
+
+def test_gateway_imports_no_execution_or_storage_authority() -> None:
+    gateway_path = Path(__file__).parents[3] / "app/local_command/gateway.py"
+    tree = ast.parse(gateway_path.read_text(encoding="utf-8"))
+    prohibited_prefixes = (
+        "app.cognition.local_resolution.repository",
+        "app.cognition.local_resolution.knowledge_capability",
+        "app.cognition.local_resolution.resolver",
+        "app.infrastructure.local_storage",
+        "app.core.container",
+    )
+    imported_modules = {
+        module
+        for node in ast.walk(tree)
+        for module in (
+            (
+                node.module
+                if isinstance(node, ast.ImportFrom)
+                else alias.name
+            )
+            for alias in (
+                node.names
+                if isinstance(node, (ast.Import, ast.ImportFrom))
+                else ()
+            )
         )
-    elif operation == "read":
+        if module is not None
+    }
+    prohibited_imports = {
+        module
+        for module in imported_modules
+        if any(
+            module == prefix or module.startswith(f"{prefix}.")
+            for prefix in prohibited_prefixes
+        )
+    }
+
+    assert prohibited_imports == set()
+
+
+@pytest.mark.parametrize(
+    "local_result",
+    (
+        KnowledgeDiscoveryResolutionResult(
+            True, True, "wrong", LOCAL_CAPABILITY_ROUTE
+        ),
+        LocalResolutionResult(True, True, "wrong", LOCAL_CAPABILITY_ROUTE),
+    ),
+)
+def test_gateway_store_rejects_wrong_result_type(local_result) -> None:
+    with pytest.raises(TypeError, match="Knowledge"):
+        _execute_successful_local(
+            StoreKnowledgeRecordCommand(_knowledge_record()), local_result
+        )
+
+
+@pytest.mark.parametrize(
+    "returned",
+    (
+        _knowledge_record(workspace="other"),
+        _knowledge_record(value="different"),
+        _knowledge_record(source_reference="different-provenance"),
+    ),
+)
+def test_gateway_store_rejects_workspace_record_and_provenance_mismatch(
+    returned,
+) -> None:
+    intent_record = _knowledge_record()
+    with pytest.raises(TypeError, match="store"):
+        _execute_successful_local(
+            StoreKnowledgeRecordCommand(intent_record),
+            KnowledgeResolutionResult(
+                True, True, "stored", LOCAL_CAPABILITY_ROUTE,
+                record=returned, created=True,
+            ),
+        )
+
+
+def test_gateway_store_rejects_selected_workspace_and_non_bool_created() -> None:
+    record = _knowledge_record()
+    result = KnowledgeResolutionResult(
+        True, True, "stored", LOCAL_CAPABILITY_ROUTE,
+        record=record, created=True,
+    )
+    with pytest.raises(TypeError, match="store"):
+        _execute_successful_local(
+            StoreKnowledgeRecordCommand(record), result,
+            WorkspaceIdentity("other"),
+        )
+    object.__setattr__(result, "created", 1)
+    with pytest.raises(TypeError, match="store"):
+        _execute_successful_local(StoreKnowledgeRecordCommand(record), result)
+
+
+def test_gateway_rejects_unknown_internal_knowledge_kind() -> None:
+    record = _knowledge_record()
+    object.__setattr__(record, "kind", "unknown")
+    result = KnowledgeResolutionResult(
+        True, True, "stored", LOCAL_CAPABILITY_ROUTE,
+        record=record, created=True,
+    )
+    with pytest.raises(TypeError, match="kind"):
+        _execute_successful_local(StoreKnowledgeRecordCommand(record), result)
+
+
+def test_gateway_maps_read_projection_without_created() -> None:
+    record = _knowledge_record(kind=KnowledgeKind.CONCEPT)
+    result = _execute_successful_local(
+        ReadKnowledgeRecordQuery("record"),
+        KnowledgeResolutionResult(
+            True, True, "canonical read", LOCAL_CAPABILITY_ROUTE,
+            record=record,
+        ),
+    )
+
+    assert result.response == "canonical read"
+    assert type(result.projection) is LocalKnowledgeReadProjection
+    assert result.projection.operation is LocalKnowledgeProjectionOperation.READ
+    assert result.projection.record.kind is LocalKnowledgeRecordKind.CONCEPT
+    assert result.projection.record.record_id == "record"
+    assert not hasattr(result.projection, "created")
+
+
+@pytest.mark.parametrize(
+    "local_result",
+    (
+        KnowledgeDiscoveryResolutionResult(
+            True, True, "wrong", LOCAL_CAPABILITY_ROUTE
+        ),
+        LocalResolutionResult(True, True, "wrong", LOCAL_CAPABILITY_ROUTE),
+    ),
+)
+def test_gateway_read_rejects_wrong_result_type(local_result) -> None:
+    with pytest.raises(TypeError, match="Knowledge"):
+        _execute_successful_local(ReadKnowledgeRecordQuery("record"), local_result)
+
+
+@pytest.mark.parametrize(
+    "record",
+    (
+        _knowledge_record("other"),
+        _knowledge_record(workspace="other"),
+    ),
+)
+def test_gateway_read_rejects_id_and_workspace_mismatch(record) -> None:
+    with pytest.raises(TypeError, match="read"):
+        _execute_successful_local(
+            ReadKnowledgeRecordQuery("record"),
+            KnowledgeResolutionResult(
+                True, True, "read", LOCAL_CAPABILITY_ROUTE, record=record
+            ),
+        )
+
+
+@pytest.mark.parametrize("created", (True, 1))
+def test_gateway_read_rejects_created_values(created) -> None:
+    record = _knowledge_record()
+    local_result = KnowledgeResolutionResult(
+        True, True, "read", LOCAL_CAPABILITY_ROUTE, record=record
+    )
+    object.__setattr__(local_result, "created", created)
+    with pytest.raises(TypeError, match="read"):
+        _execute_successful_local(ReadKnowledgeRecordQuery("record"), local_result)
+
+
+def _discovery_result(
+    records: tuple[KnowledgeRecord, ...] = (),
+    *,
+    truncated: bool = False,
+    response: str = "canonical find",
+) -> KnowledgeDiscoveryResolutionResult:
+    return KnowledgeDiscoveryResolutionResult(
+        True, True, response, LOCAL_CAPABILITY_ROUTE,
+        records=records, truncated=truncated,
+    )
+
+
+@pytest.mark.parametrize(
+    ("field_name", "invalid_value"),
+    (
+        ("handled", False),
+        ("success", 1),
+        ("resolution_route", "wrong_route"),
+        ("model_used", True),
+        ("external_access", True),
+    ),
+)
+@pytest.mark.parametrize("result_family", ("resolution", "discovery"))
+def test_gateway_rejects_corrupted_common_knowledge_success_fields(
+    field_name,
+    invalid_value,
+    result_family,
+) -> None:
+    record = _knowledge_record()
+    if result_family == "resolution":
         intent = ReadKnowledgeRecordQuery(record.record_id)
         local_result = KnowledgeResolutionResult(
-            True,
-            True,
-            "Knowledge record read locally.",
-            LOCAL_CAPABILITY_ROUTE,
-            record=record,
+            True, True, "read", LOCAL_CAPABILITY_ROUTE, record=record
         )
     else:
         intent = FindKnowledgeRecordsQuery(record.key)
-        local_result = KnowledgeDiscoveryResolutionResult(
-            True,
-            True,
-            "Knowledge records found locally.",
-            LOCAL_CAPABILITY_ROUTE,
-            records=(record,),
+        local_result = _discovery_result((record,))
+    routed = _full_result(
+        TextRoutingResult(
+            _interpreted(intent),
+            CoordinatedResult(
+                CoordinatedRoute.LOCAL,
+                local_result=local_result,
+            ),
+        )
+    )
+    object.__setattr__(local_result, field_name, invalid_value)
+
+    with pytest.raises(TypeError, match="Knowledge"):
+        _gateway(RecordingRoutingService(routed)).execute(_request())
+
+
+@pytest.mark.parametrize(
+    ("count", "truncated"),
+    ((0, False), (1, False), (50, False), (50, True)),
+)
+def test_gateway_maps_find_boundaries(count, truncated) -> None:
+    records = tuple(_knowledge_record(f"record-{index}") for index in range(count))
+    result = _execute_successful_local(
+        FindKnowledgeRecordsQuery("key"),
+        _discovery_result(records, truncated=truncated),
+    )
+
+    assert result.response == "canonical find"
+    assert type(result.projection) is LocalKnowledgeFindProjection
+    assert result.projection.operation is LocalKnowledgeProjectionOperation.FIND
+    assert tuple(record.record_id for record in result.projection.records) == tuple(
+        record.record_id for record in records
+    )
+    assert result.projection.truncated is truncated
+
+
+def test_gateway_find_preserves_order_and_correlates_optional_kind() -> None:
+    records = (
+        _knowledge_record("second", kind=KnowledgeKind.STATE),
+        _knowledge_record("first", kind=KnowledgeKind.STATE),
+    )
+    result = _execute_successful_local(
+        FindKnowledgeRecordsQuery("key", KnowledgeKind.STATE),
+        _discovery_result(records),
+    )
+
+    assert tuple(record.record_id for record in result.projection.records) == (
+        "second", "first"
+    )
+    assert all(
+        record.kind is LocalKnowledgeRecordKind.STATE
+        for record in result.projection.records
+    )
+
+
+@pytest.mark.parametrize(
+    "records",
+    (
+        (_knowledge_record(workspace="other"),),
+        (_knowledge_record(key="other"),),
+        (_knowledge_record(kind=KnowledgeKind.CONCEPT),),
+    ),
+)
+def test_gateway_find_rejects_workspace_key_and_requested_kind(records) -> None:
+    with pytest.raises(TypeError, match="find"):
+        _execute_successful_local(
+            FindKnowledgeRecordsQuery("key", KnowledgeKind.FACT),
+            _discovery_result(records),
         )
 
-    result = _execute_successful_local(intent, local_result)
+
+def test_gateway_find_rejects_wrong_type_duplicates_and_invalid_truncation() -> None:
+    with pytest.raises(TypeError, match="Knowledge"):
+        _execute_successful_local(
+            FindKnowledgeRecordsQuery("key"),
+            KnowledgeResolutionResult(
+                True, True, "wrong", LOCAL_CAPABILITY_ROUTE,
+                record=_knowledge_record(),
+            ),
+        )
+    record = _knowledge_record()
+    with pytest.raises(TypeError, match="find"):
+        _execute_successful_local(
+            FindKnowledgeRecordsQuery("key"),
+            _discovery_result((record, record)),
+        )
+    local_result = _discovery_result()
+    object.__setattr__(local_result, "truncated", 0)
+    with pytest.raises(TypeError, match="find"):
+        _execute_successful_local(FindKnowledgeRecordsQuery("key"), local_result)
+
+
+def test_gateway_find_rejects_missing_workspace_unknown_kind_and_too_many() -> None:
+    query = FindKnowledgeRecordsQuery("key")
+    with pytest.raises(TypeError, match="selected workspace"):
+        LocalCommandApplicationGateway._map_local_success_projection(
+            query, _discovery_result(), None
+        )
+    object.__setattr__(query, "kind", "unknown")
+    with pytest.raises(TypeError, match="find"):
+        _execute_successful_local(query, _discovery_result())
+    local_result = _discovery_result()
+    object.__setattr__(
+        local_result,
+        "records",
+        tuple(_knowledge_record(f"record-{index}") for index in range(51)),
+    )
+    with pytest.raises(TypeError, match="find"):
+        _execute_successful_local(FindKnowledgeRecordsQuery("key"), local_result)
+
+
+def test_gateway_uses_selected_workspace_without_reparsing_request_text() -> None:
+    record = _knowledge_record()
+    routed = _full_result(
+        TextRoutingResult(
+            _interpreted(ReadKnowledgeRecordQuery("record")),
+            CoordinatedResult(
+                CoordinatedRoute.LOCAL,
+                local_result=KnowledgeResolutionResult(
+                    True, True, "read", LOCAL_CAPABILITY_ROUTE, record=record
+                ),
+            ),
+        )
+    )
+    service = RecordingRoutingService(routed)
+    result = _gateway(service).execute(_request(text="not parseable knowledge text"))
 
     assert result.success
     assert result.route is LocalCommandApplicationRoute.LOCAL
-    assert result.response == local_result.response
-    assert result.projection is None
+    assert type(result.projection) is LocalKnowledgeReadProjection
+    assert len(service.requests) == 1
 
 
 def test_gateway_fails_closed_for_unknown_successful_local_intent() -> None:
@@ -865,6 +1210,7 @@ def test_gateway_fails_closed_for_unknown_successful_local_intent() -> None:
         LocalCommandApplicationGateway._map_local_success_projection(
             object(),
             _list_success("Unexpected local success.", items=("alpha",)),
+            WorkspaceIdentity("workspace"),
         )
 
 
@@ -906,6 +1252,7 @@ def test_gateway_maps_known_local_failures(
     assert not result.success
     assert result.route is LocalCommandApplicationRoute.LOCAL
     assert result.response is None
+    assert result.projection is None
     assert _application_error_code(result) is expected
 
 
@@ -943,6 +1290,7 @@ def test_gateway_maps_safe_insufficiency(
         result.route
         is LocalCommandApplicationRoute.SAFE_INSUFFICIENCY
     )
+    assert result.projection is None
     assert _application_error_code(result) is expected
 
 
@@ -968,6 +1316,7 @@ def test_gateway_maps_cognitive_success() -> None:
     assert result.route is LocalCommandApplicationRoute.COGNITIVE
     assert result.response == "Cognitive answer."
     assert result.error is None
+    assert result.projection is None
 
 
 def test_gateway_collapses_controlled_cognitive_failure() -> None:

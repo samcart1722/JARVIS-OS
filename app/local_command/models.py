@@ -15,11 +15,24 @@ class LocalCommandApplicationRoute(str, Enum):
 
 class LocalCommandProjectionKind(str, Enum):
     LIST = "list"
+    KNOWLEDGE = "knowledge"
 
 
 class LocalListProjectionOperation(str, Enum):
     ADD = "add"
     READ = "read"
+
+
+class LocalKnowledgeProjectionOperation(str, Enum):
+    STORE = "store"
+    READ = "read"
+    FIND = "find"
+
+
+class LocalKnowledgeRecordKind(str, Enum):
+    FACT = "fact"
+    CONCEPT = "concept"
+    STATE = "state"
 
 
 def _projection_list_id(value: object) -> str:
@@ -82,6 +95,106 @@ class LocalListReadProjection:
 
 
 LocalListProjection = LocalListAddProjection | LocalListReadProjection
+
+
+def _knowledge_record_text(value: object, label: str) -> str:
+    if type(value) is not str:
+        raise ValueError(f"Knowledge record {label} must be a string.")
+    if not value.strip():
+        raise ValueError(f"Knowledge record {label} must be non-empty.")
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class LocalKnowledgeRecordProjection:
+    record_id: str
+    kind: LocalKnowledgeRecordKind
+    key: str
+    value: str
+
+    def __post_init__(self) -> None:
+        _knowledge_record_text(self.record_id, "ID")
+        if type(self.kind) is not LocalKnowledgeRecordKind:
+            raise ValueError("Knowledge record kind is invalid.")
+        _knowledge_record_text(self.key, "key")
+        _knowledge_record_text(self.value, "value")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalKnowledgeStoreProjection:
+    record: LocalKnowledgeRecordProjection
+    created: bool
+    kind: LocalCommandProjectionKind = field(
+        default=LocalCommandProjectionKind.KNOWLEDGE,
+        init=False,
+    )
+    operation: LocalKnowledgeProjectionOperation = field(
+        default=LocalKnowledgeProjectionOperation.STORE,
+        init=False,
+    )
+
+    def __post_init__(self) -> None:
+        if type(self.record) is not LocalKnowledgeRecordProjection:
+            raise ValueError("Knowledge store record is invalid.")
+        if type(self.created) is not bool:
+            raise ValueError("Knowledge store created must be explicit.")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalKnowledgeReadProjection:
+    record: LocalKnowledgeRecordProjection
+    kind: LocalCommandProjectionKind = field(
+        default=LocalCommandProjectionKind.KNOWLEDGE,
+        init=False,
+    )
+    operation: LocalKnowledgeProjectionOperation = field(
+        default=LocalKnowledgeProjectionOperation.READ,
+        init=False,
+    )
+
+    def __post_init__(self) -> None:
+        if type(self.record) is not LocalKnowledgeRecordProjection:
+            raise ValueError("Knowledge read record is invalid.")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalKnowledgeFindProjection:
+    records: tuple[LocalKnowledgeRecordProjection, ...]
+    truncated: bool
+    kind: LocalCommandProjectionKind = field(
+        default=LocalCommandProjectionKind.KNOWLEDGE,
+        init=False,
+    )
+    operation: LocalKnowledgeProjectionOperation = field(
+        default=LocalKnowledgeProjectionOperation.FIND,
+        init=False,
+    )
+
+    def __post_init__(self) -> None:
+        if type(self.records) is not tuple:
+            raise ValueError("Knowledge find records must be a tuple.")
+        if any(
+            type(record) is not LocalKnowledgeRecordProjection
+            for record in self.records
+        ):
+            raise ValueError("Knowledge find records are invalid.")
+        if len(self.records) > 50:
+            raise ValueError("Knowledge find records exceed the maximum.")
+        if type(self.truncated) is not bool:
+            raise ValueError("Knowledge find truncated must be explicit.")
+        if self.truncated and len(self.records) != 50:
+            raise ValueError("Truncated knowledge finds require 50 records.")
+        record_ids = tuple(record.record_id for record in self.records)
+        if len(set(record_ids)) != len(record_ids):
+            raise ValueError("Knowledge find record IDs must be unique.")
+
+
+LocalKnowledgeProjection = (
+    LocalKnowledgeStoreProjection
+    | LocalKnowledgeReadProjection
+    | LocalKnowledgeFindProjection
+)
+LocalCommandProjection = LocalListProjection | LocalKnowledgeProjection
 
 
 class LocalCommandApplicationErrorCode(str, Enum):
@@ -284,7 +397,7 @@ class LocalCommandApplicationResult:
     route: LocalCommandApplicationRoute | None = None
     response: str | None = None
     error: LocalCommandApplicationError | None = None
-    projection: LocalListProjection | None = None
+    projection: LocalCommandProjection | None = None
 
     def __post_init__(self) -> None:
         if type(self.success) is not bool:
@@ -300,6 +413,9 @@ class LocalCommandApplicationResult:
             if type(self.projection) not in (
                 LocalListAddProjection,
                 LocalListReadProjection,
+                LocalKnowledgeStoreProjection,
+                LocalKnowledgeReadProjection,
+                LocalKnowledgeFindProjection,
             ):
                 raise ValueError("Application result projection is invalid.")
             if (

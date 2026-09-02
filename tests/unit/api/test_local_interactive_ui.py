@@ -286,11 +286,35 @@ def test_ui_document_is_csp_compatible_and_has_minimal_controls(
         "projection-already-present-row",
         "projection-already-present",
         "projection-items",
+        "knowledge-projection",
+        "knowledge-operation",
+        "knowledge-record-details",
+        "knowledge-record-id",
+        "knowledge-kind",
+        "knowledge-key",
+        "knowledge-value",
+        "knowledge-created-row",
+        "knowledge-created",
+        "knowledge-count-row",
+        "knowledge-count",
+        "knowledge-records",
+        "knowledge-empty",
+        "knowledge-truncated",
     }
     assert projection_ids <= set(parsed.elements_by_id)
     assert "hidden" in parsed.elements_by_id["list-projection"]
     assert "hidden" in parsed.elements_by_id["projection-added-row"]
     assert "hidden" in parsed.elements_by_id["projection-already-present-row"]
+    assert "hidden" in parsed.elements_by_id["knowledge-projection"]
+    assert "hidden" in parsed.elements_by_id["knowledge-created-row"]
+    assert "hidden" in parsed.elements_by_id["knowledge-count-row"]
+    assert "hidden" in parsed.elements_by_id["knowledge-empty"]
+    assert "hidden" in parsed.elements_by_id["knowledge-truncated"]
+    assert "Knowledge details" in document
+    assert "workspace" not in document.lower().split("knowledge details", 1)[1]
+    assert "provenance" not in document.lower()
+    assert "source_type" not in document
+    assert "source_reference" not in document
     assert {"status", "route", "response", "error"} <= set(
         parsed.elements_by_id
     )
@@ -363,6 +387,8 @@ def test_projection_hidden_state_overrides_visible_grid_layout() -> None:
     visible_rule = ".projection-row {\n  display: grid;"
     hidden_selector = (
         "#list-projection[hidden],\n"
+        "#knowledge-projection[hidden],\n"
+        ".knowledge-projection [hidden],\n"
         ".projection-row[hidden] {"
     )
     visible_position = css.index(visible_rule)
@@ -375,20 +401,96 @@ def test_projection_hidden_state_overrides_visible_grid_layout() -> None:
     assert "display: none;" in hidden_rule
 
 
-def test_list_projection_is_cleared_before_submit_can_exit_or_fetch() -> None:
+def test_all_projections_are_cleared_before_submit_can_exit_or_fetch() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     submit = script.index('form.addEventListener("submit"')
     prevent = script.index("event.preventDefault()", submit)
-    clear = script.index("clearListProjection()", prevent)
+    clear = script.index("clearAllProjections()", prevent)
     csrf = script.index("const csrfMeta", clear)
     fetch = script.index("fetch(", csrf)
 
     assert submit < prevent < clear < csrf < fetch
-    assert "function renderLocalFailure() {\n  clearListProjection();" in script
+    assert "function clearAllProjections() {" in script
+    clear_all = script[
+        script.index("function clearAllProjections() {"):
+        script.index("function renderCollection")
+    ]
+    assert "clearListProjection();" in clear_all
+    assert "clearKnowledgeProjection();" in clear_all
+    assert "function renderLocalFailure() {\n  clearAllProjections();" in script
     assert (
         "function renderListProjection(projection) {\n"
         "  clearListProjection();"
     ) in script
+
+
+def test_knowledge_projection_has_closed_literal_rendering_contract() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    rendering = script[
+        script.index("function isKnowledgeRecord"):
+        script.index("function renderResult")
+    ]
+
+    assert 'projection?.kind !== "knowledge"' in rendering
+    assert 'projection.operation === "store"' in rendering
+    assert 'projection.operation === "read"' in rendering
+    assert 'projection.operation === "find"' in rendering
+    assert '["fact", "concept", "state"].includes(record.kind)' in rendering
+    assert 'typeof projection.created === "boolean"' in rendering
+    assert 'typeof projection.truncated === "boolean"' in rendering
+    assert 'knowledgeOperation.textContent = "Stored"' in rendering
+    assert 'knowledgeOperation.textContent = "Read"' in rendering
+    assert 'knowledgeOperation.textContent = "Find"' in rendering
+    assert 'knowledgeOperation.textContent = "Found"' not in rendering
+    assert (
+        'knowledgeCreated.textContent = projection.created ? "Yes" : "No"'
+        in rendering
+    )
+    assert "knowledgeCreated.textContent = String(projection.created)" not in rendering
+    assert 'knowledgeCreated.textContent = ""' in rendering
+    assert "knowledgeCreatedRow.hidden = true" in rendering
+    assert "knowledgeCount.textContent = String(projection.records.length)" in rendering
+    assert "for (const record of projection.records)" in rendering
+    assert 'document.createElement("article")' in rendering
+    assert 'document.createElement("dt")' in rendering
+    assert 'document.createElement("dd")' in rendering
+    assert "description.textContent = value" in rendering
+    assert "knowledgeRecords.appendChild(article)" in rendering
+    assert "JSON.stringify(record)" not in rendering
+    assert "innerHTML" not in rendering
+
+
+def test_empty_truncated_and_stale_knowledge_states_are_explicit() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    clearing = script[
+        script.index("function clearKnowledgeProjection"):
+        script.index("function clearAllProjections")
+    ]
+
+    assert "No matching knowledge records." in html
+    assert "Showing the first 50 matching records." in html
+    assert "knowledgeRecords.replaceChildren();" in clearing
+    assert "knowledgeCreatedRow.hidden = true" in clearing
+    assert "knowledgeEmpty.hidden = true" in clearing
+    assert "knowledgeTruncated.hidden = true" in clearing
+    assert "knowledgeEmpty.hidden = projection.records.length !== 0" in script
+    assert "knowledgeTruncated.hidden = projection.truncated !== true" in script
+
+
+def test_result_dispatch_clears_then_isolates_projection_families() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    rendering = script[
+        script.index("function renderResult"):
+        script.index("function renderLocalFailure")
+    ]
+
+    assert rendering.index("clearAllProjections();") < rendering.index(
+        'result.projection?.kind === "list"'
+    )
+    assert 'result.projection?.kind === "knowledge"' in rendering
+    assert "renderListProjection(result.projection)" in rendering
+    assert "renderKnowledgeProjection(result.projection)" in rendering
 
 
 def test_no_generic_static_path_or_extra_ui_endpoint(tmp_path: Path) -> None:

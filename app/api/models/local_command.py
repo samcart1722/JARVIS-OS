@@ -60,6 +60,55 @@ LocalCommandHttpListProjection = Annotated[
 ]
 
 
+class LocalCommandHttpKnowledgeRecord(BaseModel):
+    """Closed HTTP representation of one application knowledge record."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    record_id: StrictStr
+    kind: Literal["fact", "concept", "state"]
+    key: StrictStr
+    value: StrictStr
+
+
+class LocalCommandHttpKnowledgeStoreProjection(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["knowledge"] = "knowledge"
+    operation: Literal["store"] = "store"
+    record: LocalCommandHttpKnowledgeRecord
+    created: StrictBool
+
+
+class LocalCommandHttpKnowledgeReadProjection(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["knowledge"] = "knowledge"
+    operation: Literal["read"] = "read"
+    record: LocalCommandHttpKnowledgeRecord
+
+
+class LocalCommandHttpKnowledgeFindProjection(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["knowledge"] = "knowledge"
+    operation: Literal["find"] = "find"
+    records: tuple[LocalCommandHttpKnowledgeRecord, ...]
+    truncated: StrictBool
+
+
+LocalCommandHttpKnowledgeProjection = Annotated[
+    LocalCommandHttpKnowledgeStoreProjection
+    | LocalCommandHttpKnowledgeReadProjection
+    | LocalCommandHttpKnowledgeFindProjection,
+    Field(discriminator="operation"),
+]
+LocalCommandHttpProjection = Annotated[
+    LocalCommandHttpListProjection | LocalCommandHttpKnowledgeProjection,
+    Field(discriminator="kind"),
+]
+
+
 class LocalCommandHttpRequest(BaseModel):
     """Strict transport request whose authentication proof stays redacted."""
 
@@ -125,4 +174,4 @@ class LocalCommandHttpResponse(BaseModel):
     route: LocalCommandHttpRoute | None
     response: str | None
     error: LocalCommandHttpError | None
-    projection: LocalCommandHttpListProjection | None = None
+    projection: LocalCommandHttpProjection | None = None

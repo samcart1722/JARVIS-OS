@@ -9,6 +9,10 @@ from pydantic import ValidationError
 
 from app.api.models.local_command import (
     LocalCommandHttpError,
+    LocalCommandHttpKnowledgeFindProjection,
+    LocalCommandHttpKnowledgeReadProjection,
+    LocalCommandHttpKnowledgeRecord,
+    LocalCommandHttpKnowledgeStoreProjection,
     LocalCommandHttpListAddProjection,
     LocalCommandHttpListReadProjection,
     LocalCommandHttpRequest,
@@ -23,6 +27,11 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeFindProjection,
+    LocalKnowledgeReadProjection,
+    LocalKnowledgeRecordKind,
+    LocalKnowledgeRecordProjection,
+    LocalKnowledgeStoreProjection,
     LocalListAddProjection,
     LocalListReadProjection,
     application_error,
@@ -393,6 +402,181 @@ def test_http_projection_union_rejects_unknown_operation() -> None:
         )
 
 
+@pytest.mark.parametrize("kind", ("fact", "concept", "state"))
+def test_http_knowledge_record_has_strict_closed_contract(kind) -> None:
+    record = LocalCommandHttpKnowledgeRecord(
+        record_id="record",
+        kind=kind,
+        key="key",
+        value="value",
+    )
+
+    assert record.model_dump() == {
+        "record_id": "record",
+        "kind": kind,
+        "key": "key",
+        "value": "value",
+    }
+    assert not hasattr(record, "workspace")
+    assert not hasattr(record, "provenance")
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    (
+        {"record_id": 1},
+        {"key": True},
+        {"value": None},
+        {"kind": "unknown"},
+        {"workspace": "forbidden"},
+        {"provenance": "forbidden"},
+    ),
+)
+def test_http_knowledge_record_rejects_invalid_contract(overrides) -> None:
+    values = {
+        "record_id": "record",
+        "kind": "fact",
+        "key": "key",
+        "value": "value",
+    }
+    values.update(overrides)
+    with pytest.raises(ValidationError):
+        LocalCommandHttpKnowledgeRecord.model_validate(values)
+
+
+def _http_record(**overrides) -> LocalCommandHttpKnowledgeRecord:
+    values = {
+        "record_id": "record",
+        "kind": "fact",
+        "key": "key",
+        "value": "value",
+    }
+    values.update(overrides)
+    return LocalCommandHttpKnowledgeRecord.model_validate(values)
+
+
+@pytest.mark.parametrize("created", (True, False))
+def test_http_store_projection_has_exact_contract(created) -> None:
+    projection = LocalCommandHttpKnowledgeStoreProjection(
+        record=_http_record(), created=created
+    )
+    assert projection.model_dump() == {
+        "kind": "knowledge",
+        "operation": "store",
+        "record": _http_record().model_dump(),
+        "created": created,
+    }
+
+
+@pytest.mark.parametrize(
+    "model,values,overrides",
+    (
+        (
+            LocalCommandHttpKnowledgeStoreProjection,
+            {"record": _http_record(), "created": True},
+            ({"created": 1}, {"kind": "list"}, {"operation": "read"}, {"x": 1}),
+        ),
+        (
+            LocalCommandHttpKnowledgeReadProjection,
+            {"record": _http_record()},
+            ({"kind": "list"}, {"operation": "store"}, {"created": False}),
+        ),
+        (
+            LocalCommandHttpKnowledgeFindProjection,
+            {"records": (), "truncated": False},
+            (
+                {"truncated": 0},
+                {"kind": "list"},
+                {"operation": "read"},
+                {"x": 1},
+            ),
+        ),
+    ),
+)
+def test_http_knowledge_projection_models_reject_invalid_contract(
+    model, values, overrides
+) -> None:
+    for override in overrides:
+        invalid = dict(values)
+        invalid.update(override)
+        with pytest.raises(ValidationError):
+            model.model_validate(invalid)
+
+
+def test_http_read_and_find_projection_exact_shapes_and_order() -> None:
+    first = _http_record(record_id="second")
+    second = _http_record(record_id="first", kind="state")
+    read = LocalCommandHttpKnowledgeReadProjection(record=first)
+    find = LocalCommandHttpKnowledgeFindProjection(
+        records=(first, second), truncated=True
+    )
+
+    assert read.model_dump() == {
+        "kind": "knowledge",
+        "operation": "read",
+        "record": first.model_dump(),
+    }
+    assert "created" not in read.model_dump()
+    assert find.records == (first, second)
+    assert LocalCommandHttpKnowledgeFindProjection(
+        records=(), truncated=False
+    ).records == ()
+
+
+@pytest.mark.parametrize(
+    ("projection", "expected_type"),
+    (
+        (
+            {"kind": "list", "operation": "add", "list_id": "x", "added": [],
+             "already_present": [], "items": []},
+            LocalCommandHttpListAddProjection,
+        ),
+        (
+            {"kind": "list", "operation": "read", "list_id": "x", "items": []},
+            LocalCommandHttpListReadProjection,
+        ),
+        (
+            {"kind": "knowledge", "operation": "store",
+             "record": _http_record().model_dump(), "created": True},
+            LocalCommandHttpKnowledgeStoreProjection,
+        ),
+        (
+            {"kind": "knowledge", "operation": "read",
+             "record": _http_record().model_dump()},
+            LocalCommandHttpKnowledgeReadProjection,
+        ),
+        (
+            {"kind": "knowledge", "operation": "find", "records": [],
+             "truncated": False},
+            LocalCommandHttpKnowledgeFindProjection,
+        ),
+    ),
+)
+def test_http_projection_union_resolves_outer_kind_then_operation(
+    projection, expected_type
+) -> None:
+    response = LocalCommandHttpResponse(
+        success=True, route="local", response="done", error=None,
+        projection=projection,
+    )
+    assert type(response.projection) is expected_type
+
+
+@pytest.mark.parametrize(
+    "projection",
+    (
+        {"kind": "unknown", "operation": "read"},
+        {"kind": "knowledge", "operation": "delete"},
+    ),
+)
+def test_http_projection_union_rejects_unknown_kind_or_operation(projection) -> None:
+    with pytest.raises(ValidationError):
+        LocalCommandHttpResponse(
+            success=True, route="local", response="done", error=None,
+            projection=cast(Any, projection),
+        )
+
+
 @pytest.mark.parametrize(
     "route",
     (
@@ -712,6 +896,186 @@ def test_http_adapter_maps_read_projection_to_exact_wire_contract(
             "operation": "read",
             "list_id": "groceries",
             "items": list(items),
+        },
+    }
+
+
+def _application_record(
+    record_id: str = "record",
+    *,
+    kind: LocalKnowledgeRecordKind = LocalKnowledgeRecordKind.FACT,
+    key: str = "key",
+    value: str = "value",
+) -> LocalKnowledgeRecordProjection:
+    return LocalKnowledgeRecordProjection(record_id, kind, key, value)
+
+
+@pytest.mark.parametrize("created", (True, False))
+def test_http_adapter_maps_store_projection_to_exact_json(
+    monkeypatch, created
+) -> None:
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="Knowledge record stored locally.",
+            projection=LocalKnowledgeStoreProjection(
+                _application_record(), created
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container, "local_command_application_gateway", gateway
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    assert payload == {
+        "success": True,
+        "route": "local",
+        "response": "Knowledge record stored locally.",
+        "error": None,
+        "projection": {
+            "kind": "knowledge",
+            "operation": "store",
+            "record": {
+                "record_id": "record",
+                "kind": "fact",
+                "key": "key",
+                "value": "value",
+            },
+            "created": created,
+        },
+    }
+
+
+def test_http_adapter_maps_read_projection_without_created(monkeypatch) -> None:
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="Knowledge record read locally.",
+            projection=LocalKnowledgeReadProjection(
+                _application_record(kind=LocalKnowledgeRecordKind.CONCEPT)
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container, "local_command_application_gateway", gateway
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    projection = _require_http_payload(payload)["projection"]
+    assert projection == {
+        "kind": "knowledge",
+        "operation": "read",
+        "record": {
+            "record_id": "record",
+            "kind": "concept",
+            "key": "key",
+            "value": "value",
+        },
+    }
+    assert "created" not in projection
+
+
+@pytest.mark.parametrize(
+    ("records", "truncated"),
+    (((), False), ((_application_record("record-1"),), False),
+     (tuple(_application_record(f"record-{index}") for index in range(50)), True)),
+)
+def test_http_adapter_maps_find_projection_preserving_order(
+    monkeypatch, records, truncated
+) -> None:
+    gateway = RecordingApplicationGateway(
+        LocalCommandApplicationResult(
+            True,
+            route=LocalCommandApplicationRoute.LOCAL,
+            response="Knowledge records found locally.",
+            projection=LocalKnowledgeFindProjection(records, truncated),
+        )
+    )
+    monkeypatch.setattr(
+        local_command.container, "local_command_application_gateway", gateway
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    projection = _require_http_payload(payload)["projection"]
+    assert projection["kind"] == "knowledge"
+    assert projection["operation"] == "find"
+    assert projection["truncated"] is truncated
+    assert [item["record_id"] for item in projection["records"]] == [
+        record.record_id for record in records
+    ]
+
+
+def test_http_adapter_preserves_hostile_record_strings_as_data(monkeypatch) -> None:
+    hostile = (
+        "<script>alert(1)</script>",
+        "<img src=x onerror=alert(1)>",
+        "javascript:alert(1)",
+        "https://example.invalid/path",
+        "C:\\private\\path & <quoted>",
+    )
+    records = tuple(
+        _application_record(
+            f"record-{index}", key=hostile[index], value=value
+        )
+        for index, value in enumerate(reversed(hostile))
+    )
+    result = LocalCommandApplicationResult(
+        True,
+        route=LocalCommandApplicationRoute.LOCAL,
+        response="Knowledge records found locally.",
+        projection=LocalKnowledgeFindProjection(records, False),
+    )
+    monkeypatch.setattr(
+        local_command.container,
+        "local_command_application_gateway",
+        RecordingApplicationGateway(result),
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 200
+    projected = _require_http_payload(payload)["projection"]["records"]
+    assert [item["key"] for item in projected] == list(hostile)
+    assert [item["value"] for item in projected] == list(reversed(hostile))
+    serialized = json.dumps(payload)
+    assert "workspace" not in serialized
+    assert "source_type" not in serialized
+    assert "source_reference" not in serialized
+    assert "provenance" not in serialized
+
+
+def test_unknown_application_projection_mapping_is_sanitized(monkeypatch) -> None:
+    result = LocalCommandApplicationResult(
+        True,
+        route=LocalCommandApplicationRoute.LOCAL,
+        response="completed",
+    )
+    object.__setattr__(result, "projection", object())
+    monkeypatch.setattr(
+        local_command.container,
+        "local_command_application_gateway",
+        RecordingApplicationGateway(result),
+    )
+
+    status, payload = _post_local_command(_payload())
+
+    assert status == 500
+    assert payload == {
+        "success": False,
+        "route": None,
+        "response": None,
+        "error": {
+            "code": "internal_error",
+            "message": "The request could not be completed.",
         },
     }
 
