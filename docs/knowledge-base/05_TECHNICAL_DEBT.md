@@ -1,6 +1,20 @@
 # Technical Debt
 
-## Sprint 35 post-release classification
+## Sprint 36 post-release classification
+
+RESOLVED: the bounded local knowledge STORE/READ/FIND structured result
+projection gap. Sprint 36 releases closed application-owned variants, strict
+HTTP mapping, and safe minimal UI presentation without changing source
+authority, local-first ordering, storage, or Cognitive Core contracts.
+
+Still future and unauthorized: knowledge edit/delete; a generic projection or
+payload registry; pagination; sorting; deduplication; ranking; fuzzy or semantic
+search; aggregate response-size policy; broader product-grade UI; and Hermes or
+Spatial study-derived implementation. Production authentication, public/remote
+serving, synchronization, encryption, audit, and broader permission lifecycle
+also remain future. None is selected as Sprint 37 scope.
+
+## Historical Sprint 35 post-release classification
 
 RESOLVED: the bounded local list ADD/READ structured projection gap. Sprint 35
 releases a closed application contract, dedicated HTTP representation, and safe

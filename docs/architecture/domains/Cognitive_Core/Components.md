@@ -382,6 +382,21 @@ return paths, and hides ADD-only rows during READ. These outer components add
 no generic payload registry, knowledge projection, browser authority, storage,
 provider, Hermes, or Spatial component.
 
+## Sprint 36 outer knowledge-projection components
+
+Sprint 36 adds no Cognitive Core component or contract. Application-owned
+closed STORE/READ/FIND variants project successful governed knowledge results;
+their public record contains only `record_id`, `kind`, `key`, and `value`.
+`LocalCommandApplicationGateway` owns typed semantic correlation without text
+reparsing or storage re-query and keeps workspace/provenance internal.
+
+The HTTP layer owns strict closed knowledge models and explicit field mapping.
+The minimal UI owns safe Knowledge details presentation, synchronous stale-state
+clearing, and literal DOM rendering without persistence or authority. As an
+outer application concern, Sprint 36 introduced no external UI resources.
+Sprint 35 list projection components and wire behavior remain supported. No
+knowledge projection type or transport model moves into the Cognitive Core.
+
 ## Sprint 33 governed revocation components
 
 Sprint 33 adds the separate `PermissionGrantRevocationRepository` port while

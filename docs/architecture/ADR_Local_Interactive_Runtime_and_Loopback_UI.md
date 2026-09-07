@@ -59,3 +59,13 @@ Local and independent validation includes B1 runtime lifecycle tests, B2/B3 inte
 ## Future candidate
 
 STRUCTURED LOCAL COMMAND RESULT PROJECTION remains a future candidate without an assigned Sprint. It is not part of the current implementation or Sprint scope.
+
+## Subsequent governed state
+
+The statements above preserve the Sprint 34 decision at adoption. Sprint 35
+subsequently released bounded list ADD/READ projections, and Sprint 36 released
+bounded knowledge STORE/READ/FIND projections through the existing application,
+HTTP, and minimal UI layers. The earlier projection candidate is therefore
+partially realized by those closed contracts. A generic projection system,
+payload registry, broader product UI, and other larger projection expansion
+remain future non-goals unless separately governed.

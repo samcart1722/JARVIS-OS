@@ -5,9 +5,9 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 35 Structured Local List Result Projection v1 is latest at
-`c2dbab846cc7116568f59786233b64c0f01ab038`, tag
-`governed-sprint-35-complete`; Sprint 34 and earlier releases remain historical.
+Sprint 36 Structured Local Knowledge Result Projection v1 is latest at
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tag
+`governed-sprint-36-complete`; Sprint 35 and earlier releases remain historical.
 Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and

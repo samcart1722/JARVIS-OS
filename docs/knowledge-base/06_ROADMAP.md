@@ -1,9 +1,28 @@
 # Roadmap
 
-## Sprint 35 formal governance closure complete
+## Sprint 36 formal governance closure complete
 
-Sprint 35 — Structured Local List Result Projection v1 is the latest governed
-implementation release through PR #52, ordinary two-parent merge
+Sprint 36 — Structured Local Knowledge Result Projection v1 is the latest
+governed implementation release through PR #54, ordinary two-parent merge
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
+`e657dcf565b5600b2b26d71aea7e49bc67799168`, and immutable tag
+`governed-sprint-36-complete`. Closed STORE/READ/FIND application projections,
+strict HTTP mapping, safe minimal UI presentation, validation of `1643 passed /
+0 failed`,
+tag verification, governed backup, and implementation-branch cleanup are
+complete. Sprint 35 list projections remain supported.
+
+Sprint 35 is historical. Sprint 36 closure does not select or define Sprint 37;
+next-sprint planning remains separate and requires explicit governance.
+Knowledge edit/delete, generic projection infrastructure, pagination, ranking,
+fuzzy/semantic search, and broader product presentation remain unapproved.
+Hermes Agent and the LUXIOM Spatial/Cognitive Interface remain separate
+controlled study lines, not Sprint 37 commitments.
+
+## Historical Sprint 35 formal governance closure
+
+At its release checkpoint, Sprint 35 — Structured Local List Result Projection
+v1 was the latest governed implementation release through PR #52, ordinary two-parent merge
 `c2dbab846cc7116568f59786233b64c0f01ab038`, tree
 `c65d2bed9158e2630c0912e398bc09eb30a5405e`, and immutable tag
 `governed-sprint-35-complete`. Its bounded closed application ADD/READ
@@ -157,8 +176,10 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 35 is latest at `c2dbab846cc7116568f59786233b64c0f01ab038`,
-tag `governed-sprint-35-complete`. Sprint 34 is the immediately preceding
+Sprint 36 is latest at `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`,
+tag `governed-sprint-36-complete`. Sprint 35 is the immediately preceding
+historical release at `c2dbab846cc7116568f59786233b64c0f01ab038`, tag
+`governed-sprint-35-complete`. Sprint 34 is the preceding
 historical release at `adbd17d564962c6d22617b5857aaaec7da051b08`, tag
 `governed-sprint-34-complete`. Sprint 33 is the preceding historical
 release at `9af9984691b034710243e1da487767108915ce3a`, tag
