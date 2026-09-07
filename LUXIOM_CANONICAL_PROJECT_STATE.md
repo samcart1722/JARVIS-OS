@@ -354,7 +354,7 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Sprint 35 is formally closed. Do not begin Sprint 36 or any other subsequent
+6. Sprint 36 is formally closed. Do not begin Sprint 37 or any other subsequent
    implementation sprint without explicit authorization; the next
    implementation remains a planning and contract-definition boundary until
    explicitly approved.
@@ -422,9 +422,10 @@ and `b905791ee11791c55417981473119b78486fdf42b72cf9ed8441daa4290b09b3`.
 This docs sync is outside the immutable release, cannot move its tag, and
 authorizes no Sprint 35.
 
-## 18. Current governed release — Sprint 35
+## 18. Historical governed release — Sprint 35
 
-Sprint 35 — Structured Local List Result Projection v1 is current. Baseline
+At its release checkpoint, Sprint 35 — Structured Local List Result Projection
+v1 was current. Baseline
 `ade9a28d45a34b01e1279bc406b7336234e173e2` and implementation
 `fd6ecb3a07c9b640892df40561006d79f531c622` reached PR #52 and ordinary
 two-parent release `c2dbab846cc7116568f59786233b64c0f01ab038`, with parents
@@ -471,6 +472,46 @@ This later documentation synchronization is outside the immutable release. It
 may advance `master`, but cannot move, recreate, or retarget its tag, creates no
 new Sprint 35 implementation tag or governed backup, and authorizes no Sprint
 36 or other implementation sprint.
+
+## 18A. Current governed release — Sprint 36
+
+Sprint 36 — Structured Local Knowledge Result Projection v1 is the current
+governed implementation release. Implementation
+`f5cc5bfdb9f263b71370af0c9d38e225e831644f` reached PR #54 and ordinary
+two-parent release merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, with parents
+`644097e1f41b2214e0112775bad899a077df7dce` and
+`f5cc5bfdb9f263b71370af0c9d38e225e831644f`. The implementation and release
+tree is `e657dcf565b5600b2b26d71aea7e49bc67799168`. Immutable tag
+`governed-sprint-36-complete`, annotated object
+`16e1b3ad9f1239c86e2786d81722620fa1b7c289`, peels to the release merge.
+
+Successful governed knowledge STORE, READ, and FIND results may now carry
+closed application-owned projections. Public records contain exactly
+`record_id`, `kind`, `key`, and `value`, with kind `FACT`, `CONCEPT`, or
+`STATE`. STORE carries one exact record and `created`; READ carries one exact
+record without `created`; FIND carries ordered records and exact `truncated`
+truth under the existing maximum-50 semantics. The gateway correlates typed
+intent with the successful governed result without reparsing text or re-querying
+storage. Authenticated selected-workspace authority stays internal, and public
+records expose no workspace or provenance.
+
+Sprint 35 list ADD/READ projections remain wire-compatible. HTTP uses explicit
+closed mapping and omits only an absent projection while preserving historical
+envelope/null behavior. The minimal UI presents separate Knowledge details,
+clears stale state before CSRF/fetch, and renders values literally without
+browser persistence or authority. The released Sprint 36 minimal UI introduced
+no external UI resources. Sprint 36 adds no edit/delete, pagination,
+sorting, deduplication, ranking, fuzzy or semantic search, model/provider or
+network behavior, schema/migration, authority redesign, generic registry,
+aggregate response-size policy, Hermes, or Spatial implementation.
+
+Full governed validation was `1643 passed / 0 failed`. The authoritative
+backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`. The
+implementation feature branch was cleaned locally and remotely. This
+documentation synchronization is later and separate; it cannot move or
+recreate the immutable implementation tag. Sprint 37 planning remains separate
+and requires explicit governance.
 
 ## 19. Sprint 29 immutable release checkpoint
 

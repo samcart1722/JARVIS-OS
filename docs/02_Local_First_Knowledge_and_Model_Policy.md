@@ -267,3 +267,24 @@ implementation branch. It does not declare Sprint 32 merged, released, tagged,
 or governance-closed; those statements require completion of the remaining
 validation, independent review, merge, immutable release tag, and backup
 lifecycle.
+
+## Sprint 36 bounded public knowledge projection policy
+
+Sprint 36 adds an outward presentation contract for successful governed local
+knowledge STORE, READ, and FIND results. It does not change deterministic
+local-first ordering, model/provider/network policy, or authentication and
+authorization ownership. Projection is derived only after governed execution
+under the authenticated selected workspace; it establishes no authority.
+
+The application gateway correlates typed intent with the governed result
+without reparsing command text or re-querying storage. Public records contain
+exactly `record_id`, `kind`, `key`, and `value`, with kind `FACT`, `CONCEPT`, or
+`STATE`; they expose neither workspace nor provenance. STORE adds `created`,
+READ does not, and FIND preserves ordered maximum-50 results with exact
+`truncated` truth. HTTP mapping is explicit and closed, and Sprint 35 list
+projection compatibility remains unchanged.
+
+This policy adds no knowledge edit/delete, pagination, ranking, fuzzy or
+semantic search, generic projection registry, model/provider execution,
+external access, schema/migration, authority redesign, Hermes, or Spatial
+implementation.

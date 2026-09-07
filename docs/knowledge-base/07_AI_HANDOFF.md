@@ -1,6 +1,35 @@
 # AI Handoff
 
-## Current Sprint 35 recovery brief
+## Current Sprint 36 recovery brief
+
+Implementation `f5cc5bfdb9f263b71370af0c9d38e225e831644f`, PR #54,
+ordinary merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
+`e657dcf565b5600b2b26d71aea7e49bc67799168`, tag
+`governed-sprint-36-complete`, object
+`16e1b3ad9f1239c86e2786d81722620fa1b7c289`, peeling to the merge.
+
+Sprint 36 releases application-owned knowledge STORE/READ/FIND projections.
+Public records are limited to `record_id`, `kind`, `key`, and `value`, with
+`FACT`, `CONCEPT`, or `STATE`; STORE also reports `created`, READ does not, and
+FIND returns ordered records with exact maximum-50 truncation truth. Gateway
+correlation follows successful governed execution without reparsing or storage
+re-query. Authority and workspace/provenance stay internal. Sprint 35 list
+projection compatibility remains intact.
+
+HTTP uses closed explicit mapping; the minimal UI renders separate Knowledge
+details safely, clears stale state before CSRF/fetch, and owns no persistence or
+authority. No edit/delete, pagination, ranking, fuzzy/semantic search, generic
+registry, schema/authority redesign, provider/network, Hermes, or Spatial work
+was added.
+
+Full governed validation was `1643 passed / 0 failed`. The backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`. The
+implementation feature branch was deleted locally and remotely. Current action
+is the separate documentation synchronization; afterward, Sprint 37 planning
+remains separate and requires explicit governance. The docs process cannot move
+or recreate the immutable implementation tag or backup.
+
+## Historical Sprint 35 recovery brief
 
 Release baseline `ade9a28d45a34b01e1279bc406b7336234e173e2`, implementation
 `fd6ecb3a07c9b640892df40561006d79f531c622`, PR #52, ordinary merge
@@ -186,12 +215,12 @@ authorize Sprint 35.
 ## Resume instruction
 
 Resume from canonical `master` and verify that local `HEAD` equals
-`origin/master` before continuing. Sprint 35 implementation, ordinary merge,
+`origin/master` before continuing. Sprint 36 implementation, ordinary merge,
 final validation, immutable tagging, and backup verification are complete. The
-immutable Sprint 35 checkpoint remains
-`c2dbab846cc7116568f59786233b64c0f01ab038` under
-`governed-sprint-35-complete`; later documentation commits may advance `master`
+immutable Sprint 36 checkpoint remains
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` under
+`governed-sprint-36-complete`; later documentation commits may advance `master`
 without moving it. This instruction does not reopen or condition that closure.
-Do not begin Sprint 36 or any subsequent implementation sprint without explicit
+Do not begin Sprint 37 or any subsequent implementation sprint without explicit
 authorization; any next implementation remains a planning and
 contract-definition boundary until explicitly approved.

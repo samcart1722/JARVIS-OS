@@ -400,6 +400,20 @@ fallback authority. Existing dependency direction through `PermissionPolicy`
 and local capabilities remains unchanged, and no Cognitive Core contract is
 added.
 
+## Sprint 36 knowledge-projection dependency boundary
+
+Sprint 36 extends the same outward-only direction for successful knowledge
+results: `typed STORE/READ/FIND intent + governed result -> application-owned
+projection -> explicit HTTP mapping -> safe UI rendering`. The gateway alone
+owns semantic correlation and may neither reparse text nor re-query storage.
+
+Application and HTTP projection contracts cannot import or serialize internal
+knowledge-domain, repository, workspace, or provenance objects. Architecture
+tests enforce the approved model topology and prevent that leakage. HTTP and UI
+remain outward consumers and cannot become authentication, authorization,
+routing, capability, persistence, or Cognitive Core authorities. Existing
+dependency direction and Sprint 35 list projection compatibility are preserved.
+
 ## Sprint 33 governed action-permission revocation boundary
 
 The inward revocation contract lives in local resolution and imports no SQLite

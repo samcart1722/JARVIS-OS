@@ -1,8 +1,45 @@
 # Current State
 
-## Sprint 35 governed implementation state
+## Sprint 36 governed implementation state
 
-Sprint 35 is current: baseline `ade9a28d45a34b01e1279bc406b7336234e173e2`,
+Sprint 36 is current: implementation
+`f5cc5bfdb9f263b71370af0c9d38e225e831644f`, PR #54, ordinary two-parent
+merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
+`e657dcf565b5600b2b26d71aea7e49bc67799168`, and immutable tag
+`governed-sprint-36-complete` (object
+`16e1b3ad9f1239c86e2786d81722620fa1b7c289`, peeling to the merge).
+
+Successful governed local knowledge STORE, READ, and FIND results now cross the
+application boundary through closed application-owned variants. A public record
+contains exactly `record_id`, `kind`, `key`, and `value`; kind is exactly
+`FACT`, `CONCEPT`, or `STATE`. STORE projects one exact record plus `created`;
+READ projects one exact record without `created`; FIND projects ordered records
+and exact `truncated` truth under the existing maximum-50 behavior. Gateway
+correlation uses typed intent and the governed result without command reparsing
+or repository re-query, and exposes no workspace or provenance.
+
+HTTP owns strict closed models and explicit field mapping. It omits only an
+absent projection and preserves historical response-envelope/null behavior and
+Sprint 35 list-projection wire compatibility. The minimal UI presents separate
+Knowledge details: STORE uses `Operation = Stored` and `Created = Yes / No`,
+READ uses `Operation = Read`, and FIND uses `Operation = Find`. Empty and
+truncated FIND use exactly `No matching knowledge records.` and
+`Showing the first 50 matching records.` State is cleared before
+CSRF/fetch and values are rendered literally, without persistence or authority.
+Sprint 36 introduced no external UI resources.
+
+No edit/delete, pagination, sorting, deduplication, ranking, fuzzy or semantic
+search, model/provider execution, external access, schema/migration, authority
+redesign, generic registry, aggregate response-size policy, Hermes, or Spatial
+implementation was added. Full governed validation was `1643 passed / 0
+failed`. Backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`. The
+implementation feature branch is absent locally and remotely.
+
+## Historical Sprint 35 governed implementation state
+
+At its release checkpoint Sprint 35 was current: baseline
+`ade9a28d45a34b01e1279bc406b7336234e173e2`,
 implementation `fd6ecb3a07c9b640892df40561006d79f531c622`, PR #52, ordinary
 two-parent merge `c2dbab846cc7116568f59786233b64c0f01ab038`, tree
 `c65d2bed9158e2630c0912e398bc09eb30a5405e`, and immutable tag

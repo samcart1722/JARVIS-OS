@@ -1,8 +1,45 @@
 # Source of Truth
 
-## Sprint 35 governed implementation truth
+## Sprint 36 governed implementation truth
 
-Latest release: implementation `fd6ecb3a07c9b640892df40561006d79f531c622`,
+Latest release: implementation `f5cc5bfdb9f263b71370af0c9d38e225e831644f`,
+PR #54, ordinary merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
+`e657dcf565b5600b2b26d71aea7e49bc67799168`, tag
+`governed-sprint-36-complete`, object
+`16e1b3ad9f1239c86e2786d81722620fa1b7c289`, peeling to the merge. The release
+parents are `644097e1f41b2214e0112775bad899a077df7dce` followed by the
+implementation commit. Full governed repository validation was `1643 passed /
+0 failed`.
+
+The governed backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`. Its bundle,
+source ZIP, and backup-manifest SHA-256 values are respectively
+`3393A918F3B515FAA34B672EB2D1A5F50A56F5681C3528999316C56FC4FCF8DA`,
+`68964D050298999D568A8582FF45450BB4EDDCF8187E47628DCCB4E3C0F116EE`,
+and `59230986C545C8709E07A90D31162F1558F64FA74A752BA663BECB538883A227`.
+The implementation feature branch was cleaned locally and remotely.
+
+### Canonical content identity and checkout diagnostics
+
+Canonical per-file release identity uses the Git blob OID, SHA-256 of the raw
+Git blob bytes, and raw blob byte length. A raw checked-out filesystem SHA is
+environment/materialization scoped when checkout filters such as
+`core.autocrlf` transform bytes. Historical pre-commit worktree hashes must not
+be described as canonical Git-blob hashes.
+
+The Sprint 36 issue was a **HASH-PROVENANCE CATEGORY ERROR**, not release or
+blob corruption, tree or patch mutation, or implementation mutation. Canonical
+blob evidence and the final verified release archive remained authoritative.
+
+The immutable implementation release is distinct from this later documentation
+synchronization. A docs commit may later advance `master`, but must not move,
+recreate, retarget, or redefine `governed-sprint-36-complete`, and creates no
+new implementation tag or governed backup. Sprint 37 planning remains separate.
+
+## Historical Sprint 35 governed implementation truth
+
+At its release checkpoint, the latest implementation was
+`fd6ecb3a07c9b640892df40561006d79f531c622`,
 PR #52, ordinary merge `c2dbab846cc7116568f59786233b64c0f01ab038`,
 tree `c65d2bed9158e2630c0912e398bc09eb30a5405e`, tag
 `governed-sprint-35-complete`, object

@@ -1,8 +1,37 @@
 # Runtime Architecture
 
-## Sprint 35 governed structured list-projection flow
+## Sprint 36 governed structured knowledge-projection flow
 
-Latest release: Sprint 35, `c2dbab846cc7116568f59786233b64c0f01ab038`,
+Latest release: Sprint 36, `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`,
+tag `governed-sprint-36-complete`. After the existing authentication, mapping,
+selected-workspace, membership, routing, `PermissionPolicy`, and local
+capability authority succeeds, the typed knowledge intent and governed result
+flow through `LocalCommandApplicationGateway` into a closed application-owned
+STORE/READ/FIND projection, explicit HTTP mapping, and safe minimal UI
+rendering. Projection never establishes authority. The gateway does not reparse
+text or re-query storage, and workspace/provenance remains internal.
+
+Public knowledge records contain exactly `record_id`, `kind`, `key`, and
+`value`; public kinds are `FACT`, `CONCEPT`, and `STATE`. STORE exposes one
+record plus `created`; READ exposes one record without `created`; FIND exposes
+ordered records and exact `truncated` truth while preserving the existing
+maximum of 50. No pagination, sorting, deduplication, ranking, fuzzy search, or
+semantic search is introduced.
+
+HTTP models are strict and closed, map fields explicitly, serialize no internal
+domain object, omit only an absent projection, and preserve the historical
+response-envelope/null behavior and Sprint 35 list wire contract. UI Knowledge
+details use `Operation = Stored` with `Created = Yes / No`, `Operation = Read`,
+or `Operation = Find`; empty and truncated FIND use exactly
+`No matching knowledge records.` and `Showing the first 50 matching records.`
+Rendering remains literal, stale state clears before CSRF/fetch, and
+the browser owns no persistence or authority. The Sprint 36 UI path remains
+self-contained and uses no external UI resources.
+
+## Historical Sprint 35 governed structured list-projection flow
+
+At its release checkpoint, the latest release was Sprint 35,
+`c2dbab846cc7116568f59786233b64c0f01ab038`,
 tag `governed-sprint-35-complete`. After existing authentication, mapping,
 workspace, membership, routing, `PermissionPolicy`, and local capability
 authority succeeds, the already interpreted typed list intent and structured
@@ -86,8 +115,9 @@ released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
 released trusted request context; Sprint 28 released durable membership;
 Sprints 29–32 released authentication, durable mapping, durable permission, and
 the authenticated application gateway; Sprint 33 released permission
-revocation; Sprint 34 released the local interactive runtime; and Sprint 35 is
-the current governed structured list-projection release.
+revocation; Sprint 34 released the local interactive runtime; Sprint 35 released
+the structured list projection; and Sprint 36 is the current governed structured
+knowledge-projection release.
 
 ## Deterministic knowledge commands (Sprint 25)
 

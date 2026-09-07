@@ -1,6 +1,30 @@
 # Decisions and Guardrails
 
-## Sprint 35 governed decisions and guardrails
+## Sprint 36 governed decisions and guardrails
+
+- Knowledge projection is closed to STORE, READ, and FIND application variants;
+  no generic projection or payload registry exists.
+- Public knowledge records contain exactly `record_id`, `kind`, `key`, and
+  `value`; kinds are exactly `FACT`, `CONCEPT`, and `STATE`. Workspace and
+  provenance remain internal.
+- `LocalCommandApplicationGateway` alone correlates typed intent with a
+  successful governed result. It neither reparses command text nor re-queries
+  storage, and projection establishes no authority.
+- STORE carries one exact record plus `created`; READ carries one exact record
+  without `created`; FIND preserves ordered records and exact truncation under
+  the existing maximum-50 behavior.
+- HTTP owns strict closed models and explicit mapping, never serializes internal
+  domain objects, omits only an absent projection, and preserves historical
+  envelope/null behavior and Sprint 35 list wire compatibility.
+- UI projection state clears synchronously before CSRF/fetch. Knowledge details
+  use safe literal DOM rendering, no persistence, and no authority; exact empty
+  and truncated FIND messages are preserved. Sprint 36 introduced no external
+  UI resources.
+- No edit/delete, pagination, sorting, deduplication, ranking, fuzzy/semantic
+  search, model/provider/network expansion, schema/migration, authority redesign,
+  aggregate response-size policy, Hermes, or Spatial implementation was added.
+
+## Historical Sprint 35 governed decisions and guardrails
 
 - Projection is list-specific and closed to immutable application ADD/READ
   variants; no generic payload registry or knowledge projection exists.

@@ -42,6 +42,30 @@ Each real run creates `LUXIOM_yyyyMMdd_HHmmss` containing
 `luxiom-repository.bundle`, `luxiom-source.zip`, and `MANIFEST.txt`. It warns
 when the working tree is dirty. Use a destination outside the repository.
 
+## Sprint 36 verified recovery checkpoint
+
+Directory:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`.
+
+The governed checkpoint contains exactly six files: the all-refs bundle, source
+ZIP from the immutable release, frozen design contract and sidecar, release
+custody manifest, and backup SHA-256 manifest.
+
+- `BACKUP_SHA256_MANIFEST.txt`:
+  `59230986C545C8709E07A90D31162F1558F64FA74A752BA663BECB538883A227`
+- `JARVIS-OS_SPRINT36_ALL_REFS.bundle`:
+  `3393A918F3B515FAA34B672EB2D1A5F50A56F5681C3528999316C56FC4FCF8DA`
+- `LUXIOM_SPRINT36_RELEASE_SOURCE.zip`:
+  `68964D050298999D568A8582FF45450BB4EDDCF8187E47628DCCB4E3C0F116EE`
+- Frozen contract:
+  `E05B66B6E4814BB342AEBF7B317C3408F500EF4C4BCF5AA62C665BFF3F49D358`
+- Frozen sidecar:
+  `3C7E1373082AFCF3E6DC1ABBE2067A94BAFC920EDAAA94344818D12D23D43EE9`
+
+The bundle and immutable tag are restorable, and all 14 governed ZIP members
+matched canonical Git blob bytes. This is the Sprint 36 implementation backup;
+later documentation synchronization neither changes nor replaces it.
+
 ## Sprint 35 verified recovery checkpoint
 
 Directory:
