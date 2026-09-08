@@ -47,13 +47,15 @@ h2 {
   background: #161b22;
 }
 
-form {
+form,
+#knowledge-assistance {
   display: grid;
   gap: 0.75rem;
 }
 
 input,
 textarea,
+select,
 button {
   width: 100%;
   border: 1px solid #484f58;
@@ -63,7 +65,8 @@ button {
 }
 
 input,
-textarea {
+textarea,
+select {
   background: #0d1117;
   color: #e6edf3;
 }
@@ -99,7 +102,8 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
-#error {
+#error,
+#preparation-error {
   color: #fca5a5;
 }
 

@@ -254,8 +254,12 @@ Sprint 25 is completed through merged PR #24 at
 (annotated tag object `6e0de87b426e4a7d4c3103bdffc77f2b171aa30f`).
 The existing interpreter maps strict JSON knowledge commands
 to existing typed knowledge intents. Workspace comes from the routing request,
-not text; caller-supplied provenance is preserved. Malformed recognized
-knowledge commands are terminal. Public HTTP and `CognitiveEngine` are unchanged.
+not text. Caller-supplied provenance is preserved after the existing
+models apply Python `str.strip()` to the outer whitespace of
+`source_type` and `source_reference`. Interior whitespace, case and
+Unicode content are preserved without Unicode normalization or
+provenance verification. Malformed recognized knowledge commands are
+terminal. Public HTTP and `CognitiveEngine` are unchanged.
 
 This boundary is not broad natural-language understanding or a model
 classifier. A cognitive route also does not imply model execution when the

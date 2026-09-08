@@ -125,7 +125,11 @@ The existing `DeterministicLocalCommandInterpreter` accepts strict JSON
 `knowledge read` and `knowledge store` commands and constructs the existing
 typed knowledge intents. `LocalCommandTextRouter` supplies the request workspace
 to interpretation exactly once; workspace cannot be supplied by JSON.
-Caller-supplied provenance is preserved in the immutable `KnowledgeRecord`.
+Caller-supplied provenance is preserved in the immutable `KnowledgeRecord`
+after the existing models apply Python `str.strip()` to the outer
+whitespace of `source_type` and `source_reference`. Interior whitespace,
+case and Unicode content are preserved without Unicode normalization;
+this does not verify provenance.
 Malformed recognized knowledge commands are terminal before coordination.
 
 This is structured deterministic parsing, not natural-language understanding.

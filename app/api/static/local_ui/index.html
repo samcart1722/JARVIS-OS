@@ -16,6 +16,55 @@
       <p class="warning">LOCAL DEVELOPMENT RUNTIME — NON-PRODUCTION AUTHENTICATION</p>
     </header>
 
+    <section class="panel" aria-labelledby="assistance-heading">
+      <h2 id="assistance-heading">Prepare a knowledge command</h2>
+      <p>Preparation only writes the editable command below. Review it, then use Send.</p>
+      <p id="knowledge-input-help">Enter literal text, including any line breaks.
+        The server trims whitespace at the edges of each text field, including
+        provenance. It preserves interior text. Source type and source reference
+        are your explicit statements, not verified identity or provenance.</p>
+      <div id="knowledge-assistance" aria-describedby="knowledge-input-help">
+        <label for="assist-operation">Operation</label>
+        <select id="assist-operation">
+          <option value="store">STORE</option>
+          <option value="read">READ</option>
+          <option value="find">FIND</option>
+        </select>
+        <div id="assist-record-id-row">
+          <label for="assist-record-id">Record ID (required)</label>
+          <textarea id="assist-record-id" rows="2" autocomplete="off"></textarea>
+        </div>
+        <div id="assist-kind-row">
+          <label for="assist-kind">Kind (required for STORE; optional for FIND)</label>
+          <select id="assist-kind">
+            <option value="">Select a kind; no kind filter for FIND</option>
+            <option value="fact">fact</option>
+            <option value="concept">concept</option>
+            <option value="state">state</option>
+          </select>
+        </div>
+        <div id="assist-key-row">
+          <label for="assist-key">Key (required)</label>
+          <textarea id="assist-key" rows="2" autocomplete="off"></textarea>
+        </div>
+        <div id="assist-value-row">
+          <label for="assist-value">Value (required)</label>
+          <textarea id="assist-value" rows="3" autocomplete="off"></textarea>
+        </div>
+        <div id="assist-source-type-row">
+          <label for="assist-source-type">Source type (required)</label>
+          <textarea id="assist-source-type" rows="2" autocomplete="off"></textarea>
+        </div>
+        <div id="assist-source-reference-row">
+          <label for="assist-source-reference">Source reference (required)</label>
+          <textarea id="assist-source-reference" rows="2" autocomplete="off"></textarea>
+        </div>
+        <button id="prepare-command" type="button">Prepare command</button>
+        <p id="preparation-status" role="status">No command prepared.</p>
+        <p id="preparation-error" role="alert"></p>
+      </div>
+    </section>
+
     <section class="panel" aria-labelledby="command-heading">
       <h2 id="command-heading">Governed local command</h2>
       <p>Workspace: <code>luxiom-local-dev-workspace</code></p>
@@ -31,7 +80,8 @@
           Allow cognitive fallback
         </label>
 
-        <button type="submit">Send</button>
+        <p id="command-state" role="status">Send uses the exact text in this editor.</p>
+        <button id="send-command" type="submit">Send</button>
       </form>
     </section>
 

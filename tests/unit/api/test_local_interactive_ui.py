@@ -1,5 +1,7 @@
 import asyncio
 import json
+import shutil
+import subprocess
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, cast
@@ -8,6 +10,10 @@ import pytest
 from fastapi import FastAPI
 
 from app.api.interactive import create_local_interactive_app
+from app.cognition.interpretation.interpreter import (
+    DeterministicLocalCommandInterpreter,
+)
+from app.cognition.local_resolution.models import WorkspaceIdentity
 from app.operations.local_interactive_runtime import (
     DEVELOPMENT_WORKSPACE,
     LocalInteractiveRuntime,
@@ -312,9 +318,10 @@ def test_ui_document_is_csp_compatible_and_has_minimal_controls(
     assert "hidden" in parsed.elements_by_id["knowledge-truncated"]
     assert "Knowledge details" in document
     assert "workspace" not in document.lower().split("knowledge details", 1)[1]
-    assert "provenance" not in document.lower()
-    assert "source_type" not in document
-    assert "source_reference" not in document
+    results = document.split('<section class="panel results"', 1)[1]
+    assert "provenance" not in results.lower()
+    assert "source_type" not in results
+    assert "source_reference" not in results
     assert {"status", "route", "response", "error"} <= set(
         parsed.elements_by_id
     )
@@ -358,6 +365,67 @@ def test_static_sources_follow_browser_security_contract() -> None:
     )
     assert all(value not in html + css + script for value in forbidden)
     assert "console." not in script
+
+
+def test_knowledge_assistance_is_separate_from_explicit_send() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    parsed = _parse(html)
+    helper = html.split('id="knowledge-assistance"', 1)[1].split(
+        '<form id="command-form">', 1
+    )[0]
+    command_form = html.split('<form id="command-form">', 1)[1].split(
+        "</form>", 1
+    )[0]
+    assert 'id="prepare-command" type="button"' in helper
+    assert "assist-" not in command_form
+    assert 'id="send-command" type="submit"' in command_form
+    assert parsed.elements_by_id["preparation-error"]["role"] == "alert"
+    assert parsed.elements_by_id["preparation-status"]["role"] == "status"
+    assert parsed.elements_by_id["command-state"]["role"] == "status"
+    for field in ("record-id", "key", "value", "source-type", "source-reference"):
+        assert any(item.get("id") == f"assist-{field}" for item in parsed.textareas)
+        assert f'for="assist-{field}"' in helper
+        assert parsed.elements_by_id[f"assist-{field}"]["autocomplete"] == "off"
+        assert parsed.elements_by_id[f"assist-{field}"].get("value") is None
+    assert "including\n        provenance" in html
+    assert "not verified identity or provenance" in html
+
+
+def test_generated_assistance_commands_match_real_interpreter() -> None:
+    # Node is an optional local verification tool, not a product dependency.
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for actual UI JavaScript verification")
+    completed = subprocess.run(
+        [node, "tests/browser/local_knowledge_command_assistance.js"],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["passed"] > 0
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint37-test-only")
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(vector["command"], workspace)
+        assert result.status.value == "interpreted", vector["name"]
+        intent = result.intent
+        expected = vector["fields"]
+        if vector["operation"] == "store":
+            record = intent.record
+            assert record.workspace is workspace
+            assert record.kind.value == expected["kind"]
+            for field in ("record_id", "key", "value"):
+                assert getattr(record, field) == expected[field].strip()
+            for field in ("source_type", "source_reference"):
+                assert getattr(record.provenance, field) == expected[field].strip()
+        elif vector["operation"] == "read":
+            assert intent.record_id == expected["record_id"].strip()
+        else:
+            assert intent.key == expected["key"].strip()
+            assert (intent.kind.value if intent.kind else "") == expected["kind"]
 
 
 def test_list_projection_script_has_closed_safe_rendering_contract() -> None:
@@ -405,11 +473,16 @@ def test_all_projections_are_cleared_before_submit_can_exit_or_fetch() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     submit = script.index('form.addEventListener("submit"')
     prevent = script.index("event.preventDefault()", submit)
-    clear = script.index("clearAllProjections()", prevent)
+    clear = script.index('clearDraftResults("Pending")', prevent)
     csrf = script.index("const csrfMeta", clear)
     fetch = script.index("fetch(", csrf)
 
     assert submit < prevent < clear < csrf < fetch
+    draft_clearing = script[
+        script.index("function clearDraftResults"):
+        script.index("function updatePreparationButton")
+    ]
+    assert "clearAllProjections();" in draft_clearing
     assert "function clearAllProjections() {" in script
     clear_all = script[
         script.index("function clearAllProjections() {"):
