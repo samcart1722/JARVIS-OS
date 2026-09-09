@@ -354,7 +354,7 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Sprint 36 is formally closed. Do not begin Sprint 37 or any other subsequent
+6. Sprint 37 implementation release is complete. Do not begin Sprint 38 or any subsequent
    implementation sprint without explicit authorization; the next
    implementation remains a planning and contract-definition boundary until
    explicitly approved.
@@ -473,10 +473,10 @@ may advance `master`, but cannot move, recreate, or retarget its tag, creates no
 new Sprint 35 implementation tag or governed backup, and authorizes no Sprint
 36 or other implementation sprint.
 
-## 18A. Current governed release — Sprint 36
+## 18A. Historical governed release — Sprint 36
 
-Sprint 36 — Structured Local Knowledge Result Projection v1 is the current
-governed implementation release. Implementation
+At its release checkpoint, Sprint 36 — Structured Local Knowledge Result
+Projection v1 was the current governed implementation release. Implementation
 `f5cc5bfdb9f263b71370af0c9d38e225e831644f` reached PR #54 and ordinary
 two-parent release merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, with parents
 `644097e1f41b2214e0112775bad899a077df7dce` and
@@ -510,8 +510,67 @@ backup is
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`. The
 implementation feature branch was cleaned locally and remotely. This
 documentation synchronization is later and separate; it cannot move or
-recreate the immutable implementation tag. Sprint 37 planning remains separate
-and requires explicit governance.
+recreate the immutable implementation tag. At that checkpoint, Sprint 37
+planning remained separate and required explicit governance.
+
+## 18B. Current governed implementation release - Sprint 37
+
+Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
+ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
+Parents, in order: `30b724a287c58ac881ddaab202f9b5f0778e1af9` and
+`6af885900344e7a89f1e3a93f784c616ae786317`.
+Release tree `cb220d0661708af226ffa8faefc5c00bba0fda4c` equals the approved
+implementation tree. Annotated tag `governed-sprint-37-complete`, object
+`1f5863ef15759829e1fbd06c97deb5a6496ff1e6`, peels to that release merge.
+
+Sprint 37 - Local Knowledge Command Assistance adds development-UI preparation
+for STORE, READ and FIND through the existing governed command flow. Preparation
+validates explicit text fields and provenance and writes an editable command;
+only explicit submission executes it. The visible editor remains authoritative.
+Python-compatible whitespace validation, real JSON serialization, Unicode and
+8192-code-point command limits, isolated-surrogate rejection in the preparer,
+concurrency guards and stale-result clearing preserve existing backend,
+authorization, fallback, SQLite and literal result-projection contracts.
+
+Previously approved evidence, not new executions by this documentation change:
+
+- User-reported post-merge validation: `1645 passed in 28.10s`; global Ruff and
+  diff checks exited 0.
+- Independent reviewer executions: 61 focused tests; Node simulated-DOM harness
+  with 406 assertions and 15 interpreter-checked vectors; nine ASGI requests
+  through a real runtime with temporary SQLite.
+- User-reported Edge InPrivate acceptance: preparation without requests,
+  STORE idempotency/conflict, READ, FIND filtering/empty/truncated results,
+  keyboard/focus, authentication recovery, concurrency, literal rendering and
+  list compatibility. This is separate from Node and reviewer ASGI evidence.
+- Zero calls apply to the six instrumented cognitive/provider/chat/readiness
+  and requests.get/post boundaries during the nine ASGI cases, not universal
+  network traffic or runtime startup. No GitHub checks/statuses were observed;
+  an empty aggregate `pending` is not CI approval.
+- Initial pytest temporary-directory permission errors were resolved using a
+  fresh external basetemp. Functional, CA-01 through CA-12, initial documentation
+  and implementation pre-merge reviews were approved.
+- Non-blocking future recommendation: assert meaningful vector categories,
+  rather than rely only on `passed > 0`; no fixed assertion count is required.
+
+The implementation backup was newly created and verified at
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260908_185059_SPRINT37`.
+All-refs bundle verification and restoration into an external mirror passed;
+all 566 ZIP file entries match the immutable release inventory and raw Git blob
+bytes, with no exclusions or export attributes applied. The bundle includes
+pre-cleanup refs. No frozen Sprint 37 B0 file or sidecar was identified or
+fabricated; a downloaded state summary is not a contract substitute.
+The implementation branch `feat/sprint-37-local-knowledge-command-assistance`
+was checked at `6af885900344e7a89f1e3a93f784c616ae786317`, confirmed integrated,
+then safely deleted locally and remotely after backup verification.
+Sprint 36 tag object `16e1b3ad9f1239c86e2786d81722620fa1b7c289` and destination
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` remain unchanged.
+This later release-truth synchronization may advance `master`; it does not move
+or replace the implementation tag or require another implementation backup.
+Sprint 38 has no selected scope or authorized implementation. Planning is a
+separate gate.
+
+Exact artifact hashes and recovery details: [Backup and Recovery](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
 
 ## 19. Sprint 29 immutable release checkpoint
 

@@ -5,9 +5,10 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 36 Structured Local Knowledge Result Projection v1 is latest at
-`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tag
-`governed-sprint-36-complete`; Sprint 35 and earlier releases remain historical.
+Sprint 37 Local Knowledge Command Assistance is latest at
+`4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tag
+`governed-sprint-37-complete`; Sprint 36 and earlier releases remain historical.
+Sprint 38 planning remains separate, with no selected or authorized scope.
 Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and

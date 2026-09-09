@@ -1,6 +1,67 @@
 # AI Handoff
 
-## Current Sprint 36 recovery brief
+## Current Sprint 37 recovery brief
+
+Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
+ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
+Parents, in order: `30b724a287c58ac881ddaab202f9b5f0778e1af9` and
+`6af885900344e7a89f1e3a93f784c616ae786317`.
+Release tree `cb220d0661708af226ffa8faefc5c00bba0fda4c` equals the approved
+implementation tree. Annotated tag `governed-sprint-37-complete`, object
+`1f5863ef15759829e1fbd06c97deb5a6496ff1e6`, peels to that release merge.
+
+Sprint 37 - Local Knowledge Command Assistance adds development-UI preparation
+for STORE, READ and FIND through the existing governed command flow. Preparation
+validates explicit text fields and provenance and writes an editable command;
+only explicit submission executes it. The visible editor remains authoritative.
+Python-compatible whitespace validation, real JSON serialization, Unicode and
+8192-code-point command limits, isolated-surrogate rejection in the preparer,
+concurrency guards and stale-result clearing preserve existing backend,
+authorization, fallback, SQLite and literal result-projection contracts.
+
+Previously approved evidence, not new executions by this documentation change:
+
+- User-reported post-merge validation: `1645 passed in 28.10s`; global Ruff and
+  diff checks exited 0.
+- Independent reviewer executions: 61 focused tests; Node simulated-DOM harness
+  with 406 assertions and 15 interpreter-checked vectors; nine ASGI requests
+  through a real runtime with temporary SQLite.
+- User-reported Edge InPrivate acceptance: preparation without requests,
+  STORE idempotency/conflict, READ, FIND filtering/empty/truncated results,
+  keyboard/focus, authentication recovery, concurrency, literal rendering and
+  list compatibility. This is separate from Node and reviewer ASGI evidence.
+- Zero calls apply to the six instrumented cognitive/provider/chat/readiness
+  and requests.get/post boundaries during the nine ASGI cases, not universal
+  network traffic or runtime startup. No GitHub checks/statuses were observed;
+  an empty aggregate `pending` is not CI approval.
+- Initial pytest temporary-directory permission errors were resolved using a
+  fresh external basetemp. Functional, CA-01 through CA-12, initial documentation
+  and implementation pre-merge reviews were approved.
+- Non-blocking future recommendation: assert meaningful vector categories,
+  rather than rely only on `passed > 0`; no fixed assertion count is required.
+
+The implementation backup was newly created and verified at
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260908_185059_SPRINT37`.
+All-refs bundle verification and restoration into an external mirror passed;
+all 566 ZIP file entries match the immutable release inventory and raw Git blob
+bytes, with no exclusions or export attributes applied. The bundle includes
+pre-cleanup refs. No frozen Sprint 37 B0 file or sidecar was identified or
+fabricated; a downloaded state summary is not a contract substitute.
+The implementation branch `feat/sprint-37-local-knowledge-command-assistance`
+was checked at `6af885900344e7a89f1e3a93f784c616ae786317`, confirmed integrated,
+then safely deleted locally and remotely after backup verification.
+Sprint 36 tag object `16e1b3ad9f1239c86e2786d81722620fa1b7c289` and destination
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` remain unchanged.
+This later release-truth synchronization may advance `master`; it does not move
+or replace the implementation tag or require another implementation backup.
+Sprint 38 has no selected scope or authorized implementation. Planning is a
+separate gate.
+
+Read [Backup and Recovery](08_BACKUP_AND_RECOVERY.md) for exact hashes.
+The external closure report records the documentation commit/PR/merge after
+those identifiers exist; no future merge SHA is embedded here.
+
+## Historical Sprint 36 recovery brief
 
 Implementation `f5cc5bfdb9f263b71370af0c9d38e225e831644f`, PR #54,
 ordinary merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
@@ -24,9 +85,9 @@ was added.
 
 Full governed validation was `1643 passed / 0 failed`. The backup is
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`. The
-implementation feature branch was deleted locally and remotely. Current action
-is the separate documentation synchronization; afterward, Sprint 37 planning
-remains separate and requires explicit governance. The docs process cannot move
+implementation feature branch was deleted locally and remotely. At that time,
+the next action was separate documentation synchronization; subsequent Sprint
+37 planning required separate explicit governance. The docs process cannot move
 or recreate the immutable implementation tag or backup.
 
 ## Historical Sprint 35 recovery brief
@@ -214,13 +275,11 @@ authorize Sprint 35.
 
 ## Resume instruction
 
-Resume from canonical `master` and verify that local `HEAD` equals
-`origin/master` before continuing. Sprint 36 implementation, ordinary merge,
-final validation, immutable tagging, and backup verification are complete. The
-immutable Sprint 36 checkpoint remains
-`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` under
-`governed-sprint-36-complete`; later documentation commits may advance `master`
-without moving it. This instruction does not reopen or condition that closure.
-Do not begin Sprint 37 or any subsequent implementation sprint without explicit
-authorization; any next implementation remains a planning and
-contract-definition boundary until explicitly approved.
+Resume from canonical `master` and verify local HEAD against origin/master.
+Sprint 37 implementation, ordinary merge, approved post-merge validation,
+immutable tag verification, recoverable backup and implementation-branch cleanup
+are complete. The immutable checkpoint remains
+`4dfaff1afdd11ab1258a52671e6799a3a442d16d` under
+`governed-sprint-37-complete`; this later release-truth documentation may advance
+master without moving it or requiring another implementation backup.
+Sprint 38 has no selected scope or authorized implementation.

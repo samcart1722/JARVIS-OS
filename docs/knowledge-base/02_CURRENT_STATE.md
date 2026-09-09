@@ -1,8 +1,52 @@
 # Current State
 
-## Sprint 36 governed implementation state
+## Sprint 37 governed implementation state
 
-Sprint 36 is current: implementation
+Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
+ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
+Parents, in order: `30b724a287c58ac881ddaab202f9b5f0778e1af9` and
+`6af885900344e7a89f1e3a93f784c616ae786317`.
+Release tree `cb220d0661708af226ffa8faefc5c00bba0fda4c` equals the approved
+implementation tree. Annotated tag `governed-sprint-37-complete`, object
+`1f5863ef15759829e1fbd06c97deb5a6496ff1e6`, peels to that release merge.
+
+Sprint 37 - Local Knowledge Command Assistance adds development-UI preparation
+for STORE, READ and FIND through the existing governed command flow. Preparation
+validates explicit text fields and provenance and writes an editable command;
+only explicit submission executes it. The visible editor remains authoritative.
+Python-compatible whitespace validation, real JSON serialization, Unicode and
+8192-code-point command limits, isolated-surrogate rejection in the preparer,
+concurrency guards and stale-result clearing preserve existing backend,
+authorization, fallback, SQLite and literal result-projection contracts.
+
+Previously approved evidence, not new executions by this documentation change:
+
+- User-reported post-merge validation: `1645 passed in 28.10s`; global Ruff and
+  diff checks exited 0.
+- Independent reviewer executions: 61 focused tests; Node simulated-DOM harness
+  with 406 assertions and 15 interpreter-checked vectors; nine ASGI requests
+  through a real runtime with temporary SQLite.
+- User-reported Edge InPrivate acceptance: preparation without requests,
+  STORE idempotency/conflict, READ, FIND filtering/empty/truncated results,
+  keyboard/focus, authentication recovery, concurrency, literal rendering and
+  list compatibility. This is separate from Node and reviewer ASGI evidence.
+- Zero calls apply to the six instrumented cognitive/provider/chat/readiness
+  and requests.get/post boundaries during the nine ASGI cases, not universal
+  network traffic or runtime startup. No GitHub checks/statuses were observed;
+  an empty aggregate `pending` is not CI approval.
+- Initial pytest temporary-directory permission errors were resolved using a
+  fresh external basetemp. Functional, CA-01 through CA-12, initial documentation
+  and implementation pre-merge reviews were approved.
+- Non-blocking future recommendation: assert meaningful vector categories,
+  rather than rely only on `passed > 0`; no fixed assertion count is required.
+
+The release backup and branch cleanup are verified; see
+[recovery evidence](08_BACKUP_AND_RECOVERY.md). This later documentation does
+not alter the release tag. Sprint 38 scope and implementation are not authorized.
+
+## Historical Sprint 36 governed implementation state
+
+At its release checkpoint Sprint 36 was current: implementation
 `f5cc5bfdb9f263b71370af0c9d38e225e831644f`, PR #54, ordinary two-parent
 merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
 `e657dcf565b5600b2b26d71aea7e49bc67799168`, and immutable tag
@@ -244,8 +288,8 @@ matches. Public HTTP, cognitive contracts, Settings, dependencies, RBAC, and
 SQLite schema version 1 remain unchanged. The functional implementation merged
 at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical Sprint 26
 release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
-fully released at the annotated tag `sprint-26-complete` and is the latest
-completed tagged release.
+fully released at the annotated tag `sprint-26-complete` and was the latest
+completed tagged release at that checkpoint.
 
 ## Sprint 25 executable state
 
@@ -282,8 +326,8 @@ and read intents resolve deterministically with model/external call counts of
 zero. `LocalFirstResolver` returns `not_handled` for unsupported typed intents;
 the pre-existing reasoning path remains separately available, but no automatic
 bridge chooses between them.
-This supersedes older checkpoint counts below as current operational truth;
-those figures remain historical evidence.
+At that checkpoint this superseded older counts below; all those figures now
+remain historical evidence beneath the Sprint 37 state above.
 
 > Sprint 20 optionally separates generator and verifier client configuration;
 > shared-client Sprint 19 behavior remains the default.

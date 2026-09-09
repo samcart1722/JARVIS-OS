@@ -1,8 +1,27 @@
 # Runtime Architecture
 
-## Sprint 36 governed structured knowledge-projection flow
+## Sprint 37 governed local command-assistance flow
 
-Latest release: Sprint 36, `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`,
+Latest implementation release: `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
+tag `governed-sprint-37-complete`. The separate preparation controls serialize
+closed STORE/READ/FIND text fields using JSON.stringify, preserve captured
+strings, reject Python-whitespace-only input and isolated surrogates, and bound
+the serialized command to 8192 Unicode code points. This surrogate restriction
+belongs to the preparer, not a new backend parser rule.
+
+Preparation does not require proof or call the server. The editable command is
+authoritative at explicit Send; the existing proof, selected development
+workspace, CSRF and user-selected fallback pass through the existing flow.
+Concurrent submission is guarded and controls lock while pending. Draft changes
+clear stale results. Existing literal renderers and list/knowledge projections
+remain intact. Provenance is an explicit STORE input, never a public result or
+verified identity; model str.strip() trims its edges without Unicode
+normalization. Core, SQLite, routing and HTTP contracts are unchanged.
+The historical projection sections below remain the inherited backend design.
+
+## Historical Sprint 36 governed structured knowledge-projection flow
+
+At that release checkpoint: Sprint 36, `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`,
 tag `governed-sprint-36-complete`. After the existing authentication, mapping,
 selected-workspace, membership, routing, `PermissionPolicy`, and local
 capability authority succeeds, the typed knowledge intent and governed result
@@ -116,8 +135,8 @@ released trusted request context; Sprint 28 released durable membership;
 Sprints 29–32 released authentication, durable mapping, durable permission, and
 the authenticated application gateway; Sprint 33 released permission
 revocation; Sprint 34 released the local interactive runtime; Sprint 35 released
-the structured list projection; and Sprint 36 is the current governed structured
-knowledge-projection release.
+the structured list projection; Sprint 36 released structured knowledge
+projections; Sprint 37 now adds governed local command assistance in the UI.
 
 ## Deterministic knowledge commands (Sprint 25)
 

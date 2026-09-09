@@ -1,6 +1,23 @@
 # Technical Debt
 
-## Sprint 36 post-release classification
+## Sprint 37 post-release classification
+
+RESOLVED: manual JSON authoring is no longer required for bounded local
+STORE/READ/FIND preparation. Existing editor authority and explicit submission
+remain. Sprint 37 adds no backend capability or production authentication.
+
+Non-blocking recommendation: strengthen harness checks for meaningful vector
+categories instead of relying only on passed > 0. The reviewed categories and
+real-interpreter comparison satisfied CA-01 through CA-12; a fixed assertion
+count is not required. Automated native-browser harness execution was not
+performed; reported manual Edge acceptance and simulated-DOM Node evidence
+remain distinct. Universal network isolation was not audited.
+
+Knowledge edit/delete, semantic search, pagination, generic projections,
+production serving/authentication, broader UI, Hermes and Spatial remain
+unapproved. Sprint 38 has no selected scope or authorized implementation.
+
+## Historical Sprint 36 post-release classification
 
 RESOLVED: the bounded local knowledge STORE/READ/FIND structured result
 projection gap. Sprint 36 releases closed application-owned variants, strict
@@ -12,7 +29,7 @@ payload registry; pagination; sorting; deduplication; ranking; fuzzy or semantic
 search; aggregate response-size policy; broader product-grade UI; and Hermes or
 Spatial study-derived implementation. Production authentication, public/remote
 serving, synchronization, encryption, audit, and broader permission lifecycle
-also remain future. None is selected as Sprint 37 scope.
+also remained future at that checkpoint. None was selected as Sprint 37 scope.
 
 ## Historical Sprint 35 post-release classification
 

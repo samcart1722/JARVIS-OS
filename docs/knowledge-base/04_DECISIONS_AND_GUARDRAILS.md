@@ -1,6 +1,20 @@
 # Decisions and Guardrails
 
-## Sprint 36 governed decisions and guardrails
+## Sprint 37 governed decisions and guardrails
+
+- The approved CA-01 through CA-12 assistance contract is bounded to local
+  STORE/READ/FIND preparation; preparation is not execution or authorization.
+- The visible editor is authoritative. Explicit provenance remains unverified;
+  public projections expose neither provenance nor workspace.
+- Existing proof, CSRF, permission, fallback, routing, storage and result
+  contracts remain unchanged. No automatic retries, correction or fallback.
+- The immutable release is `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
+  tag `governed-sprint-37-complete`. Later docs do not move that checkpoint.
+- Validation provenance and zero-call limits are explicit in Current State.
+  Node is a simulated DOM; manual Edge acceptance is separately reported.
+- Sprint 38 scope is unselected; no subsequent implementation is authorized.
+
+## Historical Sprint 36 governed decisions and guardrails
 
 - Knowledge projection is closed to STORE, READ, and FIND application variants;
   no generic projection or payload registry exists.
