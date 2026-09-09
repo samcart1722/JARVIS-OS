@@ -42,6 +42,46 @@ Each real run creates `LUXIOM_yyyyMMdd_HHmmss` containing
 `luxiom-repository.bundle`, `luxiom-source.zip`, and `MANIFEST.txt`. It warns
 when the working tree is dirty. Use a destination outside the repository.
 
+## Sprint 37 verified immutable-release backup
+
+Directory: `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260908_185059_SPRINT37`.
+
+Exactly four artifacts:
+
+- `JARVIS-OS_SPRINT37_ALL_REFS.bundle`: `731E8B80ADE2A36952F869A1CD7D0BB7F85D0D2138E9AC9FC942DAA65AA32E85`
+- `LUXIOM_SPRINT37_RELEASE_SOURCE.zip`: `2064B8099D40013A192A3DF075D506232B6EDE783A9EDE07083A727CA9A06E91`
+- `RELEASE_CUSTODY.json`: `D5341736A4B6177376E53358F84B53364B984431728824286E8123EC90EADB99`
+- `BACKUP_SHA256_MANIFEST.txt`: `35B3AAD003E185AD8A94685E7B7A5F25C97FE59EA1424B84BF69C3DB68BFF4C5`
+
+The SHA-256 manifest lists the other three artifacts; its own hash above is
+reported separately, with no self-reference. Every hash was recomputed after
+writing. The all-refs bundle was verified with git bundle verify and restored
+into an external mirror. Release commit, both ordered parents, release tree,
+Sprint 37 tag object/target and Sprint 36 tag custody matched Git.
+
+The ZIP was built directly from raw blobs at
+`4dfaff1afdd11ab1258a52671e6799a3a442d16d`; all 566 file entries, their inventory,
+byte lengths and bytes match the release and restored bundle. No exclusions
+were applied; export-ignore/export-subst checks found no applied attributes.
+This is not the general script's filtered working-tree snapshot. Tracked tests
+and .env.example are source; no local credentials, databases or test-run data
+were copied. Historical bundle paths include a Python-source memory.zip;
+versioned paths and credential signatures were screened, not universally audited.
+
+RELEASE_CUSTODY.json records commands, outcomes, limits and per-file blob OIDs,
+raw-blob SHA-256 values and lengths. Checkout CRLF/LF hashes are not substituted
+for Git-blob identity. No frozen B0 contract or sidecar was identified for
+Sprint 37; neither was invented. A downloaded project-state summary is not a
+contract or checkpoint replacement.
+
+External closure evidence and the final report are stored separately at
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260908_185059_SPRINT37_CLOSURE_EVIDENCE`.
+GATE2_VERIFIED.json records the restored mirror location; the custody manifest
+also records it. GATE3_BRANCH_CLEANUP.json records safe implementation-branch
+deletion after recovery verification. The backup retains pre-cleanup refs.
+Later documentation integration does not move the tag, modify this backup or
+require a second implementation backup. Sprint 36 backup remains untouched.
+
 ## Sprint 36 verified recovery checkpoint
 
 Directory:

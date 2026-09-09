@@ -1,8 +1,45 @@
 # Source of Truth
 
-## Sprint 36 governed implementation truth
+## Sprint 37 governed implementation truth
 
-Latest release: implementation `f5cc5bfdb9f263b71370af0c9d38e225e831644f`,
+Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
+ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
+Parents, in order: `30b724a287c58ac881ddaab202f9b5f0778e1af9` and
+`6af885900344e7a89f1e3a93f784c616ae786317`.
+Release tree `cb220d0661708af226ffa8faefc5c00bba0fda4c` equals the approved
+implementation tree. Annotated tag `governed-sprint-37-complete`, object
+`1f5863ef15759829e1fbd06c97deb5a6496ff1e6`, peels to that release merge.
+
+The implementation backup was newly created and verified at
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260908_185059_SPRINT37`.
+All-refs bundle verification and restoration into an external mirror passed;
+all 566 ZIP file entries match the immutable release inventory and raw Git blob
+bytes, with no exclusions or export attributes applied. The bundle includes
+pre-cleanup refs. No frozen Sprint 37 B0 file or sidecar was identified or
+fabricated; a downloaded state summary is not a contract substitute.
+The implementation branch `feat/sprint-37-local-knowledge-command-assistance`
+was checked at `6af885900344e7a89f1e3a93f784c616ae786317`, confirmed integrated,
+then safely deleted locally and remotely after backup verification.
+Sprint 36 tag object `16e1b3ad9f1239c86e2786d81722620fa1b7c289` and destination
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` remain unchanged.
+This later release-truth synchronization may advance `master`; it does not move
+or replace the implementation tag or require another implementation backup.
+Sprint 38 has no selected scope or authorized implementation. Planning is a
+separate gate.
+
+[Backup and Recovery](08_BACKUP_AND_RECOVERY.md) records the four exact artifact
+hashes and complete ZIP verification. RELEASE_CUSTODY.json uses raw Git blob
+identity, never checkout materialization hashes. Prior functional validation,
+manual browser evidence and newly executed recovery checks are distinguished
+there and in Current State. No frozen B0 file was fabricated.
+
+This synchronization does not assert its own future merge SHA. The final
+external closure report records that mutable master checkpoint after merge;
+the immutable implementation identity above remains authoritative.
+
+## Historical Sprint 36 governed implementation truth
+
+At that release checkpoint: implementation `f5cc5bfdb9f263b71370af0c9d38e225e831644f`,
 PR #54, ordinary merge `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
 `e657dcf565b5600b2b26d71aea7e49bc67799168`, tag
 `governed-sprint-36-complete`, object
@@ -34,7 +71,8 @@ blob evidence and the final verified release archive remained authoritative.
 The immutable implementation release is distinct from this later documentation
 synchronization. A docs commit may later advance `master`, but must not move,
 recreate, retarget, or redefine `governed-sprint-36-complete`, and creates no
-new implementation tag or governed backup. Sprint 37 planning remains separate.
+new implementation tag or governed backup. At that checkpoint Sprint 37
+planning remained separate.
 
 ## Historical Sprint 35 governed implementation truth
 

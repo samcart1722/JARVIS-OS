@@ -6,9 +6,33 @@ capabilities, and replaceable tools/providers. HealthBridge is the first
 planned consumer. Luxiom is not a chatbot, an LLM wrapper, a conventional
 agent, or a product tied to one industry.
 
-## Current checkpoint - Sprint 36
+## Current checkpoint - Sprint 37
 
-Sprint 36 is the latest formally closed governed implementation release.
+Sprint 37 - Local Knowledge Command Assistance is the latest governed
+implementation release. PR #56 merged at
+`4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tree
+`cb220d0661708af226ffa8faefc5c00bba0fda4c`, tagged
+`governed-sprint-37-complete` (object
+`1f5863ef15759829e1fbd06c97deb5a6496ff1e6`, peeling to that merge).
+It adds explicit local STORE/READ/FIND command preparation, an authoritative
+editable command, strict serialization and validation, and submission guards.
+Backend authority, fallback and result projections remain unchanged.
+
+Post-merge `1645 passed in 28.10s`, Ruff and diff success are previously
+approved, user-reported evidence. Reviewer Node/ASGI results and manual Edge
+acceptance have separate provenance; none establishes universal zero network
+traffic or CI approval. The implementation backup is verified and its branch
+was cleaned locally/remotely. See [canonical evidence](LUXIOM_CANONICAL_PROJECT_STATE.md)
+and [backup hashes](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
+
+This is later release-truth documentation. It does not move the immutable
+implementation tag or require another implementation backup. Sprint 38 has no
+selected scope or authorized implementation; planning remains separate.
+
+## Historical checkpoint - Sprint 36
+
+At its release checkpoint, Sprint 36 was the latest formally closed governed
+implementation release.
 It adds structured local knowledge result projections for STORE, READ and
 FIND through the existing application gateway, HTTP mapping and minimal UI.
 Canonical text remains authoritative; projections do not establish authority.
@@ -26,14 +50,6 @@ Verified backup:
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`.
 These are historical release results, not new executions by this correction.
 Later documentation changes do not move the immutable release tag.
-
-## Work in progress - Sprint 37
-
-The user separately approved local STORE/READ/FIND command assistance.
-Local implementation and functional/contractual independent review are
-complete; documentation work and governed release gates remain pending.
-Sprint 37 is not released or formally closed. This checkpoint correction
-does not itself authorize implementation or release actions.
 
 ## Historical checkpoint - Sprint 35
 

@@ -1,5 +1,17 @@
 # Local-First Knowledge and Model Policy
 
+## Sprint 37 governed command-assistance policy
+
+Sprint 37 is the latest implementation release at
+`4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tag
+`governed-sprint-37-complete`. The development UI prepares explicit STORE,
+READ and FIND JSON commands without executing them. Explicit Send submits the
+visible editor exactly; arbitrary manual text retains the existing explicit
+fallback contract. Provenance inputs are caller-supplied, trimmed by existing
+models and never verified or reconstructed from public results. No policy,
+backend capability, storage schema or production authentication was added.
+Historical sprint sections below describe their release checkpoints.
+
 Version: 1.0
 Status: Normative
 
@@ -58,7 +70,7 @@ merged at `54e04261933ab85dbe4b237e6f81037d508b4a1c`; the final canonical
 release commit is `ae13c3ed9720ee9564384366f2110670eb88fd85`. Sprint 26 is
 fully released at the annotated tag `sprint-26-complete`. Sprint 27 subsequently
 released trusted request context, Sprint 28 released durable membership, and
-Sprint 31 is now the latest governed implementation release at
+Sprint 31 subsequently became the governed implementation release at
 `governed-sprint-31-complete`.
 
 ## Policy
