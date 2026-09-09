@@ -104,8 +104,12 @@ presenta ningún ADR como aprobado.
 
 Sprint 25 extends the existing deterministic interpreter with strict JSON
 knowledge commands. The routing request supplies workspace; command text cannot
-supply or override it. Provenance remains caller-supplied and is preserved
-exactly. Malformed recognized knowledge commands are terminal and never reach
+supply or override it. Provenance remains caller-supplied. The existing
+models apply Python `str.strip()` to the outer whitespace of
+`source_type` and `source_reference`, then preserve those normalized
+values, including interior whitespace, case and Unicode content.
+No Unicode normalization or provenance verification is implied.
+Malformed recognized knowledge commands are terminal and never reach
 cognition. This structured syntax is not general natural-language
 understanding and changes no public HTTP, model, provider, or external access.
 

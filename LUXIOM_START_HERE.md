@@ -6,10 +6,39 @@ capabilities, and replaceable tools/providers. HealthBridge is the first
 planned consumer. Luxiom is not a chatbot, an LLM wrapper, a conventional
 agent, or a product tied to one industry.
 
-## Current checkpoint — Sprint 35
+## Current checkpoint - Sprint 36
 
-Sprint 35 — Structured Local List Result Projection v1 is the latest governed
-implementation release; Sprint 34 and earlier releases remain historical.
+Sprint 36 is the latest formally closed governed implementation release.
+It adds structured local knowledge result projections for STORE, READ and
+FIND through the existing application gateway, HTTP mapping and minimal UI.
+Canonical text remains authoritative; projections do not establish authority.
+
+Implementation release: PR #54, merge
+`b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`, tree
+`e657dcf565b5600b2b26d71aea7e49bc67799168`.
+Immutable tag: `governed-sprint-36-complete`, annotated object
+`16e1b3ad9f1239c86e2786d81722620fa1b7c289`, peeling to that merge.
+The separate documentation PR #55 merged at
+`30b724a287c58ac881ddaab202f9b5f0778e1af9`.
+
+Recorded Sprint 36 validation: 1643 passed / 0 failed.
+Verified backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260902_110324_SPRINT36`.
+These are historical release results, not new executions by this correction.
+Later documentation changes do not move the immutable release tag.
+
+## Work in progress - Sprint 37
+
+The user separately approved local STORE/READ/FIND command assistance.
+Local implementation and functional/contractual independent review are
+complete; documentation work and governed release gates remain pending.
+Sprint 37 is not released or formally closed. This checkpoint correction
+does not itself authorize implementation or release actions.
+
+## Historical checkpoint - Sprint 35
+
+Sprint 35 — Structured Local List Result Projection v1 was the governed
+implementation release at that historical checkpoint.
 
 Release identity: implementation `fd6ecb3a07c9b640892df40561006d79f531c622`,
 PR #52, merge `c2dbab846cc7116568f59786233b64c0f01ab038`, tree
@@ -117,7 +146,7 @@ in-memory and inert.
 
 - The current runtime extends the released Sprint 22 durable local foundation
   with explicit, caller-authorized routing coordination.
-- The latest immutable governed implementation release tag is
+- The historical Sprint 32 immutable governed implementation release tag is
   `governed-sprint-32-complete`; its annotated tag object is
   `c1f4267177d316d303c8c4c0e7fd3728afdcad32` and it peels to
   `08c15e3ee225c4cdb2f382af5464da01d33d3f6d`.
