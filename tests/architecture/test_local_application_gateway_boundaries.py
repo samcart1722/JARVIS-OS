@@ -43,6 +43,8 @@ GATEWAY_FORBIDDEN_DOWNSTREAM_IMPORT_PREFIXES = (
     "app.cognition.interpretation.routing",
     "app.cognition.local_resolution.capability",
     "app.cognition.local_resolution.knowledge_capability",
+    "app.cognition.local_resolution.knowledge_browse_capability",
+    "app.cognition.interpretation.interpreter",
     "app.cognition.local_resolution.permissions",
     "app.cognition.local_resolution.repository",
     "app.cognition.local_resolution.resolver",
@@ -98,6 +100,10 @@ APPLICATION_MODEL_FORBIDDEN_SYMBOLS = API_FORBIDDEN_SYMBOLS | frozenset(
         "CoordinatedResult",
         "FindKnowledgeRecordsQuery",
         "KnowledgeDiscoveryResolutionResult",
+        "BrowseKnowledgeRecordsQuery",
+        "KnowledgeBrowseResolutionResult",
+        "KnowledgeRecordSummary",
+        "KnowledgeRecordsBrowsed",
         "KnowledgeKind",
         "KnowledgeProvenance",
         "KnowledgeRead",
@@ -610,7 +616,7 @@ def test_application_result_contract_contains_no_internal_domain_types() -> None
 
     assert ast.unparse(knowledge_projection_union.value) == (
         "LocalKnowledgeStoreProjection | LocalKnowledgeReadProjection | "
-        "LocalKnowledgeFindProjection"
+        "LocalKnowledgeFindProjection | LocalKnowledgeBrowseProjection"
     )
 
     command_projection_union = _assignment(tree, "LocalCommandProjection")

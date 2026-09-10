@@ -5,6 +5,7 @@ from app.cognition.local_resolution.models import (
     KnowledgeKind,
     KnowledgeRead,
     KnowledgeRecord,
+    KnowledgeRecordSummary,
     KnowledgeStored,
     ListItemsAdded,
     ListItemsSnapshot,
@@ -49,6 +50,25 @@ class InMemoryListItemRepository:
 class InMemoryKnowledgeRecordRepository:
     def __init__(self) -> None:
         self._records: dict[tuple[str, str], KnowledgeRecord] = {}
+
+    def browse(
+        self, workspace: WorkspaceIdentity
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        if type(workspace) is not WorkspaceIdentity:
+            raise ValueError("A valid workspace is required.")
+        matches = (
+            record
+            for (workspace_id, _), record in self._records.items()
+            if workspace_id == workspace.workspace_id
+        )
+        return tuple(
+            KnowledgeRecordSummary(
+                record.record_id, record.workspace, record.kind, record.key
+            )
+            for record in sorted(matches, key=lambda record: record.record_id)[
+                :KNOWLEDGE_DISCOVERY_LOOKAHEAD
+            ]
+        )
 
     def store(self, record: KnowledgeRecord) -> KnowledgeStored:
         from app.cognition.local_resolution.contracts import KnowledgeRecordConflict

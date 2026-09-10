@@ -11,7 +11,9 @@ from app.cognition.local_resolution.models import (
     LOCAL_PERMISSION_DENIED,
     LOCAL_VALIDATION_FAILED,
     AddListItemsCommand,
+    BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
+    KnowledgeBrowseResolutionResult,
     KnowledgeDiscoveryResolutionResult,
     KnowledgeKind,
     KnowledgeRecord,
@@ -32,11 +34,13 @@ from app.local_command.models import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeBrowseProjection,
     LocalKnowledgeFindProjection,
     LocalKnowledgeReadProjection,
     LocalKnowledgeRecordKind,
     LocalKnowledgeRecordProjection,
     LocalKnowledgeStoreProjection,
+    LocalKnowledgeSummaryProjection,
     LocalListAddProjection,
     LocalListReadProjection,
     application_error,
@@ -228,6 +232,12 @@ class LocalCommandApplicationGateway:
                 "Text routing omitted coordinated result."
             )
 
+        if (
+            type(text_routing.interpretation.intent) is BrowseKnowledgeRecordsQuery
+            and coordinated.route is not CoordinatedRoute.LOCAL
+        ):
+            raise TypeError("Knowledge browse requires a local result.")
+
         if coordinated.route is CoordinatedRoute.LOCAL:
             return self._map_local_result(
                 text_routing.interpretation.intent,
@@ -258,6 +268,12 @@ class LocalCommandApplicationGateway:
                 "Local coordinated route omitted the local result."
             )
 
+        if (
+            type(intent) is BrowseKnowledgeRecordsQuery
+            or type(local_result) is KnowledgeBrowseResolutionResult
+        ):
+            self._require_browse_result(intent, local_result, selected_workspace)
+
         if local_result.success:
             projection = self._map_local_success_projection(
                 intent,
@@ -267,7 +283,11 @@ class LocalCommandApplicationGateway:
             return LocalCommandApplicationResult(
                 True,
                 route=LocalCommandApplicationRoute.LOCAL,
-                response=local_result.response,
+                response=(
+                    "Knowledge records browsed locally."
+                    if type(intent) is BrowseKnowledgeRecordsQuery
+                    else local_result.response
+                ),
                 projection=projection,
             )
 
@@ -294,7 +314,27 @@ class LocalCommandApplicationGateway:
         | LocalKnowledgeStoreProjection
         | LocalKnowledgeReadProjection
         | LocalKnowledgeFindProjection
+        | LocalKnowledgeBrowseProjection
     ):
+        if type(intent) is BrowseKnowledgeRecordsQuery:
+            cls._require_browse_result(intent, local_result, selected_workspace)
+            if local_result.success is not True:
+                raise TypeError("Knowledge browse requires local success.")
+            kind_map = {
+                KnowledgeKind.FACT: LocalKnowledgeRecordKind.FACT,
+                KnowledgeKind.CONCEPT: LocalKnowledgeRecordKind.CONCEPT,
+                KnowledgeKind.STATE: LocalKnowledgeRecordKind.STATE,
+            }
+            return LocalKnowledgeBrowseProjection(
+                records=tuple(
+                    LocalKnowledgeSummaryProjection(
+                        record.record_id, kind_map[record.kind], record.key
+                    )
+                    for record in local_result.records
+                ),
+                truncated=local_result.truncated,
+            )
+
         if type(intent) is AddListItemsCommand:
             cls._require_list_success(local_result)
             projection = LocalListAddProjection(
@@ -384,6 +424,24 @@ class LocalCommandApplicationGateway:
                 ) from error
 
         raise TypeError("Successful local result has an unknown intent.")
+
+    @classmethod
+    def _require_browse_result(cls, intent, local_result, selected_workspace) -> None:
+        cls._require_selected_workspace(selected_workspace)
+        if (
+            type(intent) is not BrowseKnowledgeRecordsQuery
+            or type(local_result) is not KnowledgeBrowseResolutionResult
+        ):
+            raise TypeError("Knowledge browse intent and result are inconsistent.")
+        try:
+            local_result.__post_init__()
+            if any(
+                record.workspace != selected_workspace
+                for record in local_result.records
+            ):
+                raise ValueError("Invalid browse scope.")
+        except (TypeError, ValueError):
+            raise TypeError("Knowledge browse result is inconsistent.") from None
 
     @staticmethod
     def _require_list_success(local_result) -> None:

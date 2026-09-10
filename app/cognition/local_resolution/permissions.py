@@ -12,6 +12,7 @@ LIST_ITEMS_ADD = "list.items.add"
 LIST_ITEMS_READ = "list.items.read"
 KNOWLEDGE_RECORDS_ADD = "knowledge.records.add"
 KNOWLEDGE_RECORDS_READ = "knowledge.records.read"
+KNOWLEDGE_RECORDS_BROWSE = "knowledge.records.browse"
 
 
 @dataclass(frozen=True, slots=True)

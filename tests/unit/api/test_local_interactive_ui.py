@@ -428,6 +428,59 @@ def test_generated_assistance_commands_match_real_interpreter() -> None:
             assert (intent.kind.value if intent.kind else "") == expected["kind"]
 
 
+def test_browse_ui_vectors_match_real_interpreter_without_id_rewriting() -> None:
+    from app.cognition.local_resolution.models import (
+        BrowseKnowledgeRecordsQuery,
+        ReadKnowledgeRecordQuery,
+    )
+
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for actual UI JavaScript verification")
+    completed = subprocess.run(
+        [node, "tests/browser/local_knowledge_browse.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 0
+    assert {
+        "preparation", "replacement", "states", "literal-metadata", "selection",
+        "limits", "error-preservation", "stale-results", "no-fetch", "send",
+        "pending", "regression", "invalid-projection",
+    } <= set(evidence["categories"])
+    assert {vector["operation"] for vector in evidence["vectors"]} == {
+        "browse", "read",
+    }
+    interpreter = DeterministicLocalCommandInterpreter()
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(
+            vector["command"], WorkspaceIdentity("s38-ui-test-only")
+        )
+        assert result.status.value == "interpreted", vector["name"]
+        if vector["operation"] == "browse":
+            assert type(result.intent) is BrowseKnowledgeRecordsQuery
+        else:
+            assert type(result.intent) is ReadKnowledgeRecordQuery
+            assert result.intent.record_id == vector["record_id"], vector["name"]
+
+
+def test_browse_preparation_controls_do_not_submit_or_add_assets() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    assert 'id="prepare-browse" type="button"' in html
+    assert html.index('id="prepare-browse"') < html.index('<form id="command-form">')
+    assert 'button.type = "button"' in script
+    assert 'prepareEditorCommand("read", { record_id: recordId })' in script
+    assert 'text: commandInput.value' in script
+    assert 'const recordId = record.record_id' in script
+    assert "No knowledge records in this workspace." in script
+    assert (
+        "Showing the first 50 records by ID. More records exist; "
+        "this version cannot browse them."
+    ) in script
+
+
 def test_list_projection_script_has_closed_safe_rendering_contract() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     rendering = script[

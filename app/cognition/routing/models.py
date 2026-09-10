@@ -5,6 +5,7 @@ from enum import Enum
 
 from app.cognition.domain.cognitive_outcome import CognitiveOutcome
 from app.cognition.local_resolution.models import (
+    KnowledgeBrowseResolutionResult,
     KnowledgeDiscoveryResolutionResult,
     KnowledgeResolutionResult,
     LocalResolutionResult,
@@ -14,6 +15,7 @@ LocalResult = (
     LocalResolutionResult
     | KnowledgeResolutionResult
     | KnowledgeDiscoveryResolutionResult
+    | KnowledgeBrowseResolutionResult
 )
 
 
@@ -68,6 +70,7 @@ class CoordinatedResult:
                         LocalResolutionResult,
                         KnowledgeResolutionResult,
                         KnowledgeDiscoveryResolutionResult,
+                        KnowledgeBrowseResolutionResult,
                     ),
                 )
                 or not self.local_result.handled

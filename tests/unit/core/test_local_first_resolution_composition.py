@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import Mock, patch
 
 import pytest
@@ -6,16 +7,25 @@ from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.local_resolution.models import (
     ActorIdentity,
     AddListItemsCommand,
+    BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
+    KnowledgeKind,
+    KnowledgeProvenance,
+    KnowledgeRecord,
+    ReadKnowledgeRecordQuery,
     ReadListItemsQuery,
+    StoreKnowledgeRecordCommand,
     WorkspaceIdentity,
 )
 from app.cognition.local_resolution.permissions import (
+    KNOWLEDGE_RECORDS_ADD,
+    KNOWLEDGE_RECORDS_BROWSE,
     KNOWLEDGE_RECORDS_READ,
     LIST_ITEMS_ADD,
     LIST_ITEMS_READ,
     PermissionGrant,
 )
+from app.cognition.local_resolution.repository import InMemoryKnowledgeRecordRepository
 from app.cognition.routing.models import CognitiveFallbackAuthorization
 from app.cognition.trusted_context import (
     TRUSTED_CONTEXT_RESOLUTION_FAILED,
@@ -55,6 +65,102 @@ class FalseyRepository:
 
     def get(self, actor, workspace):
         return None
+
+
+@pytest.mark.parametrize("mode", ("default", "records", "both", "browse_only"))
+def test_browse_composition_matrix_is_inert(mode):
+    record_port, browse_port = Mock(), Mock()
+    kwargs = {}
+    if mode in ("records", "both"):
+        kwargs["local_knowledge_repository"] = record_port
+    if mode in ("both", "browse_only"):
+        kwargs["local_knowledge_browse_repository"] = browse_port
+    with ExitStack() as stack:
+        spies = [
+            stack.enter_context(patch(target))
+            for target in (
+                "sqlite3.connect",
+                "requests.get",
+                "requests.post",
+                "app.models.ollama_client.OllamaClient.chat",
+                "app.models.ollama_readiness_probe.OllamaReadinessProbe.check",
+                "app.cognition.engine.CognitiveEngine.process",
+                "app.cognition.local_resolution.repository.InMemoryKnowledgeRecordRepository.store",
+                "app.cognition.local_resolution.repository.InMemoryKnowledgeRecordRepository.read",
+                "app.cognition.local_resolution.repository.InMemoryKnowledgeRecordRepository.find_by_key",
+                "app.cognition.local_resolution.repository.InMemoryKnowledgeRecordRepository.browse",
+            )
+        ]
+        if mode == "browse_only":
+            with patch.object(Container, "_build_memory") as build:
+                with pytest.raises(ValueError, match="explicit record repository"):
+                    Container(Settings(_env_file=None), **kwargs)
+                build.assert_not_called()
+        else:
+            instance = Container(Settings(_env_file=None), **kwargs)
+            if mode == "default":
+                assert (
+                    instance.local_knowledge_repository
+                    is instance.local_knowledge_browse_repository
+                )
+            else:
+                assert instance.local_knowledge_repository is record_port
+                assert instance.local_knowledge_browse_repository is (
+                    browse_port if mode == "both" else None
+                )
+        assert record_port.mock_calls == [] and browse_port.mock_calls == []
+        for spy in spies:
+            spy.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ("default", "records", "both"))
+def test_browse_composition_preserves_shared_storage_and_legacy_commands(mode):
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    repository = InMemoryKnowledgeRecordRepository()
+    kwargs = {} if mode == "default" else {"local_knowledge_repository": repository}
+    if mode == "both":
+        kwargs["local_knowledge_browse_repository"] = repository
+    instance = Container(
+        Settings(REASONING_ENABLED=False, _env_file=None),
+        local_permission_grants=(
+            PermissionGrant(
+                "actor",
+                "workspace",
+                frozenset(
+                    {
+                        KNOWLEDGE_RECORDS_ADD,
+                        KNOWLEDGE_RECORDS_READ,
+                        KNOWLEDGE_RECORDS_BROWSE,
+                        LIST_ITEMS_ADD,
+                        LIST_ITEMS_READ,
+                    }
+                ),
+            ),
+        ),
+        **kwargs,
+    )
+    record = KnowledgeRecord(
+        "id",
+        workspace,
+        KnowledgeKind.FACT,
+        "key",
+        "value",
+        KnowledgeProvenance("explicit", "source"),
+    )
+    resolve = instance.local_first_resolver.resolve
+    assert resolve(actor, workspace, StoreKnowledgeRecordCommand(record)).success
+    assert resolve(actor, workspace, ReadKnowledgeRecordQuery("id")).record == record
+    assert resolve(actor, workspace, FindKnowledgeRecordsQuery("key")).records == (
+        record,
+    )
+    assert resolve(actor, workspace, AddListItemsCommand("list", ("item",))).success
+    assert resolve(actor, workspace, ReadListItemsQuery("list")).items == ("item",)
+    browse = resolve(actor, workspace, BrowseKnowledgeRecordsQuery())
+    if mode == "records":
+        assert browse.handled and not browse.success
+        assert browse.error_code == "local_validation_failed" and browse.records == ()
+    else:
+        assert browse.success and browse.records[0].record_id == "id"
 
 
 class FalseyAuthenticator:

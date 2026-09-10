@@ -10,8 +10,11 @@ from app.cognition.local_resolution.knowledge_capability import (
     StructuredKnowledgeCapability,
 )
 from app.cognition.local_resolution.models import (
+    LOCAL_CAPABILITY_ROUTE,
     ActorIdentity,
     AddListItemsCommand,
+    BrowseKnowledgeRecordsQuery,
+    KnowledgeBrowseResolutionResult,
     KnowledgeKind,
     KnowledgeProvenance,
     KnowledgeRecord,
@@ -68,6 +71,39 @@ def _request(actor, workspace, intent, allowed=False, cognitive_input=None):
         CognitiveFallbackAuthorization(allowed),
         cognitive_input,
     )
+
+
+def test_coordinated_result_accepts_browse_and_rejects_mixed_payloads():
+    result = KnowledgeBrowseResolutionResult(True, True, "Done", LOCAL_CAPABILITY_ROUTE)
+    assert (
+        CoordinatedResult(CoordinatedRoute.LOCAL, local_result=result).local_result
+        is result
+    )
+    with pytest.raises(ValueError):
+        CoordinatedResult(
+            CoordinatedRoute.LOCAL,
+            local_result=result,
+            cognitive_outcome=CognitiveOutcome(True, response="not local"),
+        )
+    with pytest.raises(ValueError):
+        CoordinatedResult(
+            CoordinatedRoute.COGNITIVE,
+            local_result=result,
+            cognitive_outcome=CognitiveOutcome(True, response="not local"),
+        )
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+def test_direct_coordinator_missing_browse_is_terminal(fallback):
+    resolver, processor, actor, workspace = _components()
+    result = LocalFirstCognitiveCoordinator(resolver, processor).coordinate(
+        _request(
+            actor, workspace, BrowseKnowledgeRecordsQuery(), fallback, "cognitive input"
+        )
+    )
+    assert result.route is CoordinatedRoute.LOCAL
+    assert result.local_result.error_code == "local_validation_failed"
+    processor.process.assert_not_called()
 
 
 def _knowledge(workspace: WorkspaceIdentity, value: str = "value"):

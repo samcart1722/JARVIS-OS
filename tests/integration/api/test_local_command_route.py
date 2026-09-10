@@ -1508,3 +1508,370 @@ def test_http_workspace_rejects_oversized_normalized_value() -> None:
         LocalCommandHttpRequest.model_validate(
             _payload(requested_workspace_id=workspace_id)
         )
+
+
+@pytest.mark.parametrize("kind", ("fact", "concept", "state"))
+def test_http_browse_summary_closed_frozen_and_literal(kind):
+    from app.api.models.local_command import (
+        LocalCommandHttpKnowledgeBrowseProjection,
+        LocalCommandHttpKnowledgeSummary,
+    )
+
+    summary = LocalCommandHttpKnowledgeSummary(
+        record_id='id"\\e\u0301', kind=kind, key="key  e\u0301"
+    )
+    assert summary.model_dump() == {
+        "record_id": 'id"\\e\u0301',
+        "kind": kind,
+        "key": "key  e\u0301",
+    }
+    with pytest.raises(ValidationError):
+        summary.key = "changed"
+    projection = LocalCommandHttpKnowledgeBrowseProjection(
+        records=(summary,), truncated=False
+    )
+    assert set(projection.model_dump()) == {"kind", "operation", "records", "truncated"}
+    with pytest.raises(ValidationError):
+        projection.truncated = True
+    envelope = LocalCommandHttpResponse(
+        success=True,
+        route="local",
+        response="Done",
+        error=None,
+        projection=projection.model_dump(),
+    )
+    assert type(envelope.projection) is LocalCommandHttpKnowledgeBrowseProjection
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("record_id", 1),
+        ("key", True),
+        ("kind", "unknown"),
+        ("value", "private"),
+        ("provenance", {}),
+        ("workspace", "w"),
+        ("total", 1),
+        ("cursor", "x"),
+        ("key", " key"),
+    ),
+)
+def test_http_browse_summary_rejects_types_and_extras(field, value):
+    from app.api.models.local_command import LocalCommandHttpKnowledgeSummary
+
+    args = dict(record_id="id", kind="fact", key="key")
+    args[field] = value
+    with pytest.raises(ValidationError):
+        LocalCommandHttpKnowledgeSummary(**args)
+
+
+@pytest.mark.parametrize(
+    "override",
+    (
+        {"truncated": 0},
+        {"truncated": "false"},
+        {"truncated": True},
+        {"value": "private"},
+        {"workspace": "w"},
+        {"total": 0},
+        {"cursor": None},
+        {"operation": "find"},
+        {"kind": "list"},
+    ),
+)
+def test_http_browse_projection_rejects_invalid_contract(override):
+    from app.api.models.local_command import LocalCommandHttpKnowledgeBrowseProjection
+
+    args = dict(records=(), truncated=False)
+    args.update(override)
+    with pytest.raises(ValidationError):
+        LocalCommandHttpKnowledgeBrowseProjection(**args)
+
+
+@pytest.fixture
+def browse_http_runtime(tmp_path, monkeypatch, request):
+    from app.core.container import Container
+    from app.infrastructure.local_storage.sqlite_storage import SQLiteLocalStorage
+    from app.operations import local_interactive_runtime as runtime_module
+    from app.operations.local_interactive_runtime import (
+        DEVELOPMENT_WORKSPACE,
+        LocalInteractiveRuntime,
+    )
+
+    captured = []
+
+    def compose(*args, **kwargs):
+        parameters = getattr(getattr(request.node, "callspec", None), "params", {})
+        if parameters.get("scenario") == "missing":
+            kwargs.pop("local_knowledge_browse_repository")
+        instance = Container(*args, **kwargs)
+        captured.append(instance)
+        return instance
+
+    monkeypatch.setattr(runtime_module, "Container", compose)
+    path = tmp_path / "browse-http.sqlite3"
+    runtime = LocalInteractiveRuntime(path, "temporary-browse-proof")
+    runtime.start()
+    storage = SQLiteLocalStorage(path)
+    storage.open()
+    storage.initialize()
+    monkeypatch.setattr(
+        _http_app.state,
+        "local_command_application_gateway",
+        runtime.gateway,
+        raising=False,
+    )
+
+    def post(text, fallback=False):
+        return _post_local_command(
+            _payload(
+                proof="temporary-browse-proof",
+                requested_workspace_id=DEVELOPMENT_WORKSPACE.workspace_id,
+                text=text,
+                allow_cognitive_fallback=fallback,
+            )
+        )
+
+    try:
+        yield captured[0], storage, post
+    finally:
+        storage.close()
+        runtime.close()
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+@pytest.mark.parametrize(
+    "scenario",
+    (
+        "empty",
+        "success",
+        "full",
+        "truncated",
+        "invalid",
+        "denied",
+        "declared",
+        "unexpected",
+        "missing",
+        "gateway_corrupt",
+    ),
+)
+def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenario):
+    from unittest.mock import patch
+
+    from app.cognition.local_resolution.contracts import LocalRepositoryError
+    from app.cognition.local_resolution.models import (
+        KnowledgeKind,
+        KnowledgeProvenance,
+        KnowledgeRecord,
+    )
+    from app.cognition.local_resolution.permissions import KNOWLEDGE_RECORDS_BROWSE
+    from app.infrastructure.local_storage.sqlite_storage import (
+        SQLitePermissionGrantRepository,
+    )
+    from app.operations.local_interactive_runtime import (
+        DEVELOPMENT_ACTOR,
+        DEVELOPMENT_WORKSPACE,
+    )
+
+    instance, storage, post = browse_http_runtime
+    total = {"success": 1, "full": 50, "truncated": 51}.get(scenario, 0)
+    for i in reversed(range(total)):
+        instance.local_knowledge_repository.store(
+            KnowledgeRecord(
+                f"id-{i:03}",
+                DEVELOPMENT_WORKSPACE,
+                KnowledgeKind.FACT,
+                "key  e\u0301",
+                "PRIVATE_VALUE",
+                KnowledgeProvenance("explicit", "PRIVATE_SOURCE"),
+            )
+        )
+    if scenario == "denied":
+        SQLitePermissionGrantRepository(storage).revoke(
+            DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, KNOWLEDGE_RECORDS_BROWSE
+        )
+    repository = instance.local_knowledge_repository
+    with (
+        patch.object(repository, "browse", wraps=repository.browse) as browse,
+        patch.object(
+            instance.local_command_interpreter,
+            "interpret",
+            wraps=instance.local_command_interpreter.interpret,
+        ) as interpreter,
+        patch.object(
+            instance.cognitive_engine,
+            "process",
+            wraps=instance.cognitive_engine.process,
+        ) as cognitive,
+        patch.object(instance.ollama_client, "chat") as model,
+        patch.object(instance.provider_readiness_probe, "check") as readiness,
+        patch("requests.get") as network_get,
+        patch("requests.post") as network_post,
+        patch.object(
+            instance.local_first_resolver,
+            "resolve",
+            wraps=instance.local_first_resolver.resolve,
+        ) as resolve,
+    ):
+        if scenario == "declared":
+            browse.side_effect = LocalRepositoryError("PRIVATE_STORAGE")
+        if scenario == "unexpected":
+            browse.side_effect = RuntimeError("PRIVATE_STORAGE")
+        if scenario == "gateway_corrupt":
+            original = instance.local_first_resolver.__class__.resolve
+
+            def corrupt(*args):
+                result = original(instance.local_first_resolver, *args)
+                from app.cognition.local_resolution.models import (
+                    KnowledgeBrowseResolutionResult,
+                )
+
+                if type(result) is KnowledgeBrowseResolutionResult:
+                    object.__setattr__(result, "truncated", True)
+                return result
+
+            resolve.side_effect = corrupt
+        status, body = post(
+            "knowledge browse :: []"
+            if scenario == "invalid"
+            else "knowledge browse :: {}",
+            fallback,
+        )
+        expected = {
+            "invalid": 400,
+            "denied": 403,
+            "declared": 503,
+            "unexpected": 500,
+            "missing": 503,
+            "gateway_corrupt": 500,
+        }.get(scenario, 200)
+        assert status == expected
+        assert browse.call_count == (scenario not in ("invalid", "denied", "missing"))
+        if browse.called:
+            browse.assert_called_once_with(DEVELOPMENT_WORKSPACE)
+        interpreter.assert_called_once()
+        cognitive.assert_not_called()
+        if expected == 200:
+            assert body == {
+                "success": True,
+                "route": "local",
+                "response": "Knowledge records browsed locally.",
+                "error": None,
+                "projection": {
+                    "kind": "knowledge",
+                    "operation": "browse",
+                    "records": [
+                        {
+                            "record_id": f"id-{i:03}",
+                            "kind": "fact",
+                            "key": "key  e\u0301",
+                        }
+                        for i in range(min(total, 50))
+                    ],
+                    "truncated": total == 51,
+                },
+            }
+        else:
+            codes = {
+                400: "invalid_request",
+                403: "local_permission_denied",
+                503: "local_validation_failed",
+                500: "internal_error",
+            }
+            assert body["error"]["code"] == codes[expected]
+            assert body["response"] is None and "projection" not in body
+            if expected == 500:
+                assert body == local_command._INTERNAL_ERROR_CONTENT
+        assert "PRIVATE_" not in json.dumps(body)
+        # Same real pipeline and observed engine: unrelated authorized text invokes it.
+        _, positive = post("ordinary cognitive input", True)
+        assert positive["route"] == "cognitive"
+        cognitive.assert_called_once_with("ordinary cognitive input")
+        model.assert_not_called()
+        readiness.assert_not_called()
+        network_get.assert_not_called()
+        network_post.assert_not_called()
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+def test_http_browse_then_read_reauthorizes_without_runtime_restart(
+    browse_http_runtime, fallback
+):
+    from unittest.mock import patch
+
+    from app.cognition.local_resolution.permissions import KNOWLEDGE_RECORDS_READ
+    from app.infrastructure.local_storage.sqlite_storage import (
+        SQLitePermissionGrantRepository,
+    )
+    from app.operations.local_interactive_runtime import (
+        DEVELOPMENT_ACTOR,
+        DEVELOPMENT_WORKSPACE,
+    )
+
+    instance, storage, post = browse_http_runtime
+    status, _ = post(
+        'knowledge store :: {"record_id":"id","kind":"fact","key":"key",'
+        '"value":"private value","source_type":"explicit",'
+        '"source_reference":"private source"}',
+        fallback,
+    )
+    assert status == 200
+    assert post("knowledge browse :: {}", fallback)[0] == 200
+    status, read = post('knowledge read :: {"record_id":"id"}', fallback)
+    assert status == 200 and read["projection"]["record"]["value"] == "private value"
+    assert post('knowledge read :: {"record_id":"missing"}', fallback)[0] == 404
+    SQLitePermissionGrantRepository(storage).revoke(
+        DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, KNOWLEDGE_RECORDS_READ
+    )
+    assert post("knowledge browse :: {}", fallback)[0] == 200
+    with patch.object(
+        instance.local_knowledge_repository,
+        "read",
+        wraps=instance.local_knowledge_repository.read,
+    ) as read_port:
+        status, denied = post('knowledge read :: {"record_id":"id"}', fallback)
+        assert status == 403 and denied["error"]["code"] == "local_permission_denied"
+        assert "projection" not in denied
+        read_port.assert_not_called()
+
+
+@pytest.mark.parametrize("corruption", ("duplicate", "order", "excess"))
+def test_http_browse_model_rejects_corrupt_sequences(corruption):
+    from app.api.models.local_command import LocalCommandHttpKnowledgeBrowseProjection
+
+    records = [
+        dict(record_id=f"id-{i:03}", kind="fact", key="key")
+        for i in range(51 if corruption == "excess" else 2)
+    ]
+    if corruption == "duplicate":
+        records[1] = records[0]
+    if corruption == "order":
+        records.reverse()
+    with pytest.raises(ValidationError):
+        LocalCommandHttpKnowledgeBrowseProjection(records=records, truncated=False)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("truncated", 0),
+        ("kind", "list"),
+        ("operation", "find"),
+        ("records", (object(),)),
+    ),
+)
+def test_http_browse_corrupt_application_projection_is_sanitized(
+    monkeypatch, field, value
+):
+    from app.local_command import LocalKnowledgeBrowseProjection
+
+    projection = LocalKnowledgeBrowseProjection((), False)
+    result = LocalCommandApplicationResult(
+        True, LocalCommandApplicationRoute.LOCAL, "Done", projection=projection
+    )
+    object.__setattr__(projection, field, value)
+    gateway = RecordingApplicationGateway(result)
+    monkeypatch.setattr(local_command, "_resolve_gateway", lambda request: gateway)
+    status, body = _post_local_command(_payload(text="knowledge browse :: {}"))
+    assert status == 500 and body == local_command._INTERNAL_ERROR_CONTENT

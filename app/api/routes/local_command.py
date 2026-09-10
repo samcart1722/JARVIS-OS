@@ -8,10 +8,12 @@ from pydantic import ValidationError
 
 from app.api.models.local_command import (
     LocalCommandHttpError,
+    LocalCommandHttpKnowledgeBrowseProjection,
     LocalCommandHttpKnowledgeFindProjection,
     LocalCommandHttpKnowledgeReadProjection,
     LocalCommandHttpKnowledgeRecord,
     LocalCommandHttpKnowledgeStoreProjection,
+    LocalCommandHttpKnowledgeSummary,
     LocalCommandHttpListAddProjection,
     LocalCommandHttpListReadProjection,
     LocalCommandHttpProjection,
@@ -25,11 +27,13 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeBrowseProjection,
     LocalKnowledgeFindProjection,
     LocalKnowledgeReadProjection,
     LocalKnowledgeRecordKind,
     LocalKnowledgeRecordProjection,
     LocalKnowledgeStoreProjection,
+    LocalKnowledgeSummaryProjection,
     LocalListAddProjection,
     LocalListReadProjection,
     application_error,
@@ -103,6 +107,14 @@ def _map_projection(
 ) -> LocalCommandHttpProjection | None:
     if projection is None:
         return None
+    if type(projection) is LocalKnowledgeBrowseProjection:
+        projection.__post_init__()
+        return LocalCommandHttpKnowledgeBrowseProjection(
+            records=tuple(
+                _map_knowledge_summary(record) for record in projection.records
+            ),
+            truncated=projection.truncated,
+        )
     if type(projection) is LocalListAddProjection:
         return LocalCommandHttpListAddProjection(
             list_id=projection.list_id,
@@ -133,6 +145,22 @@ def _map_projection(
             truncated=projection.truncated,
         )
     raise TypeError("Application projection type is invalid.")
+
+
+def _map_knowledge_summary(
+    record: LocalKnowledgeSummaryProjection,
+) -> LocalCommandHttpKnowledgeSummary:
+    if type(record) is not LocalKnowledgeSummaryProjection:
+        raise TypeError("Application knowledge summary type is invalid.")
+    record.__post_init__()
+    kind_map = {
+        LocalKnowledgeRecordKind.FACT: "fact",
+        LocalKnowledgeRecordKind.CONCEPT: "concept",
+        LocalKnowledgeRecordKind.STATE: "state",
+    }
+    return LocalCommandHttpKnowledgeSummary(
+        record_id=record.record_id, kind=kind_map[record.kind], key=record.key,
+    )
 
 
 def _map_knowledge_record(

@@ -11,6 +11,7 @@ from typing import Final
 from app.cognition.local_resolution.models import ActorIdentity, WorkspaceIdentity
 from app.cognition.local_resolution.permissions import (
     KNOWLEDGE_RECORDS_ADD,
+    KNOWLEDGE_RECORDS_BROWSE,
     KNOWLEDGE_RECORDS_READ,
     LIST_ITEMS_ADD,
     LIST_ITEMS_READ,
@@ -38,6 +39,7 @@ DEVELOPMENT_PERMISSIONS: Final = (
     LIST_ITEMS_READ,
     KNOWLEDGE_RECORDS_ADD,
     KNOWLEDGE_RECORDS_READ,
+    KNOWLEDGE_RECORDS_BROWSE,
 )
 
 
@@ -164,6 +166,7 @@ class LocalInteractiveRuntime:
                 local_permission_grant_repository=permission_repository,
                 local_list_repository=storage,
                 local_knowledge_repository=knowledge_repository,
+                local_knowledge_browse_repository=knowledge_repository,
                 membership_repository=storage,
                 principal_proof_bindings=(
                     ConfiguredPrincipalProofBinding(

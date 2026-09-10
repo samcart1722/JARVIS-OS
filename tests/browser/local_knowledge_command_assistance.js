@@ -218,8 +218,7 @@ async function runLocalKnowledgeCommandAssistance(environment) {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { runLocalKnowledgeCommandAssistance };
-  if (require.main === module) {
+  function createEnvironment() {
     const fs = require("node:fs");
     const vm = require("node:vm");
     const path = require("node:path");
@@ -270,6 +269,12 @@ if (typeof module !== "undefined" && module.exports) {
     const context = vm.createContext(scope);
     const source = fs.readFileSync(path.join(root, "app/api/static/local_ui/app.js"), "utf8");
     vm.runInContext(source, context);
+    return { scope, context };
+  }
+  module.exports = { runLocalKnowledgeCommandAssistance, createEnvironment };
+  if (require.main === module) {
+    const vm = require("node:vm");
+    const { scope, context } = createEnvironment();
     runLocalKnowledgeCommandAssistance(scope).then((result) => {
       // Invalid kind cannot be selected in the real closed dropdown. Exercise
       // the actual serializer directly for strict kinds, types and operations.

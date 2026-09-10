@@ -37,6 +37,68 @@ from app.membership import (
 )
 
 
+def test_browse_never_reads_content_or_provenance_columns(tmp_path):
+    storage = SQLiteLocalStorage(tmp_path / "metadata.sqlite3")
+    workspace = WorkspaceIdentity("w")
+    reads = []
+    forbidden = {"knowledge_value", "source_type", "source_reference"}
+
+    def authorize(action, table, column, database, trigger):
+        if action == sqlite3.SQLITE_READ and table == "knowledge_records":
+            reads.append(column)
+            if column in forbidden:
+                return sqlite3.SQLITE_DENY
+        return sqlite3.SQLITE_OK
+
+    try:
+        storage.open()
+        storage.initialize()
+        repository = SQLiteKnowledgeRecordRepository(storage)
+        repository.store(_record(workspace))
+        connection = storage._connection
+        connection.set_authorizer(authorize)
+        result = repository.browse(workspace)
+        assert len(result) == 1
+        assert result[0].record_id == "family.child.diaper-size"
+        assert set(reads) == {"workspace_id", "record_id", "kind", "knowledge_key"}
+        # Positive control: this authorizer really prevents content reads.
+        for column in forbidden:
+            with pytest.raises(sqlite3.DatabaseError):
+                connection.execute(f"SELECT {column} FROM knowledge_records").fetchall()
+    finally:
+        storage.close()
+
+
+
+def test_browse_sqlite_database_failure_has_safe_declared_error(tmp_path):
+    storage = SQLiteLocalStorage(tmp_path / "failure.sqlite3")
+    try:
+        storage.open()
+        storage.initialize()
+        storage._connection.execute("DROP TABLE knowledge_records")
+        with pytest.raises(LocalStorageError) as caught:
+            SQLiteKnowledgeRecordRepository(storage).browse(WorkspaceIdentity("w"))
+        assert str(caught.value) == "Local knowledge browse failed."
+        assert isinstance(caught.value.__cause__, sqlite3.DatabaseError)
+    finally:
+        storage.close()
+
+
+
+def test_browse_sqlite_requires_initialized_storage(tmp_path):
+    storage = SQLiteLocalStorage(tmp_path / "uninitialized.sqlite3")
+    repository = SQLiteKnowledgeRecordRepository(storage)
+    with pytest.raises(LocalStorageError):
+        repository.browse(WorkspaceIdentity("w"))
+    try:
+        storage.open()
+        with pytest.raises(LocalStorageError):
+            repository.browse(WorkspaceIdentity("w"))
+    finally:
+        storage.close()
+
+
+
 def _record(workspace: WorkspaceIdentity, value: str = "4") -> KnowledgeRecord:
     return KnowledgeRecord(
         "family.child.diaper-size",

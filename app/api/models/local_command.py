@@ -10,6 +10,7 @@ from pydantic import (
     StrictBool,
     StrictStr,
     field_validator,
+    model_validator,
 )
 
 from app.local_command import (
@@ -97,10 +98,46 @@ class LocalCommandHttpKnowledgeFindProjection(BaseModel):
     truncated: StrictBool
 
 
+class LocalCommandHttpKnowledgeSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    record_id: StrictStr
+    kind: Literal["fact", "concept", "state"]
+    key: StrictStr
+
+    @field_validator("record_id", "key")
+    @classmethod
+    def _validate_literal(cls, value: str) -> str:
+        if not value or value != value.strip():
+            raise ValueError("Knowledge summary text is invalid.")
+        return value
+
+
+class LocalCommandHttpKnowledgeBrowseProjection(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["knowledge"] = "knowledge"
+    operation: Literal["browse"] = "browse"
+    records: tuple[LocalCommandHttpKnowledgeSummary, ...] = Field(max_length=50)
+    truncated: StrictBool
+
+    @model_validator(mode="after")
+    def _validate_records(self) -> "LocalCommandHttpKnowledgeBrowseProjection":
+        if self.truncated and len(self.records) != 50:
+            raise ValueError("Truncated knowledge browse requires 50 summaries.")
+        previous = None
+        for record in self.records:
+            if previous is not None and record.record_id <= previous:
+                raise ValueError("Knowledge browse order or uniqueness is invalid.")
+            previous = record.record_id
+        return self
+
+
 LocalCommandHttpKnowledgeProjection = Annotated[
     LocalCommandHttpKnowledgeStoreProjection
     | LocalCommandHttpKnowledgeReadProjection
-    | LocalCommandHttpKnowledgeFindProjection,
+    | LocalCommandHttpKnowledgeFindProjection
+    | LocalCommandHttpKnowledgeBrowseProjection,
     Field(discriminator="operation"),
 ]
 LocalCommandHttpProjection = Annotated[

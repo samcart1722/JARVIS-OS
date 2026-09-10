@@ -80,6 +80,30 @@ class KnowledgeKind(str, Enum):
 
 
 @dataclass(frozen=True, slots=True)
+class BrowseKnowledgeRecordsQuery:
+    """Explore metadata without caller-supplied filters or scope."""
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeRecordSummary:
+    record_id: str
+    workspace: WorkspaceIdentity
+    kind: KnowledgeKind
+    key: str
+
+    def __post_init__(self) -> None:
+        for value in (self.record_id, self.key):
+            if type(value) is not str or not value or value != value.strip():
+                raise ValueError(
+                    "Knowledge summary text must be non-empty and trimmed."
+                )
+        if type(self.workspace) is not WorkspaceIdentity:
+            raise ValueError("Knowledge summary workspace must be explicit.")
+        if type(self.kind) is not KnowledgeKind:
+            raise ValueError("Knowledge summary kind is invalid.")
+
+
+@dataclass(frozen=True, slots=True)
 class KnowledgeProvenance:
     source_type: str
     source_reference: str
@@ -173,6 +197,42 @@ class KnowledgeRecordsFound:
             raise ValueError("Truncated knowledge discovery must contain 50 records.")
 
 
+def _validate_browse_summaries(
+    records: tuple[KnowledgeRecordSummary, ...],
+    maximum: int,
+    workspace: WorkspaceIdentity | None = None,
+) -> None:
+    """Reject corrupt metadata; never repair, reorder or discard it."""
+    if type(records) is not tuple or len(records) > maximum:
+        raise ValueError("Knowledge browse summaries are invalid.")
+    previous_id = None
+    for record in records:
+        if type(record) is not KnowledgeRecordSummary:
+            raise ValueError("Knowledge browse summary type is invalid.")
+        # Validate even objects corrupted after construction; retain their identity.
+        record.__post_init__()
+        if workspace is None:
+            workspace = record.workspace
+        if record.workspace != workspace:
+            raise ValueError("Knowledge browse summary workspace is invalid.")
+        if previous_id is not None and record.record_id <= previous_id:
+            raise ValueError("Knowledge browse summary order or uniqueness is invalid.")
+        previous_id = record.record_id
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeRecordsBrowsed:
+    records: tuple[KnowledgeRecordSummary, ...]
+    truncated: bool
+
+    def __post_init__(self) -> None:
+        _validate_browse_summaries(self.records, KNOWLEDGE_DISCOVERY_MAX_RESULTS)
+        if type(self.truncated) is not bool:
+            raise ValueError("Knowledge browse truncation must be a boolean.")
+        if self.truncated and len(self.records) != KNOWLEDGE_DISCOVERY_MAX_RESULTS:
+            raise ValueError("Truncated knowledge browse must contain 50 summaries.")
+
+
 @dataclass(frozen=True, slots=True)
 class LocalResolutionResult:
     handled: bool
@@ -238,3 +298,47 @@ class KnowledgeDiscoveryResolutionResult:
         KnowledgeRecordsFound(self.records, self.truncated)
         if not self.success and (self.records or self.truncated):
             raise ValueError("Failed knowledge discovery cannot contain records.")
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeBrowseResolutionResult:
+    handled: bool
+    success: bool
+    response: str
+    resolution_route: str
+    records: tuple[KnowledgeRecordSummary, ...] = ()
+    truncated: bool = False
+    error_code: str | None = None
+    model_used: bool = False
+    external_access: bool = False
+
+    def __post_init__(self) -> None:
+        if any(
+            type(flag) is not bool
+            for flag in (
+                self.handled,
+                self.success,
+                self.truncated,
+                self.model_used,
+                self.external_access,
+            )
+        ):
+            raise ValueError("Knowledge browse flags must be booleans.")
+        if not self.handled or self.resolution_route != LOCAL_CAPABILITY_ROUTE:
+            raise ValueError("Knowledge browse must be a handled local result.")
+        if self.model_used or self.external_access:
+            raise ValueError(
+                "Knowledge browse cannot report model or external activity."
+            )
+        if type(self.response) is not str:
+            raise ValueError("Knowledge browse response must be text.")
+        KnowledgeRecordsBrowsed(self.records, self.truncated)
+        if self.success:
+            if self.error_code is not None:
+                raise ValueError("Successful knowledge browse cannot contain an error.")
+        elif (
+            self.records
+            or self.truncated
+            or self.error_code not in (LOCAL_PERMISSION_DENIED, LOCAL_VALIDATION_FAILED)
+        ):
+            raise ValueError("Failed knowledge browse must contain only a local error.")
