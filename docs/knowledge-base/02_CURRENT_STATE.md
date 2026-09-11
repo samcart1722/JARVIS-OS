@@ -49,26 +49,21 @@ Previously executed evidence, not new code tests in this documentation gate:
 Frozen contract SHA-256:
 `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
 
-Sprint 38 is complete at the implementation/tagged-release level.
 Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Release-truth synchronization is handled through
-[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
-open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
-origin. The authoritative current documentation HEAD is the head reported by
-PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
-The PR must receive satisfactory independent review of its current HEAD before
-proceeding to the separately authorized Documentation Merge Gate.
-Documentation merge remains pending. Post-merge verification and remaining
-governance requirements must then be completed before formal closure. Sprint 38
-remains formally open until those steps are complete. Sprint 39 is NOT STARTED
-and NOT AUTHORIZED; no scope is approved.
+`governed-sprint-38-complete`. Documentation PR #59 is merged into
+`master` at `de6a28443e955419d80a26b211a20d4db8d7e388`. Verified
+backup/recovery evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`;
+both Sprint 38 branches were removed locally and remotely. This reviewed
+closure-truth change is the last documentation synchronization required; once
+incorporated into `master`, Sprint 38 is formally CLOSED. Sprint 39 is NOT
+STARTED, NOT AUTHORIZED, and has no approved scope.
 Later documentation may advance master without moving the immutable
 implementation tag.
 
-No verified Sprint 38 backup is recorded in the supplied gate evidence; the
-historical backup-verification gate remains outstanding. The feature branch
-`feat/sprint-38-authorized-local-knowledge-browse` remains local and remote at the
-feature commit; deletion is not authorized. The unrelated untracked file
+Verified Sprint 38 backup and recovery evidence is recorded at
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260911_191202_SPRINT38_CLOSURE`. Both
+Sprint 38 branches were removed locally and remotely. The unrelated untracked file
 `tests/unit/reasoning/entities/test_user_request.py` remains intact, unexecuted,
 unstaged and absent from the release. The approved 571-file pre-documentation
 inventory matched; the six-file UI intervention preserved 565 earlier files.
