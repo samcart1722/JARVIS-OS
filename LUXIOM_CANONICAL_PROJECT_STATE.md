@@ -50,17 +50,20 @@ Frozen contract SHA-256:
 `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
 
 Sprint 38 is complete at the implementation/tagged-release level.
-The prepared documentation synchronization was committed as
-`6e888c973237350fb8e8d9d449c131ff038205d6` on
-`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
-open. Independent review of PR #59 was executed and remains BLOCKED solely by
-stale statements about documentation commit/publication/PR status. Corrective
-documentation synchronization is in progress; PR #59 is not yet approved.
-Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
-NOT STARTED and NOT AUTHORIZED.
-Any corrective commit/push, further review and governed merge require their own
-authorization. Later documentation may advance master without moving the
-immutable implementation tag.
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+Later documentation may advance master without moving the immutable
+implementation tag.
 
 No verified Sprint 38 backup is recorded in the supplied gate evidence; the
 historical backup-verification gate remains outstanding. The feature branch

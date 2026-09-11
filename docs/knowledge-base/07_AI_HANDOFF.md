@@ -50,17 +50,20 @@ Frozen contract SHA-256:
 `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
 
 Sprint 38 is complete at the implementation/tagged-release level.
-The prepared documentation synchronization was committed as
-`6e888c973237350fb8e8d9d449c131ff038205d6` on
-`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
-open. Independent review of PR #59 was executed and remains BLOCKED solely by
-stale statements about documentation commit/publication/PR status. Corrective
-documentation synchronization is in progress; PR #59 is not yet approved.
-Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
-NOT STARTED and NOT AUTHORIZED.
-Any corrective commit/push, further review and governed merge require their own
-authorization. Later documentation may advance master without moving the
-immutable implementation tag.
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+Later documentation may advance master without moving the immutable
+implementation tag.
 
 No verified Sprint 38 backup is recorded in the supplied gate evidence; the
 historical backup-verification gate remains outstanding. The feature branch
@@ -346,17 +349,18 @@ authorize Sprint 35.
 
 ## Resume instruction
 
-Verify current Git refs before resuming. The Sprint 38 immutable release remains
+Verify current Git refs and the current HEAD of PR #59 before resuming. The
+Sprint 38 immutable implementation release remains
 `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4` under
-`governed-sprint-38-complete`. Release-truth edits are on
-`docs/sprint-38-release-truth`, based on that merge. Documentation commit
-`6e888c973237350fb8e8d9d449c131ff038205d6` is published to origin and PR #59 is
-open. Its independent review remains BLOCKED solely by stale documentation
-workflow statements; corrective synchronization is in progress. Resume with
-validation of the corrective diff, stopping before stage, corrective commit or
-push. Further review and documentation merge remain separate gates; no approval
-or merge is claimed. Master may advance only through later governed work;
-never infer a future SHA here.
+`governed-sprint-38-complete`; the published documentation branch is
+`docs/sprint-38-release-truth`. Review the PR's current HEAD independently. Only
+if that review approves it may the separately authorized Documentation Merge
+Gate proceed. After documentation merge, perform post-merge verification and
+complete the remaining governance requirements before formal Sprint 38 closure.
+The remote PR is authoritative for its changing HEAD; do not infer a future
+documentation merge SHA or use an earlier review as approval of a later HEAD.
 Preserve the unrelated untracked test and both feature refs. Do not execute the
-test, create a release/tag, clean branches or claim closure. Verify the missing
-backup gate separately. Sprint 39 is NOT STARTED and has no authorized scope.
+test or change tags or branches without separate authorization. No verified
+Sprint 38 backup is recorded; verify that gate separately. Sprint 39 is NOT
+STARTED and NOT AUTHORIZED; planning or implementation requires explicit
+authorization.
