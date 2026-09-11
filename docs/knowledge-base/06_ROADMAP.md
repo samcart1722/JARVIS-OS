@@ -9,12 +9,16 @@ bounded summaries and explicit preparation of a later READ. Post-merge validatio
 observed by Codex: 1946 PASS / 0 FAIL / 0 SKIP, global Ruff and diff checks PASS.
 Native acceptance PASS for 14 scenarios is operator-reported.
 
-Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Documentation PR #59 is merged into `master` at
-`de6a28443e955419d80a26b211a20d4db8d7e388`; verified backup/recovery and branch
-cleanup are complete. This reviewed closure truth is the last documentation
-synchronization required; once incorporated into `master`, Sprint 38 is formally
-CLOSED. Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
+Sprint 38 is CLOSED. Its Authorized local knowledge browse v1 implementation
+was released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Documentation PR #59 and the final closure PR
+#60 are merged; their release truth is incorporated into `master` at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified backup and recovery
+evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
+and prior Sprint 38 feature/documentation branches were cleaned locally and
+remotely. Formal closure is complete, with no known open functional defects.
+Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 
 ## Next planning boundary - Sprint 39
 
@@ -213,8 +217,10 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 38 is latest at `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`,
-tag `governed-sprint-38-complete`; formal closure remains pending.
+Sprint 38 is the latest completed and closed Sprint at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`, with implementation release
+`97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4` and tag
+`governed-sprint-38-complete`.
 Sprint 37 is historical at `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
 tag `governed-sprint-37-complete`. Sprint 36 is the immediately preceding
 historical release at `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`,
