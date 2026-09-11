@@ -426,10 +426,11 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Sprint 38 implementation and tag gates are complete; formal closure remains
-   pending. Do not begin Sprint 39 or any subsequent implementation without
-   explicit authorization. The next implementation remains a planning boundary until
-   explicitly approved.
+6. Sprint 38 is CLOSED; PR #60 is merged and formal closure is complete. No
+   Sprint 38 closure gate remains. PR #61 is only a post-closure documentation
+   synchronization. Do not repeat Sprint 38 closure work or begin Sprint 39 or
+   any subsequent implementation without separate explicit authorization; the
+   next implementation remains a planning boundary until explicitly approved.
 
 ## 15. Repository checkpoint synchronization policy
 
