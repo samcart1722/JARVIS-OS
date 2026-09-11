@@ -8,10 +8,14 @@ from app.cognition.local_resolution.contracts import (
     KnowledgeRecordConflict,
     LocalRepositoryError,
 )
+from app.cognition.local_resolution.knowledge_browse_capability import (
+    StructuredKnowledgeBrowseCapability,
+)
 from app.cognition.local_resolution.knowledge_capability import (
     StructuredKnowledgeCapability,
 )
 from app.cognition.local_resolution.models import (
+    KNOWLEDGE_DISCOVERY_MAX_RESULTS,
     LOCAL_CAPABILITY_ROUTE,
     LOCAL_KNOWLEDGE_CONFLICT,
     LOCAL_KNOWLEDGE_NOT_FOUND,
@@ -20,9 +24,12 @@ from app.cognition.local_resolution.models import (
     LOCAL_VALIDATION_FAILED,
     ActorIdentity,
     AddListItemsCommand,
+    BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
+    KnowledgeBrowseResolutionResult,
     KnowledgeDiscoveryResolutionResult,
     KnowledgeRead,
+    KnowledgeRecordsBrowsed,
     KnowledgeRecordsFound,
     KnowledgeResolutionResult,
     KnowledgeStored,
@@ -33,6 +40,7 @@ from app.cognition.local_resolution.models import (
     ReadListItemsQuery,
     StoreKnowledgeRecordCommand,
     WorkspaceIdentity,
+    _validate_browse_summaries,
 )
 
 
@@ -41,9 +49,11 @@ class LocalFirstResolver:
         self,
         list_capability: StructuredListCapability,
         knowledge_capability: StructuredKnowledgeCapability | None = None,
+        knowledge_browse_capability: StructuredKnowledgeBrowseCapability | None = None,
     ) -> None:
         self._list_capability = list_capability
         self._knowledge_capability = knowledge_capability
+        self._knowledge_browse_capability = knowledge_browse_capability
 
     def resolve(
         self,
@@ -54,7 +64,10 @@ class LocalFirstResolver:
         LocalResolutionResult
         | KnowledgeResolutionResult
         | KnowledgeDiscoveryResolutionResult
+        | KnowledgeBrowseResolutionResult
     ):
+        if isinstance(intent, BrowseKnowledgeRecordsQuery):
+            return self._resolve_browse(actor, workspace, intent)
         list_intent = isinstance(intent, (AddListItemsCommand, ReadListItemsQuery))
         knowledge_intent = isinstance(
             intent,
@@ -245,4 +258,44 @@ class LocalFirstResolver:
             "Local operation could not be completed.",
             LOCAL_CAPABILITY_ROUTE,
             error_code=LOCAL_VALIDATION_FAILED,
+        )
+
+    def _resolve_browse(
+        self,
+        actor: ActorIdentity,
+        workspace: WorkspaceIdentity,
+        intent: BrowseKnowledgeRecordsQuery,
+    ) -> KnowledgeBrowseResolutionResult:
+        if self._knowledge_browse_capability is None:
+            return self._browse_failure(LOCAL_VALIDATION_FAILED)
+        if type(actor) is not ActorIdentity or type(workspace) is not WorkspaceIdentity:
+            return self._browse_failure(LOCAL_VALIDATION_FAILED)
+        try:
+            result = self._knowledge_browse_capability.execute(actor, workspace, intent)
+            if type(result) is not KnowledgeRecordsBrowsed:
+                raise TypeError("Invalid local knowledge browse result.")
+            _validate_browse_summaries(
+                result.records, KNOWLEDGE_DISCOVERY_MAX_RESULTS, workspace
+            )
+            return KnowledgeBrowseResolutionResult(
+                True,
+                True,
+                "Knowledge records browsed locally.",
+                LOCAL_CAPABILITY_ROUTE,
+                records=result.records,
+                truncated=result.truncated,
+            )
+        except LocalPermissionDenied:
+            return self._browse_failure(LOCAL_PERMISSION_DENIED)
+        except (LocalRepositoryError, TypeError, ValueError):
+            return self._browse_failure(LOCAL_VALIDATION_FAILED)
+
+    @staticmethod
+    def _browse_failure(error_code: str) -> KnowledgeBrowseResolutionResult:
+        return KnowledgeBrowseResolutionResult(
+            True,
+            False,
+            "Local knowledge browse could not be completed.",
+            LOCAL_CAPABILITY_ROUTE,
+            error_code=error_code,
         )

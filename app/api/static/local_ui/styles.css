@@ -158,6 +158,14 @@ button:disabled {
   margin: 0;
 }
 
+.knowledge-summary button {
+  margin-top: 0.75rem;
+}
+
+.knowledge-summary dd {
+  white-space: pre-wrap;
+}
+
 .examples code {
   display: block;
   margin-top: 0.5rem;

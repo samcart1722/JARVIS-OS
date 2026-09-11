@@ -27,6 +27,7 @@ class LocalKnowledgeProjectionOperation(str, Enum):
     STORE = "store"
     READ = "read"
     FIND = "find"
+    BROWSE = "browse"
 
 
 class LocalKnowledgeRecordKind(str, Enum):
@@ -189,10 +190,56 @@ class LocalKnowledgeFindProjection:
             raise ValueError("Knowledge find record IDs must be unique.")
 
 
+@dataclass(frozen=True, slots=True)
+class LocalKnowledgeSummaryProjection:
+    record_id: str
+    kind: LocalKnowledgeRecordKind
+    key: str
+
+    def __post_init__(self) -> None:
+        for value in (self.record_id, self.key):
+            if type(value) is not str or not value or value != value.strip():
+                raise ValueError("Knowledge summary text is invalid.")
+        if type(self.kind) is not LocalKnowledgeRecordKind:
+            raise ValueError("Knowledge summary kind is invalid.")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalKnowledgeBrowseProjection:
+    records: tuple[LocalKnowledgeSummaryProjection, ...]
+    truncated: bool
+    kind: LocalCommandProjectionKind = field(
+        default=LocalCommandProjectionKind.KNOWLEDGE, init=False,
+    )
+    operation: LocalKnowledgeProjectionOperation = field(
+        default=LocalKnowledgeProjectionOperation.BROWSE, init=False,
+    )
+
+    def __post_init__(self) -> None:
+        if (
+            self.kind is not LocalCommandProjectionKind.KNOWLEDGE
+            or self.operation is not LocalKnowledgeProjectionOperation.BROWSE
+            or type(self.records) is not tuple
+            or len(self.records) > 50
+            or type(self.truncated) is not bool
+            or (self.truncated and len(self.records) != 50)
+        ):
+            raise ValueError("Knowledge browse projection is invalid.")
+        previous = None
+        for record in self.records:
+            if type(record) is not LocalKnowledgeSummaryProjection:
+                raise ValueError("Knowledge browse summary is invalid.")
+            record.__post_init__()
+            if previous is not None and record.record_id <= previous:
+                raise ValueError("Knowledge browse order or uniqueness is invalid.")
+            previous = record.record_id
+
+
 LocalKnowledgeProjection = (
     LocalKnowledgeStoreProjection
     | LocalKnowledgeReadProjection
     | LocalKnowledgeFindProjection
+    | LocalKnowledgeBrowseProjection
 )
 LocalCommandProjection = LocalListProjection | LocalKnowledgeProjection
 
@@ -416,6 +463,7 @@ class LocalCommandApplicationResult:
                 LocalKnowledgeStoreProjection,
                 LocalKnowledgeReadProjection,
                 LocalKnowledgeFindProjection,
+                LocalKnowledgeBrowseProjection,
             ):
                 raise ValueError("Application result projection is invalid.")
             if (

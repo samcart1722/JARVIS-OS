@@ -6,11 +6,12 @@ const KNOWLEDGE_FIELDS = Object.freeze({
   store: ["record_id", "kind", "key", "value", "source_type", "source_reference"],
   read: ["record_id"],
   find: ["key", "kind"],
+  browse: [],
 });
 
 function prepareKnowledgeCommand(operation, fields) {
   if (!Object.hasOwn(KNOWLEDGE_FIELDS, operation)) {
-    throw new Error("Select STORE, READ or FIND.");
+    throw new Error("Select STORE, READ, FIND or BROWSE.");
   }
   const payload = {};
   for (const field of KNOWLEDGE_FIELDS[operation]) {
@@ -45,6 +46,8 @@ const sendButton = document.querySelector("#send-command");
 const assistance = document.querySelector("#knowledge-assistance");
 const operationInput = document.querySelector("#assist-operation");
 const prepareButton = document.querySelector("#prepare-command");
+const browseButton = document.querySelector("#prepare-browse");
+let browseReadButtons = [];
 const preparationStatus = document.querySelector("#preparation-status");
 const preparationError = document.querySelector("#preparation-error");
 const commandState = document.querySelector("#command-state");
@@ -100,6 +103,8 @@ function clearListProjection() {
 }
 
 function clearKnowledgeProjection() {
+  for (const button of browseReadButtons) button.disabled = true;
+  browseReadButtons = [];
   knowledgeProjection.hidden = true;
   knowledgeOperation.textContent = "";
   knowledgeRecordId.textContent = "";
@@ -224,6 +229,24 @@ function renderKnowledgeProjection(projection) {
     return;
   }
 
+  if (projection.operation === "browse") {
+    if (
+      !Array.isArray(projection.records)
+      || projection.records.length > 50
+      || typeof projection.truncated !== "boolean"
+      || (projection.truncated && projection.records.length !== 50)
+      || !projection.records.every(isKnowledgeSummary)
+    ) return;
+    knowledgeOperation.textContent = "Browse";
+    for (const record of projection.records) renderKnowledgeSummary(record);
+    knowledgeEmpty.textContent = "No knowledge records in this workspace.";
+    knowledgeTruncated.textContent = "Showing the first 50 records by ID. More records exist; this version cannot browse them.";
+    knowledgeEmpty.hidden = projection.records.length !== 0;
+    knowledgeTruncated.hidden = !projection.truncated;
+    knowledgeProjection.hidden = false;
+    return;
+  }
+
   if (
     projection.operation === "store"
     && isKnowledgeRecord(projection.record)
@@ -264,6 +287,8 @@ function renderKnowledgeProjection(projection) {
     && typeof projection.truncated === "boolean"
   ) {
     knowledgeOperation.textContent = "Find";
+    knowledgeEmpty.textContent = "No matching knowledge records.";
+    knowledgeTruncated.textContent = "Showing the first 50 matching records.";
     knowledgeCount.textContent = String(projection.records.length);
     knowledgeCountRow.hidden = false;
     for (const record of projection.records) {
@@ -273,6 +298,15 @@ function renderKnowledgeProjection(projection) {
     knowledgeTruncated.hidden = projection.truncated !== true;
     knowledgeProjection.hidden = false;
   }
+}
+
+function isKnowledgeSummary(record) {
+  return record !== null && typeof record === "object" && !Array.isArray(record)
+    && Object.keys(record).length === 3
+    && ["record_id", "kind", "key"].every((key) => Object.hasOwn(record, key))
+    && typeof record.record_id === "string"
+    && ["fact", "concept", "state"].includes(record.kind)
+    && typeof record.key === "string";
 }
 
 function renderResult(result) {
@@ -296,6 +330,35 @@ function renderLocalFailure() {
   errorOutput.textContent = "The local request could not be completed.";
 }
 
+function renderKnowledgeSummary(record) {
+  // Capture the original data now; selection clears and detaches this article.
+  const recordId = record.record_id;
+  const article = document.createElement("article");
+  article.className = "knowledge-record knowledge-summary";
+  const details = document.createElement("dl");
+  for (const [label, value] of [["Record ID", recordId], ["Kind", record.kind], ["Key", record.key]]) {
+    const row = document.createElement("div");
+    row.className = "projection-row";
+    const term = document.createElement("dt");
+    const description = document.createElement("dd");
+    term.textContent = label;
+    description.textContent = value;
+    row.append(term, description);
+    details.appendChild(row);
+  }
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = commandInput.value ? "Prepare READ and replace editor command" : "Prepare READ";
+  button.disabled = requestPending;
+  button.addEventListener("click", () => {
+    if (requestPending || button.disabled) return;
+    prepareEditorCommand("read", { record_id: recordId });
+  });
+  browseReadButtons.push(button);
+  article.append(details, button);
+  knowledgeRecords.appendChild(article);
+}
+
 function clearDraftResults(status = "Ready") {
   clearAllProjections();
   statusOutput.textContent = status;
@@ -308,6 +371,9 @@ function updatePreparationButton() {
   prepareButton.textContent = commandInput.value
     ? "Prepare and replace editor command"
     : "Prepare command";
+  browseButton.textContent = commandInput.value
+    ? "Prepare browse and replace editor command"
+    : "Prepare browse";
 }
 
 function updateAssistanceFields() {
@@ -327,6 +393,8 @@ function setRequestPending(pending) {
   fallbackInput.disabled = pending;
   operationInput.disabled = pending;
   prepareButton.disabled = pending;
+  browseButton.disabled = pending;
+  for (const button of browseReadButtons) button.disabled = pending;
   updateAssistanceFields();
 }
 
@@ -360,16 +428,14 @@ fallbackInput.addEventListener("change", () => {
   if (!requestPending) clearDraftResults();
 });
 
-prepareButton.addEventListener("click", () => {
+function prepareEditorCommand(operation, fields) {
   if (requestPending) return;
   clearDraftResults();
   preparationError.textContent = "";
-  const fields = Object.fromEntries(
-    Object.entries(assistanceInputs).map(([field, input]) => [field, input.value]),
-  );
+  const replaced = commandInput.value !== "";
   try {
-    commandInput.value = prepareKnowledgeCommand(operationInput.value, fields);
-    preparationStatus.textContent = "Command prepared. No operation has been executed.";
+    commandInput.value = prepareKnowledgeCommand(operation, fields);
+    preparationStatus.textContent = `${operation === "read" ? "READ command" : "Command"} prepared. ${replaced ? "Previous editor command replaced. " : ""}No operation has been executed.`;
     commandState.textContent = "Review or edit the prepared command, then explicitly Send.";
     commandInput.focus();
   } catch (error) {
@@ -378,7 +444,16 @@ prepareButton.addEventListener("click", () => {
     commandState.textContent = "Previous editor text retained; no new command was prepared.";
   }
   updatePreparationButton();
+}
+
+prepareButton.addEventListener("click", () => {
+  const fields = Object.fromEntries(
+    Object.entries(assistanceInputs).map(([field, input]) => [field, input.value]),
+  );
+  prepareEditorCommand(operationInput.value, fields);
 });
+
+browseButton.addEventListener("click", () => prepareEditorCommand("browse", {}));
 
 updateAssistanceFields();
 

@@ -7,6 +7,7 @@ from app.cognition.local_resolution.models import (
     KnowledgeKind,
     KnowledgeRead,
     KnowledgeRecord,
+    KnowledgeRecordSummary,
     KnowledgeStored,
     ListItemsAdded,
     ListItemsSnapshot,
@@ -42,6 +43,14 @@ class KnowledgeRecordRepository(Protocol):
         kind: KnowledgeKind | None = None,
     ) -> tuple[KnowledgeRecord, ...]:
         """Return at most 51 exact matches ordered by binary record ID."""
+        ...
+
+
+class KnowledgeBrowseRepository(Protocol):
+    def browse(
+        self, workspace: WorkspaceIdentity
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        """Return at most 51 unique scoped summaries in ordinal record-ID order."""
         ...
 
 

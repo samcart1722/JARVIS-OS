@@ -5,6 +5,8 @@ PURE = (
     "app/cognition/local_resolution/models.py",
     "app/cognition/local_resolution/contracts.py",
     "app/cognition/local_resolution/knowledge_capability.py",
+    "app/cognition/local_resolution/knowledge_browse_capability.py",
+    "app/cognition/local_resolution/resolver.py",
 )
 
 
@@ -61,6 +63,7 @@ def test_cognition_does_not_import_sqlite_or_local_storage() -> None:
         "app/cognition/local_resolution/repository.py",
         "app/cognition/local_resolution/capability.py",
         "app/cognition/local_resolution/knowledge_capability.py",
+        "app/cognition/local_resolution/knowledge_browse_capability.py",
         "app/cognition/local_resolution/resolver.py",
     ):
         imported = _imports(path)

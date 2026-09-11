@@ -64,11 +64,13 @@ def test_knowledge_enums_have_exact_closed_values() -> None:
         LocalKnowledgeProjectionOperation.STORE,
         LocalKnowledgeProjectionOperation.READ,
         LocalKnowledgeProjectionOperation.FIND,
+        LocalKnowledgeProjectionOperation.BROWSE,
     )
     assert tuple(item.value for item in LocalKnowledgeProjectionOperation) == (
         "store",
         "read",
         "find",
+        "browse",
     )
     assert tuple(LocalKnowledgeRecordKind) == (
         LocalKnowledgeRecordKind.FACT,
@@ -413,3 +415,130 @@ def test_historical_result_construction_remains_valid() -> None:
     assert local.projection is None
     assert cognitive.projection is None
     assert failure.projection is None
+
+
+@pytest.mark.parametrize(
+    "total,truncated", ((0, False), (49, False), (50, False), (50, True))
+)
+def test_browse_public_projection_is_closed_frozen_and_literal(total, truncated):
+    from dataclasses import fields
+
+    from app.local_command import (
+        LocalKnowledgeBrowseProjection,
+        LocalKnowledgeSummaryProjection,
+    )
+
+    records = tuple(
+        LocalKnowledgeSummaryProjection(
+            f"id-{i:03}", LocalKnowledgeRecordKind.FACT, 'e\u0301 "key"'
+        )
+        for i in range(total)
+    )
+    projection = LocalKnowledgeBrowseProjection(records, truncated)
+    assert {f.name for f in fields(LocalKnowledgeSummaryProjection)} == {
+        "record_id",
+        "kind",
+        "key",
+    }
+    assert {f.name for f in fields(projection)} == {
+        "kind",
+        "operation",
+        "records",
+        "truncated",
+    }
+    assert projection.records is records
+    assert (
+        LocalCommandApplicationResult(
+            True, LocalCommandApplicationRoute.LOCAL, "Done", projection=projection
+        ).projection
+        is projection
+    )
+    with pytest.raises(FrozenInstanceError):
+        projection.truncated = False
+    if records:
+        assert records[0].key == 'e\u0301 "key"'
+        with pytest.raises(FrozenInstanceError):
+            records[0].key = "changed"
+    with pytest.raises(TypeError):
+        LocalKnowledgeSummaryProjection(
+            "id", LocalKnowledgeRecordKind.FACT, "key", value="hidden"
+        )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("record_id", 1),
+        ("key", True),
+        ("key", " key"),
+        ("record_id", ""),
+        ("kind", "fact"),
+    ),
+)
+def test_browse_summary_rejects_invalid_fields(field, value):
+    from app.local_command import LocalKnowledgeSummaryProjection
+
+    args = dict(record_id="id", kind=LocalKnowledgeRecordKind.FACT, key="key")
+    args[field] = value
+    with pytest.raises(ValueError):
+        LocalKnowledgeSummaryProjection(**args)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    ("list", "type", "duplicate", "order", "excess", "boolean", "truncated"),
+)
+def test_browse_public_projection_rejects_corruption(corruption):
+    from app.local_command import (
+        LocalKnowledgeBrowseProjection,
+        LocalKnowledgeSummaryProjection,
+    )
+
+    a = LocalKnowledgeSummaryProjection("a", LocalKnowledgeRecordKind.FACT, "key")
+    b = LocalKnowledgeSummaryProjection("b", LocalKnowledgeRecordKind.FACT, "key")
+    records, truncated = (a, b), False
+    if corruption == "list":
+        records = [a]
+    if corruption == "type":
+        records = (object(),)
+    if corruption == "duplicate":
+        records = (a, a)
+    if corruption == "order":
+        records = (b, a)
+    if corruption == "excess":
+        records = tuple(
+            LocalKnowledgeSummaryProjection(
+                f"{i:03}", LocalKnowledgeRecordKind.FACT, "key"
+            )
+            for i in range(51)
+        )
+    if corruption == "boolean":
+        truncated = 0
+    if corruption == "truncated":
+        truncated = True
+    with pytest.raises(ValueError):
+        LocalKnowledgeBrowseProjection(records, truncated)
+
+
+@pytest.mark.parametrize(
+    "success,route",
+    (
+        (False, LocalCommandApplicationRoute.LOCAL),
+        (True, LocalCommandApplicationRoute.COGNITIVE),
+    ),
+)
+def test_browse_application_projection_requires_local_success(success, route):
+    from app.local_command import LocalKnowledgeBrowseProjection
+
+    with pytest.raises(ValueError):
+        LocalCommandApplicationResult(
+            success,
+            route,
+            "Done" if success else None,
+            error=None
+            if success
+            else application_error(
+                LocalCommandApplicationErrorCode.LOCAL_PERMISSION_DENIED
+            ),
+            projection=LocalKnowledgeBrowseProjection((), False),
+        )

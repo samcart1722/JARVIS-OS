@@ -10,6 +10,7 @@ from app.cognition.interpretation.models import (
 )
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
     KnowledgeKind,
     KnowledgeProvenance,
@@ -23,7 +24,7 @@ from app.cognition.local_resolution.models import (
 _LIST_NAMESPACE = re.compile(r"^list(?:\s|$)", re.IGNORECASE | re.ASCII)
 _KNOWLEDGE_NAMESPACE = re.compile(r"^knowledge(?:\s|$)", re.IGNORECASE | re.ASCII)
 _KNOWLEDGE_PREFIX = re.compile(
-    r"^knowledge\s+(read|store|find)\s+::", re.IGNORECASE | re.ASCII
+    r"^knowledge\s+(read|store|find|browse)\s+::", re.IGNORECASE | re.ASCII
 )
 _READ_FIELDS = frozenset(("record_id",))
 _FIND_FIELDS = frozenset(("key",))
@@ -122,6 +123,13 @@ class DeterministicLocalCommandInterpreter:
             return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_JSON)
 
         operation = prefix.group(1).lower()
+        if operation == "browse":
+            if payload:
+                return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_FIELDS)
+            return LocalCommandInterpretation(
+                LocalCommandInterpretationStatus.INTERPRETED,
+                intent=BrowseKnowledgeRecordsQuery(),
+            )
         required = _READ_FIELDS if operation == "read" else _STORE_FIELDS
         if operation == "find":
             required = frozenset(payload)

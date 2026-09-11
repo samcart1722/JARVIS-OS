@@ -18,6 +18,7 @@ from app.cognition.local_resolution.models import (
     KnowledgeProvenance,
     KnowledgeRead,
     KnowledgeRecord,
+    KnowledgeRecordSummary,
     KnowledgeStored,
     ListItemsAdded,
     ListItemsSnapshot,
@@ -340,6 +341,10 @@ class SQLiteLocalStorage:
             return KnowledgeStored(record, True)
         except sqlite3.IntegrityError:
             existing = self.read_knowledge(record.workspace, record.record_id).record
+            if existing is None:
+                raise KnowledgeRecordConflict(
+                    "Knowledge record already exists."
+                ) from None
             if existing == record:
                 return KnowledgeStored(existing, False)
             raise KnowledgeRecordConflict("Knowledge record already exists.") from None
@@ -372,6 +377,26 @@ class SQLiteLocalStorage:
                 row[2],
                 KnowledgeProvenance(row[3], row[4]),
             )
+        )
+
+    def browse_knowledge(
+        self, workspace: WorkspaceIdentity
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        if type(workspace) is not WorkspaceIdentity:
+            raise ValueError("A valid workspace is required.")
+        connection = self._require_initialized_connection()
+        try:
+            rows = connection.execute(
+                "SELECT record_id, kind, knowledge_key FROM knowledge_records "
+                "WHERE workspace_id = ? "
+                "ORDER BY record_id COLLATE BINARY ASC LIMIT ?",
+                (workspace.workspace_id, KNOWLEDGE_DISCOVERY_LOOKAHEAD),
+            ).fetchall()
+        except sqlite3.DatabaseError as error:
+            raise LocalStorageError("Local knowledge browse failed.") from error
+        return tuple(
+            KnowledgeRecordSummary(row[0], workspace, KnowledgeKind(row[1]), row[2])
+            for row in rows
         )
 
     def find_knowledge_by_key(
@@ -1068,6 +1093,11 @@ class SQLiteKnowledgeRecordRepository:
 
     def __init__(self, storage: SQLiteLocalStorage) -> None:
         self._storage = storage
+
+    def browse(
+        self, workspace: WorkspaceIdentity
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        return self._storage.browse_knowledge(workspace)
 
     def store(self, record: KnowledgeRecord) -> KnowledgeStored:
         return self._storage.store(record)

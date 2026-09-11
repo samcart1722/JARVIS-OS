@@ -1,6 +1,6 @@
 """Application routing proofs for interpreted, invalid and unrelated text."""
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -19,6 +19,7 @@ from app.cognition.interpretation.routing import (
     TextRoutingResult,
 )
 from app.cognition.local_resolution.capability import StructuredListCapability
+from app.cognition.local_resolution.contracts import LocalRepositoryError
 from app.cognition.local_resolution.knowledge_capability import (
     StructuredKnowledgeCapability,
 )
@@ -27,12 +28,15 @@ from app.cognition.local_resolution.models import (
     LOCAL_KNOWLEDGE_NOT_FOUND,
     LOCAL_PERMISSION_DENIED,
     ActorIdentity,
+    KnowledgeKind,
+    KnowledgeRecordSummary,
     ReadListItemsQuery,
     StoreKnowledgeRecordCommand,
     WorkspaceIdentity,
 )
 from app.cognition.local_resolution.permissions import (
     KNOWLEDGE_RECORDS_ADD,
+    KNOWLEDGE_RECORDS_BROWSE,
     KNOWLEDGE_RECORDS_READ,
     LIST_ITEMS_ADD,
     LIST_ITEMS_READ,
@@ -51,6 +55,8 @@ from app.cognition.routing.models import (
     CoordinatedRoute,
     SafeInsufficiencyReason,
 )
+from app.core.config import Settings
+from app.core.container import Container
 from app.operations.local_command_interpretation_demo_runtime import (
     LocalCommandInterpretationDemoRuntime,
 )
@@ -87,6 +93,96 @@ def _request(actor, workspace, text, allowed=False):
     return TextRoutingRequest(
         actor, workspace, text, CognitiveFallbackAuthorization(allowed)
     )
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+@pytest.mark.parametrize(
+    "scenario",
+    (
+        "success",
+        "empty",
+        "denied",
+        "missing",
+        "invalid",
+        "storage",
+        "grammar",
+    ),
+)
+def test_composed_browse_terminals_never_call_cognition(fallback, scenario):
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    repository = Mock()
+    repository.browse.return_value = (
+        (KnowledgeRecordSummary("id", workspace, KnowledgeKind.FACT, "key"),)
+        if scenario == "success"
+        else ()
+    )
+    if scenario == "invalid":
+        repository.browse.return_value = []
+    if scenario == "storage":
+        repository.browse.side_effect = LocalRepositoryError("private details")
+    container = Container(
+        Settings(REASONING_ENABLED=False, _env_file=None),
+        local_knowledge_repository=repository,
+        local_knowledge_browse_repository=None if scenario == "missing" else repository,
+        local_permission_grants=()
+        if scenario == "denied"
+        else (
+            PermissionGrant(
+                "actor", "workspace", frozenset({KNOWLEDGE_RECORDS_BROWSE})
+            ),
+        ),
+    )
+    with (
+        patch.object(
+            container.cognitive_engine,
+            "process",
+            wraps=container.cognitive_engine.process,
+        ) as cognitive,
+        patch.object(container.ollama_client, "chat") as model,
+        patch.object(container.provider_readiness_probe, "check") as readiness,
+        patch("requests.get") as network_get,
+        patch("requests.post") as network_post,
+    ):
+        text = (
+            "knowledge browse :: []"
+            if scenario == "grammar"
+            else "knowledge browse :: {}"
+        )
+        result = container.local_command_text_router.route(
+            _request(actor, workspace, text, fallback)
+        )
+        if scenario == "grammar":
+            assert (
+                result.interpretation.status is LocalCommandInterpretationStatus.INVALID
+            )
+            assert result.coordinated_result is None
+        else:
+            assert result.coordinated_result.route is CoordinatedRoute.LOCAL
+            local = result.coordinated_result.local_result
+            expected_error = (
+                None
+                if scenario in ("empty", "success")
+                else "local_permission_denied"
+                if scenario == "denied"
+                else "local_validation_failed"
+            )
+            assert local.success is (expected_error is None)
+            assert local.error_code == expected_error
+        cognitive.assert_not_called()
+        assert repository.browse.call_count == (
+            scenario not in ("denied", "missing", "grammar")
+        )
+        # Positive control: the very same real router/coordinator does invoke the
+        # observed engine when unrelated text explicitly authorizes fallback.
+        positive = container.local_command_text_router.route(
+            _request(actor, workspace, "ordinary cognitive input", True)
+        )
+        assert positive.coordinated_result.route is CoordinatedRoute.COGNITIVE
+        cognitive.assert_called_once_with("ordinary cognitive input")
+        model.assert_not_called()
+        readiness.assert_not_called()
+        network_get.assert_not_called()
+        network_post.assert_not_called()
 
 
 def test_interpreted_add_calls_each_boundary_once_and_is_terminal() -> None:

@@ -18,6 +18,7 @@ from app.cognition.interpretation.models import (
 )
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
     KnowledgeKind,
     ReadKnowledgeRecordQuery,
@@ -406,3 +407,40 @@ def test_knowledge_json_trailing_whitespace_is_accepted(interpreter, workspace) 
     )
     assert result.status is Status.INTERPRETED
     assert result.intent == ReadKnowledgeRecordQuery("r")
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "knowledge browse :: {}",
+        " KnOwLeDgE BrOwSe ::{} \t\n",
+        "knowledge\tbrowse\n:: {\n\t}",
+    ),
+)
+def test_browse_interpretation_accepts_only_empty_object(interpreter, workspace, text):
+    result = interpreter.interpret(text, workspace)
+    assert result.status is Status.INTERPRETED
+    assert type(result.intent) is BrowseKnowledgeRecordsQuery
+    assert result.invalid_reason is None
+
+
+@pytest.mark.parametrize(
+    "text,reason",
+    (
+        ("knowledge browse", Reason.MALFORMED_KNOWLEDGE_COMMAND),
+        ("knowledge browse ::", Reason.MISSING_KNOWLEDGE_PAYLOAD),
+        ("knowledge browse :: []", Reason.INVALID_KNOWLEDGE_JSON),
+        ("knowledge browse :: null", Reason.INVALID_KNOWLEDGE_JSON),
+        ("knowledge browse :: {} trailing", Reason.INVALID_KNOWLEDGE_JSON),
+        ("knowledge browse :: {}{}", Reason.INVALID_KNOWLEDGE_JSON),
+        ('knowledge browse :: {"workspace":"w"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge browse :: {"limit":50}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge browse :: {"key":"a","key":"b"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('knowledge find :: {"key":""}', Reason.INVALID_KNOWLEDGE_FIELDS),
+    ),
+)
+def test_invalid_browse_remains_terminal(interpreter, workspace, text, reason):
+    result = interpreter.interpret(text, workspace)
+    assert result.status is Status.INVALID
+    assert result.invalid_reason is reason
+    assert result.intent is None

@@ -1,12 +1,21 @@
 import sqlite3
 from pathlib import Path
 from threading import Event, Thread, current_thread
+from unittest.mock import patch
 
 import pytest
 
-from app.cognition.local_resolution.models import ActorIdentity
+from app.cognition.local_resolution.models import (
+    ActorIdentity,
+    BrowseKnowledgeRecordsQuery,
+    KnowledgeKind,
+    KnowledgeProvenance,
+    KnowledgeRecord,
+    StoreKnowledgeRecordCommand,
+)
 from app.cognition.local_resolution.permissions import (
     KNOWLEDGE_RECORDS_ADD,
+    KNOWLEDGE_RECORDS_BROWSE,
     KNOWLEDGE_RECORDS_READ,
     LIST_ITEMS_ADD,
     LIST_ITEMS_READ,
@@ -101,6 +110,7 @@ def test_exact_bootstrap_is_created_and_no_extra_permission_exists(
             LIST_ITEMS_READ,
             KNOWLEDGE_RECORDS_ADD,
             KNOWLEDGE_RECORDS_READ,
+            KNOWLEDGE_RECORDS_BROWSE,
         )
         assert all(
             permission.is_granted(
@@ -137,7 +147,70 @@ def test_exact_existing_bootstrap_is_idempotently_accepted(tmp_path: Path) -> No
         ).fetchone()[0] == 1
         assert connection.execute(
             "SELECT COUNT(*) FROM action_permission_grants"
-        ).fetchone()[0] == 4
+        ).fetchone()[0] == 5
+
+
+def test_runtime_composes_shared_browse_port_and_replenishes_development_grant(
+    tmp_path,
+):
+    from app.core.container import Container
+
+    path = tmp_path / "browse-runtime.sqlite3"
+    composed = []
+
+    def capture(*args, **kwargs):
+        assert (
+            kwargs["local_knowledge_repository"]
+            is kwargs["local_knowledge_browse_repository"]
+        )
+        instance = Container(*args, **kwargs)
+        composed.append(instance)
+        return instance
+
+    runtime = _runtime(path)
+    with patch(
+        "app.operations.local_interactive_runtime.Container", side_effect=capture
+    ):
+        runtime.start()
+    try:
+        instance = composed[0]
+        record = KnowledgeRecord(
+            "runtime-id",
+            DEVELOPMENT_WORKSPACE,
+            KnowledgeKind.FACT,
+            "key",
+            "private value",
+            KnowledgeProvenance("explicit", "source"),
+        )
+        resolve = instance.local_first_resolver.resolve
+        assert resolve(
+            DEVELOPMENT_ACTOR,
+            DEVELOPMENT_WORKSPACE,
+            StoreKnowledgeRecordCommand(record),
+        ).success
+        result = resolve(
+            DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, BrowseKnowledgeRecordsQuery()
+        )
+        assert result.success and result.records[0].record_id == "runtime-id"
+        with _initialized_storage(path) as storage:
+            SQLitePermissionGrantRepository(storage).revoke(
+                DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, KNOWLEDGE_RECORDS_BROWSE
+            )
+        denied = resolve(
+            DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, BrowseKnowledgeRecordsQuery()
+        )
+        assert denied.error_code == "local_permission_denied"
+    finally:
+        runtime.close()
+    second = _runtime(path)
+    try:
+        second.start()
+        with _initialized_storage(path) as storage:
+            assert SQLitePermissionGrantRepository(storage).is_granted(
+                DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, KNOWLEDGE_RECORDS_BROWSE
+            )
+    finally:
+        second.close()
 
 
 def test_conflicting_mapping_fails_closed_and_cannot_restart(tmp_path: Path) -> None:
