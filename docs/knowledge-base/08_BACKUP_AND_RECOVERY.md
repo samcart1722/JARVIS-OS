@@ -1,6 +1,6 @@
 # Backup and Recovery
 
-## Sprint 38 release custody status - backup verification pending
+## Sprint 38 release custody status - backup verified
 
 The immutable implementation is PR #58 merge
 `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, tree
@@ -9,26 +9,19 @@ The immutable implementation is PR #58 merge
 `70e48c1d4ccb813b064136507d44e90c71d752b3`, peels to that merge;
 local and remote tag identities were directly verified during the tag gate.
 
-No authoritative Sprint 38 backup bundle, source ZIP, custody manifest or restore
-verification is recorded in the supplied gate evidence. Do not label Sprint 37
-artifacts below as Sprint 38 backups. The external B5 inventory/snapshot is
-implementation-review evidence, not a verified release backup. Backup creation
-and verification remain a separate governance gate, not performed by this
-documentation synchronization. Feature refs and the unrelated local test remain
-preserved.
+The verified Sprint 38 backup is
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260911_191202_SPRINT38_CLOSURE`.
+Bundle verification, external bare restore, master recovery, tag recovery, ZIP
+extraction and the recovery check all passed. The bundle, ZIP and custody hashes
+are recorded in `BACKUP_SHA256_MANIFEST.txt`. The unrelated untracked
+`tests/unit/reasoning/` tree is excluded from release artifacts.
 
 Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Release-truth synchronization is handled through
-[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
-open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
-origin. The authoritative current documentation HEAD is the head reported by
-PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
-The PR must receive satisfactory independent review of its current HEAD before
-proceeding to the separately authorized Documentation Merge Gate.
-Documentation merge remains pending. Post-merge verification and remaining
-governance requirements must then be completed before formal closure. Sprint 38
-remains formally open until those steps are complete. Sprint 39 is NOT STARTED
-and NOT AUTHORIZED; no scope is approved.
+`governed-sprint-38-complete`. Documentation PR #59 is merged into `master` at
+`de6a28443e955419d80a26b211a20d4db8d7e388`; branch cleanup is complete. This
+reviewed closure truth is the last documentation synchronization required; once
+incorporated into `master`, Sprint 38 is formally CLOSED. Sprint 39 is NOT
+STARTED, NOT AUTHORIZED, and has no approved scope.
 
 No project should depend on one computer, chat account, or AI provider. Git and
 repository documentation preserve continuity; chats are secondary history.

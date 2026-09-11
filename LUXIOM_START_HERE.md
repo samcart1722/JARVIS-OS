@@ -30,20 +30,14 @@ by the operator, not personally observed by Codex. See
 
 Implementation and tag are complete.
 Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Release-truth synchronization is handled through
-[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
-open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
-origin. The authoritative current documentation HEAD is the head reported by
-PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
-The PR must receive satisfactory independent review of its current HEAD before
-proceeding to the separately authorized Documentation Merge Gate.
-Documentation merge remains pending. Post-merge verification and remaining
-governance requirements must then be completed before formal closure. Sprint 38
-remains formally open until those steps are complete. Sprint 39 is NOT STARTED
-and NOT AUTHORIZED; no scope is approved.
-No verified Sprint 38 backup is recorded; see
-[recovery status](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
-Sprint 39 is NOT STARTED, with no selected scope or authorization.
+`governed-sprint-38-complete`. Documentation PR #59 is merged into
+`master` at `de6a28443e955419d80a26b211a20d4db8d7e388`. Verified
+backup/recovery evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`;
+both Sprint 38 branches were removed locally and remotely. This reviewed
+closure-truth change is the last documentation synchronization required; once
+incorporated into `master`, Sprint 38 is formally CLOSED. Sprint 39 is NOT
+STARTED, NOT AUTHORIZED, and has no approved scope.
 
 Luxiom is a Cognitive Operating System: a domain-independent cognitive core
 intended to support multiple products through reusable specialists,
