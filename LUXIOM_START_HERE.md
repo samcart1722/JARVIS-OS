@@ -28,16 +28,16 @@ Ruff and diff checks passed. Native acceptance PASS (14 scenarios) is reported
 by the operator, not personally observed by Codex. See
 [canonical evidence](LUXIOM_CANONICAL_PROJECT_STATE.md).
 
-Implementation and tag are complete.
-Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Documentation PR #59 is merged into
-`master` at `de6a28443e955419d80a26b211a20d4db8d7e388`. Verified
-backup/recovery evidence is recorded at
-`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`;
-both Sprint 38 branches were removed locally and remotely. This reviewed
-closure-truth change is the last documentation synchronization required; once
-incorporated into `master`, Sprint 38 is formally CLOSED. Sprint 39 is NOT
-STARTED, NOT AUTHORIZED, and has no approved scope.
+Sprint 38 is CLOSED. Its Authorized local knowledge browse v1 implementation
+was released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Documentation PR #59 and the final closure PR
+#60 are merged; their release truth is incorporated into `master` at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified backup and recovery
+evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
+and prior Sprint 38 feature/documentation branches were cleaned locally and
+remotely. Formal closure is complete, with no known open functional defects.
+Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 
 Luxiom is a Cognitive Operating System: a domain-independent cognitive core
 intended to support multiple products through reusable specialists,

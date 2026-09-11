@@ -22,12 +22,16 @@ Bundle verification PASS, external restore PASS, master recovery PASS, tag
 recovery PASS, ZIP extraction PASS and recovery check PASS. The unrelated untracked
 `tests/unit/reasoning/` tree is excluded from release artifacts.
 
-Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Documentation PR #59 is merged into `master` at
-`de6a28443e955419d80a26b211a20d4db8d7e388`; branch cleanup is complete. This
-reviewed closure truth is the last documentation synchronization required; once
-incorporated into `master`, Sprint 38 is formally CLOSED. Sprint 39 is NOT
-STARTED, NOT AUTHORIZED, and has no approved scope.
+Sprint 38 is CLOSED. Its Authorized local knowledge browse v1 implementation
+was released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Documentation PR #59 and the final closure PR
+#60 are merged; their release truth is incorporated into `master` at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified backup and recovery
+evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
+and prior Sprint 38 feature/documentation branches were cleaned locally and
+remotely. Formal closure is complete, with no known open functional defects.
+Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 
 No project should depend on one computer, chat account, or AI provider. Git and
 repository documentation preserve continuity; chats are secondary history.

@@ -38,15 +38,16 @@ Previously executed evidence, not new code tests in this documentation gate:
 Frozen contract SHA-256:
 `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
 
-Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Documentation PR #59 is merged into
-`master` at `de6a28443e955419d80a26b211a20d4db8d7e388`. Verified
-backup/recovery evidence is recorded at
-`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`;
-both Sprint 38 branches were removed locally and remotely. This reviewed
-closure-truth change is the last documentation synchronization required; once
-incorporated into `master`, Sprint 38 is formally CLOSED. Sprint 39 is NOT
-STARTED, NOT AUTHORIZED, and has no approved scope.
+Sprint 38 is CLOSED. Its Authorized local knowledge browse v1 implementation
+was released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Documentation PR #59 and the final closure PR
+#60 are merged; their release truth is incorporated into `master` at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified backup and recovery
+evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
+and prior Sprint 38 feature/documentation branches were cleaned locally and
+remotely. Formal closure is complete, with no known open functional defects.
+Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 Later documentation may advance master without moving the immutable
 implementation tag.
 
@@ -87,13 +88,13 @@ identities are historical facts, not assertions of its current or final HEAD.
 
 ### Formal state and remaining authorization
 
-Documentation PR #59 is merged into `master` at
-`de6a28443e955419d80a26b211a20d4db8d7e388`. The verified Sprint 38 backup and
+Documentation PR #59 and the final closure PR #60 are merged. Their release
+truth is incorporated into `master` at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified Sprint 38 backup and
 recovery evidence, and local/remote branch cleanup, are recorded in
-[Backup and Recovery](08_BACKUP_AND_RECOVERY.md). This reviewed closure truth is
-the last documentation synchronization required; once incorporated into
-`master`, Sprint 38 is formally CLOSED. Sprint 39 remains NOT STARTED, NOT
-AUTHORIZED, and has no approved scope.
+[Backup and Recovery](08_BACKUP_AND_RECOVERY.md). Sprint 38 is CLOSED and
+formal closure is complete. Sprint 39 remains NOT STARTED, NOT AUTHORIZED, and
+has no approved scope.
 
 ### Historical documentation reviews - not an operational checkpoint
 

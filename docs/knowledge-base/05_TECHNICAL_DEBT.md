@@ -19,12 +19,16 @@ identified native list execution are absent, classified as non-blocking in the
 consolidated review; automated list regression exists. No universal network
 isolation claim follows from instrumented zero-call tests or simulated DOM.
 
-Sprint 38 implementation is released through merged PR #58 and immutable tag
-`governed-sprint-38-complete`. Documentation PR #59 is merged into `master` at
-`de6a28443e955419d80a26b211a20d4db8d7e388`; verified backup/recovery and branch
-cleanup are complete. This reviewed closure truth is the last documentation
-synchronization required; once incorporated into `master`, Sprint 38 is formally
-CLOSED. Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
+Sprint 38 is CLOSED. Its Authorized local knowledge browse v1 implementation
+was released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Documentation PR #59 and the final closure PR
+#60 are merged; their release truth is incorporated into `master` at
+`a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified backup and recovery
+evidence is recorded at
+`C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
+and prior Sprint 38 feature/documentation branches were cleaned locally and
+remotely. Formal closure is complete, with no known open functional defects.
+Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 The unrelated untracked test is excluded and must remain untouched. Knowledge edit/delete,
 semantic search, pagination, production serving/authentication, broader UI,
 Hermes and Spatial remain outside this release. Sprint 39 is NOT STARTED.
