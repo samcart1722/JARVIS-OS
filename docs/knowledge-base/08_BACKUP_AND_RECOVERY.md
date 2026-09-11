@@ -14,8 +14,17 @@ verification is recorded in the supplied gate evidence. Do not label Sprint 37
 artifacts below as Sprint 38 backups. The external B5 inventory/snapshot is
 implementation-review evidence, not a verified release backup. Backup creation
 and verification remain a separate governance gate, not performed by this
-uncommitted documentation synchronization. Feature refs and the unrelated local
-test remain preserved; formal Sprint 38 closure is pending.
+documentation synchronization. Feature refs and the unrelated local test remain
+preserved.
+
+The prepared documentation synchronization was committed as
+`6e888c973237350fb8e8d9d449c131ff038205d6` on
+`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
+open. Independent review of PR #59 was executed and remains BLOCKED solely by
+stale statements about documentation commit/publication/PR status. Corrective
+documentation synchronization is in progress; PR #59 is not yet approved.
+Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
+NOT STARTED and NOT AUTHORIZED.
 
 No project should depend on one computer, chat account, or AI provider. Git and
 repository documentation preserve continuity; chats are secondary history.

@@ -28,8 +28,15 @@ Ruff and diff checks passed. Native acceptance PASS (14 scenarios) is reported
 by the operator, not personally observed by Codex. See
 [canonical evidence](LUXIOM_CANONICAL_PROJECT_STATE.md).
 
-Implementation and tag are complete; formal closure and remaining governance
-gates are pending. This documentation has not been committed or published.
+Implementation and tag are complete.
+The prepared documentation synchronization was committed as
+`6e888c973237350fb8e8d9d449c131ff038205d6` on
+`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
+open. Independent review of PR #59 was executed and remains BLOCKED solely by
+stale statements about documentation commit/publication/PR status. Corrective
+documentation synchronization is in progress; PR #59 is not yet approved.
+Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
+NOT STARTED and NOT AUTHORIZED.
 No verified Sprint 38 backup is recorded; see
 [recovery status](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
 Sprint 39 is NOT STARTED, with no selected scope or authorization.

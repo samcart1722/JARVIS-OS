@@ -19,9 +19,16 @@ identified native list execution are absent, classified as non-blocking in the
 consolidated review; automated list regression exists. No universal network
 isolation claim follows from instrumented zero-call tests or simulated DOM.
 
-Remaining governance: no verified Sprint 38 backup is recorded; documentation
-commit/publication/review/merge and formal closure are pending. The unrelated
-untracked test is excluded and must remain untouched. Knowledge edit/delete,
+The prepared documentation synchronization was committed as
+`6e888c973237350fb8e8d9d449c131ff038205d6` on
+`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
+open. Independent review of PR #59 was executed and remains BLOCKED solely by
+stale statements about documentation commit/publication/PR status. Corrective
+documentation synchronization is in progress; PR #59 is not yet approved.
+Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
+NOT STARTED and NOT AUTHORIZED.
+No verified Sprint 38 backup is recorded. The unrelated untracked test is
+excluded and must remain untouched. Knowledge edit/delete,
 semantic search, pagination, production serving/authentication, broader UI,
 Hermes and Spatial remain outside this release. Sprint 39 is NOT STARTED.
 

@@ -38,12 +38,18 @@ Previously executed evidence, not new code tests in this documentation gate:
 Frozen contract SHA-256:
 `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
 
-Sprint 38 is complete at the implementation/tagged-release level; formal Sprint
-closure remains pending. This is an uncommitted documentation synchronization
-prepared for independent review. Documentation commit, push, PR, independent
-pre-merge review and governed merge require their own authorization; no future
-documentation identifiers or closure are asserted. Later documentation may
-advance master without moving the immutable implementation tag.
+Sprint 38 is complete at the implementation/tagged-release level.
+The prepared documentation synchronization was committed as
+`6e888c973237350fb8e8d9d449c131ff038205d6` on
+`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
+open. Independent review of PR #59 was executed and remains BLOCKED solely by
+stale statements about documentation commit/publication/PR status. Corrective
+documentation synchronization is in progress; PR #59 is not yet approved.
+Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
+NOT STARTED and NOT AUTHORIZED.
+Any corrective commit/push, further review and governed merge require their own
+authorization. Later documentation may advance master without moving the
+immutable implementation tag.
 
 No verified Sprint 38 backup is recorded in the supplied gate evidence; the
 historical backup-verification gate remains outstanding. The feature branch
@@ -55,7 +61,8 @@ inventory matched; the six-file UI intervention preserved 565 earlier files.
 Sprint 39 is **NOT STARTED**: no scope selected and no implementation authorized.
 
 The current master baseline for these edits is the release merge above.
-This document does not assert its own future commit, PR or merge SHA.
+The existing documentation commit and open PR #59 are identified above.
+No corrective commit or documentation merge SHA is asserted.
 [Backup and Recovery](08_BACKUP_AND_RECOVERY.md) records the pending custody gate;
 older verified backup facts remain historical and are not Sprint 38 evidence.
 

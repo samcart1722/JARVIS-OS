@@ -49,12 +49,18 @@ Previously executed evidence, not new code tests in this documentation gate:
 Frozen contract SHA-256:
 `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
 
-Sprint 38 is complete at the implementation/tagged-release level; formal Sprint
-closure remains pending. This is an uncommitted documentation synchronization
-prepared for independent review. Documentation commit, push, PR, independent
-pre-merge review and governed merge require their own authorization; no future
-documentation identifiers or closure are asserted. Later documentation may
-advance master without moving the immutable implementation tag.
+Sprint 38 is complete at the implementation/tagged-release level.
+The prepared documentation synchronization was committed as
+`6e888c973237350fb8e8d9d449c131ff038205d6` on
+`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
+open. Independent review of PR #59 was executed and remains BLOCKED solely by
+stale statements about documentation commit/publication/PR status. Corrective
+documentation synchronization is in progress; PR #59 is not yet approved.
+Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
+NOT STARTED and NOT AUTHORIZED.
+Any corrective commit/push, further review and governed merge require their own
+authorization. Later documentation may advance master without moving the
+immutable implementation tag.
 
 No verified Sprint 38 backup is recorded in the supplied gate evidence; the
 historical backup-verification gate remains outstanding. The feature branch
@@ -343,9 +349,14 @@ authorize Sprint 35.
 Verify current Git refs before resuming. The Sprint 38 immutable release remains
 `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4` under
 `governed-sprint-38-complete`. Release-truth edits are on
-`docs/sprint-38-release-truth`, based on that merge, pending independent review
-and authorization before any documentation commit. Master may advance only
-through later governed work; never infer a future SHA here.
+`docs/sprint-38-release-truth`, based on that merge. Documentation commit
+`6e888c973237350fb8e8d9d449c131ff038205d6` is published to origin and PR #59 is
+open. Its independent review remains BLOCKED solely by stale documentation
+workflow statements; corrective synchronization is in progress. Resume with
+validation of the corrective diff, stopping before stage, corrective commit or
+push. Further review and documentation merge remain separate gates; no approval
+or merge is claimed. Master may advance only through later governed work;
+never infer a future SHA here.
 Preserve the unrelated untracked test and both feature refs. Do not execute the
 test, create a release/tag, clean branches or claim closure. Verify the missing
 backup gate separately. Sprint 39 is NOT STARTED and has no authorized scope.

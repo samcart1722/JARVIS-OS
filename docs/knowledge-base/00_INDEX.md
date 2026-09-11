@@ -7,8 +7,15 @@ to authoritative material; it does not replace normative documents.
 
 Sprint 38 Authorized local knowledge browse v1 is the latest implementation
 release at `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, annotated tag
-`governed-sprint-38-complete`. Formal Sprint closure remains pending; this
-release-truth synchronization is prepared for review, not yet committed.
+`governed-sprint-38-complete`.
+The prepared documentation synchronization was committed as
+`6e888c973237350fb8e8d9d449c131ff038205d6` on
+`docs/sprint-38-release-truth`, published to origin, with documentation PR #59
+open. Independent review of PR #59 was executed and remains BLOCKED solely by
+stale statements about documentation commit/publication/PR status. Corrective
+documentation synchronization is in progress; PR #59 is not yet approved.
+Documentation merge and formal Sprint 38 closure remain pending. Sprint 39 is
+NOT STARTED and NOT AUTHORIZED.
 Sprint 37 and earlier releases remain historical. Sprint 39 is NOT STARTED
 and has no selected scope or implementation authorization.
 Start with the repository-owned
