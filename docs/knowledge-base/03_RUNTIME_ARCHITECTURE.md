@@ -1,8 +1,44 @@
 # Runtime Architecture
 
-## Sprint 37 governed local command-assistance flow
+## Sprint 38 governed local knowledge browse flow
 
-Latest implementation release: `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
+Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
+through the existing authenticated local command flow. The separate
+`knowledge.records.browse` permission precedes a workspace-scoped metadata
+lookup. At most 50 summaries expose exactly `record_id`, `kind` and `key`,
+with `truncated` derived from a bounded 51st-row lookahead. No value,
+provenance, workspace, total or cursor is exposed in the BROWSE projection.
+Prepare BROWSE and selection-based Prepare READ only write the editor;
+explicit Send submits its exact text. A separate READ rechecks authorization.
+STORE/READ/FIND, lists, provenance requirements, local-first terminal behavior,
+identity boundaries and SQLite schema v4 remain preserved.
+
+The interpreter accepts only an empty JSON object for BROWSE. A separate
+KnowledgeBrowseRepository port preserves the existing record repository contract.
+Memory and SQLite share the logical STORE/READ/FIND data; SQLite selects only
+record_id, kind and knowledge_key after filtering workspace, in ordinal ID
+order, with LIMIT 51. No schema change or second content query is introduced.
+Composition defaults to shared memory; records-only injection leaves BROWSE
+unavailable, both ports must share logical storage, and browse-only injection
+is rejected before I/O. No capability discovery through storage introspection.
+
+The capability authorizes first. Resolver and gateway validate exact types,
+workspace, order, uniqueness, bounds and truncation without repair or partial
+results. Gateway mapping neither reparses commands nor queries storage. HTTP
+maps its own closed immutable summary models explicitly, omits absent projection
+and preserves previous null fields. Empty BROWSE returns 200; invalid, denied,
+unavailable and unexpected failures use sanitized 400/403/503/500 responses.
+
+The UI renders metadata as text and captures the original record_id from result
+data before clearing results. Prepare READ reuses the serializer, preserving
+8192 serialized code-point limits and isolated-surrogate rejection. A failure
+retains the editor and declares no new command prepared. Preparation, editing
+and Send clear stale results; preparation, selection and Send lock while pending.
+There is no pagination, automatic READ, new endpoint or external UI dependency.
+
+## Historical Sprint 37 governed local command-assistance flow
+
+Sprint 37 implementation release: `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
 tag `governed-sprint-37-complete`. The separate preparation controls serialize
 closed STORE/READ/FIND text fields using JSON.stringify, preserve captured
 strings, reject Python-whitespace-only input and isolated surrogates, and bound
@@ -136,7 +172,8 @@ Sprints 29–32 released authentication, durable mapping, durable permission, an
 the authenticated application gateway; Sprint 33 released permission
 revocation; Sprint 34 released the local interactive runtime; Sprint 35 released
 the structured list projection; Sprint 36 released structured knowledge
-projections; Sprint 37 now adds governed local command assistance in the UI.
+projections; Sprint 37 added governed local command assistance in the UI;
+Sprint 38 adds the separately authorized metadata-browse path described above.
 
 ## Deterministic knowledge commands (Sprint 25)
 

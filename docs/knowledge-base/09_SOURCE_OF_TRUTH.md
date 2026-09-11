@@ -1,6 +1,65 @@
 # Source of Truth
 
-## Sprint 37 governed implementation truth
+## Sprint 38 governed implementation truth
+
+Implementation `b690e299ac4737f7323fdaf631c459f5f25ce80b`, PR #58,
+ordinary two-parent release merge `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`.
+Parents, in order: `e26b8a6c7b89132b9ff2221b1bc35d0726cba236` and
+`b690e299ac4737f7323fdaf631c459f5f25ce80b`.
+Release tree `683ee3336b17ec4d63f5b542e1553ddb9e2fb445` equals the approved
+feature tree; exactly 36 authorized files changed from the first parent.
+Annotated tag `governed-sprint-38-complete`, object
+`70e48c1d4ccb813b064136507d44e90c71d752b3`, peels to that release merge.
+Exact annotation: `Sprint 38 - Authorized local knowledge browse v1`.
+
+Previously executed evidence, not new code tests in this documentation gate:
+
+- Direct Codex post-merge validation on master at the release merge: **1946 PASS,
+  0 FAIL, 0 SKIP**, including architecture; global Ruff and diff checks passed.
+  Pytest explicitly excluded the unrelated test, disabled bytecode/cache writes,
+  and used an external temporary directory. Runtime data was synthetic/temporary.
+- Direct Codex pre-merge review: complete remote 36-file diff; 908 focused tests,
+  Sprint 37 Node harness 406 checks, BROWSE harness 65 checks in 13 meaningful
+  categories, and real-interpreter comparison passed. Node uses a simulated DOM.
+- Operator-reported native acceptance: **PASS, 14 scenarios**, Windows 11 and a
+  real browser, sessions 0/1/50/51 plus count 1 with a 9000-character ID.
+  Focus, Enter/Space, layout, Prepare versus separate Send, exact editor payload,
+  real transport, results, STORE/READ/FIND, Pending/Offline recovery and editor
+  preservation passed. The operator used TemporaryDirectory-backed synthetic.sqlite3,
+  synthetic data/proof and 127.0.0.1:8765, never a personal database. Codex did not
+  personally observe this manual execution.
+- Exact browser version and a separately identified native list regression were
+  not recorded. Consolidated review classified these as non-blocking; list
+  regression is covered by automated evidence. Neither missing fact is inferred.
+- Independent block, consolidated and pre-merge reviews approved the implementation;
+  commit, push, PR, merge, post-merge validation and tag gates passed. No known
+  open functional defects or blocking architecture violations remain.
+
+Frozen contract SHA-256:
+`5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
+
+Sprint 38 is complete at the implementation/tagged-release level; formal Sprint
+closure remains pending. This is an uncommitted documentation synchronization
+prepared for independent review. Documentation commit, push, PR, independent
+pre-merge review and governed merge require their own authorization; no future
+documentation identifiers or closure are asserted. Later documentation may
+advance master without moving the immutable implementation tag.
+
+No verified Sprint 38 backup is recorded in the supplied gate evidence; the
+historical backup-verification gate remains outstanding. The feature branch
+`feat/sprint-38-authorized-local-knowledge-browse` remains local and remote at the
+feature commit; deletion is not authorized. The unrelated untracked file
+`tests/unit/reasoning/entities/test_user_request.py` remains intact, unexecuted,
+unstaged and absent from the release. The approved 571-file pre-documentation
+inventory matched; the six-file UI intervention preserved 565 earlier files.
+Sprint 39 is **NOT STARTED**: no scope selected and no implementation authorized.
+
+The current master baseline for these edits is the release merge above.
+This document does not assert its own future commit, PR or merge SHA.
+[Backup and Recovery](08_BACKUP_AND_RECOVERY.md) records the pending custody gate;
+older verified backup facts remain historical and are not Sprint 38 evidence.
+
+## Historical Sprint 37 governed implementation truth
 
 Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
 ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
@@ -24,7 +83,7 @@ Sprint 36 tag object `16e1b3ad9f1239c86e2786d81722620fa1b7c289` and destination
 `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` remain unchanged.
 This later release-truth synchronization may advance `master`; it does not move
 or replace the implementation tag or require another implementation backup.
-Sprint 38 has no selected scope or authorized implementation. Planning is a
+At the Sprint 37 checkpoint, Sprint 38 had no selected scope or authorized implementation. Planning is a
 separate gate.
 
 [Backup and Recovery](08_BACKUP_AND_RECOVERY.md) records the four exact artifact

@@ -1,6 +1,31 @@
 # Technical Debt
 
-## Sprint 37 post-release classification
+## Sprint 38 post-release classification
+
+RESOLVED: users can discover authorized local record IDs without knowing an
+exact key and explicitly prepare READ. BROWSE has separate authorization,
+metadata-only summaries, bounded deterministic enumeration and UI preparation.
+The new BROWSE harness enforces meaningful categories and exact IDs against the
+real interpreter, addressing that recommendation for the new browse coverage.
+No known open functional defects remain in the approved review record.
+
+By design, only the first 50 records by ID are visible; truncated signals more
+records without total, cursor or pagination. Metadata lengths have no aggregate
+response-byte cap. An ID that exceeds the serialized READ limit is displayed
+literally but preparation fails without truncation, request or editor loss.
+
+Native acceptance is operator-reported. Browser-version metadata and separately
+identified native list execution are absent, classified as non-blocking in the
+consolidated review; automated list regression exists. No universal network
+isolation claim follows from instrumented zero-call tests or simulated DOM.
+
+Remaining governance: no verified Sprint 38 backup is recorded; documentation
+commit/publication/review/merge and formal closure are pending. The unrelated
+untracked test is excluded and must remain untouched. Knowledge edit/delete,
+semantic search, pagination, production serving/authentication, broader UI,
+Hermes and Spatial remain outside this release. Sprint 39 is NOT STARTED.
+
+## Historical Sprint 37 post-release classification
 
 RESOLVED: manual JSON authoring is no longer required for bounded local
 STORE/READ/FIND preparation. Existing editor authority and explicit submission
@@ -15,7 +40,7 @@ remain distinct. Universal network isolation was not audited.
 
 Knowledge edit/delete, semantic search, pagination, generic projections,
 production serving/authentication, broader UI, Hermes and Spatial remain
-unapproved. Sprint 38 has no selected scope or authorized implementation.
+unapproved. At the Sprint 37 checkpoint, Sprint 38 had no selected scope or authorized implementation.
 
 ## Historical Sprint 36 post-release classification
 

@@ -1,6 +1,71 @@
 # AI Handoff
 
-## Current Sprint 37 recovery brief
+## Current Sprint 38 recovery brief
+
+Implementation `b690e299ac4737f7323fdaf631c459f5f25ce80b`, PR #58,
+ordinary two-parent release merge `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`.
+Parents, in order: `e26b8a6c7b89132b9ff2221b1bc35d0726cba236` and
+`b690e299ac4737f7323fdaf631c459f5f25ce80b`.
+Release tree `683ee3336b17ec4d63f5b542e1553ddb9e2fb445` equals the approved
+feature tree; exactly 36 authorized files changed from the first parent.
+Annotated tag `governed-sprint-38-complete`, object
+`70e48c1d4ccb813b064136507d44e90c71d752b3`, peels to that release merge.
+Exact annotation: `Sprint 38 - Authorized local knowledge browse v1`.
+
+Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
+through the existing authenticated local command flow. The separate
+`knowledge.records.browse` permission precedes a workspace-scoped metadata
+lookup. At most 50 summaries expose exactly `record_id`, `kind` and `key`,
+with `truncated` derived from a bounded 51st-row lookahead. No value,
+provenance, workspace, total or cursor is exposed in the BROWSE projection.
+Prepare BROWSE and selection-based Prepare READ only write the editor;
+explicit Send submits its exact text. A separate READ rechecks authorization.
+STORE/READ/FIND, lists, provenance requirements, local-first terminal behavior,
+identity boundaries and SQLite schema v4 remain preserved.
+
+Previously executed evidence, not new code tests in this documentation gate:
+
+- Direct Codex post-merge validation on master at the release merge: **1946 PASS,
+  0 FAIL, 0 SKIP**, including architecture; global Ruff and diff checks passed.
+  Pytest explicitly excluded the unrelated test, disabled bytecode/cache writes,
+  and used an external temporary directory. Runtime data was synthetic/temporary.
+- Direct Codex pre-merge review: complete remote 36-file diff; 908 focused tests,
+  Sprint 37 Node harness 406 checks, BROWSE harness 65 checks in 13 meaningful
+  categories, and real-interpreter comparison passed. Node uses a simulated DOM.
+- Operator-reported native acceptance: **PASS, 14 scenarios**, Windows 11 and a
+  real browser, sessions 0/1/50/51 plus count 1 with a 9000-character ID.
+  Focus, Enter/Space, layout, Prepare versus separate Send, exact editor payload,
+  real transport, results, STORE/READ/FIND, Pending/Offline recovery and editor
+  preservation passed. The operator used TemporaryDirectory-backed synthetic.sqlite3,
+  synthetic data/proof and 127.0.0.1:8765, never a personal database. Codex did not
+  personally observe this manual execution.
+- Exact browser version and a separately identified native list regression were
+  not recorded. Consolidated review classified these as non-blocking; list
+  regression is covered by automated evidence. Neither missing fact is inferred.
+- Independent block, consolidated and pre-merge reviews approved the implementation;
+  commit, push, PR, merge, post-merge validation and tag gates passed. No known
+  open functional defects or blocking architecture violations remain.
+
+Frozen contract SHA-256:
+`5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
+
+Sprint 38 is complete at the implementation/tagged-release level; formal Sprint
+closure remains pending. This is an uncommitted documentation synchronization
+prepared for independent review. Documentation commit, push, PR, independent
+pre-merge review and governed merge require their own authorization; no future
+documentation identifiers or closure are asserted. Later documentation may
+advance master without moving the immutable implementation tag.
+
+No verified Sprint 38 backup is recorded in the supplied gate evidence; the
+historical backup-verification gate remains outstanding. The feature branch
+`feat/sprint-38-authorized-local-knowledge-browse` remains local and remote at the
+feature commit; deletion is not authorized. The unrelated untracked file
+`tests/unit/reasoning/entities/test_user_request.py` remains intact, unexecuted,
+unstaged and absent from the release. The approved 571-file pre-documentation
+inventory matched; the six-file UI intervention preserved 565 earlier files.
+Sprint 39 is **NOT STARTED**: no scope selected and no implementation authorized.
+
+## Historical Sprint 37 recovery brief
 
 Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
 ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
@@ -54,7 +119,7 @@ Sprint 36 tag object `16e1b3ad9f1239c86e2786d81722620fa1b7c289` and destination
 `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` remain unchanged.
 This later release-truth synchronization may advance `master`; it does not move
 or replace the implementation tag or require another implementation backup.
-Sprint 38 has no selected scope or authorized implementation. Planning is a
+At the Sprint 37 checkpoint, Sprint 38 had no selected scope or authorized implementation. Planning is a
 separate gate.
 
 Read [Backup and Recovery](08_BACKUP_AND_RECOVERY.md) for exact hashes.
@@ -275,11 +340,12 @@ authorize Sprint 35.
 
 ## Resume instruction
 
-Resume from canonical `master` and verify local HEAD against origin/master.
-Sprint 37 implementation, ordinary merge, approved post-merge validation,
-immutable tag verification, recoverable backup and implementation-branch cleanup
-are complete. The immutable checkpoint remains
-`4dfaff1afdd11ab1258a52671e6799a3a442d16d` under
-`governed-sprint-37-complete`; this later release-truth documentation may advance
-master without moving it or requiring another implementation backup.
-Sprint 38 has no selected scope or authorized implementation.
+Verify current Git refs before resuming. The Sprint 38 immutable release remains
+`97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4` under
+`governed-sprint-38-complete`. Release-truth edits are on
+`docs/sprint-38-release-truth`, based on that merge, pending independent review
+and authorization before any documentation commit. Master may advance only
+through later governed work; never infer a future SHA here.
+Preserve the unrelated untracked test and both feature refs. Do not execute the
+test, create a release/tag, clean branches or claim closure. Verify the missing
+backup gate separately. Sprint 39 is NOT STARTED and has no authorized scope.

@@ -5,10 +5,12 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 37 Local Knowledge Command Assistance is latest at
-`4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tag
-`governed-sprint-37-complete`; Sprint 36 and earlier releases remain historical.
-Sprint 38 planning remains separate, with no selected or authorized scope.
+Sprint 38 Authorized local knowledge browse v1 is the latest implementation
+release at `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, annotated tag
+`governed-sprint-38-complete`. Formal Sprint closure remains pending; this
+release-truth synchronization is prepared for review, not yet committed.
+Sprint 37 and earlier releases remain historical. Sprint 39 is NOT STARTED
+and has no selected scope or implementation authorization.
 Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and

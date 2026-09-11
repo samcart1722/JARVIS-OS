@@ -1,5 +1,22 @@
 # Backup and Recovery
 
+## Sprint 38 release custody status - backup verification pending
+
+The immutable implementation is PR #58 merge
+`97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, tree
+`683ee3336b17ec4d63f5b542e1553ddb9e2fb445`. Annotated tag
+`governed-sprint-38-complete`, object
+`70e48c1d4ccb813b064136507d44e90c71d752b3`, peels to that merge;
+local and remote tag identities were directly verified during the tag gate.
+
+No authoritative Sprint 38 backup bundle, source ZIP, custody manifest or restore
+verification is recorded in the supplied gate evidence. Do not label Sprint 37
+artifacts below as Sprint 38 backups. The external B5 inventory/snapshot is
+implementation-review evidence, not a verified release backup. Backup creation
+and verification remain a separate governance gate, not performed by this
+uncommitted documentation synchronization. Feature refs and the unrelated local
+test remain preserved; formal Sprint 38 closure is pending.
+
 No project should depend on one computer, chat account, or AI provider. Git and
 repository documentation preserve continuity; chats are secondary history.
 
