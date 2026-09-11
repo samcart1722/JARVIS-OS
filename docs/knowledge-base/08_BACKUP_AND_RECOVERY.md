@@ -11,9 +11,15 @@ local and remote tag identities were directly verified during the tag gate.
 
 The verified Sprint 38 backup is
 `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260911_191202_SPRINT38_CLOSURE`.
-Bundle verification, external bare restore, master recovery, tag recovery, ZIP
-extraction and the recovery check all passed. The bundle, ZIP and custody hashes
-are recorded in `BACKUP_SHA256_MANIFEST.txt`. The unrelated untracked
+The bundle is `JARVIS-OS_SPRINT38_ALL_REFS.bundle` with SHA-256
+`FAAAA11A50B456B5ABBD3C3BD0B4BD64D5AA8CDB61F5F96885603C0BEF74DD99`.
+The release source is `LUXIOM_SPRINT38_RELEASE_SOURCE.zip` with SHA-256
+`6759BD276D644A151EC584FB10DC895158B4435FEED41AF7EED335DBBC161BA0`.
+`RELEASE_CUSTODY.json` has SHA-256
+`480487B8FE586092BE2A889F35A584EEC302C66B16AE2CF82F2EB654128C20DE`.
+`BACKUP_SHA256_MANIFEST.txt` remains the complete verifiable manifest.
+Bundle verification PASS, external restore PASS, master recovery PASS, tag
+recovery PASS, ZIP extraction PASS and recovery check PASS. The unrelated untracked
 `tests/unit/reasoning/` tree is excluded from release artifacts.
 
 Sprint 38 implementation is released through merged PR #58 and immutable tag

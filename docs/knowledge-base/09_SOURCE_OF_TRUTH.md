@@ -75,6 +75,12 @@ Already published documentation commits are:
   `docs: stabilize Sprint 38 release truth`.
 - Closure backup identities and hashes are recorded in
   `C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260911_191202_SPRINT38_CLOSURE`.
+- Sprint 38 closure backup bundle SHA-256:
+  `FAAAA11A50B456B5ABBD3C3BD0B4BD64D5AA8CDB61F5F96885603C0BEF74DD99`.
+- Sprint 38 release source ZIP SHA-256:
+  `6759BD276D644A151EC584FB10DC895158B4435FEED41AF7EED335DBBC161BA0`.
+- Sprint 38 release custody SHA-256:
+  `480487B8FE586092BE2A889F35A584EEC302C66B16AE2CF82F2EB654128C20DE`.
 
 PR #59 is the stable document-review reference. These existing commit
 identities are historical facts, not assertions of its current or final HEAD.
