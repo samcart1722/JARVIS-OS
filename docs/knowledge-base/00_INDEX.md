@@ -5,10 +5,23 @@ to authoritative material; it does not replace normative documents.
 
 ## Recommended reading order
 
-Sprint 37 Local Knowledge Command Assistance is latest at
-`4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tag
-`governed-sprint-37-complete`; Sprint 36 and earlier releases remain historical.
-Sprint 38 planning remains separate, with no selected or authorized scope.
+Sprint 38 Authorized local knowledge browse v1 is the latest implementation
+release at `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, annotated tag
+`governed-sprint-38-complete`.
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+Sprint 37 and earlier releases remain historical. Sprint 39 is NOT STARTED
+and has no selected scope or implementation authorization.
 Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and

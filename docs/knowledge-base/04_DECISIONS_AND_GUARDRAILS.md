@@ -1,6 +1,31 @@
 # Decisions and Guardrails
 
-## Sprint 37 governed decisions and guardrails
+## Sprint 38 governed decisions and guardrails
+
+Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
+through the existing authenticated local command flow. The separate
+`knowledge.records.browse` permission precedes a workspace-scoped metadata
+lookup. At most 50 summaries expose exactly `record_id`, `kind` and `key`,
+with `truncated` derived from a bounded 51st-row lookahead. No value,
+provenance, workspace, total or cursor is exposed in the BROWSE projection.
+Prepare BROWSE and selection-based Prepare READ only write the editor;
+explicit Send submits its exact text. A separate READ rechecks authorization.
+STORE/READ/FIND, lists, provenance requirements, local-first terminal behavior,
+identity boundaries and SQLite schema v4 remain preserved.
+
+- Contract SHA-256:
+  `5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
+- PR #58 explicitly used an ordinary merge with master first and feature second;
+  the user resolved the handbook's squash preference for this multi-stage work.
+  This decision applies to Sprint 38, not a rewrite of historical merge policy.
+- Immutable release: `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`,
+  tag `governed-sprint-38-complete`; later documentation cannot retarget it.
+- No natural-language browse, semantic search, pagination, schema migration,
+  production identity changes or automatic writes were authorized.
+- Implementation/tag completion does not imply formal closure. No Sprint 39
+  scope or implementation is authorized. See Current State for evidence limits.
+
+## Historical Sprint 37 governed decisions and guardrails
 
 - The approved CA-01 through CA-12 assistance contract is bounded to local
   STORE/READ/FIND preparation; preparation is not execution or authorization.
@@ -12,7 +37,7 @@
   tag `governed-sprint-37-complete`. Later docs do not move that checkpoint.
 - Validation provenance and zero-call limits are explicit in Current State.
   Node is a simulated DOM; manual Edge acceptance is separately reported.
-- Sprint 38 scope is unselected; no subsequent implementation is authorized.
+- At that Sprint 37 checkpoint, Sprint 38 scope was unselected and not authorized.
 
 ## Historical Sprint 36 governed decisions and guardrails
 

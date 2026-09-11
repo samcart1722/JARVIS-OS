@@ -1,6 +1,42 @@
 # Technical Debt
 
-## Sprint 37 post-release classification
+## Sprint 38 post-release classification
+
+RESOLVED: users can discover authorized local record IDs without knowing an
+exact key and explicitly prepare READ. BROWSE has separate authorization,
+metadata-only summaries, bounded deterministic enumeration and UI preparation.
+The new BROWSE harness enforces meaningful categories and exact IDs against the
+real interpreter, addressing that recommendation for the new browse coverage.
+No known open functional defects remain in the approved review record.
+
+By design, only the first 50 records by ID are visible; truncated signals more
+records without total, cursor or pagination. Metadata lengths have no aggregate
+response-byte cap. An ID that exceeds the serialized READ limit is displayed
+literally but preparation fails without truncation, request or editor loss.
+
+Native acceptance is operator-reported. Browser-version metadata and separately
+identified native list execution are absent, classified as non-blocking in the
+consolidated review; automated list regression exists. No universal network
+isolation claim follows from instrumented zero-call tests or simulated DOM.
+
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+No verified Sprint 38 backup is recorded. The unrelated untracked test is
+excluded and must remain untouched. Knowledge edit/delete,
+semantic search, pagination, production serving/authentication, broader UI,
+Hermes and Spatial remain outside this release. Sprint 39 is NOT STARTED.
+
+## Historical Sprint 37 post-release classification
 
 RESOLVED: manual JSON authoring is no longer required for bounded local
 STORE/READ/FIND preparation. Existing editor authority and explicit submission
@@ -15,7 +51,7 @@ remain distinct. Universal network isolation was not audited.
 
 Knowledge edit/delete, semantic search, pagination, generic projections,
 production serving/authentication, broader UI, Hermes and Spatial remain
-unapproved. Sprint 38 has no selected scope or authorized implementation.
+unapproved. At the Sprint 37 checkpoint, Sprint 38 had no selected scope or authorized implementation.
 
 ## Historical Sprint 36 post-release classification
 

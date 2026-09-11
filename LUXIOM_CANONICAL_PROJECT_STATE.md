@@ -1,5 +1,81 @@
 # Luxiom Canonical Project State
 
+## Current release truth - Sprint 38
+
+Implementation `b690e299ac4737f7323fdaf631c459f5f25ce80b`, PR #58,
+ordinary two-parent release merge `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`.
+Parents, in order: `e26b8a6c7b89132b9ff2221b1bc35d0726cba236` and
+`b690e299ac4737f7323fdaf631c459f5f25ce80b`.
+Release tree `683ee3336b17ec4d63f5b542e1553ddb9e2fb445` equals the approved
+feature tree; exactly 36 authorized files changed from the first parent.
+Annotated tag `governed-sprint-38-complete`, object
+`70e48c1d4ccb813b064136507d44e90c71d752b3`, peels to that release merge.
+Exact annotation: `Sprint 38 - Authorized local knowledge browse v1`.
+
+Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
+through the existing authenticated local command flow. The separate
+`knowledge.records.browse` permission precedes a workspace-scoped metadata
+lookup. At most 50 summaries expose exactly `record_id`, `kind` and `key`,
+with `truncated` derived from a bounded 51st-row lookahead. No value,
+provenance, workspace, total or cursor is exposed in the BROWSE projection.
+Prepare BROWSE and selection-based Prepare READ only write the editor;
+explicit Send submits its exact text. A separate READ rechecks authorization.
+STORE/READ/FIND, lists, provenance requirements, local-first terminal behavior,
+identity boundaries and SQLite schema v4 remain preserved.
+
+Previously executed evidence, not new code tests in this documentation gate:
+
+- Direct Codex post-merge validation on master at the release merge: **1946 PASS,
+  0 FAIL, 0 SKIP**, including architecture; global Ruff and diff checks passed.
+  Pytest explicitly excluded the unrelated test, disabled bytecode/cache writes,
+  and used an external temporary directory. Runtime data was synthetic/temporary.
+- Direct Codex pre-merge review: complete remote 36-file diff; 908 focused tests,
+  Sprint 37 Node harness 406 checks, BROWSE harness 65 checks in 13 meaningful
+  categories, and real-interpreter comparison passed. Node uses a simulated DOM.
+- Operator-reported native acceptance: **PASS, 14 scenarios**, Windows 11 and a
+  real browser, sessions 0/1/50/51 plus count 1 with a 9000-character ID.
+  Focus, Enter/Space, layout, Prepare versus separate Send, exact editor payload,
+  real transport, results, STORE/READ/FIND, Pending/Offline recovery and editor
+  preservation passed. The operator used TemporaryDirectory-backed synthetic.sqlite3,
+  synthetic data/proof and 127.0.0.1:8765, never a personal database. Codex did not
+  personally observe this manual execution.
+- Exact browser version and a separately identified native list regression were
+  not recorded. Consolidated review classified these as non-blocking; list
+  regression is covered by automated evidence. Neither missing fact is inferred.
+- Independent block, consolidated and pre-merge reviews approved the implementation;
+  commit, push, PR, merge, post-merge validation and tag gates passed. No known
+  open functional defects or blocking architecture violations remain.
+
+Frozen contract SHA-256:
+`5187858A5C09C796D9D07A28607220E8C696CAD9F8C99EF96E7CF0A8E10C0BE5`.
+
+Sprint 38 is complete at the implementation/tagged-release level.
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+Later documentation may advance master without moving the immutable
+implementation tag.
+
+No verified Sprint 38 backup is recorded in the supplied gate evidence; the
+historical backup-verification gate remains outstanding. The feature branch
+`feat/sprint-38-authorized-local-knowledge-browse` remains local and remote at the
+feature commit; deletion is not authorized. The unrelated untracked file
+`tests/unit/reasoning/entities/test_user_request.py` remains intact, unexecuted,
+unstaged and absent from the release. The approved 571-file pre-documentation
+inventory matched; the six-file UI intervention preserved 565 earlier files.
+Sprint 39 is **NOT STARTED**: no scope selected and no implementation authorized.
+
+See [backup status](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
+
 ## 1. Purpose and authority
 
 This repository-owned `LUXIOM_CANONICAL_PROJECT_STATE.md` is the durable,
@@ -354,9 +430,9 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Sprint 37 implementation release is complete. Do not begin Sprint 38 or any subsequent
-   implementation sprint without explicit authorization; the next
-   implementation remains a planning and contract-definition boundary until
+6. Sprint 38 implementation and tag gates are complete; formal closure remains
+   pending. Do not begin Sprint 39 or any subsequent implementation without
+   explicit authorization. The next implementation remains a planning boundary until
    explicitly approved.
 
 ## 15. Repository checkpoint synchronization policy
@@ -513,7 +589,7 @@ documentation synchronization is later and separate; it cannot move or
 recreate the immutable implementation tag. At that checkpoint, Sprint 37
 planning remained separate and required explicit governance.
 
-## 18B. Current governed implementation release - Sprint 37
+## 18B. Historical governed implementation release - Sprint 37
 
 Implementation `6af885900344e7a89f1e3a93f784c616ae786317`, PR #56,
 ordinary two-parent release merge `4dfaff1afdd11ab1258a52671e6799a3a442d16d`.
@@ -567,7 +643,7 @@ Sprint 36 tag object `16e1b3ad9f1239c86e2786d81722620fa1b7c289` and destination
 `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787` remain unchanged.
 This later release-truth synchronization may advance `master`; it does not move
 or replace the implementation tag or require another implementation backup.
-Sprint 38 has no selected scope or authorized implementation. Planning is a
+At the Sprint 37 checkpoint, Sprint 38 had no selected scope or authorized implementation. Planning is a
 separate gate.
 
 Exact artifact hashes and recovery details: [Backup and Recovery](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).

@@ -1,6 +1,34 @@
 # Roadmap
 
-## Sprint 37 governed implementation release complete
+## Sprint 38 implementation and tagged release complete
+
+Authorized local knowledge browse v1 is released through PR #58 at
+`97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, annotated tag
+`governed-sprint-38-complete`. It adds separately authorized metadata discovery,
+bounded summaries and explicit preparation of a later READ. Post-merge validation
+observed by Codex: 1946 PASS / 0 FAIL / 0 SKIP, global Ruff and diff checks PASS.
+Native acceptance PASS for 14 scenarios is operator-reported.
+
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+Backup verification is not yet recorded and feature branches remain preserved.
+
+## Next planning boundary - Sprint 39
+
+NOT STARTED. No scope selected, implementation authorized or commitments made.
+Any planning and implementation require their own explicit authorization.
+
+## Historical Sprint 37 governed implementation release complete
 
 Local Knowledge Command Assistance is released through PR #56 at
 `4dfaff1afdd11ab1258a52671e6799a3a442d16d`, immutable tag
@@ -9,7 +37,7 @@ ordinary merge, approved post-merge validation, tag custody, recoverable backup
 and implementation-branch cleanup are complete. This is the separate reviewed
 release-truth synchronization, not a new implementation release.
 
-## Next planning boundary - Sprint 38
+## Historical planning boundary after Sprint 37
 
 No scope has been selected and no implementation is authorized. Planning must
 be separate. Knowledge edit/delete, semantic retrieval, pagination, broader UI,
@@ -192,7 +220,9 @@ Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md
 
 ## Current state
 
-Sprint 37 is latest at `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
+Sprint 38 is latest at `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`,
+tag `governed-sprint-38-complete`; formal closure remains pending.
+Sprint 37 is historical at `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,
 tag `governed-sprint-37-complete`. Sprint 36 is the immediately preceding
 historical release at `b3e5516e70616d8a5a0b30d5e0f01d07af9b7787`,
 tag `governed-sprint-36-complete`. Sprint 35 is the earlier

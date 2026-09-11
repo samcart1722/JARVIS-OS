@@ -1,14 +1,59 @@
 # Luxiom — Start Here
 
+## Current checkpoint - Sprint 38
+
+Implementation `b690e299ac4737f7323fdaf631c459f5f25ce80b`, PR #58,
+ordinary two-parent release merge `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`.
+Parents, in order: `e26b8a6c7b89132b9ff2221b1bc35d0726cba236` and
+`b690e299ac4737f7323fdaf631c459f5f25ce80b`.
+Release tree `683ee3336b17ec4d63f5b542e1553ddb9e2fb445` equals the approved
+feature tree; exactly 36 authorized files changed from the first parent.
+Annotated tag `governed-sprint-38-complete`, object
+`70e48c1d4ccb813b064136507d44e90c71d752b3`, peels to that release merge.
+Exact annotation: `Sprint 38 - Authorized local knowledge browse v1`.
+
+Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
+through the existing authenticated local command flow. The separate
+`knowledge.records.browse` permission precedes a workspace-scoped metadata
+lookup. At most 50 summaries expose exactly `record_id`, `kind` and `key`,
+with `truncated` derived from a bounded 51st-row lookahead. No value,
+provenance, workspace, total or cursor is exposed in the BROWSE projection.
+Prepare BROWSE and selection-based Prepare READ only write the editor;
+explicit Send submits its exact text. A separate READ rechecks authorization.
+STORE/READ/FIND, lists, provenance requirements, local-first terminal behavior,
+identity boundaries and SQLite schema v4 remain preserved.
+
+Post-merge validation observed by Codex: 1946 PASS / 0 FAIL / 0 SKIP; global
+Ruff and diff checks passed. Native acceptance PASS (14 scenarios) is reported
+by the operator, not personally observed by Codex. See
+[canonical evidence](LUXIOM_CANONICAL_PROJECT_STATE.md).
+
+Implementation and tag are complete.
+Sprint 38 implementation is released through merged PR #58 and immutable tag
+`governed-sprint-38-complete`. Release-truth synchronization is handled through
+[documentation PR #59](https://github.com/samcart1722/JARVIS-OS/pull/59), which is
+open and not merged. Its branch, `docs/sprint-38-release-truth`, is published to
+origin. The authoritative current documentation HEAD is the head reported by
+PR #59; this checkpoint does not pin that mutable head to a documentation SHA.
+The PR must receive satisfactory independent review of its current HEAD before
+proceeding to the separately authorized Documentation Merge Gate.
+Documentation merge remains pending. Post-merge verification and remaining
+governance requirements must then be completed before formal closure. Sprint 38
+remains formally open until those steps are complete. Sprint 39 is NOT STARTED
+and NOT AUTHORIZED; no scope is approved.
+No verified Sprint 38 backup is recorded; see
+[recovery status](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
+Sprint 39 is NOT STARTED, with no selected scope or authorization.
+
 Luxiom is a Cognitive Operating System: a domain-independent cognitive core
 intended to support multiple products through reusable specialists,
 capabilities, and replaceable tools/providers. HealthBridge is the first
 planned consumer. Luxiom is not a chatbot, an LLM wrapper, a conventional
 agent, or a product tied to one industry.
 
-## Current checkpoint - Sprint 37
+## Historical checkpoint - Sprint 37
 
-Sprint 37 - Local Knowledge Command Assistance is the latest governed
+At that checkpoint, Sprint 37 - Local Knowledge Command Assistance was the latest governed
 implementation release. PR #56 merged at
 `4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tree
 `cb220d0661708af226ffa8faefc5c00bba0fda4c`, tagged
@@ -26,8 +71,8 @@ was cleaned locally/remotely. See [canonical evidence](LUXIOM_CANONICAL_PROJECT_
 and [backup hashes](docs/knowledge-base/08_BACKUP_AND_RECOVERY.md).
 
 This is later release-truth documentation. It does not move the immutable
-implementation tag or require another implementation backup. Sprint 38 has no
-selected scope or authorized implementation; planning remains separate.
+implementation tag or require another implementation backup. At that checkpoint, Sprint 38 had no
+selected scope or authorized implementation; planning remained separate.
 
 ## Historical checkpoint - Sprint 36
 

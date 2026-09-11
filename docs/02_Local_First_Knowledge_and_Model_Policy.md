@@ -1,8 +1,31 @@
 # Local-First Knowledge and Model Policy
 
-## Sprint 37 governed command-assistance policy
+## Sprint 38 governed metadata-browse policy
 
-Sprint 37 is the latest implementation release at
+Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
+through the existing authenticated local command flow. The separate
+`knowledge.records.browse` permission precedes a workspace-scoped metadata
+lookup. At most 50 summaries expose exactly `record_id`, `kind` and `key`,
+with `truncated` derived from a bounded 51st-row lookahead. No value,
+provenance, workspace, total or cursor is exposed in the BROWSE projection.
+Prepare BROWSE and selection-based Prepare READ only write the editor;
+explicit Send submits its exact text. A separate READ rechecks authorization.
+STORE/READ/FIND, lists, provenance requirements, local-first terminal behavior,
+identity boundaries and SQLite schema v4 remain preserved.
+
+BROWSE requires its own explicit permission; membership and READ permission
+do not grant enumeration. Recognized BROWSE outcomes remain terminal locally
+with either fallback setting. A READ after selection is a new request and
+checks current READ permission before storage access, including revocation
+without restarting the runtime. The runtime development bootstrap adds BROWSE
+to its explicit grants; this is not a production authentication redesign.
+
+Release: `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`,
+tag `governed-sprint-38-complete`. Historical policies below retain their scope.
+
+## Historical Sprint 37 governed command-assistance policy
+
+At that checkpoint, Sprint 37 was the latest implementation release at
 `4dfaff1afdd11ab1258a52671e6799a3a442d16d`, tag
 `governed-sprint-37-complete`. The development UI prepares explicit STORE,
 READ and FIND JSON commands without executing them. Explicit Send submits the
