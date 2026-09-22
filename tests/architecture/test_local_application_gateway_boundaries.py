@@ -44,6 +44,7 @@ GATEWAY_FORBIDDEN_DOWNSTREAM_IMPORT_PREFIXES = (
     "app.cognition.local_resolution.capability",
     "app.cognition.local_resolution.knowledge_capability",
     "app.cognition.local_resolution.knowledge_browse_capability",
+    "app.cognition.local_resolution.knowledge_browse_after_capability",
     "app.cognition.interpretation.interpreter",
     "app.cognition.local_resolution.permissions",
     "app.cognition.local_resolution.repository",
@@ -101,6 +102,7 @@ APPLICATION_MODEL_FORBIDDEN_SYMBOLS = API_FORBIDDEN_SYMBOLS | frozenset(
         "FindKnowledgeRecordsQuery",
         "KnowledgeDiscoveryResolutionResult",
         "BrowseKnowledgeRecordsQuery",
+        "BrowseAfterKnowledgeRecordsQuery",
         "KnowledgeBrowseResolutionResult",
         "KnowledgeRecordSummary",
         "KnowledgeRecordsBrowsed",
@@ -616,7 +618,8 @@ def test_application_result_contract_contains_no_internal_domain_types() -> None
 
     assert ast.unparse(knowledge_projection_union.value) == (
         "LocalKnowledgeStoreProjection | LocalKnowledgeReadProjection | "
-        "LocalKnowledgeFindProjection | LocalKnowledgeBrowseProjection"
+        "LocalKnowledgeFindProjection | LocalKnowledgeBrowseProjection | "
+        "LocalKnowledgeBrowseAfterProjection"
     )
 
     command_projection_union = _assignment(tree, "LocalCommandProjection")
@@ -953,3 +956,20 @@ def test_frozen_legacy_http_surfaces_remain_byte_semantically_unchanged() -> Non
     }
 
     assert observed == FROZEN_UNCHANGED_SHA256
+
+
+def test_browse_after_public_layers_do_not_execute_data_or_authorization():
+    for path in (LOCAL_COMMAND_GATEWAY_PATH, HTTP_ROUTE_PATH):
+        for node in ast.walk(_tree(path)):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                assert node.func.attr not in {
+                    "browse_after",
+                    "browse",
+                    "is_allowed",
+                    "find_by_key",
+                    "store",
+                    "read",
+                    "chat",
+                    "process",
+                    "check",
+                }

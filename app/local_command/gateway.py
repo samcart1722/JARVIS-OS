@@ -11,6 +11,7 @@ from app.cognition.local_resolution.models import (
     LOCAL_PERMISSION_DENIED,
     LOCAL_VALIDATION_FAILED,
     AddListItemsCommand,
+    BrowseAfterKnowledgeRecordsQuery,
     BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
     KnowledgeBrowseResolutionResult,
@@ -34,6 +35,7 @@ from app.local_command.models import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeBrowseAfterProjection,
     LocalKnowledgeBrowseProjection,
     LocalKnowledgeFindProjection,
     LocalKnowledgeReadProjection,
@@ -233,7 +235,8 @@ class LocalCommandApplicationGateway:
             )
 
         if (
-            type(text_routing.interpretation.intent) is BrowseKnowledgeRecordsQuery
+            type(text_routing.interpretation.intent)
+            in (BrowseKnowledgeRecordsQuery, BrowseAfterKnowledgeRecordsQuery)
             and coordinated.route is not CoordinatedRoute.LOCAL
         ):
             raise TypeError("Knowledge browse requires a local result.")
@@ -269,7 +272,8 @@ class LocalCommandApplicationGateway:
             )
 
         if (
-            type(intent) is BrowseKnowledgeRecordsQuery
+            type(intent)
+            in (BrowseKnowledgeRecordsQuery, BrowseAfterKnowledgeRecordsQuery)
             or type(local_result) is KnowledgeBrowseResolutionResult
         ):
             self._require_browse_result(intent, local_result, selected_workspace)
@@ -285,7 +289,8 @@ class LocalCommandApplicationGateway:
                 route=LocalCommandApplicationRoute.LOCAL,
                 response=(
                     "Knowledge records browsed locally."
-                    if type(intent) is BrowseKnowledgeRecordsQuery
+                    if type(intent)
+                    in (BrowseKnowledgeRecordsQuery, BrowseAfterKnowledgeRecordsQuery)
                     else local_result.response
                 ),
                 projection=projection,
@@ -315,8 +320,11 @@ class LocalCommandApplicationGateway:
         | LocalKnowledgeReadProjection
         | LocalKnowledgeFindProjection
         | LocalKnowledgeBrowseProjection
+        | LocalKnowledgeBrowseAfterProjection
     ):
-        if type(intent) is BrowseKnowledgeRecordsQuery:
+        if type(intent) in (
+            BrowseKnowledgeRecordsQuery, BrowseAfterKnowledgeRecordsQuery
+        ):
             cls._require_browse_result(intent, local_result, selected_workspace)
             if local_result.success is not True:
                 raise TypeError("Knowledge browse requires local success.")
@@ -325,7 +333,12 @@ class LocalCommandApplicationGateway:
                 KnowledgeKind.CONCEPT: LocalKnowledgeRecordKind.CONCEPT,
                 KnowledgeKind.STATE: LocalKnowledgeRecordKind.STATE,
             }
-            return LocalKnowledgeBrowseProjection(
+            projection_type = (
+                LocalKnowledgeBrowseAfterProjection
+                if type(intent) is BrowseAfterKnowledgeRecordsQuery
+                else LocalKnowledgeBrowseProjection
+            )
+            return projection_type(
                 records=tuple(
                     LocalKnowledgeSummaryProjection(
                         record.record_id, kind_map[record.kind], record.key
@@ -429,7 +442,8 @@ class LocalCommandApplicationGateway:
     def _require_browse_result(cls, intent, local_result, selected_workspace) -> None:
         cls._require_selected_workspace(selected_workspace)
         if (
-            type(intent) is not BrowseKnowledgeRecordsQuery
+            type(intent)
+            not in (BrowseKnowledgeRecordsQuery, BrowseAfterKnowledgeRecordsQuery)
             or type(local_result) is not KnowledgeBrowseResolutionResult
         ):
             raise TypeError("Knowledge browse intent and result are inconsistent.")
@@ -440,6 +454,14 @@ class LocalCommandApplicationGateway:
                 for record in local_result.records
             ):
                 raise ValueError("Invalid browse scope.")
+            if type(intent) is BrowseAfterKnowledgeRecordsQuery:
+                if BrowseAfterKnowledgeRecordsQuery(intent.after_record_id) != intent:
+                    raise ValueError("Invalid browse anchor.")
+                if any(
+                    record.record_id <= intent.after_record_id
+                    for record in local_result.records
+                ):
+                    raise ValueError("Invalid browse lower bound.")
         except (TypeError, ValueError):
             raise TypeError("Knowledge browse result is inconsistent.") from None
 

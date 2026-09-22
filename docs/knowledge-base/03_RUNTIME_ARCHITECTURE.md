@@ -36,6 +36,29 @@ retains the editor and declares no new command prepared. Preparation, editing
 and Send clear stale results; preparation, selection and Send lock while pending.
 There is no pagination, automatic READ, new endpoint or external UI dependency.
 
+### Browse-after continuation path
+
+The active pre-merge continuation keeps the initial `knowledge browse :: {}`
+path as the baseline and adds the explicit continuation command
+`knowledge browse-after :: {"after_record_id":"..."}`. The request continues
+within the same governed workspace context and uses the same
+`knowledge.records.browse` permission. Authorization is re-evaluated on each
+explicit Send before any storage lookup. The repository query is
+`workspace_id = current workspace AND record_id > normalized after_record_id`,
+ordered by ascending `record_id` with SQLite `COLLATE BINARY` semantics and
+matching deterministic in-memory ordering. The anchor need not match an
+existing record. The repository may internally read up to 51 valid summaries;
+the public/UI layer exposes no more than 50. `truncated=true` is set only when
+another valid record remains beyond the public limit. The public projection is
+metadata-only: `record_id`, `kind`, and `key`; value and provenance remain
+internal and hidden. `Prepare next page` only prepares the continuation command
+in the editor, performs zero requests, and leaves the user free to inspect or
+edit the text; explicit Send is required to perform the request and
+authorization. A selected continuation record still requires a separate prepared
+READ command, which re-checks authorization on Send. No persistent cursor,
+snapshot, Previous flow, totals, semantic retrieval, edit/update/delete,
+model/provider or network dependency is introduced.
+
 ## Historical Sprint 37 governed local command-assistance flow
 
 Sprint 37 implementation release: `4dfaff1afdd11ab1258a52671e6799a3a442d16d`,

@@ -167,6 +167,7 @@ class LocalInteractiveRuntime:
                 local_list_repository=storage,
                 local_knowledge_repository=knowledge_repository,
                 local_knowledge_browse_repository=knowledge_repository,
+                local_knowledge_browse_after_repository=knowledge_repository,
                 membership_repository=storage,
                 principal_proof_bindings=(
                     ConfiguredPrincipalProofBinding(

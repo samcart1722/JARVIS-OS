@@ -45,10 +45,14 @@ from app.cognition.interpretation.interpreter import (
 from app.cognition.interpretation.routing import LocalCommandTextRouter
 from app.cognition.local_resolution.capability import StructuredListCapability
 from app.cognition.local_resolution.contracts import (
+    KnowledgeBrowseAfterRepository,
     KnowledgeBrowseRepository,
     KnowledgeRecordRepository,
     ListItemRepository,
     PermissionGrantRepository,
+)
+from app.cognition.local_resolution.knowledge_browse_after_capability import (
+    StructuredKnowledgeBrowseAfterCapability,
 )
 from app.cognition.local_resolution.knowledge_browse_capability import (
     StructuredKnowledgeBrowseCapability,
@@ -156,6 +160,8 @@ class Container:
         local_list_repository: ListItemRepository | None = None,
         local_knowledge_repository: KnowledgeRecordRepository | None = None,
         local_knowledge_browse_repository: KnowledgeBrowseRepository | None = None,
+        local_knowledge_browse_after_repository: KnowledgeBrowseAfterRepository
+        | None = None,
         trusted_host_bindings: tuple[ConfiguredTrustedHostBinding, ...] = (),
         trusted_known_workspaces: tuple[WorkspaceIdentity, ...] = (),
         trusted_request_context_resolver: TrustedRequestContextResolver
@@ -169,6 +175,13 @@ class Container:
         local_principal_authenticator: LocalPrincipalAuthenticator | None = None,
         principal_actor_mapper: PrincipalActorMapper | None = None,
     ) -> None:
+        if (
+            local_knowledge_browse_after_repository is not None
+            and local_knowledge_repository is None
+        ):
+            raise ValueError(
+                "Knowledge browse-after requires an explicit record repository."
+            )
         if (
             local_knowledge_browse_repository is not None
             and local_knowledge_repository is None
@@ -247,6 +260,9 @@ class Container:
         self._injected_local_knowledge_repository = local_knowledge_repository
         self._injected_local_knowledge_browse_repository = (
             local_knowledge_browse_repository
+        )
+        self._injected_local_knowledge_browse_after_repository = (
+            local_knowledge_browse_after_repository
         )
         self._trusted_host_bindings = tuple(trusted_host_bindings)
         self._trusted_known_workspaces = tuple(trusted_known_workspaces)
@@ -328,6 +344,11 @@ class Container:
             if self._injected_local_knowledge_repository is None
             else self._injected_local_knowledge_browse_repository
         )
+        self.local_knowledge_browse_after_repository = (
+            self.local_knowledge_repository
+            if self._injected_local_knowledge_repository is None
+            else self._injected_local_knowledge_browse_after_repository
+        )
         if (
             self._injected_local_permission_grant_repository
             is not None
@@ -364,6 +385,14 @@ class Container:
                     self.local_knowledge_browse_repository, self.local_permission_policy
                 )
                 if self.local_knowledge_browse_repository is not None
+                else None
+            ),
+            knowledge_browse_after_capability=(
+                StructuredKnowledgeBrowseAfterCapability(
+                    self.local_knowledge_browse_after_repository,
+                    self.local_permission_policy,
+                )
+                if self.local_knowledge_browse_after_repository is not None
                 else None
             ),
         )

@@ -59,3 +59,40 @@ def test_demo_cli_is_thin_container_adapter() -> None:
     assert "app.operations.local_first_cognitive_routing_demo_runtime" in imports
     assert "LocalFirstCognitiveCoordinator(" not in source
     assert "Ollama" not in source
+
+
+def test_continuation_resolver_routes_explicitly_without_storage_or_authorization():
+    path = "app/cognition/local_resolution/resolver.py"
+    imports = _imports(path)
+    assert "app.cognition.local_resolution.knowledge_browse_after_capability" in imports
+    assert not any(
+        name.startswith(("app.infrastructure", "app.api", "app.local_command"))
+        for name in imports
+    )
+    tree = ast.parse(Path(path).read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                assert node.func.id not in {"getattr", "hasattr"}
+            elif isinstance(node.func, ast.Attribute):
+                assert node.func.attr not in {
+                    "is_allowed",
+                    "browse_after",
+                    "interpret",
+                    "raw_decode",
+                }
+
+
+def test_continuation_composition_never_discovers_ports_or_queries_data():
+    tree = ast.parse(Path("app/core/container.py").read_text(encoding="utf-8"))
+    build = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_build_local_resolution"
+    )
+    for node in ast.walk(build):
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                assert node.func.id not in {"getattr", "hasattr"}
+            elif isinstance(node.func, ast.Attribute):
+                assert node.func.attr not in {"browse_after", "is_allowed"}

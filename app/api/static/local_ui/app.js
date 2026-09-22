@@ -7,6 +7,7 @@ const KNOWLEDGE_FIELDS = Object.freeze({
   read: ["record_id"],
   find: ["key", "kind"],
   browse: [],
+  "browse-after": ["after_record_id"],
 });
 
 function prepareKnowledgeCommand(operation, fields) {
@@ -48,6 +49,7 @@ const operationInput = document.querySelector("#assist-operation");
 const prepareButton = document.querySelector("#prepare-command");
 const browseButton = document.querySelector("#prepare-browse");
 let browseReadButtons = [];
+let nextPageButton = null;
 const preparationStatus = document.querySelector("#preparation-status");
 const preparationError = document.querySelector("#preparation-error");
 const commandState = document.querySelector("#command-state");
@@ -91,6 +93,8 @@ const knowledgeCount = document.querySelector("#knowledge-count");
 const knowledgeRecords = document.querySelector("#knowledge-records");
 const knowledgeEmpty = document.querySelector("#knowledge-empty");
 const knowledgeTruncated = document.querySelector("#knowledge-truncated");
+const continuationActions = document.createElement("div");
+knowledgeProjection.appendChild(continuationActions);
 
 function clearListProjection() {
   listProjection.hidden = true;
@@ -103,6 +107,9 @@ function clearListProjection() {
 }
 
 function clearKnowledgeProjection() {
+  if (nextPageButton) nextPageButton.disabled = true;
+  nextPageButton = null;
+  continuationActions.replaceChildren();
   for (const button of browseReadButtons) button.disabled = true;
   browseReadButtons = [];
   knowledgeProjection.hidden = true;
@@ -229,7 +236,7 @@ function renderKnowledgeProjection(projection) {
     return;
   }
 
-  if (projection.operation === "browse") {
+  if (["browse", "browse_after"].includes(projection.operation)) {
     if (
       !Array.isArray(projection.records)
       || projection.records.length > 50
@@ -237,12 +244,16 @@ function renderKnowledgeProjection(projection) {
       || (projection.truncated && projection.records.length !== 50)
       || !projection.records.every(isKnowledgeSummary)
     ) return;
-    knowledgeOperation.textContent = "Browse";
+    knowledgeOperation.textContent = projection.operation === "browse_after"
+      ? "Browse after" : "Browse";
     for (const record of projection.records) renderKnowledgeSummary(record);
-    knowledgeEmpty.textContent = "No knowledge records in this workspace.";
-    knowledgeTruncated.textContent = "Showing the first 50 records by ID. More records exist; this version cannot browse them.";
+    knowledgeEmpty.textContent = projection.operation === "browse_after"
+      ? "No knowledge records after this ID in this workspace."
+      : "No knowledge records in this workspace.";
+    knowledgeTruncated.textContent = "Showing up to 50 records by ID. More records exist; prepare the next page to continue.";
     knowledgeEmpty.hidden = projection.records.length !== 0;
     knowledgeTruncated.hidden = !projection.truncated;
+    if (projection.truncated) renderNextPageAction(projection.records);
     knowledgeProjection.hidden = false;
     return;
   }
@@ -359,6 +370,22 @@ function renderKnowledgeSummary(record) {
   knowledgeRecords.appendChild(article);
 }
 
+function renderNextPageAction(records) {
+  // Capture structured data before any preparation invalidates this result.
+  const anchor = records[records.length - 1].record_id;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Prepare next page";
+  button.disabled = requestPending;
+  button.hidden = requestPending;
+  button.addEventListener("click", () => {
+    if (requestPending || button.disabled || nextPageButton !== button) return;
+    prepareEditorCommand("browse-after", { after_record_id: anchor });
+  });
+  nextPageButton = button;
+  continuationActions.appendChild(button);
+}
+
 function clearDraftResults(status = "Ready") {
   clearAllProjections();
   statusOutput.textContent = status;
@@ -395,6 +422,10 @@ function setRequestPending(pending) {
   prepareButton.disabled = pending;
   browseButton.disabled = pending;
   for (const button of browseReadButtons) button.disabled = pending;
+  if (nextPageButton) {
+    nextPageButton.disabled = pending;
+    nextPageButton.hidden = pending;
+  }
   updateAssistanceFields();
 }
 

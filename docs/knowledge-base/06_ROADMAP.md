@@ -22,8 +22,11 @@ Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 
 ## Next planning boundary - Sprint 39
 
-NOT STARTED. No scope selected, implementation authorized or commitments made.
-Any planning and implementation require their own explicit authorization.
+Approved active pre-merge scope: `Authorized Local Knowledge Browse Continuation v1`.
+Implementation and validation remain in progress under the existing governance
+rules. This scope does not yet represent merge, release, closure, tag custody,
+or backup completion. Future roadmap priorities remain unchanged and continue to
+be tracked separately.
 
 ## Historical Sprint 37 governed implementation release complete
 

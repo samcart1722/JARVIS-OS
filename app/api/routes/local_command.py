@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from app.api.models.local_command import (
     LocalCommandHttpError,
+    LocalCommandHttpKnowledgeBrowseAfterProjection,
     LocalCommandHttpKnowledgeBrowseProjection,
     LocalCommandHttpKnowledgeFindProjection,
     LocalCommandHttpKnowledgeReadProjection,
@@ -27,6 +28,7 @@ from app.local_command import (
     LocalCommandApplicationRequest,
     LocalCommandApplicationResult,
     LocalCommandApplicationRoute,
+    LocalKnowledgeBrowseAfterProjection,
     LocalKnowledgeBrowseProjection,
     LocalKnowledgeFindProjection,
     LocalKnowledgeReadProjection,
@@ -107,9 +109,17 @@ def _map_projection(
 ) -> LocalCommandHttpProjection | None:
     if projection is None:
         return None
-    if type(projection) is LocalKnowledgeBrowseProjection:
+    if type(projection) in (
+        LocalKnowledgeBrowseProjection,
+        LocalKnowledgeBrowseAfterProjection,
+    ):
         projection.__post_init__()
-        return LocalCommandHttpKnowledgeBrowseProjection(
+        projection_type = (
+            LocalCommandHttpKnowledgeBrowseAfterProjection
+            if type(projection) is LocalKnowledgeBrowseAfterProjection
+            else LocalCommandHttpKnowledgeBrowseProjection
+        )
+        return projection_type(
             records=tuple(
                 _map_knowledge_summary(record) for record in projection.records
             ),

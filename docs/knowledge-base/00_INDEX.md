@@ -17,9 +17,12 @@ evidence is recorded at
 `C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
 and prior Sprint 38 feature/documentation branches were cleaned locally and
 remotely. Formal closure is complete, with no known open functional defects.
-Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
-Sprint 37 and earlier releases remain historical. Sprint 39 is NOT STARTED
-and has no selected scope or implementation authorization.
+Sprint 39 is the active pre-merge implementation scope for
+`Authorized Local Knowledge Browse Continuation v1`. Blocks A-E are approved;
+Block F validation and documentation remain in progress. The scope is not yet
+merged, released, closed or tagged.
+Sprint 37 and earlier releases remain historical. Sprint 39 remains pre-merge
+and has no final release closure yet.
 Start with the repository-owned
 [Canonical Project State](../../LUXIOM_CANONICAL_PROJECT_STATE.md), then see
 the [Sprint 28 summary](history/sprints/SPRINT_28_SUMMARY.md) and

@@ -65,12 +65,14 @@ def test_knowledge_enums_have_exact_closed_values() -> None:
         LocalKnowledgeProjectionOperation.READ,
         LocalKnowledgeProjectionOperation.FIND,
         LocalKnowledgeProjectionOperation.BROWSE,
+        LocalKnowledgeProjectionOperation.BROWSE_AFTER,
     )
     assert tuple(item.value for item in LocalKnowledgeProjectionOperation) == (
         "store",
         "read",
         "find",
         "browse",
+        "browse_after",
     )
     assert tuple(LocalKnowledgeRecordKind) == (
         LocalKnowledgeRecordKind.FACT,
@@ -420,13 +422,21 @@ def test_historical_result_construction_remains_valid() -> None:
 @pytest.mark.parametrize(
     "total,truncated", ((0, False), (49, False), (50, False), (50, True))
 )
-def test_browse_public_projection_is_closed_frozen_and_literal(total, truncated):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_browse_public_projection_is_closed_frozen_and_literal(
+    total, truncated, continuation
+):
     from dataclasses import fields
 
     from app.local_command import (
         LocalKnowledgeBrowseProjection,
         LocalKnowledgeSummaryProjection,
     )
+
+    if continuation:
+        from app.local_command import (
+            LocalKnowledgeBrowseAfterProjection as LocalKnowledgeBrowseProjection,
+        )
 
     records = tuple(
         LocalKnowledgeSummaryProjection(
@@ -446,6 +456,7 @@ def test_browse_public_projection_is_closed_frozen_and_literal(total, truncated)
         "records",
         "truncated",
     }
+    assert projection.operation.value == ("browse_after" if continuation else "browse")
     assert projection.records is records
     assert (
         LocalCommandApplicationResult(
@@ -488,11 +499,17 @@ def test_browse_summary_rejects_invalid_fields(field, value):
     "corruption",
     ("list", "type", "duplicate", "order", "excess", "boolean", "truncated"),
 )
-def test_browse_public_projection_rejects_corruption(corruption):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_browse_public_projection_rejects_corruption(corruption, continuation):
     from app.local_command import (
         LocalKnowledgeBrowseProjection,
         LocalKnowledgeSummaryProjection,
     )
+
+    if continuation:
+        from app.local_command import (
+            LocalKnowledgeBrowseAfterProjection as LocalKnowledgeBrowseProjection,
+        )
 
     a = LocalKnowledgeSummaryProjection("a", LocalKnowledgeRecordKind.FACT, "key")
     b = LocalKnowledgeSummaryProjection("b", LocalKnowledgeRecordKind.FACT, "key")
@@ -527,8 +544,16 @@ def test_browse_public_projection_rejects_corruption(corruption):
         (True, LocalCommandApplicationRoute.COGNITIVE),
     ),
 )
-def test_browse_application_projection_requires_local_success(success, route):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_browse_application_projection_requires_local_success(
+    success, route, continuation
+):
     from app.local_command import LocalKnowledgeBrowseProjection
+
+    if continuation:
+        from app.local_command import (
+            LocalKnowledgeBrowseAfterProjection as LocalKnowledgeBrowseProjection,
+        )
 
     with pytest.raises(ValueError):
         LocalCommandApplicationResult(
