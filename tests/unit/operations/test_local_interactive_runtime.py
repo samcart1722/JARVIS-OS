@@ -60,6 +60,85 @@ def _initialized_storage(path: Path) -> SQLiteLocalStorage:
     return storage
 
 
+@pytest.mark.parametrize("fallback", (False, True))
+def test_sqlite_continuation_authenticated_route_reauthorizes_without_restart(
+    tmp_path, fallback
+):
+    from app.cognition.routing.models import (
+        CognitiveFallbackAuthorization,
+        CoordinatedRoute,
+    )
+    from app.principal_authentication import AuthenticatedLocalCommandRequest
+
+    runtime = _runtime(tmp_path / "continuation-runtime.sqlite3")
+    with (
+        patch("app.models.ollama_client.OllamaClient.chat") as model,
+        patch(
+            "app.models.ollama_readiness_probe.OllamaReadinessProbe.check"
+        ) as readiness,
+        patch("app.cognition.engine.CognitiveEngine.process") as cognitive,
+        patch("requests.get") as network_get,
+        patch("requests.post") as network_post,
+    ):
+        runtime.start()
+        try:
+            instance = runtime._container
+            repository = instance.local_knowledge_repository
+            assert repository is instance.local_knowledge_browse_repository
+            assert repository is instance.local_knowledge_browse_after_repository
+            assert repository._storage is runtime._storage
+            for identifier in ("a", "z"):
+                record = KnowledgeRecord(
+                    identifier,
+                    DEVELOPMENT_WORKSPACE,
+                    KnowledgeKind.FACT,
+                    "key",
+                    "value",
+                    KnowledgeProvenance("test", "synthetic"),
+                )
+                assert instance.local_first_resolver.resolve(
+                    DEVELOPMENT_ACTOR,
+                    DEVELOPMENT_WORKSPACE,
+                    StoreKnowledgeRecordCommand(record),
+                ).success
+            request = AuthenticatedLocalCommandRequest(
+                LocalAuthenticationProof(TEST_PROOF),
+                DEVELOPMENT_WORKSPACE.workspace_id,
+                'knowledge browse-after :: {"after_record_id":"a"}',
+                CognitiveFallbackAuthorization(fallback),
+            )
+            with patch.object(
+                repository, "browse_after", wraps=repository.browse_after
+            ) as data:
+                service = instance.authenticated_local_command_routing_service
+                first = service.route(request)
+                assert first.mapping_result.actor == DEVELOPMENT_ACTOR
+                assert (
+                    first.workspace_selection_result.workspace == DEVELOPMENT_WORKSPACE
+                )
+                coordinated = first.text_routing_result.coordinated_result
+                assert coordinated.route is CoordinatedRoute.LOCAL
+                assert coordinated.local_result.success
+                assert tuple(
+                    row.record_id for row in coordinated.local_result.records
+                ) == ("z",)
+                data.assert_called_once_with(DEVELOPMENT_WORKSPACE, "a")
+                SQLitePermissionGrantRepository(runtime._storage).revoke(
+                    DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, KNOWLEDGE_RECORDS_BROWSE
+                )
+                data.reset_mock()
+                second = service.route(request).text_routing_result.coordinated_result
+                assert second.route is CoordinatedRoute.LOCAL
+                assert second.local_result.error_code == "local_permission_denied"
+                data.assert_not_called()
+        finally:
+            runtime.close()
+        assert runtime.state is LocalInteractiveRuntimeState.CLOSED
+        assert runtime._storage is None
+        for spy in (model, readiness, cognitive, network_get, network_post):
+            spy.assert_not_called()
+
+
 def test_construction_is_no_io_secret_safe_and_new(tmp_path: Path) -> None:
     path = tmp_path / "runtime.sqlite3"
     runtime = _runtime(path)

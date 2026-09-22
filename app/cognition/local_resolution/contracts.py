@@ -54,6 +54,21 @@ class KnowledgeBrowseRepository(Protocol):
         ...
 
 
+class KnowledgeBrowseAfterRepository(Protocol):
+    def browse_after(
+        self, workspace: WorkspaceIdentity, after_record_id: str
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        """Return at most 51 metadata summaries in the exact workspace.
+
+        IDs must be strictly greater than the normalized anchor, unique and
+        ascending in ordinal/BINARY order. The anchor need not exist; do not
+        look it up or skip records for textual representability. This read-only
+        port carries no authorization state; callers must authorize each request
+        before access. No snapshot or durable cursor is established.
+        """
+        ...
+
+
 class PermissionGrantRepositoryError(RuntimeError):
     """Signal a safe action-permission repository failure."""
 

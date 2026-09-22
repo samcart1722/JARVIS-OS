@@ -97,6 +97,87 @@ def _request(actor, workspace, text, allowed=False):
 
 @pytest.mark.parametrize("fallback", (False, True))
 @pytest.mark.parametrize(
+    "scenario", ("success", "empty", "denied", "missing", "invalid", "storage")
+)
+def test_browse_after_terminals_never_invoke_cognition(fallback, scenario):
+    actor, workspace = ActorIdentity("actor"), WorkspaceIdentity("workspace")
+    repository = Mock()
+    repository.browse_after.return_value = (
+        (KnowledgeRecordSummary("z", workspace, KnowledgeKind.FACT, "key"),)
+        if scenario == "success"
+        else ()
+    )
+    if scenario == "invalid":
+        repository.browse_after.return_value = []
+    if scenario == "storage":
+        repository.browse_after.side_effect = LocalRepositoryError("private")
+    instance = Container(
+        Settings(REASONING_ENABLED=False, _env_file=None),
+        local_knowledge_repository=repository,
+        local_knowledge_browse_after_repository=(
+            None if scenario == "missing" else repository
+        ),
+        local_permission_grants=()
+        if scenario == "denied"
+        else (
+            PermissionGrant(
+                "actor", "workspace", frozenset({KNOWLEDGE_RECORDS_BROWSE})
+            ),
+        ),
+    )
+    with (
+        patch.object(
+            instance.cognitive_engine,
+            "process",
+            wraps=instance.cognitive_engine.process,
+        ) as cognitive,
+        patch.object(instance.ollama_client, "chat") as model,
+        patch.object(instance.provider_readiness_probe, "check") as readiness,
+        patch("requests.get") as network_get,
+        patch("requests.post") as network_post,
+    ):
+        result = instance.local_command_text_router.route(
+            _request(
+                actor,
+                workspace,
+                'knowledge browse-after :: {"after_record_id":" m "}',
+                fallback,
+            )
+        )
+        assert (
+            result.interpretation.status is LocalCommandInterpretationStatus.INTERPRETED
+        )
+        assert result.coordinated_result.route is CoordinatedRoute.LOCAL
+        local = result.coordinated_result.local_result
+        assert local.handled and not local.model_used and not local.external_access
+        expected = (
+            None
+            if scenario in ("success", "empty")
+            else (
+                "local_permission_denied"
+                if scenario == "denied"
+                else "local_validation_failed"
+            )
+        )
+        assert local.error_code == expected
+        assert local.success is (expected is None)
+        if scenario in ("denied", "missing"):
+            repository.browse_after.assert_not_called()
+        else:
+            repository.browse_after.assert_called_once_with(workspace, "m")
+        cognitive.assert_not_called()
+        # Positive control preserves the historical generic-text fallback.
+        generic = instance.local_command_text_router.route(
+            _request(actor, workspace, "ordinary cognitive input", True)
+        )
+        assert generic.coordinated_result.route is CoordinatedRoute.COGNITIVE
+        cognitive.assert_called_once_with("ordinary cognitive input")
+        for spy in (model, readiness, network_get, network_post):
+            spy.assert_not_called()
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+@pytest.mark.parametrize(
     "scenario",
     (
         "success",

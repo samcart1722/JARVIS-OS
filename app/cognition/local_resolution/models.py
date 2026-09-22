@@ -85,6 +85,21 @@ class BrowseKnowledgeRecordsQuery:
 
 
 @dataclass(frozen=True, slots=True)
+class BrowseAfterKnowledgeRecordsQuery:
+    """Continue metadata browsing after a logical ID, without a text-size cap."""
+
+    after_record_id: str
+
+    def __post_init__(self) -> None:
+        if type(self.after_record_id) is not str:
+            raise ValueError("After record ID must be a string.")
+        anchor = _non_blank(self.after_record_id, "After record ID")
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in anchor):
+            raise ValueError("After record ID must not contain isolated surrogates.")
+        object.__setattr__(self, "after_record_id", anchor)
+
+
+@dataclass(frozen=True, slots=True)
 class KnowledgeRecordSummary:
     record_id: str
     workspace: WorkspaceIdentity

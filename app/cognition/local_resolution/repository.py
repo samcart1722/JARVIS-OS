@@ -2,6 +2,7 @@
 
 from app.cognition.local_resolution.models import (
     KNOWLEDGE_DISCOVERY_LOOKAHEAD,
+    BrowseAfterKnowledgeRecordsQuery,
     KnowledgeKind,
     KnowledgeRead,
     KnowledgeRecord,
@@ -60,6 +61,26 @@ class InMemoryKnowledgeRecordRepository:
             record
             for (workspace_id, _), record in self._records.items()
             if workspace_id == workspace.workspace_id
+        )
+        return tuple(
+            KnowledgeRecordSummary(
+                record.record_id, record.workspace, record.kind, record.key
+            )
+            for record in sorted(matches, key=lambda record: record.record_id)[
+                :KNOWLEDGE_DISCOVERY_LOOKAHEAD
+            ]
+        )
+
+    def browse_after(
+        self, workspace: WorkspaceIdentity, after_record_id: str
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        if type(workspace) is not WorkspaceIdentity:
+            raise ValueError("A valid workspace is required.")
+        anchor = BrowseAfterKnowledgeRecordsQuery(after_record_id).after_record_id
+        matches = (
+            record
+            for (workspace_id, _), record in self._records.items()
+            if workspace_id == workspace.workspace_id and record.record_id > anchor
         )
         return tuple(
             KnowledgeRecordSummary(

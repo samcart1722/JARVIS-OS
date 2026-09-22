@@ -1,6 +1,8 @@
 """Proofs for the bounded deterministic list-command grammar."""
 
 import json
+from dataclasses import FrozenInstanceError, fields
+from inspect import signature
 
 import pytest
 
@@ -18,6 +20,7 @@ from app.cognition.interpretation.models import (
 )
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    BrowseAfterKnowledgeRecordsQuery,
     BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
     KnowledgeKind,
@@ -444,3 +447,197 @@ def test_invalid_browse_remains_terminal(interpreter, workspace, text, reason):
     assert result.status is Status.INVALID
     assert result.invalid_reason is reason
     assert result.intent is None
+
+
+PYTHON_STRIP_WHITESPACE = (
+    "\u0009\u000a\u000b\u000c\u000d\u001c\u001d\u001e\u001f\u0020"
+    "\u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006"
+    "\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
+)
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    (
+        "knowledge browse-after :: ",
+        " KnOwLeDgE BrOwSe-AfTeR ::",
+        "knowledge\tbrowse-after\n::",
+    ),
+)
+def test_browse_after_is_a_distinct_interpreted_intent(interpreter, workspace, prefix):
+    result = interpreter.interpret(prefix + '{"after_record_id":"id"} \t\n', workspace)
+    assert result == LocalCommandInterpretation(
+        Status.INTERPRETED, BrowseAfterKnowledgeRecordsQuery("id")
+    )
+    assert type(result.intent) is BrowseAfterKnowledgeRecordsQuery
+
+
+@pytest.mark.parametrize("whitespace", tuple(PYTHON_STRIP_WHITESPACE))
+def test_browse_after_python_strip_and_interior_preservation(
+    interpreter, workspace, whitespace
+):
+    anchor = "A" + whitespace + "  B"
+    raw = whitespace + anchor + whitespace
+    assert BrowseAfterKnowledgeRecordsQuery(raw).after_record_id == anchor
+    result = interpreter.interpret(
+        "knowledge browse-after :: " + json.dumps({"after_record_id": raw}), workspace
+    )
+    assert result.intent == BrowseAfterKnowledgeRecordsQuery(anchor)
+    with pytest.raises(ValueError):
+        BrowseAfterKnowledgeRecordsQuery(whitespace)
+    assert interpreter.interpret(
+        "knowledge browse-after :: " + json.dumps({"after_record_id": whitespace}),
+        workspace,
+    ).invalid_reason is Reason.INVALID_KNOWLEDGE_FIELDS
+
+
+@pytest.mark.parametrize(
+    "anchor",
+    ("\u200b", "\ufeff", "\u200bID\ufeff", "AaZz", "\u00e9", "e\u0301",
+     "\uff21", "\U0001f600", 'a"\\b\x00c'),
+)
+@pytest.mark.parametrize("ensure_ascii", (True, False))
+def test_browse_after_preserves_unicode_and_json_escapes(
+    interpreter, workspace, anchor, ensure_ascii
+):
+    assert BrowseAfterKnowledgeRecordsQuery(anchor).after_record_id == anchor
+    payload = json.dumps({"after_record_id": anchor}, ensure_ascii=ensure_ascii)
+    result = interpreter.interpret("knowledge browse-after :: " + payload, workspace)
+    assert result.status is Status.INTERPRETED
+    assert result.intent.after_record_id == anchor
+
+
+@pytest.mark.parametrize("anchor", ("\ud800", "\udbff", "\udc00", "\udfff", "a\ud800b"))
+def test_browse_after_rejects_isolated_surrogates_only_in_new_operation(
+    interpreter, workspace, anchor
+):
+    with pytest.raises(ValueError, match="surrogates"):
+        BrowseAfterKnowledgeRecordsQuery(anchor)
+    # Both JSON escapes and a directly supplied Python string are validated.
+    for ensure_ascii in (True, False):
+        payload = json.dumps({"after_record_id": anchor}, ensure_ascii=ensure_ascii)
+        result = interpreter.interpret(
+            "knowledge browse-after :: " + payload, workspace
+        )
+        assert result == LocalCommandInterpretation(
+            Status.INVALID, invalid_reason=Reason.INVALID_KNOWLEDGE_FIELDS
+        )
+    read = interpreter.interpret(
+        "knowledge read :: " + json.dumps({"record_id": anchor}), workspace
+    )
+    store = interpreter.interpret(
+        "knowledge store :: " + _store_payload(record_id=anchor), workspace
+    )
+    assert read.status is store.status is Status.INTERPRETED
+    assert read.intent.record_id == store.intent.record.record_id == anchor
+
+
+@pytest.mark.parametrize(
+    "payload,reason",
+    (
+        ("", Reason.MISSING_KNOWLEDGE_PAYLOAD),
+        ("{}", Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"record_id":"id"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"AFTER_RECORD_ID":"id"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":"id","workspace":"w"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":"id","actor":"a"}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        (
+            '{"after_record_id":"a","after_record_id":"b"}',
+            Reason.INVALID_KNOWLEDGE_FIELDS,
+        ),
+        ('{"after_record_id":null}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":1}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":true}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":[]}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":{}}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":""}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ('{"after_record_id":"   "}', Reason.INVALID_KNOWLEDGE_FIELDS),
+        ("[]", Reason.INVALID_KNOWLEDGE_JSON),
+        ("null", Reason.INVALID_KNOWLEDGE_JSON),
+        ('"id"', Reason.INVALID_KNOWLEDGE_JSON),
+        ('{"after_record_id":', Reason.INVALID_KNOWLEDGE_JSON),
+        ('{"after_record_id":"id",}', Reason.INVALID_KNOWLEDGE_JSON),
+        ('{"after_record_id":"id"} trailing', Reason.INVALID_KNOWLEDGE_JSON),
+        ('{"after_record_id":"id"}{}', Reason.INVALID_KNOWLEDGE_JSON),
+    ),
+)
+def test_browse_after_rejects_invalid_payloads(interpreter, workspace, payload, reason):
+    result = interpreter.interpret("knowledge browse-after :: " + payload, workspace)
+    assert result == LocalCommandInterpretation(Status.INVALID, invalid_reason=reason)
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    (
+        "knowledge browse_after ::",
+        "knowledge browseafter ::",
+        "knowledge browse-afterx ::",
+        "knowledge browse-after :",
+        "knowledge browse-after",
+        "knowledge browse-after::",
+        "knowledge\u00a0browse-after ::",
+        "knowledge brow\u017fe-after ::",
+    ),
+)
+def test_browse_after_preserves_ascii_keyword_and_separator_rules(
+    interpreter, workspace, prefix
+):
+    result = interpreter.interpret(prefix + ' {"after_record_id":"id"}', workspace)
+    # Non-ASCII namespace whitespace remains outside the existing namespace.
+    if "\u00a0" in prefix:
+        assert result.status is Status.NOT_INTERPRETED
+    else:
+        assert result.invalid_reason is Reason.MALFORMED_KNOWLEDGE_COMMAND
+    assert result.intent is None
+
+
+def test_browse_after_query_is_closed_frozen_and_has_no_textual_size_cap():
+    anchor = "\U0001f600" * 9000
+    query = BrowseAfterKnowledgeRecordsQuery(anchor)
+    assert query.after_record_id == anchor
+    assert tuple(field.name for field in fields(query)) == ("after_record_id",)
+    assert fields(BrowseKnowledgeRecordsQuery()) == ()
+    with pytest.raises(FrozenInstanceError):
+        query.after_record_id = "changed"
+    with pytest.raises(TypeError):
+        BrowseAfterKnowledgeRecordsQuery("id", workspace="w")
+    with pytest.raises(TypeError):
+        BrowseKnowledgeRecordsQuery(after_record_id="id")
+
+
+@pytest.mark.parametrize("anchor", (None, 1, True, [], {}, "", " \t\n"))
+def test_browse_after_direct_query_rejects_invalid_values(anchor):
+    with pytest.raises(ValueError):
+        BrowseAfterKnowledgeRecordsQuery(anchor)
+
+
+def test_browse_after_query_requires_exact_string_type():
+    class StringSubclass(str):
+        pass
+
+    with pytest.raises(ValueError):
+        BrowseAfterKnowledgeRecordsQuery(StringSubclass("id"))
+
+
+def test_browse_after_anchor_does_not_extend_initial_browse(interpreter, workspace):
+    result = interpreter.interpret(
+        'knowledge browse :: {"after_record_id":"id"}', workspace
+    )
+    assert result.invalid_reason is Reason.INVALID_KNOWLEDGE_FIELDS
+
+
+def test_browse_after_port_is_separate_from_existing_repository_contracts():
+    from app.cognition.local_resolution.contracts import (
+        KnowledgeBrowseAfterRepository,
+        KnowledgeBrowseRepository,
+        KnowledgeRecordRepository,
+    )
+
+    assert tuple(signature(KnowledgeBrowseAfterRepository.browse_after).parameters) == (
+        "self", "workspace", "after_record_id"
+    )
+    assert tuple(signature(KnowledgeBrowseRepository.browse).parameters) == (
+        "self", "workspace"
+    )
+    assert "browse_after" not in KnowledgeBrowseRepository.__dict__
+    assert "browse_after" not in KnowledgeRecordRepository.__dict__

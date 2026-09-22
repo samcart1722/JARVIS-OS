@@ -23,6 +23,28 @@ to its explicit grants; this is not a production authentication redesign.
 Release: `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`,
 tag `governed-sprint-38-complete`. Historical policies below retain their scope.
 
+## Active pre-merge browse-after continuation policy
+
+The approved continuation keeps the local-first, deterministic knowledge browse
+model intact while extending it with `knowledge browse-after :: {"after_record_id":"..."}`.
+This is a read-only continuation of the same governed workspace context and
+requires the same `knowledge.records.browse` permission. Authorization is
+re-evaluated on every explicit Send. The browse-after query is scoped to the
+current workspace and to `record_id > normalized after_record_id`, ordered by
+ascending `record_id` using SQLite `COLLATE BINARY` semantics and equivalent
+deterministic memory ordering. The anchor does not need to exist. The
+repository may internally retrieve up to 51 valid summaries, while the public
+and UI projection exposes at most 50 metadata-only records: `record_id`, `kind`,
+and `key`. `truncated=true` is set only when another valid record remains
+beyond the public maximum. Value and provenance are never exposed. This is not a
+semantic retrieval feature, not a page-history mechanism, and not a persistent
+cursor or snapshot. It requires no model, provider, or external network
+involvement. `Prepare next page` only prepares the editor command with zero
+requests; the user may inspect or change the editor, and explicit Send is
+required to perform the request and authorization. A selected continuation
+record still requires a separate READ operation with independent authorization
+on Send.
+
 ## Historical Sprint 37 governed command-assistance policy
 
 At that checkpoint, Sprint 37 was the latest implementation release at

@@ -57,7 +57,7 @@ async function runBrowse() {
     "full versus truncated without value or invented total");
   }
   check("states", get("knowledge-truncated").textContent
-    === "Showing the first 50 records by ID. More records exist; this version cannot browse them.", "contractual truncation text");
+    === "Showing up to 50 records by ID. More records exist; prepare the next page to continue.", "contractual truncation text");
 
   for (const id of ['id"\\<img src=x onerror=alert(1)>', "é e\u0301 😀", "line\ninside\tID", "a\u0000b", "\ufeff"]) {
     const record = summary(id);

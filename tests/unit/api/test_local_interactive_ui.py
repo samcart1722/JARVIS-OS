@@ -476,8 +476,8 @@ def test_browse_preparation_controls_do_not_submit_or_add_assets() -> None:
     assert 'const recordId = record.record_id' in script
     assert "No knowledge records in this workspace." in script
     assert (
-        "Showing the first 50 records by ID. More records exist; "
-        "this version cannot browse them."
+        "Showing up to 50 records by ID. More records exist; "
+        "prepare the next page to continue."
     ) in script
 
 
@@ -756,3 +756,56 @@ def test_fresh_runtime_rotates_token_and_rejects_old_token(tmp_path: Path) -> No
     old_token, new_token, rejected = asyncio.run(exercise())
     assert old_token != new_token
     assert rejected == (403, TRANSPORT_REJECTION)
+
+
+def test_browse_after_ui_harness_and_real_interpreter_parity() -> None:
+    from app.cognition.local_resolution.models import BrowseAfterKnowledgeRecordsQuery
+
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Sprint 39 Block E verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_knowledge_browse_after.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 0
+    assert evidence["nativeKeyboardVerified"] is False
+    assert {
+        "initial-browse", "explicit-send", "continuation-render", "next-page",
+        "prepare-no-fetch", "keyboard-focus", "stale-controls", "final-page",
+        "read-continuation", "flow-101", "empty", "unicode-escaping",
+        "length-boundaries", "failure-preservation", "pending",
+        "disconnect-recovery", "visibility",
+    } == set(evidence["categories"])
+    interpreter = DeterministicLocalCommandInterpreter()
+    lengths = set()
+    for vector in evidence["vectors"]:
+        command = vector["command"]
+        assert len(command) <= 8192
+        lengths.add(len(command))
+        payload = json.loads(command.split(" :: ", 1)[1])
+        assert payload == {"after_record_id": vector["anchor"]}
+        result = interpreter.interpret(command, WorkspaceIdentity("s39-ui-only"))
+        assert result.status.value == "interpreted"
+        assert type(result.intent) is BrowseAfterKnowledgeRecordsQuery
+        assert result.intent.after_record_id == vector["anchor"].strip()
+    assert {8191, 8192} <= lengths
+
+
+def test_browse_after_uses_existing_accessible_preparation_boundary() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    assert 'id="preparation-status" role="status"' in html
+    assert 'id="preparation-error" role="alert"' in html
+    action = script[
+        script.index("function renderNextPageAction"):
+        script.index("function clearDraftResults")
+    ]
+    assert 'button.type = "button"' in action
+    assert 'const anchor = records[records.length - 1].record_id' in action
+    assert 'prepareEditorCommand("browse-after", { after_record_id: anchor })' in action
+    assert "fetch(" not in action
+    assert "keydown" not in action and "keyup" not in action
+    assert ".trim(" not in script and ".normalize(" not in script
+    assert "No knowledge records after this ID in this workspace." in script

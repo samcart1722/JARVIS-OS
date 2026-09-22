@@ -14,6 +14,7 @@ from app.cognition.local_resolution.contracts import (
 from app.cognition.local_resolution.models import (
     KNOWLEDGE_DISCOVERY_LOOKAHEAD,
     ActorIdentity,
+    BrowseAfterKnowledgeRecordsQuery,
     KnowledgeKind,
     KnowledgeProvenance,
     KnowledgeRead,
@@ -394,6 +395,27 @@ class SQLiteLocalStorage:
             ).fetchall()
         except sqlite3.DatabaseError as error:
             raise LocalStorageError("Local knowledge browse failed.") from error
+        return tuple(
+            KnowledgeRecordSummary(row[0], workspace, KnowledgeKind(row[1]), row[2])
+            for row in rows
+        )
+
+    def browse_knowledge_after(
+        self, workspace: WorkspaceIdentity, after_record_id: str
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        if type(workspace) is not WorkspaceIdentity:
+            raise ValueError("A valid workspace is required.")
+        anchor = BrowseAfterKnowledgeRecordsQuery(after_record_id).after_record_id
+        connection = self._require_initialized_connection()
+        try:
+            rows = connection.execute(
+                "SELECT record_id, kind, knowledge_key FROM knowledge_records "
+                "WHERE workspace_id = ? AND record_id COLLATE BINARY > ? "
+                "ORDER BY record_id COLLATE BINARY ASC LIMIT ?",
+                (workspace.workspace_id, anchor, KNOWLEDGE_DISCOVERY_LOOKAHEAD),
+            ).fetchall()
+        except sqlite3.DatabaseError as error:
+            raise LocalStorageError("Local knowledge browse-after failed.") from error
         return tuple(
             KnowledgeRecordSummary(row[0], workspace, KnowledgeKind(row[1]), row[2])
             for row in rows
@@ -1101,6 +1123,11 @@ class SQLiteKnowledgeRecordRepository:
 
     def store(self, record: KnowledgeRecord) -> KnowledgeStored:
         return self._storage.store(record)
+
+    def browse_after(
+        self, workspace: WorkspaceIdentity, after_record_id: str
+    ) -> tuple[KnowledgeRecordSummary, ...]:
+        return self._storage.browse_knowledge_after(workspace, after_record_id)
 
     def read(self, workspace: WorkspaceIdentity, record_id: str) -> KnowledgeRead:
         return self._storage.read_knowledge(workspace, record_id)

@@ -10,6 +10,7 @@ from app.cognition.interpretation.models import (
 )
 from app.cognition.local_resolution.models import (
     AddListItemsCommand,
+    BrowseAfterKnowledgeRecordsQuery,
     BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
     KnowledgeKind,
@@ -24,8 +25,10 @@ from app.cognition.local_resolution.models import (
 _LIST_NAMESPACE = re.compile(r"^list(?:\s|$)", re.IGNORECASE | re.ASCII)
 _KNOWLEDGE_NAMESPACE = re.compile(r"^knowledge(?:\s|$)", re.IGNORECASE | re.ASCII)
 _KNOWLEDGE_PREFIX = re.compile(
-    r"^knowledge\s+(read|store|find|browse)\s+::", re.IGNORECASE | re.ASCII
+    r"^knowledge\s+(read|store|find|browse|browse-after)\s+::",
+    re.IGNORECASE | re.ASCII,
 )
+_BROWSE_AFTER_FIELDS = frozenset(("after_record_id",))
 _READ_FIELDS = frozenset(("record_id",))
 _FIND_FIELDS = frozenset(("key",))
 _FIND_KIND_FIELDS = frozenset(("key", "kind"))
@@ -123,6 +126,16 @@ class DeterministicLocalCommandInterpreter:
             return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_JSON)
 
         operation = prefix.group(1).lower()
+        if operation == "browse-after":
+            if frozenset(payload) != _BROWSE_AFTER_FIELDS:
+                return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_FIELDS)
+            try:
+                intent = BrowseAfterKnowledgeRecordsQuery(payload["after_record_id"])
+            except ValueError:
+                return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_FIELDS)
+            return LocalCommandInterpretation(
+                LocalCommandInterpretationStatus.INTERPRETED, intent=intent
+            )
         if operation == "browse":
             if payload:
                 return _invalid(LocalCommandInvalidReason.INVALID_KNOWLEDGE_FIELDS)

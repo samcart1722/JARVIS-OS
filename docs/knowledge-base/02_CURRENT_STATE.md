@@ -58,7 +58,30 @@ evidence is recorded at
 `C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
 and prior Sprint 38 feature/documentation branches were cleaned locally and
 remotely. Formal closure is complete, with no known open functional defects.
-Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
+Sprint 39 is the active pre-merge implementation scope for
+`Authorized Local Knowledge Browse Continuation v1`. Blocks A–F are APPROVED;
+the implementation is in PR review / PRE-MERGE. The continuation command
+is `knowledge browse-after :: {"after_record_id":"..."}` and the initial
+browse remains `knowledge browse :: {}`. It is read-only, keeps the same
+governed workspace context, and preserves `knowledge.records.browse` as the
+required permission. Authorization is re-evaluated on each explicit Send. The
+query semantics are `workspace_id exact match AND record_id > normalized
+after_record_id`, ordered by ascending `record_id` with SQLite `COLLATE BINARY`
+semantics and matching deterministic in-memory behavior. The anchor does not
+need to exist, the repository may internally read up to 51 valid summaries,
+public/UI output exposes at most 50, and `truncated=true` only if another valid
+record exists. Public results remain metadata-only: `record_id`, `kind`, and
+`key`; value and provenance are never exposed. UI continuation is exact:
+`Prepare next page` prepares the editor command without performing any request;
+explicit Send is required to perform the request and authorization. READ after a
+selected continuation record remains a separate prepared operation with
+independent authorization on Send. No persistent cursor, snapshot, history,
+Previous flow, totals, semantic retrieval, or edit/update/delete capability is
+introduced. NATIVE ACCEPTANCE NOT EXECUTED; the automated regression baseline
+is 2221 passed with exit code 0 and Ruff PASS. Implementation commit
+`1e92520f786a0f40b06a0a12348cc5d1a3d85e6f` exists and the feature branch is
+pushed. PR #62 is OPEN. Sprint 39 remains PRE-MERGE: merge, release, release tag,
+backup/closure evidence and formal Sprint 39 closure have not occurred.
 Later documentation may advance master without moving the immutable
 implementation tag.
 
@@ -68,7 +91,8 @@ Sprint 38 branches were removed locally and remotely. The unrelated untracked fi
 `tests/unit/reasoning/entities/test_user_request.py` remains intact, unexecuted,
 unstaged and absent from the release. The approved 571-file pre-documentation
 inventory matched; the six-file UI intervention preserved 565 earlier files.
-Sprint 39 is **NOT STARTED**: no scope selected and no implementation authorized.
+Sprint 39 remains **PRE-MERGE**: Blocks A–F are APPROVED and PR #62 is OPEN,
+not merged, released or formally closed.
 
 ## Historical Sprint 37 governed implementation state
 

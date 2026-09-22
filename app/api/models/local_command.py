@@ -133,11 +133,18 @@ class LocalCommandHttpKnowledgeBrowseProjection(BaseModel):
         return self
 
 
+class LocalCommandHttpKnowledgeBrowseAfterProjection(
+    LocalCommandHttpKnowledgeBrowseProjection
+):
+    operation: Literal["browse_after"] = "browse_after"
+
+
 LocalCommandHttpKnowledgeProjection = Annotated[
     LocalCommandHttpKnowledgeStoreProjection
     | LocalCommandHttpKnowledgeReadProjection
     | LocalCommandHttpKnowledgeFindProjection
-    | LocalCommandHttpKnowledgeBrowseProjection,
+    | LocalCommandHttpKnowledgeBrowseProjection
+    | LocalCommandHttpKnowledgeBrowseAfterProjection,
     Field(discriminator="operation"),
 ]
 LocalCommandHttpProjection = Annotated[

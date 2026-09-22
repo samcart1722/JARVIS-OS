@@ -1532,21 +1532,41 @@ def _browse_result(total=1, truncated=False):
 @pytest.mark.parametrize(
     "total,truncated", ((0, False), (49, False), (50, False), (50, True))
 )
-def test_gateway_browse_projects_once_without_reparsing(total, truncated):
-    from app.cognition.local_resolution.models import BrowseKnowledgeRecordsQuery
+@pytest.mark.parametrize("continuation", (False, True))
+def test_gateway_browse_projects_once_without_reparsing(total, truncated, continuation):
+    from app.cognition.local_resolution.models import (
+        BrowseAfterKnowledgeRecordsQuery,
+        BrowseKnowledgeRecordsQuery,
+    )
     from app.local_command import LocalKnowledgeBrowseProjection
 
     local = _browse_result(total, truncated)
     routed = _full_result(
         TextRoutingResult(
-            _interpreted(BrowseKnowledgeRecordsQuery()),
+            _interpreted(
+                (
+                    BrowseAfterKnowledgeRecordsQuery("PRIVATE_ANCHOR")
+                    if continuation
+                    else BrowseKnowledgeRecordsQuery()
+                )
+            ),
             CoordinatedResult(CoordinatedRoute.LOCAL, local_result=local),
         )
     )
     service = RecordingRoutingService(routed)
     result = _gateway(service).execute(_request(text="deliberately not parseable"))
     assert len(service.requests) == 1
-    assert type(result.projection) is LocalKnowledgeBrowseProjection
+    from app.local_command import LocalKnowledgeBrowseAfterProjection
+
+    expected = (
+        LocalKnowledgeBrowseAfterProjection
+        if continuation
+        else LocalKnowledgeBrowseProjection
+    )
+    assert type(result.projection) is expected
+    assert result.projection.operation.value == (
+        "browse_after" if continuation else "browse"
+    )
     assert result.response == "Knowledge records browsed locally."
     assert result.projection.truncated is truncated
     assert tuple(r.record_id for r in result.projection.records) == tuple(
@@ -1578,10 +1598,21 @@ def test_gateway_browse_projects_once_without_reparsing(total, truncated):
         "failure_partial",
     ),
 )
-def test_gateway_rejects_browse_inconsistencies(corruption):
-    from app.cognition.local_resolution.models import BrowseKnowledgeRecordsQuery
+@pytest.mark.parametrize("continuation", (False, True))
+def test_gateway_rejects_browse_inconsistencies(corruption, continuation):
+    from app.cognition.local_resolution.models import (
+        BrowseAfterKnowledgeRecordsQuery,
+        BrowseKnowledgeRecordsQuery,
+    )
 
-    query, result = BrowseKnowledgeRecordsQuery(), _browse_result(2)
+    query, result = (
+        (
+            BrowseAfterKnowledgeRecordsQuery("PRIVATE_ANCHOR")
+            if continuation
+            else BrowseKnowledgeRecordsQuery()
+        ),
+        _browse_result(2),
+    )
     if corruption == "intent":
         query = ReadListItemsQuery("list")
     if corruption == "result":
@@ -1628,8 +1659,12 @@ def test_gateway_rejects_browse_inconsistencies(corruption):
 
 
 @pytest.mark.parametrize("code", (LOCAL_PERMISSION_DENIED, LOCAL_VALIDATION_FAILED))
-def test_gateway_browse_failures_remain_canonical_without_projection(code):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_gateway_browse_failures_remain_canonical_without_projection(
+    code, continuation
+):
     from app.cognition.local_resolution.models import (
+        BrowseAfterKnowledgeRecordsQuery,
         BrowseKnowledgeRecordsQuery,
         KnowledgeBrowseResolutionResult,
     )
@@ -1637,19 +1672,36 @@ def test_gateway_browse_failures_remain_canonical_without_projection(code):
     local = KnowledgeBrowseResolutionResult(
         True, False, "private detail", LOCAL_CAPABILITY_ROUTE, error_code=code
     )
-    result = _execute_successful_local(BrowseKnowledgeRecordsQuery(), local)
+    result = _execute_successful_local(
+        (
+            BrowseAfterKnowledgeRecordsQuery("PRIVATE_ANCHOR")
+            if continuation
+            else BrowseKnowledgeRecordsQuery()
+        ),
+        local,
+    )
     assert not result.success and result.projection is None
     assert result.error.code.value == code
     assert "private" not in result.error.message
 
 
 @pytest.mark.parametrize("workspace", (None, "workspace", object()))
-def test_gateway_browse_requires_exact_selected_workspace(workspace):
-    from app.cognition.local_resolution.models import BrowseKnowledgeRecordsQuery
+@pytest.mark.parametrize("continuation", (False, True))
+def test_gateway_browse_requires_exact_selected_workspace(workspace, continuation):
+    from app.cognition.local_resolution.models import (
+        BrowseAfterKnowledgeRecordsQuery,
+        BrowseKnowledgeRecordsQuery,
+    )
 
     with pytest.raises(TypeError, match="selected workspace"):
         LocalCommandApplicationGateway._map_local_success_projection(
-            BrowseKnowledgeRecordsQuery(), _browse_result(), workspace
+            (
+                BrowseAfterKnowledgeRecordsQuery("PRIVATE_ANCHOR")
+                if continuation
+                else BrowseKnowledgeRecordsQuery()
+            ),
+            _browse_result(),
+            workspace,
         )
 
 
@@ -1679,8 +1731,12 @@ def test_gateway_browse_rejects_subclass_contracts(foreign):
 @pytest.mark.parametrize(
     "route", (CoordinatedRoute.COGNITIVE, CoordinatedRoute.SAFE_INSUFFICIENCY)
 )
-def test_gateway_browse_rejects_nonlocal_routing(route):
-    from app.cognition.local_resolution.models import BrowseKnowledgeRecordsQuery
+@pytest.mark.parametrize("continuation", (False, True))
+def test_gateway_browse_rejects_nonlocal_routing(route, continuation):
+    from app.cognition.local_resolution.models import (
+        BrowseAfterKnowledgeRecordsQuery,
+        BrowseKnowledgeRecordsQuery,
+    )
 
     coordinated = (
         CoordinatedResult(
@@ -1692,7 +1748,36 @@ def test_gateway_browse_rejects_nonlocal_routing(route):
         )
     )
     routed = _full_result(
-        TextRoutingResult(_interpreted(BrowseKnowledgeRecordsQuery()), coordinated)
+        TextRoutingResult(
+            _interpreted(
+                (
+                    BrowseAfterKnowledgeRecordsQuery("PRIVATE_ANCHOR")
+                    if continuation
+                    else BrowseKnowledgeRecordsQuery()
+                )
+            ),
+            coordinated,
+        )
     )
     with pytest.raises(TypeError, match="browse"):
         _gateway(RecordingRoutingService(routed)).execute(_request())
+
+
+@pytest.mark.parametrize("anchor", ("id-000", "id-999"))
+def test_gateway_browse_after_rejects_result_outside_anchor(anchor):
+    from app.cognition.local_resolution.models import BrowseAfterKnowledgeRecordsQuery
+
+    with pytest.raises(TypeError, match="browse result"):
+        _execute_successful_local(
+            BrowseAfterKnowledgeRecordsQuery(anchor), _browse_result()
+        )
+
+
+def test_gateway_browse_after_rejects_query_subclass():
+    from app.cognition.local_resolution.models import BrowseAfterKnowledgeRecordsQuery
+
+    class OtherQuery(BrowseAfterKnowledgeRecordsQuery):
+        pass
+
+    with pytest.raises(TypeError, match="browse"):
+        _execute_successful_local(OtherQuery("PRIVATE_ANCHOR"), _browse_result())

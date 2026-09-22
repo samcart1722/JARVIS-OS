@@ -1511,11 +1511,20 @@ def test_http_workspace_rejects_oversized_normalized_value() -> None:
 
 
 @pytest.mark.parametrize("kind", ("fact", "concept", "state"))
-def test_http_browse_summary_closed_frozen_and_literal(kind):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_http_browse_summary_closed_frozen_and_literal(kind, continuation):
     from app.api.models.local_command import (
         LocalCommandHttpKnowledgeBrowseProjection,
         LocalCommandHttpKnowledgeSummary,
     )
+
+    if continuation:
+        from app.api.models.local_command import (
+            LocalCommandHttpKnowledgeBrowseAfterProjection,
+        )
+        LocalCommandHttpKnowledgeBrowseProjection = (
+            LocalCommandHttpKnowledgeBrowseAfterProjection
+        )
 
     summary = LocalCommandHttpKnowledgeSummary(
         record_id='id"\\e\u0301', kind=kind, key="key  e\u0301"
@@ -1580,8 +1589,17 @@ def test_http_browse_summary_rejects_types_and_extras(field, value):
         {"kind": "list"},
     ),
 )
-def test_http_browse_projection_rejects_invalid_contract(override):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_http_browse_projection_rejects_invalid_contract(override, continuation):
     from app.api.models.local_command import LocalCommandHttpKnowledgeBrowseProjection
+
+    if continuation:
+        from app.api.models.local_command import (
+            LocalCommandHttpKnowledgeBrowseAfterProjection,
+        )
+        LocalCommandHttpKnowledgeBrowseProjection = (
+            LocalCommandHttpKnowledgeBrowseAfterProjection
+        )
 
     args = dict(records=(), truncated=False)
     args.update(override)
@@ -1604,7 +1622,11 @@ def browse_http_runtime(tmp_path, monkeypatch, request):
     def compose(*args, **kwargs):
         parameters = getattr(getattr(request.node, "callspec", None), "params", {})
         if parameters.get("scenario") == "missing":
-            kwargs.pop("local_knowledge_browse_repository")
+            kwargs.pop(
+                "local_knowledge_browse_after_repository"
+                if parameters.get("continuation")
+                else "local_knowledge_browse_repository"
+            )
         instance = Container(*args, **kwargs)
         captured.append(instance)
         return instance
@@ -1656,7 +1678,10 @@ def browse_http_runtime(tmp_path, monkeypatch, request):
         "gateway_corrupt",
     ),
 )
-def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenario):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_browse_http_integrated_terminals(
+    browse_http_runtime, fallback, scenario, continuation
+):
     from unittest.mock import patch
 
     from app.cognition.local_resolution.contracts import LocalRepositoryError
@@ -1675,13 +1700,16 @@ def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenari
     )
 
     instance, storage, post = browse_http_runtime
+    anchor = "PRIVATE_ANCHOR"
+    operation = "browse-after" if continuation else "browse"
+    method = "browse_after" if continuation else "browse"
     total = {"success": 1, "full": 50, "truncated": 51}.get(scenario, 0)
     for i in reversed(range(total)):
         instance.local_knowledge_repository.store(
             KnowledgeRecord(
                 f"id-{i:03}",
                 DEVELOPMENT_WORKSPACE,
-                KnowledgeKind.FACT,
+                (KnowledgeKind.FACT, KnowledgeKind.CONCEPT, KnowledgeKind.STATE)[i % 3],
                 "key  e\u0301",
                 "PRIVATE_VALUE",
                 KnowledgeProvenance("explicit", "PRIVATE_SOURCE"),
@@ -1693,7 +1721,7 @@ def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenari
         )
     repository = instance.local_knowledge_repository
     with (
-        patch.object(repository, "browse", wraps=repository.browse) as browse,
+        patch.object(repository, method, wraps=getattr(repository, method)) as browse,
         patch.object(
             instance.local_command_interpreter,
             "interpret",
@@ -1733,9 +1761,10 @@ def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenari
 
             resolve.side_effect = corrupt
         status, body = post(
-            "knowledge browse :: []"
+            f"knowledge {operation} :: []"
             if scenario == "invalid"
-            else "knowledge browse :: {}",
+            else f"knowledge {operation} :: "
+            + json.dumps({"after_record_id": anchor} if continuation else {}),
             fallback,
         )
         expected = {
@@ -1749,7 +1778,9 @@ def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenari
         assert status == expected
         assert browse.call_count == (scenario not in ("invalid", "denied", "missing"))
         if browse.called:
-            browse.assert_called_once_with(DEVELOPMENT_WORKSPACE)
+            browse.assert_called_once_with(
+                DEVELOPMENT_WORKSPACE, *((anchor,) if continuation else ())
+            )
         interpreter.assert_called_once()
         cognitive.assert_not_called()
         if expected == 200:
@@ -1760,11 +1791,11 @@ def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenari
                 "error": None,
                 "projection": {
                     "kind": "knowledge",
-                    "operation": "browse",
+                    "operation": "browse_after" if continuation else "browse",
                     "records": [
                         {
                             "record_id": f"id-{i:03}",
-                            "kind": "fact",
+                            "kind": ("fact", "concept", "state")[i % 3],
                             "key": "key  e\u0301",
                         }
                         for i in range(min(total, 50))
@@ -1783,7 +1814,18 @@ def test_browse_http_integrated_terminals(browse_http_runtime, fallback, scenari
             assert body["response"] is None and "projection" not in body
             if expected == 500:
                 assert body == local_command._INTERNAL_ERROR_CONTENT
-        assert "PRIVATE_" not in json.dumps(body)
+        serialized = json.dumps(body)
+        for private in (
+            "PRIVATE_",
+            DEVELOPMENT_ACTOR.actor_id,
+            DEVELOPMENT_WORKSPACE.workspace_id,
+            "after_record_id",
+            "source_type",
+            "source_reference",
+            "provenance",
+            "id-050",
+        ):
+            assert private not in serialized
         # Same real pipeline and observed engine: unrelated authorized text invokes it.
         _, positive = post("ordinary cognitive input", True)
         assert positive["route"] == "cognitive"
@@ -1837,8 +1879,17 @@ def test_http_browse_then_read_reauthorizes_without_runtime_restart(
 
 
 @pytest.mark.parametrize("corruption", ("duplicate", "order", "excess"))
-def test_http_browse_model_rejects_corrupt_sequences(corruption):
+@pytest.mark.parametrize("continuation", (False, True))
+def test_http_browse_model_rejects_corrupt_sequences(corruption, continuation):
     from app.api.models.local_command import LocalCommandHttpKnowledgeBrowseProjection
+
+    if continuation:
+        from app.api.models.local_command import (
+            LocalCommandHttpKnowledgeBrowseAfterProjection,
+        )
+        LocalCommandHttpKnowledgeBrowseProjection = (
+            LocalCommandHttpKnowledgeBrowseAfterProjection
+        )
 
     records = [
         dict(record_id=f"id-{i:03}", kind="fact", key="key")
@@ -1861,11 +1912,16 @@ def test_http_browse_model_rejects_corrupt_sequences(corruption):
         ("records", (object(),)),
     ),
 )
+@pytest.mark.parametrize("continuation", (False, True))
 def test_http_browse_corrupt_application_projection_is_sanitized(
-    monkeypatch, field, value
+    monkeypatch, field, value, continuation
 ):
     from app.local_command import LocalKnowledgeBrowseProjection
 
+    if continuation:
+        from app.local_command import (
+            LocalKnowledgeBrowseAfterProjection as LocalKnowledgeBrowseProjection,
+        )
     projection = LocalKnowledgeBrowseProjection((), False)
     result = LocalCommandApplicationResult(
         True, LocalCommandApplicationRoute.LOCAL, "Done", projection=projection
@@ -1875,3 +1931,66 @@ def test_http_browse_corrupt_application_projection_is_sanitized(
     monkeypatch.setattr(local_command, "_resolve_gateway", lambda request: gateway)
     status, body = _post_local_command(_payload(text="knowledge browse :: {}"))
     assert status == 500 and body == local_command._INTERNAL_ERROR_CONTENT
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+def test_http_browse_after_revocation_without_restart(browse_http_runtime, fallback):
+    from unittest.mock import patch
+
+    from app.cognition.local_resolution.permissions import KNOWLEDGE_RECORDS_BROWSE
+    from app.infrastructure.local_storage.sqlite_storage import (
+        SQLitePermissionGrantRepository,
+    )
+    from app.operations.local_interactive_runtime import (
+        DEVELOPMENT_ACTOR,
+        DEVELOPMENT_WORKSPACE,
+    )
+
+    instance, storage, post = browse_http_runtime
+    assert (
+        post(
+            'knowledge store :: {"record_id":"record","kind":"fact","key":"key",'
+            '"value":"PRIVATE_VALUE","source_type":"explicit",'
+            '"source_reference":"PRIVATE_SOURCE"}',
+            fallback,
+        )[0]
+        == 200
+    )
+    command = 'knowledge browse-after :: {"after_record_id":"PRIVATE_ANCHOR"}'
+    status, body = post(command, fallback)
+    assert status == 200 and body["projection"]["operation"] == "browse_after"
+    assert [r["record_id"] for r in body["projection"]["records"]] == ["record"]
+    SQLitePermissionGrantRepository(storage).revoke(
+        DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, KNOWLEDGE_RECORDS_BROWSE
+    )
+    with patch.object(instance.local_knowledge_repository, "browse_after") as data:
+        status, body = post(command, fallback)
+        assert status == 403 and body["error"]["code"] == "local_permission_denied"
+        assert "projection" not in body and body["response"] is None
+        assert "PRIVATE_" not in json.dumps(body)
+        data.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "after_record_id",
+        "anchor",
+        "actor",
+        "workspace_id",
+        "value",
+        "provenance",
+        "total",
+        "cursor",
+        "page",
+    ),
+)
+def test_http_browse_after_projection_rejects_private_fields(field):
+    from app.api.models.local_command import (
+        LocalCommandHttpKnowledgeBrowseAfterProjection,
+    )
+
+    with pytest.raises(ValidationError):
+        LocalCommandHttpKnowledgeBrowseAfterProjection(
+            records=(), truncated=False, **{field: "PRIVATE_SENTINEL"}
+        )

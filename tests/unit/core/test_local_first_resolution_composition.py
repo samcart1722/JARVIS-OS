@@ -7,6 +7,7 @@ from app.cognition.domain.reasoning_result import ReasoningResult
 from app.cognition.local_resolution.models import (
     ActorIdentity,
     AddListItemsCommand,
+    BrowseAfterKnowledgeRecordsQuery,
     BrowseKnowledgeRecordsQuery,
     FindKnowledgeRecordsQuery,
     KnowledgeKind,
@@ -65,6 +66,124 @@ class FalseyRepository:
 
     def get(self, actor, workspace):
         return None
+
+
+@pytest.mark.parametrize("mode", ("default", "legacy", "explicit"))
+def test_continuation_composition_shares_data_and_preserves_old_commands(mode):
+    class FalseyKnowledgeRepository(InMemoryKnowledgeRecordRepository):
+        def __bool__(self):
+            return False
+
+    repository = FalseyKnowledgeRepository()
+    kwargs = (
+        {}
+        if mode == "default"
+        else {
+            "local_knowledge_repository": repository,
+            "local_knowledge_browse_repository": repository,
+        }
+    )
+    if mode == "explicit":
+        kwargs["local_knowledge_browse_after_repository"] = repository
+    instance = Container(
+        Settings(REASONING_ENABLED=False, _env_file=None),
+        local_permission_grants=(
+            PermissionGrant(
+                "a",
+                "w",
+                frozenset(
+                    {
+                        KNOWLEDGE_RECORDS_ADD,
+                        KNOWLEDGE_RECORDS_READ,
+                        KNOWLEDGE_RECORDS_BROWSE,
+                    }
+                ),
+            ),
+        ),
+        **kwargs,
+    )
+    if mode != "default":
+        assert instance.local_knowledge_repository is repository
+    assert instance.local_knowledge_browse_after_repository is (
+        None if mode == "legacy" else instance.local_knowledge_repository
+    )
+    actor, workspace = ActorIdentity("a"), WorkspaceIdentity("w")
+    resolve = instance.local_first_resolver.resolve
+    for index in reversed(range(52)):
+        record = KnowledgeRecord(
+            f"r-{index:03}",
+            workspace,
+            KnowledgeKind.FACT,
+            "key",
+            "value",
+            KnowledgeProvenance("test", "synthetic"),
+        )
+        assert resolve(actor, workspace, StoreKnowledgeRecordCommand(record)).success
+    assert resolve(actor, workspace, ReadKnowledgeRecordQuery("r-001")).success
+    assert resolve(actor, workspace, FindKnowledgeRecordsQuery("key")).success
+    assert resolve(actor, workspace, BrowseKnowledgeRecordsQuery()).success
+    page = resolve(actor, workspace, BrowseAfterKnowledgeRecordsQuery("r-000"))
+    assert page.handled
+    if mode == "legacy":
+        assert not page.success and page.error_code == "local_validation_failed"
+    else:
+        assert page.success and page.truncated
+        assert tuple(row.record_id for row in page.records) == tuple(
+            f"r-{index:03}" for index in range(1, 51)
+        )
+
+
+def test_continuation_only_injection_rejected_before_composition():
+    with patch.object(Container, "_build_memory") as build:
+        with pytest.raises(ValueError, match="explicit record repository"):
+            Container(
+                Settings(_env_file=None), local_knowledge_browse_after_repository=Mock()
+            )
+        build.assert_not_called()
+
+
+def test_resolver_dispatches_exact_query_context_once_and_preserves_falsey_capability():
+    from app.cognition.local_resolution.models import KnowledgeRecordsBrowsed
+    from app.cognition.local_resolution.resolver import LocalFirstResolver
+
+    class FalseyCapability:
+        def __bool__(self):
+            return False
+
+        execute = Mock(return_value=KnowledgeRecordsBrowsed((), False))
+
+    after = FalseyCapability()
+    browse = Mock()
+    browse.execute.return_value = KnowledgeRecordsBrowsed((), False)
+    resolver = LocalFirstResolver(Mock(), Mock(), browse, after)
+    actor, workspace = ActorIdentity("a"), WorkspaceIdentity("w")
+    query = BrowseAfterKnowledgeRecordsQuery("anchor")
+    assert resolver.resolve(actor, workspace, query).success
+    args = after.execute.call_args.args
+    assert args[0] is actor and args[1] is workspace and args[2] is query
+    after.execute.assert_called_once()
+    browse.execute.assert_not_called()
+    assert resolver.resolve(actor, workspace, BrowseKnowledgeRecordsQuery()).success
+    browse.execute.assert_called_once()
+    after.execute.assert_called_once()
+
+
+@pytest.mark.parametrize("fault", (TypeError, ValueError))
+def test_continuation_capability_validation_exceptions_remain_local(fault):
+    from app.cognition.local_resolution.resolver import LocalFirstResolver
+
+    after = Mock()
+    after.execute.side_effect = fault("private detail")
+    result = LocalFirstResolver(
+        Mock(), knowledge_browse_after_capability=after
+    ).resolve(
+        ActorIdentity("a"),
+        WorkspaceIdentity("w"),
+        BrowseAfterKnowledgeRecordsQuery("m"),
+    )
+    assert result.handled and not result.success
+    assert result.error_code == "local_validation_failed"
+    assert "private" not in result.response
 
 
 @pytest.mark.parametrize("mode", ("default", "records", "both", "browse_only"))
