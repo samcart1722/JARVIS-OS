@@ -18,9 +18,11 @@ evidence is recorded at
 and prior Sprint 38 feature/documentation branches were cleaned locally and
 remotely. Formal closure is complete, with no known open functional defects.
 Sprint 39 is the active pre-merge implementation scope for
-`Authorized Local Knowledge Browse Continuation v1`. Blocks A-E are approved;
-Block F validation and documentation remain in progress. The scope is not yet
-merged, released, closed or tagged.
+`Authorized Local Knowledge Browse Continuation v1`. Blocks A–F are APPROVED.
+Implementation commit `1e92520f786a0f40b06a0a12348cc5d1a3d85e6f` exists and
+the feature branch is pushed. PR #62 is OPEN; Sprint 39 remains PRE-MERGE.
+Merge, release, tag, backup and formal closure have not occurred.
+NATIVE ACCEPTANCE NOT EXECUTED.
 Sprint 37 and earlier releases remain historical. Sprint 39 remains pre-merge
 and has no final release closure yet.
 Start with the repository-owned
