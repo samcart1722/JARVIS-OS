@@ -1,6 +1,75 @@
 # Luxiom — Start Here
 
-## Current checkpoint - Sprint 38
+## Current release truth - Sprint 39
+
+Authorized Local Knowledge Browse Continuation v1 implementation is complete.
+Blocks A-F are APPROVED. Sprint 39 is MERGED + TAGGED + BACKED UP + RECOVERY
+VERIFIED, **NOT YET FORMALLY CLOSED**. Formal closure remains pending completion
+of the release-truth commit, review, push and merge lifecycle. Sprint 39 release
+lifecycle is completing; Sprint 40 is NOT YET AUTHORIZED and has no assigned scope.
+
+Implementation: `1e92520f786a0f40b06a0a12348cc5d1a3d85e6f`.
+Pre-merge documentation correction: `4c659790c65eb22c63f57fd3817b77a0e9bc31e6`.
+PR #62 is MERGED through normal two-parent merge
+`27409adc61487015ee6b6bb0198c8256b957b723`. Ordered parents:
+`f87f8f6fe77901c49e1622edc8bff87c24966430` and
+`4c659790c65eb22c63f57fd3817b77a0e9bc31e6`.
+Annotated release tag: `governed-sprint-39-complete`.
+Tag object: `21c89a0903c5efe371a4359257ab5f51f92fc301`.
+Peeled release commit: `27409adc61487015ee6b6bb0198c8256b957b723`.
+Annotation: `Governed Sprint 39 complete`.
+Release tree: `8bd5c78f025b9146f01eb055842ccd9892869211`.
+Later documentation may advance master without moving this immutable tag.
+
+Initial browse remains `knowledge browse :: {}`. Continuation is
+`knowledge browse-after :: {"after_record_id":"..."}`: deterministic read-only
+execution in the governed workspace, using `knowledge.records.browse` and
+re-authorizing on every explicit Send before data access. Filtering uses the
+exact workspace and `record_id > normalized after_record_id`; ascending binary
+ordering uses SQLite `COLLATE BINARY`. The anchor need not exist. Internal
+lookahead is at most 51 summaries; public output is at most 50 records and
+`truncated` is true iff another valid record exists. Public records expose only
+`record_id`, `kind` and `key`, never value or provenance. Prepare next page
+performs zero requests; explicit Send submits the current editor and remains
+the execution/authorization boundary. READ is separately prepared and authorized.
+Handled continuation success/failure remains terminal locally.
+
+No persistent cursor, snapshots, page history, Previous navigation, totals,
+semantic retrieval, knowledge edit/update/delete, generic pagination framework,
+model/provider or external network dependency, Hermes integration or Spatial
+interface was introduced.
+
+Post-merge validation at the release: **2221 passed, 0 failed, 0 skipped**,
+pytest exit code 0; global Ruff, JavaScript syntax and diff checks PASS.
+Node harnesses: command assistance 406, BROWSE 65, BROWSE-AFTER 141 checks.
+**NATIVE ACCEPTANCE NOT EXECUTED** remains an acknowledged manual/release risk.
+Node DOM doubles and simulated fetch checks are not native-browser evidence.
+
+Backup:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260922_180530_SPRINT39_CLOSURE`.
+Full-history bundle `JARVIS-OS_SPRINT39_ALL_REFS.bundle`, SHA-256:
+`28C7BC09BA706DCFA9F651FDF00B4C327EC489EA4873F13C6E75754F5B79E4C1`.
+Release ZIP `LUXIOM_SPRINT39_RELEASE_SOURCE.zip`, SHA-256:
+`271B1ED596538805F390D48DC886AC145B36FF1D14B04DFA517C2B234F7BAF40`.
+Custody: `RELEASE_CUSTODY.json` and `BACKUP_SHA256_MANIFEST.txt`.
+Recovery:
+`C:\PROYECTOS\LUXIOM_BACKUPS\LUXIOM_20260922_180530_SPRINT39_RECOVERY`.
+Bundle verification, external restore and `git fsck --full`: PASS. All 574 ZIP
+files passed inventory, byte and extraction verification. Recovered tag object,
+peeled commit and both feature commits match the release. Recovered and live
+release trees both equal `8bd5c78f025b9146f01eb055842ccd9892869211`:
+**tree equality PASS**.
+
+The current untracked `tests/unit/reasoning/entities/test_user_request.py`
+remains unstaged, unmodified, unexecuted and outside Sprint 39 commits, the
+release tree and ZIP. Its SHA-256 is
+`45CF806561DB59828555A0A14DB7C5106B309F3F0B2122C68E5F0C37FBD3C49C`.
+The canonical `git bundle --all` legitimately retains historical committed
+versions of that path; this is not inclusion of the current untracked file.
+No history filtering or rewriting occurred. The Sprint 39 feature branch remains
+preserved; branch cleanup and formal closure have not occurred.
+
+## Historical checkpoint - Sprint 38
 
 Implementation `b690e299ac4737f7323fdaf631c459f5f25ce80b`, PR #58,
 ordinary two-parent release merge `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`.
@@ -37,7 +106,6 @@ evidence is recorded at
 `C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
 and prior Sprint 38 feature/documentation branches were cleaned locally and
 remotely. Formal closure is complete, with no known open functional defects.
-Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
 
 Luxiom is a Cognitive Operating System: a domain-independent cognitive core
 intended to support multiple products through reusable specialists,
