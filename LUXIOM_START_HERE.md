@@ -4,9 +4,16 @@
 
 Authorized Local Knowledge Browse Continuation v1 implementation is complete.
 Blocks A-F are APPROVED. Sprint 39 is MERGED + TAGGED + BACKED UP + RECOVERY
-VERIFIED, **NOT YET FORMALLY CLOSED**. Formal closure remains pending completion
-of the release-truth commit, review, push and merge lifecycle. Sprint 39 release
-lifecycle is completing; Sprint 40 is NOT YET AUTHORIZED and has no assigned scope.
+VERIFIED. All Sprint 39 formal closure prerequisites have been satisfied.
+Sprint 39 is FORMALLY CLOSED upon merge of this formal-closure record into master.
+Release-truth PR #63 is MERGED at
+`1d8d67af8f10ba0c390371ce5c819ab10221edcd`; final closure validation is APPROVED.
+Completed prerequisites include Blocks A-F APPROVED, implementation PR #62 MERGED,
+post-merge validation PASS, release tag created and verified, backup PASS,
+recovery verification PASS, release tree equality PASS, release-truth PR #63
+MERGED and final closure validation APPROVED.
+Sprint 40 is NOT YET AUTHORIZED and has no assigned scope; Sprint 39 closure
+does not authorize Sprint 40.
 
 Implementation: `1e92520f786a0f40b06a0a12348cc5d1a3d85e6f`.
 Pre-merge documentation correction: `4c659790c65eb22c63f57fd3817b77a0e9bc31e6`.
@@ -42,7 +49,7 @@ interface was introduced.
 Post-merge validation at the release: **2221 passed, 0 failed, 0 skipped**,
 pytest exit code 0; global Ruff, JavaScript syntax and diff checks PASS.
 Node harnesses: command assistance 406, BROWSE 65, BROWSE-AFTER 141 checks.
-**NATIVE ACCEPTANCE NOT EXECUTED** remains an acknowledged manual/release risk.
+**NATIVE ACCEPTANCE NOT EXECUTED** remains a documented non-blocking manual/release risk.
 Node DOM doubles and simulated fetch checks are not native-browser evidence.
 
 Backup:
@@ -67,7 +74,7 @@ release tree and ZIP. Its SHA-256 is
 The canonical `git bundle --all` legitimately retains historical committed
 versions of that path; this is not inclusion of the current untracked file.
 No history filtering or rewriting occurred. The Sprint 39 feature branch remains
-preserved; branch cleanup and formal closure have not occurred.
+preserved; branch cleanup remains a separate, later gate.
 
 ## Historical checkpoint - Sprint 38
 
