@@ -23,7 +23,7 @@ to its explicit grants; this is not a production authentication redesign.
 Release: `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`,
 tag `governed-sprint-38-complete`. Historical policies below retain their scope.
 
-## Active pre-merge browse-after continuation policy
+## Sprint 39 released browse-after continuation policy
 
 The approved continuation keeps the local-first, deterministic knowledge browse
 model intact while extending it with `knowledge browse-after :: {"after_record_id":"..."}`.

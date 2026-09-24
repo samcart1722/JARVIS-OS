@@ -5,15 +5,18 @@
 Authorized Local Knowledge Browse Continuation v1 implementation is complete.
 Blocks A-F are APPROVED. Sprint 39 is MERGED + TAGGED + BACKED UP + RECOVERY
 VERIFIED. All Sprint 39 formal closure prerequisites have been satisfied.
-Sprint 39 is FORMALLY CLOSED upon merge of this formal-closure record into master.
+Sprint 39 is FORMALLY CLOSED. Formal-closure PR #64 merged through normal two-parent merge
+`4704f526edb1e15d692bb961691d8f8457217128`; controlled Sprint 39 working-branch cleanup is complete.
 Release-truth PR #63 is MERGED at
 `1d8d67af8f10ba0c390371ce5c819ab10221edcd`; final closure validation is APPROVED.
 Completed prerequisites include Blocks A-F APPROVED, implementation PR #62 MERGED,
 post-merge validation PASS, release tag created and verified, backup PASS,
 recovery verification PASS, release tree equality PASS, release-truth PR #63
 MERGED and final closure validation APPROVED.
-Sprint 40 is NOT YET AUTHORIZED and has no assigned scope; Sprint 39 closure
-does not authorize Sprint 40.
+Sprint 40 planning selected `Guided Local Capture–Recall–Action Experience v1`
+and is AUTHORIZED FOR CONTRACT + DOCUMENTATION BASELINE CORRECTION ONLY.
+Feature implementation is NOT YET AUTHORIZED pending a frozen behavior
+contract and completion of this baseline synchronization.
 
 Implementation: `1e92520f786a0f40b06a0a12348cc5d1a3d85e6f`.
 Pre-merge documentation correction: `4c659790c65eb22c63f57fd3817b77a0e9bc31e6`.
@@ -73,8 +76,9 @@ release tree and ZIP. Its SHA-256 is
 `45CF806561DB59828555A0A14DB7C5106B309F3F0B2122C68E5F0C37FBD3C49C`.
 The canonical `git bundle --all` legitimately retains historical committed
 versions of that path; this is not inclusion of the current untracked file.
-No history filtering or rewriting occurred. The Sprint 39 feature branch remains
-preserved; branch cleanup remains a separate, later gate.
+No history filtering or rewriting occurred. Sprint 39 working-branch cleanup
+is complete: the implementation, release-truth and formal-closure branch refs
+were safely removed locally and remotely after merge verification.
 
 ## Historical release truth - Sprint 38
 
@@ -500,10 +504,11 @@ authorization for a later gate from completion of an earlier one.
 4. Verify backup evidence when recovery matters.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
-6. Sprint 39 formal closure prerequisites are satisfied; closure is effective
-   upon merge of this formal-closure record into master. Preserve its immutable
-   tag and backup. Sprint 38 closure is historical; do not repeat it. Sprint 40
-   is NOT YET AUTHORIZED; do not infer scope or implementation authorization.
+6. Sprint 39 is FORMALLY CLOSED at closure merge
+   `4704f526edb1e15d692bb961691d8f8457217128`; preserve its immutable tag and
+   verified backup. Sprint 39 working-branch cleanup is complete. Sprint 40 is
+   authorized only for contract and documentation-baseline correction; feature
+   implementation remains NOT YET AUTHORIZED.
 
 ## 15. Repository checkpoint synchronization policy
 

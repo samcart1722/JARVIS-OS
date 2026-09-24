@@ -36,9 +36,9 @@ retains the editor and declares no new command prepared. Preparation, editing
 and Send clear stale results; preparation, selection and Send lock while pending.
 There is no pagination, automatic READ, new endpoint or external UI dependency.
 
-### Browse-after continuation path
+### Sprint 39 released browse-after continuation path
 
-The active pre-merge continuation keeps the initial `knowledge browse :: {}`
+The released Sprint 39 continuation keeps the initial `knowledge browse :: {}`
 path as the baseline and adds the explicit continuation command
 `knowledge browse-after :: {"after_record_id":"..."}`. The request continues
 within the same governed workspace context and uses the same
