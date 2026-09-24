@@ -471,7 +471,7 @@ def test_browse_preparation_controls_do_not_submit_or_add_assets() -> None:
     assert 'id="prepare-browse" type="button"' in html
     assert html.index('id="prepare-browse"') < html.index('<form id="command-form">')
     assert 'button.type = "button"' in script
-    assert 'prepareEditorCommand("read", { record_id: recordId })' in script
+    assert "prepareGuidedRecallRead(recordId)" in script
     assert 'text: commandInput.value' in script
     assert 'const recordId = record.record_id' in script
     assert "No knowledge records in this workspace." in script
@@ -485,7 +485,7 @@ def test_list_projection_script_has_closed_safe_rendering_contract() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     rendering = script[
         script.index("function renderListProjection"):
-        script.index("function renderResult")
+        script.index("function isKnowledgeRecord")
     ]
 
     assert 'projection?.kind !== "list"' in rendering
@@ -705,6 +705,57 @@ def test_guided_experience_state_harness_has_zero_requests() -> None:
     ]
 
 
+def test_guided_capture_recall_harness_uses_governed_results() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for Sprint 40 UI verification")
+
+    completed = subprocess.run(
+        [
+            node,
+            "tests/browser/local_guided_capture_recall_action.js",
+            "--capture-recall",
+        ],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 7
+    assert evidence["nativeBrowserVerified"] is False
+    assert {
+        "capture-prepare",
+        "capture-send",
+        "capture-result",
+        "recall-query-prepare",
+        "recall-query-send",
+        "recall-query-result",
+        "selection",
+        "manual-editor",
+        "mismatch",
+        "recall-read-send",
+        "recall-complete",
+        "capture-replacement",
+        "recall-replacement",
+        "operation-replacement",
+        "no-hidden-send",
+    } == set(evidence["categories"])
+
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint40-block-b-test-only")
+    assert {vector["operation"] for vector in evidence["vectors"]} == {
+        "store",
+        "find",
+        "read",
+    }
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(vector["command"], workspace)
+        assert result.status.value == "interpreted", vector["operation"]
+
+
 def test_no_generic_static_path_or_extra_ui_endpoint(tmp_path: Path) -> None:
     runtime = LocalInteractiveRuntime(tmp_path / "routes.sqlite3", TEST_PROOF)
     app = create_local_interactive_app(runtime)
@@ -890,7 +941,9 @@ def test_browse_after_uses_existing_accessible_preparation_boundary() -> None:
     ]
     assert 'button.type = "button"' in action
     assert 'const anchor = records[records.length - 1].record_id' in action
-    assert 'prepareEditorCommand("browse-after", { after_record_id: anchor })' in action
+    assert 'prepareGuidedRecallQuery(' in action
+    assert '"browse-after"' in action
+    assert '{ after_record_id: anchor }' in action
     assert "fetch(" not in action
     assert "keydown" not in action and "keyup" not in action
     assert ".trim(" not in script and ".normalize(" not in script

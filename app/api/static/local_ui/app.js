@@ -2,6 +2,14 @@
 
 // Python str.strip() whitespace in the governed knowledge models.
 const KNOWLEDGE_WHITESPACE_ONLY = /^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/u;
+const KNOWLEDGE_LEADING_WHITESPACE = /^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+/u;
+const KNOWLEDGE_TRAILING_WHITESPACE = /[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/u;
+
+function stripKnowledgeWhitespace(value) {
+  return value
+    .replace(KNOWLEDGE_LEADING_WHITESPACE, "")
+    .replace(KNOWLEDGE_TRAILING_WHITESPACE, "");
+}
 const KNOWLEDGE_FIELDS = Object.freeze({
   store: ["record_id", "kind", "key", "value", "source_type", "source_reference"],
   read: ["record_id"],
@@ -164,6 +172,294 @@ renderGuidedState(
   "Capture is ready. No guided operation has been executed.",
 );
 
+function guidedStageAvailable(stage) {
+  if (stage === "capture") {
+    return guidedState.stages.capture !== "completed";
+  }
+  if (stage === "recall") {
+    return (
+      guidedState.stages.capture === "completed"
+      && guidedState.stages.recall !== "completed"
+    );
+  }
+  return false;
+}
+
+function invalidateGuidedStage(stage) {
+  if (requestPending || !["capture", "recall"].includes(stage)) return;
+  const affected = GUIDE_STAGES.slice(GUIDE_STAGES.indexOf(stage));
+  for (const dependent of affected) {
+    guidedState.stages[dependent] = "not-started";
+  }
+  guidedState.stages[stage] = stage === "capture"
+    || guidedState.stages.capture === "completed" ? "ready" : "not-started";
+  if (affected.includes(guidedState.correlation?.stage)) {
+    guidedState.correlation = null;
+  }
+  renderGuidedState(
+    `${stage === "capture" ? "Capture" : "Recall"} inputs or preparation changed. `
+      + "Previous progress for this step and dependent steps was cleared. Nothing was executed.",
+  );
+}
+
+function invalidateGuidedOperation(operation) {
+  if (operation === "store") invalidateGuidedStage("capture");
+  else if (["find", "read", "browse", "browse-after"].includes(operation)) {
+    invalidateGuidedStage("recall");
+  }
+}
+
+function clearGuidedCorrelationForReplacement() {
+  const correlation = guidedState.correlation;
+  guidedState.correlation = null;
+  if (!correlation) return;
+
+  const stage = correlation.stage;
+  if (
+    ["capture", "recall"].includes(stage)
+    && guidedState.stages[stage] !== "completed"
+  ) {
+    invalidateGuidedStage(stage);
+  }
+}
+
+function setGuidedPreparation(stage, correlation, message) {
+  guidedState.correlation = correlation;
+  setGuidedStageState(stage, "prepared", message);
+}
+
+function prepareGuidedCapture(fields) {
+  if (requestPending) return;
+  invalidateGuidedStage("capture");
+  const prepared = prepareEditorCommand("store", fields);
+  if (!prepared) {
+    if (guidedStageAvailable("capture")) {
+      setGuidedStageState(
+        "capture",
+        "failed",
+        "Capture preparation failed. Correct the fields and prepare again.",
+      );
+    }
+    return;
+  }
+
+  if (!guidedStageAvailable("capture")) return;
+
+  setGuidedPreparation(
+    "capture",
+    {
+      stage: "capture",
+      type: "capture-store",
+      recordId: stripKnowledgeWhitespace(fields.record_id),
+    },
+    "Capture prepared. Review the editor, then explicitly Send.",
+  );
+}
+
+function prepareGuidedRecallQuery(operation, fields) {
+  if (requestPending) return;
+  invalidateGuidedStage("recall");
+  const prepared = prepareEditorCommand(operation, fields);
+  if (!prepared) {
+    if (guidedStageAvailable("recall")) {
+      setGuidedStageState(
+        "recall",
+        "failed",
+        "Recall preparation failed. Correct the fields and prepare again.",
+      );
+    }
+    return;
+  }
+
+  if (!guidedStageAvailable("recall")) return;
+
+  const projectionOperation = operation === "browse-after"
+    ? "browse_after"
+    : operation;
+
+  setGuidedPreparation(
+    "recall",
+    {
+      stage: "recall",
+      type: "recall-query",
+      operation: projectionOperation,
+    },
+    "Recall query prepared. Review the editor, then explicitly Send.",
+  );
+}
+
+function prepareGuidedRecallRead(recordId) {
+  if (requestPending) return;
+  invalidateGuidedStage("recall");
+  const prepared = prepareEditorCommand(
+    "read",
+    { record_id: recordId },
+  );
+  if (!prepared) {
+    if (guidedStageAvailable("recall")) {
+      setGuidedStageState(
+        "recall",
+        "failed",
+        "READ preparation failed. Select the record again.",
+      );
+    }
+    return;
+  }
+
+  if (!guidedStageAvailable("recall")) return;
+
+  setGuidedPreparation(
+    "recall",
+    {
+      stage: "recall",
+      type: "recall-read",
+      recordId: stripKnowledgeWhitespace(recordId),
+    },
+    "READ prepared for the selected record. Explicit Send is still required.",
+  );
+}
+
+function isValidGuidedRecallQueryProjection(projection, operation) {
+  if (
+    projection?.kind !== "knowledge"
+    || projection.operation !== operation
+  ) {
+    return false;
+  }
+
+  if (operation === "find") {
+    return (
+      Array.isArray(projection.records)
+      && projection.records.every(isKnowledgeRecord)
+      && typeof projection.truncated === "boolean"
+    );
+  }
+
+  if (!["browse", "browse_after"].includes(operation)) {
+    return false;
+  }
+
+  return (
+    Array.isArray(projection.records)
+    && projection.records.length <= 50
+    && typeof projection.truncated === "boolean"
+    && (!projection.truncated || projection.records.length === 50)
+    && projection.records.every(isKnowledgeSummary)
+  );
+}
+
+function beginGuidedRequest() {
+  const correlation = guidedState.correlation;
+  if (!correlation) return;
+
+  const stage = correlation.stage;
+  if (!["capture", "recall"].includes(stage)) return;
+  if (guidedState.stages[stage] === "completed") return;
+
+  setGuidedStageState(
+    stage,
+    "pending",
+    `${stage === "capture" ? "Capture" : "Recall"} request pending. `
+      + "Completion still depends on the governed result.",
+  );
+}
+
+function failGuidedRequest(message) {
+  const correlation = guidedState.correlation;
+  if (!correlation) return;
+
+  const stage = correlation.stage;
+  if (!["capture", "recall"].includes(stage)) return;
+  if (guidedState.stages[stage] === "completed") return;
+
+  setGuidedStageState(stage, "failed", message);
+}
+
+function applyGuidedResult(result) {
+  const correlation = guidedState.correlation;
+  if (!correlation) return;
+
+  if (result?.success !== true) {
+    failGuidedRequest(
+      "The governed request did not succeed. The guided step remains incomplete.",
+    );
+    return;
+  }
+
+  const projection = result.projection;
+
+  if (correlation.type === "capture-store") {
+    const matches = (
+      projection?.kind === "knowledge"
+      && projection.operation === "store"
+      && isKnowledgeRecord(projection.record)
+      && typeof projection.created === "boolean"
+      && projection.record.record_id === correlation.recordId
+    );
+
+    if (!matches) {
+      failGuidedRequest(
+        "The returned result did not match the prepared Capture record.",
+      );
+      return;
+    }
+
+    guidedState.correlation = null;
+    guidedState.stages.capture = "completed";
+    guidedState.stages.recall = "ready";
+    renderGuidedState(
+      "Capture completed from the governed STORE result. Recall is ready.",
+    );
+    return;
+  }
+
+  if (correlation.type === "recall-query") {
+    if (
+      !isValidGuidedRecallQueryProjection(
+        projection,
+        correlation.operation,
+      )
+    ) {
+      failGuidedRequest(
+        "The returned result did not match the prepared Recall query.",
+      );
+      return;
+    }
+
+    guidedState.correlation = null;
+    guidedState.stages.recall = "ready";
+    renderGuidedState(
+      "Recall results returned. Select a record to prepare READ; "
+      + "selection does not execute it.",
+    );
+    return;
+  }
+
+  if (correlation.type === "recall-read") {
+    const matches = (
+      projection?.kind === "knowledge"
+      && projection.operation === "read"
+      && isKnowledgeRecord(projection.record)
+      && projection.record.record_id === correlation.recordId
+    );
+
+    if (!matches) {
+      failGuidedRequest(
+        "The returned READ did not match the selected record. "
+        + "Recall remains incomplete.",
+      );
+      return;
+    }
+
+    guidedState.correlation = null;
+    guidedState.stages.recall = "completed";
+    guidedState.stages["follow-up"] = "ready";
+    renderGuidedState(
+      "Recall completed from the selected READ result. Follow-up is ready.",
+    );
+  }
+}
+
 const proofInput = document.querySelector("#proof");
 const commandInput = document.querySelector("#command");
 const fallbackInput = document.querySelector("#cognitive-fallback");
@@ -312,7 +608,8 @@ function isKnowledgeRecord(record) {
   );
 }
 
-function renderKnowledgeRecord(record) {
+function renderKnowledgeRecord(record, selectable = false) {
+  const recordId = record.record_id;
   const article = document.createElement("article");
   article.className = "knowledge-record";
   const details = document.createElement("dl");
@@ -332,6 +629,22 @@ function renderKnowledgeRecord(record) {
     details.appendChild(row);
   }
   article.appendChild(details);
+
+  if (selectable) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = commandInput.value
+      ? "Prepare READ and replace editor command"
+      : "Prepare READ";
+    button.disabled = requestPending;
+    button.addEventListener("click", () => {
+      if (requestPending || button.disabled) return;
+      prepareGuidedRecallRead(recordId);
+    });
+    browseReadButtons.push(button);
+    article.appendChild(button);
+  }
+
   knowledgeRecords.appendChild(article);
 }
 
@@ -408,7 +721,7 @@ function renderKnowledgeProjection(projection) {
     knowledgeCount.textContent = String(projection.records.length);
     knowledgeCountRow.hidden = false;
     for (const record of projection.records) {
-      renderKnowledgeRecord(record);
+      renderKnowledgeRecord(record, true);
     }
     knowledgeEmpty.hidden = projection.records.length !== 0;
     knowledgeTruncated.hidden = projection.truncated !== true;
@@ -468,7 +781,7 @@ function renderKnowledgeSummary(record) {
   button.disabled = requestPending;
   button.addEventListener("click", () => {
     if (requestPending || button.disabled) return;
-    prepareEditorCommand("read", { record_id: recordId });
+    prepareGuidedRecallRead(recordId);
   });
   browseReadButtons.push(button);
   article.append(details, button);
@@ -485,7 +798,10 @@ function renderNextPageAction(records) {
   button.hidden = requestPending;
   button.addEventListener("click", () => {
     if (requestPending || button.disabled || nextPageButton !== button) return;
-    prepareEditorCommand("browse-after", { after_record_id: anchor });
+    prepareGuidedRecallQuery(
+      "browse-after",
+      { after_record_id: anchor },
+    );
   });
   nextPageButton = button;
   continuationActions.appendChild(button);
@@ -537,6 +853,8 @@ function setRequestPending(pending) {
 
 operationInput.addEventListener("change", () => {
   if (requestPending) return;
+  clearGuidedCorrelationForReplacement();
+  invalidateGuidedOperation(operationInput.value);
   for (const input of Object.values(assistanceInputs)) input.value = "";
   updateAssistanceFields();
   clearDraftResults();
@@ -548,6 +866,7 @@ operationInput.addEventListener("change", () => {
 
 assistance.addEventListener("input", (event) => {
   if (requestPending || event.target === operationInput) return;
+  invalidateGuidedOperation(operationInput.value);
   clearDraftResults();
   preparationError.textContent = "";
   preparationStatus.textContent = "Field changes have not been applied to the editor.";
@@ -571,26 +890,45 @@ function prepareEditorCommand(operation, fields) {
   preparationError.textContent = "";
   const replaced = commandInput.value !== "";
   try {
-    commandInput.value = prepareKnowledgeCommand(operation, fields);
+    const preparedCommand = prepareKnowledgeCommand(operation, fields);
+    clearGuidedCorrelationForReplacement();
+    commandInput.value = preparedCommand;
     preparationStatus.textContent = `${operation === "read" ? "READ command" : "Command"} prepared. ${replaced ? "Previous editor command replaced. " : ""}No operation has been executed.`;
     commandState.textContent = "Review or edit the prepared command, then explicitly Send.";
     commandInput.focus();
+    updatePreparationButton();
+    return true;
   } catch (error) {
     preparationError.textContent = error.message;
     preparationStatus.textContent = "Preparation failed. Editor unchanged.";
     commandState.textContent = "Previous editor text retained; no new command was prepared.";
   }
   updatePreparationButton();
+  return false;
 }
 
 prepareButton.addEventListener("click", () => {
   const fields = Object.fromEntries(
     Object.entries(assistanceInputs).map(([field, input]) => [field, input.value]),
   );
+
+  if (operationInput.value === "store") {
+    prepareGuidedCapture(fields);
+    return;
+  }
+
+  if (operationInput.value === "find") {
+    prepareGuidedRecallQuery("find", fields);
+    return;
+  }
+
   prepareEditorCommand(operationInput.value, fields);
 });
 
-browseButton.addEventListener("click", () => prepareEditorCommand("browse", {}));
+browseButton.addEventListener(
+  "click",
+  () => prepareGuidedRecallQuery("browse", {}),
+);
 
 updateAssistanceFields();
 
@@ -598,10 +936,14 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (requestPending) return;
   clearDraftResults("Pending");
+  beginGuidedRequest();
 
   const csrfMeta = document.querySelector("meta[name=\"luxiom-csrf\"]");
   const csrfToken = csrfMeta?.getAttribute("content") || "";
   if (!csrfToken) {
+    failGuidedRequest(
+      "The request could not start. The guided step remains incomplete.",
+    );
     renderLocalFailure();
     return;
   }
@@ -627,8 +969,12 @@ form.addEventListener("submit", async (event) => {
       body: requestBody,
     });
     const result = await response.json();
+    applyGuidedResult(result);
     renderResult(result);
   } catch {
+    failGuidedRequest(
+      "The local request could not be completed. The guided step remains incomplete.",
+    );
     renderLocalFailure();
   } finally {
     setRequestPending(false);
