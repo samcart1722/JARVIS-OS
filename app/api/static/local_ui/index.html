@@ -16,6 +16,75 @@
       <p class="warning">LOCAL DEVELOPMENT RUNTIME — NON-PRODUCTION AUTHENTICATION</p>
     </header>
 
+    <section
+      id="guided-experience"
+      class="panel guided-experience"
+      aria-labelledby="guided-heading"
+    >
+      <div class="guided-heading-row">
+        <div>
+          <p class="eyebrow">SPRINT 40</p>
+          <h2 id="guided-heading">Guided local experience</h2>
+        </div>
+        <button id="guided-reset" class="secondary-button" type="button">
+          Reset guide
+        </button>
+      </div>
+      <p id="guided-help">
+        Save knowledge, recall it, record a follow-up, and verify it.
+        Preparation never sends a request.
+      </p>
+      <p>
+        Guide progress exists only in this browser tab and may reset on refresh.
+        Send remains the governed execution boundary.
+      </p>
+      <p id="guided-status" role="status">
+        Capture is ready. No guided operation has been executed.
+      </p>
+      <ol id="guided-stages" class="guided-stages">
+        <li id="guided-capture" class="guided-stage" data-guide-state="ready">
+          <div>
+            <span class="guided-step-number" aria-hidden="true">1</span>
+            <div>
+              <h3>Capture</h3>
+              <p>Save explicitly supplied knowledge.</p>
+            </div>
+          </div>
+          <strong id="guided-capture-state">Ready</strong>
+        </li>
+        <li id="guided-recall" class="guided-stage" data-guide-state="not-started">
+          <div>
+            <span class="guided-step-number" aria-hidden="true">2</span>
+            <div>
+              <h3>Recall</h3>
+              <p>Rediscover and explicitly read saved knowledge.</p>
+            </div>
+          </div>
+          <strong id="guided-recall-state">Not started</strong>
+        </li>
+        <li id="guided-follow-up" class="guided-stage" data-guide-state="not-started">
+          <div>
+            <span class="guided-step-number" aria-hidden="true">3</span>
+            <div>
+              <h3>Follow-up</h3>
+              <p>Explicitly author a local follow-up list item.</p>
+            </div>
+          </div>
+          <strong id="guided-follow-up-state">Not started</strong>
+        </li>
+        <li id="guided-verify" class="guided-stage" data-guide-state="not-started">
+          <div>
+            <span class="guided-step-number" aria-hidden="true">4</span>
+            <div>
+              <h3>Verify</h3>
+              <p>Read the list and verify the expected follow-up.</p>
+            </div>
+          </div>
+          <strong id="guided-verify-state">Not started</strong>
+        </li>
+      </ol>
+    </section>
+
     <section class="panel" aria-labelledby="assistance-heading">
       <h2 id="assistance-heading">Prepare a knowledge command</h2>
       <p>Preparation only writes the editable command below. Review it, then use Send.</p>

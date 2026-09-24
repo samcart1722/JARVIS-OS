@@ -42,6 +42,50 @@ function prepareKnowledgeCommand(operation, fields) {
   return command;
 }
 
+const GUIDE_STAGES = Object.freeze([
+  "capture",
+  "recall",
+  "follow-up",
+  "verify",
+]);
+const GUIDE_STATES = Object.freeze([
+  "not-started",
+  "ready",
+  "prepared",
+  "pending",
+  "completed",
+  "failed",
+]);
+const GUIDE_INITIAL_STATES = Object.freeze({
+  capture: "ready",
+  recall: "not-started",
+  "follow-up": "not-started",
+  verify: "not-started",
+});
+const GUIDE_STATE_LABELS = Object.freeze({
+  "not-started": "Not started",
+  ready: "Ready",
+  prepared: "Prepared",
+  pending: "Pending",
+  completed: "Completed",
+  failed: "Needs retry",
+});
+
+const guidedStatus = document.querySelector("#guided-status");
+const guidedResetButton = document.querySelector("#guided-reset");
+const guidedStageElements = Object.fromEntries(
+  GUIDE_STAGES.map((stage) => [
+    stage,
+    document.querySelector(`#guided-${stage}`),
+  ]),
+);
+const guidedStageOutputs = Object.fromEntries(
+  GUIDE_STAGES.map((stage) => [
+    stage,
+    document.querySelector(`#guided-${stage}-state`),
+  ]),
+);
+
 const form = document.querySelector("#command-form");
 const sendButton = document.querySelector("#send-command");
 const assistance = document.querySelector("#knowledge-assistance");
@@ -59,6 +103,67 @@ const assistanceInputs = Object.fromEntries(
   ]),
 );
 let requestPending = false;
+let guidedState = {
+  stages: { ...GUIDE_INITIAL_STATES },
+  correlation: null,
+};
+
+function renderGuidedState(message = null) {
+  for (const stage of GUIDE_STAGES) {
+    const state = guidedState.stages[stage];
+    guidedStageElements[stage].setAttribute("data-guide-state", state);
+    guidedStageOutputs[stage].textContent = GUIDE_STATE_LABELS[state];
+  }
+
+  if (message !== null) {
+    guidedStatus.textContent = message;
+    return;
+  }
+
+  const currentStage = GUIDE_STAGES.find(
+    (stage) => guidedState.stages[stage] !== "not-started"
+      && guidedState.stages[stage] !== "completed",
+  );
+  if (currentStage) {
+    guidedStatus.textContent =
+      `${GUIDE_STATE_LABELS[guidedState.stages[currentStage]]}: `
+      + `${currentStage}. Send remains explicit.`;
+    return;
+  }
+
+  guidedStatus.textContent = "Guided workflow state is ready for the next step.";
+}
+
+function setGuidedStageState(stage, state, message = null) {
+  if (!GUIDE_STAGES.includes(stage)) {
+    throw new Error(`Unknown guided stage: ${stage}`);
+  }
+  if (!GUIDE_STATES.includes(state)) {
+    throw new Error(`Unknown guided state: ${state}`);
+  }
+  guidedState.stages[stage] = state;
+  renderGuidedState(message);
+}
+
+function resetGuidedExperience() {
+  guidedState = {
+    stages: { ...GUIDE_INITIAL_STATES },
+    correlation: null,
+  };
+  renderGuidedState(
+    "Guide reset. Capture is ready; no command was prepared or executed.",
+  );
+}
+
+guidedResetButton.addEventListener("click", () => {
+  if (requestPending) return;
+  resetGuidedExperience();
+});
+
+renderGuidedState(
+  "Capture is ready. No guided operation has been executed.",
+);
+
 const proofInput = document.querySelector("#proof");
 const commandInput = document.querySelector("#command");
 const fallbackInput = document.querySelector("#cognitive-fallback");
@@ -421,6 +526,7 @@ function setRequestPending(pending) {
   operationInput.disabled = pending;
   prepareButton.disabled = pending;
   browseButton.disabled = pending;
+  guidedResetButton.disabled = pending;
   for (const button of browseReadButtons) button.disabled = pending;
   if (nextPageButton) {
     nextPageButton.disabled = pending;

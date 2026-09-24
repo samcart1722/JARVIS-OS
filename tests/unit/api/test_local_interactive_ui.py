@@ -619,6 +619,92 @@ def test_result_dispatch_clears_then_isolates_projection_families() -> None:
     assert "renderKnowledgeProjection(result.projection)" in rendering
 
 
+def test_guided_experience_shell_is_presentation_only() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    parsed = _parse(html)
+
+    expected_ids = {
+        "guided-experience",
+        "guided-heading",
+        "guided-help",
+        "guided-status",
+        "guided-reset",
+        "guided-stages",
+        "guided-capture",
+        "guided-capture-state",
+        "guided-recall",
+        "guided-recall-state",
+        "guided-follow-up",
+        "guided-follow-up-state",
+        "guided-verify",
+        "guided-verify-state",
+    }
+    assert expected_ids <= set(parsed.elements_by_id)
+    assert parsed.elements_by_id["guided-status"]["role"] == "status"
+    assert parsed.elements_by_id["guided-capture"]["data-guide-state"] == "ready"
+    for stage in ("recall", "follow-up", "verify"):
+        assert (
+            parsed.elements_by_id[f"guided-{stage}"]["data-guide-state"]
+            == "not-started"
+        )
+    reset = next(
+        button for button in parsed.buttons if button.get("id") == "guided-reset"
+    )
+    assert reset.get("type") == "button"
+    assert html.index('id="guided-reset"') < html.index('<form id="command-form">')
+    assert "Preparation never sends a request." in html
+    assert "Guide progress exists only in this browser tab" in html
+    assert "Send remains the governed execution boundary." in html
+
+    for literal in (
+        '"not-started"',
+        '"ready"',
+        '"prepared"',
+        '"pending"',
+        '"completed"',
+        '"failed"',
+        "function renderGuidedState",
+        "function setGuidedStageState",
+        "function resetGuidedExperience",
+        "correlation: null",
+        "guidedResetButton.disabled = pending",
+    ):
+        assert literal in script
+
+
+def test_guided_experience_state_harness_has_zero_requests() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for Sprint 40 UI verification")
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js"],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 0
+    assert {
+        "initial",
+        "states",
+        "validation",
+        "reset",
+        "editor-authority",
+        "no-fetch",
+    } == set(evidence["categories"])
+    assert evidence["states"] == [
+        "not-started",
+        "ready",
+        "prepared",
+        "pending",
+        "completed",
+        "failed",
+    ]
+
+
 def test_no_generic_static_path_or_extra_ui_endpoint(tmp_path: Path) -> None:
     runtime = LocalInteractiveRuntime(tmp_path / "routes.sqlite3", TEST_PROOF)
     app = create_local_interactive_app(runtime)
