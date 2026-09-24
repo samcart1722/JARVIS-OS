@@ -1,6 +1,30 @@
 # Decisions and Guardrails
 
-## Sprint 38 governed decisions and guardrails
+## Current Sprint 39 closure and Sprint 40 planning guardrails
+
+Sprint 39 is FORMALLY CLOSED at
+`4704f526edb1e15d692bb961691d8f8457217128`; working-branch cleanup is complete.
+Its immutable implementation tag and verified backup remain unchanged.
+
+Sprint 40 planning selected `Guided Local Capture–Recall–Action Experience v1`.
+Sprint 40 is AUTHORIZED FOR CONTRACT + DOCUMENTATION BASELINE CORRECTION ONLY.
+Feature implementation is NOT YET AUTHORIZED. A frozen behavior contract and
+separate explicit implementation authorization are required before feature work.
+The proposed guided browser experience may prepare existing
+commands but may not acquire authorization authority, send automatically,
+introduce model dependence, infer autonomous tasks, change schema v4, or bypass
+the existing authenticated local-command gateway.
+
+The selected workflow is explicit knowledge capture, rediscovery/browse and
+READ, creation of a user-authored follow-up list item, and later list READ.
+Action does not mean autonomous task inference, autonomous execution,
+model-generated action, or new orchestration authority. Model enablement,
+general natural-language interpretation, reasoning over durable structured
+knowledge, semantic retrieval, knowledge edit/delete, schema migration, new
+permissions, new endpoints, a new backend orchestrator, Hermes, Spatial,
+HealthBridge integration and production authentication redesign are out of scope.
+
+## Historical Sprint 38 governed decisions and guardrails
 
 Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
 through the existing authenticated local command flow. The separate
@@ -22,8 +46,9 @@ identity boundaries and SQLite schema v4 remain preserved.
   tag `governed-sprint-38-complete`; later documentation cannot retarget it.
 - No natural-language browse, semantic search, pagination, schema migration,
   production identity changes or automatic writes were authorized.
-- Implementation/tag completion does not imply formal closure. No Sprint 39
-  scope or implementation is authorized. See Current State for evidence limits.
+- At the Sprint 38 checkpoint, implementation/tag completion did not imply
+  formal closure and Sprint 39 scope was not yet authorized. This is historical
+  checkpoint context; current state is recorded above.
 
 ## Historical Sprint 37 governed decisions and guardrails
 

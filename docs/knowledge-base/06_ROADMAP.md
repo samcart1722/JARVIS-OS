@@ -1,6 +1,26 @@
 # Roadmap
 
-## Sprint 38 implementation and tagged release complete
+## Current boundary — Sprint 40 planning
+
+Sprint 39 — `Authorized Local Knowledge Browse Continuation v1` — is FORMALLY
+CLOSED. PR #62, release-truth PR #63 and formal-closure PR #64 are merged.
+Closure is recorded at `4704f526edb1e15d692bb961691d8f8457217128`; branch cleanup
+is complete. The immutable tag `governed-sprint-39-complete` remains on
+implementation release `27409adc61487015ee6b6bb0198c8256b957b723`.
+`NATIVE ACCEPTANCE NOT EXECUTED` remains recorded acceptance debt.
+
+Sprint 40 planning selected `Guided Local Capture–Recall–Action Experience v1`.
+The intended bounded capability is one guided browser journey that reuses
+existing governed knowledge and list operations so a user can capture
+information, rediscover/browse and READ it, explicitly create a user-authored
+follow-up list item, and later READ that list without memorizing command grammar.
+
+Sprint 40 is AUTHORIZED FOR CONTRACT + DOCUMENTATION BASELINE CORRECTION ONLY.
+Feature implementation is NOT YET AUTHORIZED. No model enablement, semantic
+retrieval, knowledge edit/delete, new authorization authority, schema migration,
+Hermes, Spatial or HealthBridge integration is authorized by this planning state.
+
+## Historical Sprint 38 implementation and tagged release complete
 
 Authorized local knowledge browse v1 is released through PR #58 at
 `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4`, annotated tag
@@ -18,16 +38,17 @@ evidence is recorded at
 `C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
 and prior Sprint 38 feature/documentation branches were cleaned locally and
 remotely. Formal closure is complete, with no known open functional defects.
-Sprint 39 has approved scope and remains PRE-MERGE with PR #62 OPEN.
+At that Sprint 38 closure checkpoint, later Sprint 39 lifecycle work had not yet completed.
 
-## Next planning boundary - Sprint 39
+## Historical Sprint 39 pre-merge planning boundary
 
-Approved active pre-merge scope: `Authorized Local Knowledge Browse Continuation v1`.
-Implementation Blocks A–F are APPROVED. Implementation commit
-`1e92520f786a0f40b06a0a12348cc5d1a3d85e6f` exists and the feature branch is
-pushed. PR #62 is OPEN; Sprint 39 remains PRE-MERGE. Merge, release, tag,
-backup and formal closure have not occurred. NATIVE ACCEPTANCE NOT EXECUTED.
-Future roadmap priorities remain unchanged and continue to be tracked separately.
+At that historical checkpoint, the approved scope was
+`Authorized Local Knowledge Browse Continuation v1`.
+Implementation Blocks A–F were APPROVED. Implementation commit
+`1e92520f786a0f40b06a0a12348cc5d1a3d85e6f` existed and the feature branch had
+been pushed. PR #62 was OPEN; Sprint 39 remained PRE-MERGE. Merge, release,
+tag, backup and formal closure had not occurred. Native acceptance was recorded
+as NATIVE ACCEPTANCE NOT EXECUTED. Current release and planning truth is above.
 
 ## Historical Sprint 37 governed implementation release complete
 
@@ -219,9 +240,9 @@ and safe prompt use remain future work.
 
 Detailed evidence is in [`history/sprints/`](history/sprints/SPRINT_0_SUMMARY.md).
 
-## Current state
+## Historical state after Sprint 38 closure
 
-Sprint 38 is the latest completed and closed Sprint at
+At that checkpoint, Sprint 38 was the latest completed and closed Sprint at
 `a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`, with implementation release
 `97e2bc0ba51e4bb571b9ee03f72f4c0d394c70c4` and tag
 `governed-sprint-38-complete`.

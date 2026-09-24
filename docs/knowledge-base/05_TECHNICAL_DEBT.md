@@ -1,6 +1,23 @@
 # Technical Debt
 
-## Sprint 38 post-release classification
+## Current post-Sprint 39 classification
+
+Sprint 39 is FORMALLY CLOSED and branch cleanup is complete.
+`NATIVE ACCEPTANCE NOT EXECUTED` for Sprint 39 browse-after remains explicit
+non-blocking acceptance debt and must not be rewritten as PASS.
+
+The immediate demo bottleneck is primarily browser UX/discoverability rather
+than another backend foundation. Sprint 40 planning selected
+`Guided Local Capture–Recall–Action Experience v1`.
+Sprint 40 is AUTHORIZED FOR CONTRACT + DOCUMENTATION BASELINE CORRECTION ONLY.
+Feature implementation is NOT YET AUTHORIZED; a frozen behavior contract does
+not itself grant implementation authorization.
+
+Knowledge edit/delete, semantic retrieval, model reasoning over durable
+structured knowledge, production identity, Hermes, Spatial and HealthBridge
+integration remain outside the currently authorized Sprint 40 planning scope.
+
+## Historical Sprint 38 post-release classification
 
 RESOLVED: users can discover authorized local record IDs without knowing an
 exact key and explicitly prepare READ. BROWSE has separate authorization,
@@ -28,10 +45,10 @@ evidence is recorded at
 `C:\\PROYECTOS\\LUXIOM_BACKUPS\\LUXIOM_20260911_191202_SPRINT38_CLOSURE`,
 and prior Sprint 38 feature/documentation branches were cleaned locally and
 remotely. Formal closure is complete, with no known open functional defects.
-Sprint 39 is NOT STARTED, NOT AUTHORIZED, and has no approved scope.
-The unrelated untracked test is excluded and must remain untouched. Knowledge edit/delete,
-semantic search, pagination, production serving/authentication, broader UI,
-Hermes and Spatial remain outside this release. Sprint 39 is NOT STARTED.
+At the Sprint 38 checkpoint, Sprint 39 was not started or authorized and had
+no approved scope. The unrelated untracked test was excluded and remains outside
+that release. Knowledge edit/delete, semantic search, pagination, production
+serving/authentication, broader UI, Hermes and Spatial were outside the Sprint 38 release.
 
 ## Historical Sprint 37 post-release classification
 
