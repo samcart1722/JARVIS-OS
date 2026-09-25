@@ -110,13 +110,26 @@ const assistanceInputs = Object.fromEntries(
     field, document.querySelector(`#assist-${field.replaceAll("_", "-")}`),
   ]),
 );
+const followUpListInput = document.querySelector("#follow-up-list-id");
+const followUpItemInput = document.querySelector("#follow-up-item");
+const followUpPrepareButton = document.querySelector("#prepare-follow-up");
+const followUpError = document.querySelector("#follow-up-error");
 let requestPending = false;
 let guidedState = {
   stages: { ...GUIDE_INITIAL_STATES },
   correlation: null,
+  retainedFollowUp: null,
 };
 
+function updateFollowUpControls() {
+  const disabled = requestPending || guidedState.stages.recall !== "completed";
+  followUpListInput.disabled = disabled;
+  followUpItemInput.disabled = disabled;
+  followUpPrepareButton.disabled = disabled;
+}
+
 function renderGuidedState(message = null) {
+  updateFollowUpControls();
   for (const stage of GUIDE_STAGES) {
     const state = guidedState.stages[stage];
     guidedStageElements[stage].setAttribute("data-guide-state", state);
@@ -154,9 +167,11 @@ function setGuidedStageState(stage, state, message = null) {
 }
 
 function resetGuidedExperience() {
+  followUpError.textContent = "";
   guidedState = {
     stages: { ...GUIDE_INITIAL_STATES },
     correlation: null,
+    retainedFollowUp: null,
   };
   renderGuidedState(
     "Guide reset. Capture is ready; no command was prepared or executed.",
@@ -172,6 +187,10 @@ renderGuidedState(
   "Capture is ready. No guided operation has been executed.",
 );
 
+function guidedStageLabel(stage) {
+  return { capture: "Capture", recall: "Recall", "follow-up": "Follow-up" }[stage];
+}
+
 function guidedStageAvailable(stage) {
   if (stage === "capture") {
     return guidedState.stages.capture !== "completed";
@@ -186,18 +205,21 @@ function guidedStageAvailable(stage) {
 }
 
 function invalidateGuidedStage(stage) {
-  if (requestPending || !["capture", "recall"].includes(stage)) return;
+  if (requestPending || !["capture", "recall", "follow-up"].includes(stage)) return;
   const affected = GUIDE_STAGES.slice(GUIDE_STAGES.indexOf(stage));
   for (const dependent of affected) {
     guidedState.stages[dependent] = "not-started";
   }
+  const prerequisite = stage === "recall" ? "capture" : "recall";
   guidedState.stages[stage] = stage === "capture"
-    || guidedState.stages.capture === "completed" ? "ready" : "not-started";
+    || guidedState.stages[prerequisite] === "completed" ? "ready" : "not-started";
+  guidedState.retainedFollowUp = null;
+  followUpError.textContent = "";
   if (affected.includes(guidedState.correlation?.stage)) {
     guidedState.correlation = null;
   }
   renderGuidedState(
-    `${stage === "capture" ? "Capture" : "Recall"} inputs or preparation changed. `
+    `${guidedStageLabel(stage)} inputs or preparation changed. `
       + "Previous progress for this step and dependent steps was cleared. Nothing was executed.",
   );
 }
@@ -216,7 +238,7 @@ function clearGuidedCorrelationForReplacement() {
 
   const stage = correlation.stage;
   if (
-    ["capture", "recall"].includes(stage)
+    ["capture", "recall", "follow-up"].includes(stage)
     && guidedState.stages[stage] !== "completed"
   ) {
     invalidateGuidedStage(stage);
@@ -353,13 +375,13 @@ function beginGuidedRequest() {
   if (!correlation) return;
 
   const stage = correlation.stage;
-  if (!["capture", "recall"].includes(stage)) return;
+  if (!["capture", "recall", "follow-up"].includes(stage)) return;
   if (guidedState.stages[stage] === "completed") return;
 
   setGuidedStageState(
     stage,
     "pending",
-    `${stage === "capture" ? "Capture" : "Recall"} request pending. `
+    `${guidedStageLabel(stage)} request pending. `
       + "Completion still depends on the governed result.",
   );
 }
@@ -369,7 +391,7 @@ function failGuidedRequest(message) {
   if (!correlation) return;
 
   const stage = correlation.stage;
-  if (!["capture", "recall"].includes(stage)) return;
+  if (!["capture", "recall", "follow-up"].includes(stage)) return;
   if (guidedState.stages[stage] === "completed") return;
 
   setGuidedStageState(stage, "failed", message);
@@ -387,6 +409,38 @@ function applyGuidedResult(result) {
   }
 
   const projection = result.projection;
+
+  if (correlation.type === "follow-up-add") {
+    const strings = (value) => Array.isArray(value)
+      && value.every((item) => typeof item === "string");
+    if (
+      projection?.kind !== "list"
+      || projection.operation !== "add"
+      || projection.list_id !== correlation.listId
+      || !strings(projection.added)
+      || !strings(projection.already_present)
+      || !strings(projection.items)
+      || !(projection.added.includes(correlation.expectedItem)
+        || projection.already_present.includes(correlation.expectedItem))
+    ) {
+      failGuidedRequest(
+        "The returned ADD did not match the prepared follow-up. Prepare again to retry.",
+      );
+      return;
+    }
+    guidedState.retainedFollowUp = {
+      listId: correlation.listId,
+      expectedItem: correlation.expectedItem,
+    };
+    guidedState.correlation = null;
+    guidedState.stages["follow-up"] = "completed";
+    guidedState.stages.verify = "ready";
+    renderGuidedState(
+      "Follow-up recorded from the governed ADD result. "
+        + "Verify is ready; nothing else was executed.",
+    );
+    return;
+  }
 
   if (correlation.type === "capture-store") {
     const matches = (
@@ -849,6 +903,7 @@ function setRequestPending(pending) {
     nextPageButton.hidden = pending;
   }
   updateAssistanceFields();
+  updateFollowUpControls();
 }
 
 operationInput.addEventListener("change", () => {
@@ -875,6 +930,9 @@ assistance.addEventListener("input", (event) => {
 
 commandInput.addEventListener("input", () => {
   if (requestPending) return;
+  if (guidedState.correlation?.stage === "follow-up") {
+    invalidateGuidedStage("follow-up");
+  }
   clearDraftResults();
   commandState.textContent = "Manually edited. Send uses this exact text; fields are not reapplied.";
   updatePreparationButton();
@@ -882,6 +940,66 @@ commandInput.addEventListener("input", () => {
 
 fallbackInput.addEventListener("change", () => {
   if (!requestPending) clearDraftResults();
+});
+
+function prepareFollowUpCommand(listId, item) {
+  const whitespace = /[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/u;
+  if (typeof listId !== "string" || !listId || whitespace.test(listId)
+    || listId.includes("::")) {
+    throw new Error("List ID must be one nonblank token with no whitespace or ::.");
+  }
+  if (typeof item !== "string" || KNOWLEDGE_WHITESPACE_ONLY.test(item)
+    || item.includes("|")) {
+    throw new Error("Supply one nonblank item without |.");
+  }
+  const expectedItem = stripKnowledgeWhitespace(item);
+  const command = `list add ${listId} :: ${expectedItem}`;
+  for (const character of command) {
+    const point = character.codePointAt(0);
+    if (point >= 0xd800 && point <= 0xdfff) {
+      throw new Error("Follow-up contains an isolated Unicode surrogate.");
+    }
+  }
+  if (Array.from(command).length > 8192) {
+    throw new Error("The complete command exceeds 8192 Unicode code points.");
+  }
+  return { command, listId, expectedItem };
+}
+
+for (const input of [followUpListInput, followUpItemInput]) {
+  input.addEventListener("input", () => {
+    if (requestPending || guidedState.stages.recall !== "completed") return;
+    invalidateGuidedStage("follow-up");
+    clearDraftResults();
+  });
+}
+
+followUpPrepareButton.addEventListener("click", () => {
+  if (requestPending || guidedState.stages.recall !== "completed") return;
+  invalidateGuidedStage("follow-up");
+  clearDraftResults();
+  try {
+    const prepared = prepareFollowUpCommand(
+      followUpListInput.value, followUpItemInput.value,
+    );
+    clearGuidedCorrelationForReplacement();
+    commandInput.value = prepared.command;
+    preparationError.textContent = "";
+    preparationStatus.textContent = "Follow-up command prepared. No operation has been executed.";
+    commandState.textContent = "Review or edit the prepared command, then explicitly Send.";
+    setGuidedPreparation("follow-up", {
+      stage: "follow-up", type: "follow-up-add",
+      listId: prepared.listId, expectedItem: prepared.expectedItem,
+    }, "Follow-up prepared. Review the editor, then explicitly Send.");
+    commandInput.focus();
+    updatePreparationButton();
+  } catch (error) {
+    followUpError.textContent = error.message;
+    setGuidedStageState(
+      "follow-up", "failed",
+      "Follow-up preparation failed. Editor unchanged; correct the fields and prepare again.",
+    );
+  }
 });
 
 function prepareEditorCommand(operation, fields) {

@@ -13,7 +13,7 @@ from app.api.interactive import create_local_interactive_app
 from app.cognition.interpretation.interpreter import (
     DeterministicLocalCommandInterpreter,
 )
-from app.cognition.local_resolution.models import WorkspaceIdentity
+from app.cognition.local_resolution.models import AddListItemsCommand, WorkspaceIdentity
 from app.operations.local_interactive_runtime import (
     DEVELOPMENT_WORKSPACE,
     LocalInteractiveRuntime,
@@ -754,6 +754,57 @@ def test_guided_capture_recall_harness_uses_governed_results() -> None:
     for vector in evidence["vectors"]:
         result = interpreter.interpret(vector["command"], workspace)
         assert result.status.value == "interpreted", vector["operation"]
+
+
+def test_guided_follow_up_harness_and_interpreter_parity() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for Sprint 40 UI verification")
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js", "--follow-up"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["passed"] == 134
+    assert evidence["actualRequests"] == 0
+    assert evidence["mockedFetchCalls"] == evidence["explicitSubmissions"] == 28
+    assert evidence["nativeBrowserVerified"] is False
+    assert {
+        "precondition", "preparation", "delimiter-collision", "item-separator",
+        "list-id-whitespace", "blank", "unicode", "whitespace", "pending",
+        "added", "already-present", "manual-edit", "retry", "replacement",
+        "malformed", "wrong-list", "absent-item", "exact-spelling", "failure",
+        "unrelated", "wrong-operation", "network-failure", "reset",
+        "no-hidden-send", "exact-editor", "prepared-edit", "operation-replacement",
+        "types", "length", "unicode-rejection",
+    } == set(evidence["categories"])
+
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint40-block-c-test-only")
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(vector["command"], workspace)
+        assert result.status.value == "interpreted"
+        assert isinstance(result.intent, AddListItemsCommand)
+        assert result.intent.list_id == vector["listId"]
+        assert result.intent.items == (vector["expectedItem"],)
+
+    # The first :: wins: without the UI guard the intended ID and item change.
+    collision = interpreter.interpret(
+        "list add project::tasks :: Call pharmacy tomorrow", workspace,
+    )
+    assert isinstance(collision.intent, AddListItemsCommand)
+    assert collision.intent.list_id == "project"
+    assert collision.intent.items == ("tasks :: Call pharmacy tomorrow",)
+
+
+def test_follow_up_controls_are_preparatory_and_accessible() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'id="prepare-follow-up" type="button" disabled' in html
+    assert html.index('id="prepare-follow-up"') < html.index('<form id="command-form">')
+    for field in ("follow-up-list-id", "follow-up-item"):
+        assert f'for="{field}"' in html
+        assert f'id="{field}"' in html
+    assert 'id="follow-up-error" role="alert"' in html
 
 
 def test_no_generic_static_path_or_extra_ui_endpoint(tmp_path: Path) -> None:

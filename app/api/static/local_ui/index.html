@@ -135,6 +135,22 @@
       </div>
     </section>
 
+    <section class="panel" aria-labelledby="follow-up-heading">
+      <h2 id="follow-up-heading">Prepare a follow-up</h2>
+      <p id="follow-up-help">Complete Recall first. Choose a list and write one item.
+        List IDs cannot contain whitespace or ::. Items cannot contain |.
+        Item edge whitespace is removed; interior text is preserved.
+        Preparation only replaces the editor command. Review it, then use Send.</p>
+      <label for="follow-up-list-id">List ID</label>
+      <textarea id="follow-up-list-id" rows="1" autocomplete="off"
+        aria-describedby="follow-up-help" disabled></textarea>
+      <label for="follow-up-item">Follow-up item</label>
+      <textarea id="follow-up-item" rows="3" autocomplete="off"
+        aria-describedby="follow-up-help" disabled></textarea>
+      <button id="prepare-follow-up" type="button" disabled>Prepare follow-up</button>
+      <p id="follow-up-error" role="alert"></p>
+    </section>
+
     <section class="panel" aria-labelledby="command-heading">
       <h2 id="command-heading">Governed local command</h2>
       <p>Workspace: <code>luxiom-local-dev-workspace</code></p>
