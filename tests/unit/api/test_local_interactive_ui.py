@@ -1,5 +1,6 @@
 import asyncio
 import json
+import platform
 import shutil
 import subprocess
 from html.parser import HTMLParser
@@ -999,3 +1000,85 @@ def test_browse_after_uses_existing_accessible_preparation_boundary() -> None:
     assert "keydown" not in action and "keyup" not in action
     assert ".trim(" not in script and ".normalize(" not in script
     assert "No knowledge records after this ID in this workspace." in script
+
+
+def test_guided_verify_harness_and_real_interpreter_parity() -> None:
+    from app.cognition.local_resolution.models import ReadListItemsQuery
+
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Block D verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js", "--verify"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["passed"] == 199
+    assert evidence["actualRequests"] == evidence["hiddenRequests"] == 0
+    assert evidence["mockedFetchCalls"] == evidence["explicitSubmissions"] == 41
+    assert evidence["nativeBrowserVerified"] is False
+    assert evidence["nativeKeyboardVerified"] is False
+    assert {
+        "precondition", "no-hidden-send", "exact-editor", "retained-context",
+        "preparation", "stale-projection", "pending", "ascii", "completion",
+        "stable", "missing-item", "wrong-list", "failure", "malformed",
+        "unrelated", "wrong-operation", "network-failure", "manual-edit",
+        "retry", "dependent-invalidation", "sharp-s", "sigma", "ligature",
+        "dotted-i", "negative", "no-trimming", "no-normalization",
+        "replacement", "reset",
+    } == set(evidence["categories"])
+    interpreter = DeterministicLocalCommandInterpreter()
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(
+            vector["command"], WorkspaceIdentity("sprint40-block-d-test-only"),
+        )
+        assert result.status.value == "interpreted"
+        assert isinstance(result.intent, ReadListItemsQuery)
+        assert result.intent.list_id == vector["listId"]
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    button = _parse(html).elements_by_id["prepare-verification"]
+    assert button["type"] == "button"
+    assert button["aria-describedby"] == "verification-help"
+    assert html.index('id="prepare-verification"') < html.index(
+        '<form id="command-form">',
+    )
+
+
+def test_browser_casefold_matches_current_python_runtime() -> None:
+    # Derive the complete non-identity mapping from this interpreter, including
+    # supplementary planes. This also rejects extra mappings for identity points.
+    mapping = {
+        str(point): chr(point).casefold() for point in range(0x110000)
+        if chr(point).casefold() != chr(point)
+    }
+    vectors = [
+        ("GRAPES", "grapes"), ("Stra\u00dfe", "STRASSE"),
+        ("\u03a3", "\u03c2"), ("\u03c2", "\u03c3"),
+        ("o\ufb03ce", "OFFICE"), ("\u0130", "i\u0307"),
+        ("\u212a", "k"), ("\u1e9e", "ss"),
+        ("\U00010400", "\U00010428"), ("\u13a0", "\uab70"),
+        ("\u00e9", "e\u0301"), ("grape", "grapes"),
+        (" grapes", "grapes"), ("grapes\n", "grapes"),
+        ("I", "\u0131"), ("\u0130", "i"), ("", ""),
+        ("\ud800", "\ud800"), ("\U0001f347", "\U0001f347"),
+        ("\ufeffgrapes", "grapes"),
+    ]
+    for point, folded in mapping.items():
+        vectors.extend(((chr(int(point)), folded), (chr(int(point)), folded + "!")))
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Python/browser casefold parity"
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js",
+         "--casefold-parity"],
+        input=json.dumps(vectors, ensure_ascii=True), check=True,
+        capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["mapping"] == mapping
+    assert len(evidence["results"]) == len(vectors)
+    for (left, right), actual in zip(vectors, evidence["results"], strict=True):
+        assert actual["folded"] == left.casefold()
+        assert actual["equal"] is (left.casefold() == right.casefold())
+    print(
+        f"Python {platform.python_version()}: "
+        f"{len(vectors)} casefold parity vectors PASS"
+    )

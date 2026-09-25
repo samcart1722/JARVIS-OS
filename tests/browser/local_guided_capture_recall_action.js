@@ -550,8 +550,8 @@ async function runGuidedFollowUp() {
     try { vm.runInContext(expression, context); } catch { rejected = true; }
     check("types", rejected, "non-string input rejected");
   }
-  prepare("t?ches", "\u001c\u0085  Appeler  Jos?\n?? ?? e\u0301 \u3000");
-  check("unicode", state().correlation.expectedItem === "Appeler  Jos?\n?? ?? e\u0301", "interior whitespace and Unicode preserved");
+  prepare("t\u00e2ches", "\u001c\u0085  Appeler  Jos\u00e9\n\u6771\u4eac \u{1f347} e\u0301 \u3000");
+  check("unicode", state().correlation.expectedItem === "Appeler  Jos\u00e9\n\u6771\u4eac \u{1f347} e\u0301", "interior whitespace and Unicode preserved");
   prepare("tasks", "\ufeffitem\ufeff");
   check("whitespace", state().correlation.expectedItem === "\ufeffitem\ufeff", "Python does not strip BOM");
 
@@ -644,8 +644,186 @@ async function runGuidedFollowUp() {
     nativeBrowserVerified: false };
 }
 
+
+// Python supplies parity vectors on stdin; the browser code performs comparison.
+function runCasefoldParity() {
+  const { scope, context } = createEnvironment();
+  const vectors = JSON.parse(require("node:fs").readFileSync(0, "utf8"));
+  scope.parityVectors = vectors;
+  return vm.runInContext(`({ mapping: PYTHON_CASEFOLD, results: parityVectors.map(([left, right]) => ({
+    folded: pythonCasefold(left), equal: casefoldEquivalent(left, right)
+  })) })`, context);
+}
+
+async function runGuidedVerify() {
+  const { scope, context } = createEnvironment();
+  const get = (id) => scope.document.querySelector(`#${id}`);
+  const fire = (id, type = "click") => get(id).dispatchEvent(
+    new scope.Event(type, { bubbles: true, cancelable: true }),
+  );
+  const state = () => JSON.parse(vm.runInContext("JSON.stringify(guidedState)", context));
+  const stage = (name = "verify") => state().stages[name];
+  const categories = new Set();
+  const vectors = [];
+  let passed = 0;
+  const check = (category, condition, message) => {
+    if (!condition) throw new Error(`${category}: ${message}`);
+    categories.add(category); passed += 1;
+  };
+  const calls = [];
+  let submissions = 0;
+  let reply;
+  scope.fetch = (url, options) => {
+    calls.push({ url, options });
+    check("no-hidden-send", calls.length === submissions && url === "/local/command",
+      "only explicit local Send may fetch");
+    return new Promise((resolve, reject) => { reply = { resolve, reject }; });
+  };
+  const flush = async () => { for (let i = 0; i < 15; i += 1) await Promise.resolve(); };
+  const send = () => {
+    submissions += 1;
+    const text = get("command").value;
+    get("proof").value = "synthetic-block-d-proof";
+    fire("command-form", "submit");
+    check("exact-editor", calls.length === submissions
+      && JSON.parse(calls.at(-1).options.body).text === text,
+    "exact current editor, including manual whitespace, is authoritative");
+  };
+  const finish = async (result) => {
+    reply.resolve({ json: async () => result }); await flush();
+  };
+  const field = (id, value) => { get(id).value = value; fire(id, "input"); };
+  check("precondition", stage() === "not-started" && get("prepare-verification").disabled,
+    "verification unavailable initially");
+  fire("prepare-verification");
+  check("precondition", calls.length === 0 && state().correlation === null, "early click ignored");
+  const record = { record_id: "one", kind: "fact", key: "key", value: "value" };
+  for (const [id, value] of Object.entries({
+    "assist-record-id": "one", "assist-kind": "fact", "assist-key": "key",
+    "assist-value": "value", "assist-source-type": "explicit-note", "assist-source-reference": "test",
+  })) field(id, value);
+  fire("prepare-command"); send();
+  await finish({ success: true, projection: { kind: "knowledge", operation: "store", created: true, record } });
+  vm.runInContext('prepareGuidedRecallRead("one")', context);
+  send(); await finish({ success: true, projection: { kind: "knowledge", operation: "read", record } });
+  check("precondition", stage() === "not-started" && get("prepare-verification").disabled,
+    "Recall alone does not enable Verify");
+  const add = async (item = "GRAPES", listId = "tasks") => {
+    field("follow-up-list-id", listId); field("follow-up-item", item);
+    fire("prepare-follow-up");
+    check("precondition", stage() === "not-started", "ADD preparation cannot enable Verify");
+    send();
+    await finish({ success: true, projection: { kind: "list", operation: "add", list_id: listId,
+      added: [], already_present: [item], items: [item] } });
+    check("retained-context", stage() === "ready" && !get("prepare-verification").disabled
+      && state().retainedFollowUp.listId === listId && state().retainedFollowUp.expectedItem === item,
+    "only successful correlated ADD enables verification");
+  };
+  const prepare = () => {
+    const before = calls.length;
+    const retained = state().retainedFollowUp;
+    fire("prepare-verification");
+    check("preparation", calls.length === before && stage() === "prepared"
+      && get("command").value === `list read ${retained.listId}`
+      && state().correlation.listId === retained.listId
+      && state().correlation.expectedItem === retained.expectedItem,
+    "prepare binds retained values without Send");
+    check("stale-projection", get("list-projection").hidden && get("knowledge-projection").hidden,
+      "incompatible projections cleared");
+    vectors.push({ command: get("command").value, listId: retained.listId });
+  };
+  const read = (items = ["grapes"], listId = "tasks") => ({ success: true,
+    projection: { kind: "list", operation: "read", list_id: listId, items } });
+  await add(); prepare(); send();
+  check("pending", stage() === "pending" && get("prepare-verification").disabled
+    && get("prepare-follow-up").disabled && get("guided-reset").disabled
+    && get("command").disabled && vm.runInContext("sendButton.disabled", context), "pending controls lock");
+  const beforePending = calls.length;
+  fire("prepare-verification"); fire("prepare-follow-up"); fire("guided-reset"); fire("command-form", "submit");
+  check("pending", calls.length === beforePending && stage() === "pending", "stale clicks and duplicate Send ignored");
+  await finish(read());
+  check("ascii", stage() === "completed", "GRAPES verifies grapes");
+  check("completion", ["capture", "recall", "follow-up", "verify"].every((name) => stage(name) === "completed")
+    && state().correlation === null, "all stages complete without another action");
+  field("command", "list read unrelated"); send(); await finish(read([], "unrelated"));
+  check("stable", stage() === "completed", "unrelated request does not rewrite retained verification truth");
+
+  const failures = [
+    ["missing-item", read(["Send email"])], ["wrong-list", read(["grapes"], "TASKS")],
+    ["failure", { ...read(), success: false }], ["failure", { ...read(), success: 1 }],
+    ["malformed", { success: true }],
+    ["unrelated", { success: true, projection: { kind: "knowledge", operation: "read", record } }],
+    ["wrong-operation", { success: true, projection: { ...read().projection, operation: "add" } }],
+  ];
+  for (const items of [null, "grapes", {}, [3], ["grapes", null]]) {
+    failures.push(["malformed", read(items)]);
+  }
+  // Undefined explicitly removes items (the read helper otherwise defaults it).
+  failures.push(["malformed", { success: true, projection: { kind: "list", operation: "read", list_id: "tasks" } }]);
+  for (const [category, result] of failures) {
+    prepare(); send(); await finish(result);
+    check(category, stage() === "failed" && stage("follow-up") === "completed", "result cannot prove verification");
+  }
+  prepare(); const editor = get("command").value; send(); reply.reject(new Error("offline")); await flush();
+  check("network-failure", stage() === "failed" && get("command").value === editor, "network failure preserves editor");
+  prepare();
+  const old = vm.runInContext("guidedState.correlation", context);
+  field("command", "  list read tasks  ");
+  check("manual-edit", stage() === "ready" && state().correlation === null
+    && state().retainedFollowUp.expectedItem === "GRAPES", "manual edit immediately invalidates only pending verification");
+  send(); await finish(read());
+  check("manual-edit", stage() === "ready", "matching old result cannot advance manually edited READ");
+  field("command", "list read tasks"); send(); await finish(read());
+  check("manual-edit", stage() === "ready", "manual original text cannot infer correlation");
+  prepare();
+  check("retry", vm.runInContext("guidedState.correlation", context) !== old, "re-prepare establishes fresh binding");
+  send(); await finish(read()); check("retry", stage() === "completed", "fresh correlation succeeds");
+
+  for (const [category, expected, returned, equal] of [
+    ["sharp-s", "Stra\u00dfe", "STRASSE", true],
+    ["sigma", "\u03a3\u03c2", "\u03c3\u03c3", true],
+    ["ligature", "o\ufb03ce", "OFFICE", true],
+    ["dotted-i", "\u0130", "i\u0307", true],
+    ["negative", "grape", "grapes", false],
+    ["no-trimming", "grapes", " grapes", false],
+    ["no-normalization", "\u00e9", "e\u0301", false],
+  ]) {
+    const before = calls.length;
+    field("follow-up-item", expected);
+    check("dependent-invalidation", stage() === "not-started" && stage("follow-up") === "ready"
+      && state().retainedFollowUp === null && state().correlation === null && calls.length === before,
+    "Stage C edits clear old Verify truth without requests");
+    await add(expected, "t\u00e2ches"); prepare(); send(); await finish(read([returned], "t\u00e2ches"));
+    check(category, stage() === (equal ? "completed" : "failed"), "casefold-only result correlation");
+  }
+  await add(); prepare();
+  get("assist-operation").value = "store"; fire("assist-operation", "change");
+  check("replacement", state().correlation === null && stage() === "not-started"
+    && state().retainedFollowUp === null, "earlier operation replacement clears Stage D");
+  // Reset is tested with live retained Stage C and prepared Stage D context.
+  vm.runInContext('prepareGuidedCapture({ record_id: "one", kind: "fact", key: "key", value: "value", source_type: "note", source_reference: "test" })', context);
+  send(); await finish({ success: true, projection: { kind: "knowledge", operation: "store", created: true, record } });
+  vm.runInContext('prepareGuidedRecallRead("one")', context);
+  send(); await finish({ success: true, projection: { kind: "knowledge", operation: "read", record } });
+  await add(); prepare();
+  const beforeReset = calls.length; const resetEditor = get("command").value;
+  fire("guided-reset"); fire("prepare-verification");
+  check("reset", calls.length === beforeReset && state().correlation === null && state().retainedFollowUp === null
+    && stage("capture") === "ready" && ["recall", "follow-up", "verify"].every((name) => stage(name) === "not-started")
+    && get("command").value === resetEditor, "Reset clears all browser context without request or editor rewrite");
+  send(); await finish(read()); check("reset", stage() === "not-started", "old editor after Reset cannot verify");
+  check("no-hidden-send", calls.length === submissions, "zero hidden requests");
+  return { environment: "node-dom-double", passed, categories: [...categories], vectors,
+    actualRequests: 0, mockedFetchCalls: calls.length, explicitSubmissions: submissions,
+    hiddenRequests: 0, nativeBrowserVerified: false, nativeKeyboardVerified: false };
+}
+
 if (require.main === module) {
-  const runner = process.argv.includes("--follow-up")
+  const runner = process.argv.includes("--casefold-parity")
+    ? runCasefoldParity
+    : process.argv.includes("--verify")
+    ? runGuidedVerify
+    : process.argv.includes("--follow-up")
     ? runGuidedFollowUp
     : process.argv.includes("--capture-recall")
     ? runGuidedCaptureRecall
