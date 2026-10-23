@@ -4,10 +4,12 @@
 
 Guided Local Capture–Recall–Action Experience v1 implementation is complete.
 Sprint 40 is MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED.
-The prerequisites preceding this formal-closure record have been completed.
-Sprint 40 is FORMALLY CLOSED upon merge of this formal-closure record into master.
-Until that merge, formal closure remains pending; this branch does not record
-an already-merged formal closure.
+Sprint 40 remains FORMALLY CLOSED. Formal-closure PR #69 MERGED through normal
+two-parent merge `26304970f092eab8838b077da0276d2b7b76ca9a`, incorporating
+formal-closure commit `8ab5a726cc01e954fc9e9aa6d7180540824e0169`.
+Sprint 40 post-closure branch cleanup is COMPLETE, as recorded below.
+Cleanup occurred after the formal-closure merge; it is not a retroactive
+prerequisite for closure and does not reopen Sprint 40.
 
 Release-truth commit: `ace4f9f6c8a3a25011b6d386f4ed36fea3ddf048`.
 Subject: `docs: synchronize Sprint 40 release truth`.
@@ -22,9 +24,9 @@ implementation PR #67 MERGED through normal two-parent merge, post-merge
 validation on master PASS, annotated release tag created and verified,
 authoritative backup, recovery proof from the bundle, release-truth
 synchronization commit and release-truth PR #68 MERGED at the commit above.
-Merge of this formal-closure record into master is the remaining formal-closure
-gate. Sprint 41 is NOT authorized by Sprint 40 closure; Sprint 41 scope is not
-established merely by Sprint 40 formal closure.
+Sprint 41 is NOT started and is NOT authorized merely by Sprint 40 closure or
+completion of its cleanup. Sprint 41 scope remains to be selected through a
+separate governed planning lifecycle.
 
 Implementation base: `3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad`.
 Implementation HEAD: `f42edd8bd0c06769eb09a01be6321c110c0520aa`.
@@ -92,8 +94,37 @@ remains unstaged, unmodified, unexecuted and excluded from Sprint 40. Its SHA-25
 It is verified absent from the Sprint 40 release tree, release source ZIP and
 recovered Git repository. This does not claim that a full-history bundle contains
 no historical objects or versions related to that path. No history rewriting
-occurred. Formal closure is effective upon merge of this record into master;
-branch cleanup remains a separate, later gate and is not declared complete here.
+occurred.
+
+### Sprint 40 post-closure branch cleanup - COMPLETE
+
+After formal-closure merge `26304970f092eab8838b077da0276d2b7b76ca9a`, governed
+cleanup safely deleted these five branches both locally and on origin:
+
+| Branch | Verified tip | Associated PR |
+|---|---|---|
+| `docs/sprint-40-baseline-truth` | `0c2baba` | #65 MERGED |
+| `docs/sprint-40-behavior-contract` | `f50228a` | #66 MERGED |
+| `feat/sprint-40-guided-local-capture-recall-action` | `f42edd8b` | #67 MERGED |
+| `docs/sprint-40-release-truth` | `ace4f9f` | #68 MERGED |
+| `docs/sprint-40-formal-closure` | `8ab5a72` | #69 MERGED |
+
+Each tip existed and was proven an ancestor of master and, for the remote ref,
+origin/master, with zero unique commits outside master and no associated open PR.
+All associated PRs were MERGED. Local deletion used only `git branch -d`;
+remote deletion used only `git push origin --delete`. No `git branch -D`, force
+deletion or force push was used. No non-Sprint-40 branches were touched.
+After `git fetch --prune origin`, zero local and zero origin Sprint 40 branches
+remained at that cleanup checkpoint. No merged Sprint 40 branches remain pending
+cleanup. This subsequent documentation-only cleanup-record branch is separate
+from those deleted branches; this record has not yet been merged.
+
+Before and after cleanup, branch master, HEAD and origin/master remained at
+`26304970f092eab8838b077da0276d2b7b76ca9a`. Staged and tracked diffs were empty;
+the only untracked tree was `tests/unit/reasoning/`. Its foreign file hash above
+remained unchanged. The annotated release tag object and peel remained the
+immutable Sprint 40 identities above: master/tag immutability PASS. Cleanup
+itself modified no files, created no commits and did not move the release tag.
 
 ## Historical release truth - Sprint 39
 
