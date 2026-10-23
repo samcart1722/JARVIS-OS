@@ -1,6 +1,84 @@
 # Source of Truth
 
-## Current release truth - Sprint 39
+## Current release truth - Sprint 40
+
+Guided Local Capture–Recall–Action Experience v1 implementation is complete.
+Sprint 40 is MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED,
+**NOT YET FORMALLY CLOSED**. Formal closure remains pending the release-truth
+review, push, PR and merge lifecycle and the later explicit formal-closure
+lifecycle. This release does not authorize Sprint 41 and does not establish
+Sprint 41 scope.
+
+Implementation base: `3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad`.
+Implementation HEAD: `f42edd8bd0c06769eb09a01be6321c110c0520aa`.
+PR #67 is MERGED through normal two-parent release merge
+`3a3b607d94e359a1410f29da894882424fadb6f6`. Ordered parents:
+`3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad` and
+`f42edd8bd0c06769eb09a01be6321c110c0520aa`.
+Annotated release tag: `governed-sprint-40-complete`.
+Tag object: `22044ff154287c000251a16e503807151104e81f`.
+Peeled release commit: `3a3b607d94e359a1410f29da894882424fadb6f6`.
+Annotation: `Governed Sprint 40 complete: Guided Local Capture-Recall-Action Experience v1`.
+Release tree: `7bf9b8478772c75804b1c378c74f8cc00147e1bd`.
+Later documentation may advance master without moving this immutable tag.
+
+The governed journey is Capture → Recall → Follow-up → Verify. Prepare
+serializes a command into the visible, editable editor without a governed
+request. Explicit Send remains the execution/authorization boundary and submits
+the exact current editor text through the existing governed command path.
+Capture uses governed knowledge STORE. Recall requires discovery through
+explicit FIND, BROWSE or BROWSE-AFTER and a separately sent, correlated READ of
+the selected record; discovery alone does not complete Recall. Pagination
+remains explicit: Prepare next page does not fetch, and continuation requires Send.
+Follow-up means only one list item explicitly authored by the user and recorded
+through explicit list ADD. Verify requires an explicit, correlated list READ
+for the intended list containing the expected item under the frozen casefold rule.
+Completion is based on matching governed response projections, not preparation
+or prior success. Dependency invalidation clears stale downstream progress and
+retained context; retry correlation prevents unrelated results from completing
+a stage. Manual ADD/verification editor changes invalidate pending correlation
+until re-preparation. Guided state is browser-memory-only and carries no
+authority; refresh may lose guide state without deleting governed backend data.
+Unicode/casefold comparison was validated against Python str.casefold(), without
+additional normalization, trimming or locale dependence. Hostile/literal values
+remain text, not interpreted HTML.
+
+No new orchestrator, autonomy, models, implicit model activation, semantic
+retrieval, knowledge edit/delete, workflow history, persistence, schema or
+migration, authority, permission system or session system was introduced.
+No Hermes, Spatial or HealthBridge integration was introduced.
+
+Native acceptance: **SCENARIOS 1-19: PASS**.
+Final independent review: `SPRINT_40_FINAL_INDEPENDENT_REVIEW_APPROVED`.
+Post-merge focused validation: **27 passed**. Post-merge full suite:
+**2228 passed**. Ruff, JavaScript syntax and `git diff --check`: PASS.
+Native acceptance is distinct from automated Node DOM-double evidence.
+
+Backup/recovery: `SPRINT_40_BACKUP_AND_RECOVERY_VERIFIED`.
+Backup:
+`C:\Users\Lenovo YOGA\Desktop\LUXIOM_BACKUPS\SPRINT_40\20261023-103957`.
+Full-repository bundle `JARVIS-OS_SPRINT_40_FULL_REPOSITORY.bundle`, SHA-256:
+`DAD3F416E746681495C9CF933E84B6F73BB435CE701D1B6B8BECC15A0C362F81`.
+Release ZIP `JARVIS-OS_SPRINT_40_RELEASE_SOURCE.zip`, SHA-256:
+`4CA4BF816696972115A5F93A1DCE96BABA56DD707338ED5800F039D9F3596523`.
+Recovery from the bundle only: PASS; recovered repository CLEAN.
+Recovered master and tag peel both equal
+`3a3b607d94e359a1410f29da894882424fadb6f6`; recovered annotated tag object equals
+`22044ff154287c000251a16e503807151104e81f`. Recovered ordered merge parents are
+`3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad` and
+`f42edd8bd0c06769eb09a01be6321c110c0520aa`. Recovered and live release trees
+both equal `7bf9b8478772c75804b1c378c74f8cc00147e1bd`: **tree equality PASS**.
+
+The unrelated current untracked `tests/unit/reasoning/entities/test_user_request.py`
+remains unstaged, unmodified, unexecuted and excluded from Sprint 40. Its SHA-256 is
+`45CF806561DB59828555A0A14DB7C5106B309F3F0B2122C68E5F0C37FBD3C49C`.
+It is verified absent from the Sprint 40 release tree, release source ZIP and
+recovered Git repository. This does not claim that a full-history bundle contains
+no historical objects or versions related to that path. No history rewriting
+occurred. Formal closure and any later branch cleanup are separate gates;
+neither is declared complete here.
+
+## Historical release truth - Sprint 39
 
 Authorized Local Knowledge Browse Continuation v1 implementation is complete.
 Blocks A-F are APPROVED. Sprint 39 is MERGED + TAGGED + BACKED UP + RECOVERY
@@ -13,10 +91,11 @@ Completed prerequisites include Blocks A-F APPROVED, implementation PR #62 MERGE
 post-merge validation PASS, release tag created and verified, backup PASS,
 recovery verification PASS, release tree equality PASS, release-truth PR #63
 MERGED and final closure validation APPROVED.
-Sprint 40 planning selected `Guided Local Capture–Recall–Action Experience v1`
-and is AUTHORIZED FOR CONTRACT + DOCUMENTATION BASELINE CORRECTION ONLY.
-Feature implementation is NOT YET AUTHORIZED pending a frozen behavior
-contract and completion of this baseline synchronization.
+Historical Sprint 40 planning selected `Guided Local Capture–Recall–Action Experience v1`
+with authorization then limited to contract and documentation-baseline correction.
+At that planning checkpoint, feature implementation was not yet authorized,
+pending a frozen behavior contract and baseline synchronization. This is a
+historical planning record; current Sprint 40 release truth is recorded above.
 
 Implementation: `1e92520f786a0f40b06a0a12348cc5d1a3d85e6f`.
 Pre-merge documentation correction: `4c659790c65eb22c63f57fd3817b77a0e9bc31e6`.
@@ -171,8 +250,13 @@ truth is incorporated into `master` at
 `a5c92f052cc2eb7294767c1f5514ee54bc4b61ca`. The verified Sprint 38 backup and
 recovery evidence, and local/remote branch cleanup, are recorded in
 [Backup and Recovery](08_BACKUP_AND_RECOVERY.md). Sprint 38 is CLOSED and
-formal closure is complete for Sprint 38. Current Sprint 39 release truth is
+formal closure is complete for Sprint 38. Historical Sprint 39 release truth is
 recorded above; Sprint 39 is formally closed and its working-branch cleanup is complete.
+Current Sprint 40 release truth is recorded at the top of this document:
+MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED, **NOT YET FORMALLY CLOSED**.
+Its release-truth review, push, PR and merge lifecycle and later explicit
+formal-closure lifecycle remain pending. This does not authorize Sprint 41 or
+establish Sprint 41 scope.
 
 ### Historical documentation reviews - not an operational checkpoint
 
