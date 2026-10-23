@@ -3,11 +3,28 @@
 ## Current release truth - Sprint 40
 
 Guided Local Capture–Recall–Action Experience v1 implementation is complete.
-Sprint 40 is MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED,
-**NOT YET FORMALLY CLOSED**. Formal closure remains pending the release-truth
-review, push, PR and merge lifecycle and the later explicit formal-closure
-lifecycle. This release does not authorize Sprint 41 and does not establish
-Sprint 41 scope.
+Sprint 40 is MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED.
+The prerequisites preceding this formal-closure record have been completed.
+Sprint 40 is FORMALLY CLOSED upon merge of this formal-closure record into master.
+Until that merge, formal closure remains pending; this branch does not record
+an already-merged formal closure.
+
+Release-truth commit: `ace4f9f6c8a3a25011b6d386f4ed36fea3ddf048`.
+Subject: `docs: synchronize Sprint 40 release truth`.
+Release-truth PR #68 is MERGED through normal two-parent merge
+`e3c3e6d66e8fe835ad300a9d032a7a9f111e92ab`. Ordered parents:
+`3a3b607d94e359a1410f29da894882424fadb6f6` and
+`ace4f9f6c8a3a25011b6d386f4ed36fea3ddf048`.
+Completed prerequisites include the Sprint 40 contract/baseline lifecycle,
+implementation Blocks A-D, consolidated implementation review, native acceptance
+Scenarios 1-19 PASS, final independent review APPROVED, feature branch push,
+implementation PR #67 MERGED through normal two-parent merge, post-merge
+validation on master PASS, annotated release tag created and verified,
+authoritative backup, recovery proof from the bundle, release-truth
+synchronization commit and release-truth PR #68 MERGED at the commit above.
+Merge of this formal-closure record into master is the remaining formal-closure
+gate. Sprint 41 is NOT authorized by Sprint 40 closure; Sprint 41 scope is not
+established merely by Sprint 40 formal closure.
 
 Implementation base: `3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad`.
 Implementation HEAD: `f42edd8bd0c06769eb09a01be6321c110c0520aa`.
@@ -75,8 +92,8 @@ remains unstaged, unmodified, unexecuted and excluded from Sprint 40. Its SHA-25
 It is verified absent from the Sprint 40 release tree, release source ZIP and
 recovered Git repository. This does not claim that a full-history bundle contains
 no historical objects or versions related to that path. No history rewriting
-occurred. Formal closure and any later branch cleanup are separate gates;
-neither is declared complete here.
+occurred. Formal closure is effective upon merge of this record into master;
+branch cleanup remains a separate, later gate and is not declared complete here.
 
 ## Historical release truth - Sprint 39
 
@@ -584,12 +601,15 @@ authorization for a later gate from completion of an earlier one.
 5. Read Current State, Runtime Architecture, Decisions, Technical Debt, and
    Roadmap before proposing scope.
 6. Sprint 40 implementation/release is complete: MERGED + TAGGED + BACKED UP +
-   RECOVERY VERIFIED. Preserve immutable tag `governed-sprint-40-complete` and
-   its verified backup. Release truth is being synchronized; Sprint 40 is
-   NOT YET FORMALLY CLOSED pending the release-truth lifecycle and later explicit
-   formal-closure lifecycle. Sprint 39 closure and cleanup remain historical and
-   complete. Sprint 40 release publication does not authorize Sprint 41 or
-   establish its scope.
+   RECOVERY VERIFIED. Release-truth PR #68 is MERGED at
+   `e3c3e6d66e8fe835ad300a9d032a7a9f111e92ab`. Formal closure is effective
+   upon merge of this formal-closure record into master; that merge remains
+   the final formal-closure gate. Preserve immutable tag
+   `governed-sprint-40-complete` at release commit
+   `3a3b607d94e359a1410f29da894882424fadb6f6`; do not move it to documentation
+   commits. Preserve its verified backup. Sprint 39 closure and cleanup remain
+   historical and complete. Sprint 40 closure does not authorize Sprint 41 or
+   establish its scope; branch cleanup remains a separate, later gate.
 
 ## 15. Repository checkpoint synchronization policy
 
