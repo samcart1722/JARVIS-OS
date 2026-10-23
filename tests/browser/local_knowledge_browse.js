@@ -150,9 +150,19 @@ async function runBrowse() {
       && get("response").textContent === "Canonical", `${operation} replaces browse state`);
     if (operation === "find") {
       const article = get("knowledge-records").children[0];
-      check("regression", article.children.length === 1
-        && article.children[0].children[3].children[1].textContent === fullRecord.value,
-      "FIND keeps full records without READ selection buttons");
+      const select = article.children[1];
+      check("regression", article.children.length === 2
+        && article.children[0].children[3].children[1].textContent === fullRecord.value
+        && select.type === "button"
+        && select.textContent.includes("Prepare READ"),
+      "FIND keeps full records and exposes explicit READ preparation");
+
+      const beforeSelection = calls.length;
+      fire(select);
+      check("regression", calls.length === beforeSelection
+        && get("command").value === 'knowledge read :: {"record_id":"id"}'
+        && cleared(),
+      "FIND selection prepares READ locally without sending");
     } else {
       check("regression", get("knowledge-value").textContent === fullRecord.value
         && get("knowledge-created-row").hidden === (operation !== "store"),

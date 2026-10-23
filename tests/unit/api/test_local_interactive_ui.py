@@ -1,5 +1,6 @@
 import asyncio
 import json
+import platform
 import shutil
 import subprocess
 from html.parser import HTMLParser
@@ -13,7 +14,7 @@ from app.api.interactive import create_local_interactive_app
 from app.cognition.interpretation.interpreter import (
     DeterministicLocalCommandInterpreter,
 )
-from app.cognition.local_resolution.models import WorkspaceIdentity
+from app.cognition.local_resolution.models import AddListItemsCommand, WorkspaceIdentity
 from app.operations.local_interactive_runtime import (
     DEVELOPMENT_WORKSPACE,
     LocalInteractiveRuntime,
@@ -471,7 +472,7 @@ def test_browse_preparation_controls_do_not_submit_or_add_assets() -> None:
     assert 'id="prepare-browse" type="button"' in html
     assert html.index('id="prepare-browse"') < html.index('<form id="command-form">')
     assert 'button.type = "button"' in script
-    assert 'prepareEditorCommand("read", { record_id: recordId })' in script
+    assert "prepareGuidedRecallRead(recordId)" in script
     assert 'text: commandInput.value' in script
     assert 'const recordId = record.record_id' in script
     assert "No knowledge records in this workspace." in script
@@ -485,7 +486,7 @@ def test_list_projection_script_has_closed_safe_rendering_contract() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     rendering = script[
         script.index("function renderListProjection"):
-        script.index("function renderResult")
+        script.index("function isKnowledgeRecord")
     ]
 
     assert 'projection?.kind !== "list"' in rendering
@@ -617,6 +618,194 @@ def test_result_dispatch_clears_then_isolates_projection_families() -> None:
     assert 'result.projection?.kind === "knowledge"' in rendering
     assert "renderListProjection(result.projection)" in rendering
     assert "renderKnowledgeProjection(result.projection)" in rendering
+
+
+def test_guided_experience_shell_is_presentation_only() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    parsed = _parse(html)
+
+    expected_ids = {
+        "guided-experience",
+        "guided-heading",
+        "guided-help",
+        "guided-status",
+        "guided-reset",
+        "guided-stages",
+        "guided-capture",
+        "guided-capture-state",
+        "guided-recall",
+        "guided-recall-state",
+        "guided-follow-up",
+        "guided-follow-up-state",
+        "guided-verify",
+        "guided-verify-state",
+    }
+    assert expected_ids <= set(parsed.elements_by_id)
+    assert parsed.elements_by_id["guided-status"]["role"] == "status"
+    assert parsed.elements_by_id["guided-capture"]["data-guide-state"] == "ready"
+    for stage in ("recall", "follow-up", "verify"):
+        assert (
+            parsed.elements_by_id[f"guided-{stage}"]["data-guide-state"]
+            == "not-started"
+        )
+    reset = next(
+        button for button in parsed.buttons if button.get("id") == "guided-reset"
+    )
+    assert reset.get("type") == "button"
+    assert html.index('id="guided-reset"') < html.index('<form id="command-form">')
+    assert "Preparation never sends a request." in html
+    assert "Guide progress exists only in this browser tab" in html
+    assert "Send remains the governed execution boundary." in html
+
+    for literal in (
+        '"not-started"',
+        '"ready"',
+        '"prepared"',
+        '"pending"',
+        '"completed"',
+        '"failed"',
+        "function renderGuidedState",
+        "function setGuidedStageState",
+        "function resetGuidedExperience",
+        "correlation: null",
+        "guidedResetButton.disabled = pending",
+    ):
+        assert literal in script
+
+
+def test_guided_experience_state_harness_has_zero_requests() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for Sprint 40 UI verification")
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js"],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 0
+    assert {
+        "initial",
+        "states",
+        "validation",
+        "reset",
+        "editor-authority",
+        "no-fetch",
+    } == set(evidence["categories"])
+    assert evidence["states"] == [
+        "not-started",
+        "ready",
+        "prepared",
+        "pending",
+        "completed",
+        "failed",
+    ]
+
+
+def test_guided_capture_recall_harness_uses_governed_results() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for Sprint 40 UI verification")
+
+    completed = subprocess.run(
+        [
+            node,
+            "tests/browser/local_guided_capture_recall_action.js",
+            "--capture-recall",
+        ],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 7
+    assert evidence["nativeBrowserVerified"] is False
+    assert {
+        "capture-prepare",
+        "capture-send",
+        "capture-result",
+        "recall-query-prepare",
+        "recall-query-send",
+        "recall-query-result",
+        "selection",
+        "manual-editor",
+        "mismatch",
+        "recall-read-send",
+        "recall-complete",
+        "capture-replacement",
+        "recall-replacement",
+        "operation-replacement",
+        "no-hidden-send",
+    } == set(evidence["categories"])
+
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint40-block-b-test-only")
+    assert {vector["operation"] for vector in evidence["vectors"]} == {
+        "store",
+        "find",
+        "read",
+    }
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(vector["command"], workspace)
+        assert result.status.value == "interpreted", vector["operation"]
+
+
+def test_guided_follow_up_harness_and_interpreter_parity() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Installed Node required for Sprint 40 UI verification")
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js", "--follow-up"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["passed"] == 134
+    assert evidence["actualRequests"] == 0
+    assert evidence["mockedFetchCalls"] == evidence["explicitSubmissions"] == 28
+    assert evidence["nativeBrowserVerified"] is False
+    assert {
+        "precondition", "preparation", "delimiter-collision", "item-separator",
+        "list-id-whitespace", "blank", "unicode", "whitespace", "pending",
+        "added", "already-present", "manual-edit", "retry", "replacement",
+        "malformed", "wrong-list", "absent-item", "exact-spelling", "failure",
+        "unrelated", "wrong-operation", "network-failure", "reset",
+        "no-hidden-send", "exact-editor", "prepared-edit", "operation-replacement",
+        "types", "length", "unicode-rejection",
+    } == set(evidence["categories"])
+
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint40-block-c-test-only")
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(vector["command"], workspace)
+        assert result.status.value == "interpreted"
+        assert isinstance(result.intent, AddListItemsCommand)
+        assert result.intent.list_id == vector["listId"]
+        assert result.intent.items == (vector["expectedItem"],)
+
+    # The first :: wins: without the UI guard the intended ID and item change.
+    collision = interpreter.interpret(
+        "list add project::tasks :: Call pharmacy tomorrow", workspace,
+    )
+    assert isinstance(collision.intent, AddListItemsCommand)
+    assert collision.intent.list_id == "project"
+    assert collision.intent.items == ("tasks :: Call pharmacy tomorrow",)
+
+
+def test_follow_up_controls_are_preparatory_and_accessible() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'id="prepare-follow-up" type="button" disabled' in html
+    assert html.index('id="prepare-follow-up"') < html.index('<form id="command-form">')
+    for field in ("follow-up-list-id", "follow-up-item"):
+        assert f'for="{field}"' in html
+        assert f'id="{field}"' in html
+    assert 'id="follow-up-error" role="alert"' in html
 
 
 def test_no_generic_static_path_or_extra_ui_endpoint(tmp_path: Path) -> None:
@@ -804,8 +993,92 @@ def test_browse_after_uses_existing_accessible_preparation_boundary() -> None:
     ]
     assert 'button.type = "button"' in action
     assert 'const anchor = records[records.length - 1].record_id' in action
-    assert 'prepareEditorCommand("browse-after", { after_record_id: anchor })' in action
+    assert 'prepareGuidedRecallQuery(' in action
+    assert '"browse-after"' in action
+    assert '{ after_record_id: anchor }' in action
     assert "fetch(" not in action
     assert "keydown" not in action and "keyup" not in action
     assert ".trim(" not in script and ".normalize(" not in script
     assert "No knowledge records after this ID in this workspace." in script
+
+
+def test_guided_verify_harness_and_real_interpreter_parity() -> None:
+    from app.cognition.local_resolution.models import ReadListItemsQuery
+
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Block D verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js", "--verify"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["passed"] == 199
+    assert evidence["actualRequests"] == evidence["hiddenRequests"] == 0
+    assert evidence["mockedFetchCalls"] == evidence["explicitSubmissions"] == 41
+    assert evidence["nativeBrowserVerified"] is False
+    assert evidence["nativeKeyboardVerified"] is False
+    assert {
+        "precondition", "no-hidden-send", "exact-editor", "retained-context",
+        "preparation", "stale-projection", "pending", "ascii", "completion",
+        "stable", "missing-item", "wrong-list", "failure", "malformed",
+        "unrelated", "wrong-operation", "network-failure", "manual-edit",
+        "retry", "dependent-invalidation", "sharp-s", "sigma", "ligature",
+        "dotted-i", "negative", "no-trimming", "no-normalization",
+        "replacement", "reset",
+    } == set(evidence["categories"])
+    interpreter = DeterministicLocalCommandInterpreter()
+    for vector in evidence["vectors"]:
+        result = interpreter.interpret(
+            vector["command"], WorkspaceIdentity("sprint40-block-d-test-only"),
+        )
+        assert result.status.value == "interpreted"
+        assert isinstance(result.intent, ReadListItemsQuery)
+        assert result.intent.list_id == vector["listId"]
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    button = _parse(html).elements_by_id["prepare-verification"]
+    assert button["type"] == "button"
+    assert button["aria-describedby"] == "verification-help"
+    assert html.index('id="prepare-verification"') < html.index(
+        '<form id="command-form">',
+    )
+
+
+def test_browser_casefold_matches_current_python_runtime() -> None:
+    # Derive the complete non-identity mapping from this interpreter, including
+    # supplementary planes. This also rejects extra mappings for identity points.
+    mapping = {
+        str(point): chr(point).casefold() for point in range(0x110000)
+        if chr(point).casefold() != chr(point)
+    }
+    vectors = [
+        ("GRAPES", "grapes"), ("Stra\u00dfe", "STRASSE"),
+        ("\u03a3", "\u03c2"), ("\u03c2", "\u03c3"),
+        ("o\ufb03ce", "OFFICE"), ("\u0130", "i\u0307"),
+        ("\u212a", "k"), ("\u1e9e", "ss"),
+        ("\U00010400", "\U00010428"), ("\u13a0", "\uab70"),
+        ("\u00e9", "e\u0301"), ("grape", "grapes"),
+        (" grapes", "grapes"), ("grapes\n", "grapes"),
+        ("I", "\u0131"), ("\u0130", "i"), ("", ""),
+        ("\ud800", "\ud800"), ("\U0001f347", "\U0001f347"),
+        ("\ufeffgrapes", "grapes"),
+    ]
+    for point, folded in mapping.items():
+        vectors.extend(((chr(int(point)), folded), (chr(int(point)), folded + "!")))
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Python/browser casefold parity"
+    completed = subprocess.run(
+        [node, "tests/browser/local_guided_capture_recall_action.js",
+         "--casefold-parity"],
+        input=json.dumps(vectors, ensure_ascii=True), check=True,
+        capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["mapping"] == mapping
+    assert len(evidence["results"]) == len(vectors)
+    for (left, right), actual in zip(vectors, evidence["results"], strict=True):
+        assert actual["folded"] == left.casefold()
+        assert actual["equal"] is (left.casefold() == right.casefold())
+    print(
+        f"Python {platform.python_version()}: "
+        f"{len(vectors)} casefold parity vectors PASS"
+    )
