@@ -85,6 +85,76 @@
       </ol>
     </section>
 
+    <section id="natural-intent-panel" class="panel" aria-labelledby="natural-intent-heading">
+      <p class="eyebrow">SPRINT 41</p>
+      <h2 id="natural-intent-heading">Natural-language preparation</h2>
+      <p id="natural-intent-help">Use one deliberately bounded Spanish request, such as
+        “Recuerda que MedSupply entrega los martes.” or “Qué sabes de MedSupply”.
+        Interpret / Prepare performs no request. The generated command stays visible
+        and editable below; Send remains separate and governed.</p>
+      <label for="natural-intent-input">Spanish request</label>
+      <textarea id="natural-intent-input" rows="4" autocomplete="off"
+        aria-describedby="natural-intent-help"></textarea>
+      <div id="natural-intent-fields">
+        <div id="natural-field-record-id-row" hidden>
+          <label for="natural-field-record-id">Record ID</label>
+          <textarea id="natural-field-record-id" rows="2" autocomplete="off" disabled></textarea>
+        </div>
+        <div id="natural-field-kind-row" hidden>
+          <label for="natural-field-kind">Kind (optional for Recall)</label>
+          <select id="natural-field-kind" autocomplete="off" disabled>
+            <option value="">Select a kind; no kind filter for Recall</option>
+            <option value="fact">fact</option>
+            <option value="concept">concept</option>
+            <option value="state">state</option>
+          </select>
+        </div>
+        <div id="natural-field-key-row" hidden>
+          <label for="natural-field-key">Key</label>
+          <textarea id="natural-field-key" rows="2" autocomplete="off" disabled></textarea>
+        </div>
+        <div id="natural-field-value-row" hidden>
+          <label for="natural-field-value">Value</label>
+          <textarea id="natural-field-value" rows="3" autocomplete="off" disabled></textarea>
+        </div>
+        <div id="natural-field-source-type-row" hidden>
+          <label for="natural-field-source-type">Source type (your explicit assertion)</label>
+          <textarea id="natural-field-source-type" rows="2" autocomplete="off" disabled></textarea>
+        </div>
+        <div id="natural-field-source-reference-row" hidden>
+          <label for="natural-field-source-reference">Source reference (your explicit assertion)</label>
+          <textarea id="natural-field-source-reference" rows="2" autocomplete="off" disabled></textarea>
+        </div>
+        <div id="natural-field-list-id-row" hidden>
+          <label for="natural-field-list-id">List ID (one token; no whitespace or ::)</label>
+          <textarea id="natural-field-list-id" rows="1" autocomplete="off" disabled></textarea>
+        </div>
+        <div id="natural-field-item-row" hidden>
+          <label for="natural-field-item">One item (no |)</label>
+          <textarea id="natural-field-item" rows="3" autocomplete="off" disabled></textarea>
+        </div>
+      </div>
+      <div class="natural-intent-actions">
+        <button id="natural-intent-prepare" type="button">Interpret / Prepare</button>
+        <button id="natural-intent-reject" class="secondary-button" type="button" disabled>Reject proposal</button>
+      </div>
+      <p id="natural-intent-status" role="status">No natural-language proposal is active.</p>
+      <div id="natural-intent-result" hidden>
+        <h3>Preparation for review</h3>
+        <dl>
+          <div class="projection-row"><dt>Outcome</dt><dd id="natural-intent-outcome"></dd></div>
+          <div class="projection-row"><dt>Intent</dt><dd id="natural-intent-detected-intent"></dd></div>
+          <div class="projection-row"><dt>Extracted fields</dt><dd id="natural-intent-extracted-fields"></dd></div>
+          <div class="projection-row"><dt>Current usable fields</dt><dd id="natural-intent-final-fields"></dd></div>
+          <div class="projection-row"><dt>Missing fields</dt><dd id="natural-intent-missing-fields"></dd></div>
+          <div class="projection-row"><dt>Invalid fields</dt><dd id="natural-intent-invalid-fields"></dd></div>
+          <div class="projection-row"><dt>Conflicting fields</dt><dd id="natural-intent-conflicting-fields"></dd></div>
+          <div class="projection-row"><dt>Reason</dt><dd id="natural-intent-reason"></dd></div>
+        </dl>
+        <p id="natural-intent-clarification" role="alert"></p>
+      </div>
+    </section>
+
     <section class="panel" aria-labelledby="assistance-heading">
       <h2 id="assistance-heading">Prepare a knowledge command</h2>
       <p>Preparation only writes the editable command below. Review it, then use Send.</p>

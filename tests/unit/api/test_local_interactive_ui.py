@@ -1155,3 +1155,117 @@ def test_bounded_intent_preparer_purity_and_real_interpreter_parity() -> None:
     print(
         f"Sprint 41 Block A: {len(evidence['vectors'])} real interpreter vectors PASS"
     )
+
+
+def test_bounded_intent_ui_structure_and_accessible_controls() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    parsed = _parse(html)
+    panel_start = html.index('<section id="natural-intent-panel"')
+    panel_end = html.index("</section>", panel_start)
+    panel = html[panel_start:panel_end]
+    assert panel_end < html.index('id="assistance-heading"')
+    assert panel_end < html.index('<form id="command-form">')
+    assert "<form" not in panel
+    assert parsed.elements_by_id["natural-intent-panel"]["aria-labelledby"] == (
+        "natural-intent-heading"
+    )
+    natural_input = parsed.elements_by_id["natural-intent-input"]
+    assert natural_input["rows"] == "4"
+    assert natural_input["autocomplete"] == "off"
+    assert natural_input["aria-describedby"] == "natural-intent-help"
+    assert '<label for="natural-intent-input">' in panel
+    assert "Interpret / Prepare performs no request." in panel
+    assert "Send remains separate and governed." in panel
+    assert parsed.elements_by_id["natural-intent-status"]["role"] == "status"
+    assert "No natural-language proposal is active." in panel
+    assert "hidden" in parsed.elements_by_id["natural-intent-result"]
+    assert parsed.elements_by_id["natural-intent-clarification"]["role"] == "alert"
+    for suffix in (
+        "outcome", "detected-intent", "extracted-fields", "final-fields",
+        "missing-fields", "invalid-fields", "conflicting-fields", "reason",
+        "clarification",
+    ):
+        assert f'id="natural-intent-{suffix}"' in panel
+    for action, label in (
+        ("prepare", "Interpret / Prepare"), ("reject", "Reject proposal"),
+    ):
+        element_id = f"natural-intent-{action}"
+        button = next(item for item in parsed.buttons if item["id"] == element_id)
+        assert button["type"] == "button"
+        assert f">{label}</button>" in panel
+        assert "tabindex" not in button
+    assert "disabled" in parsed.elements_by_id["natural-intent-reject"]
+    for field in (
+        "record-id", "kind", "key", "value", "source-type", "source-reference",
+        "list-id", "item",
+    ):
+        element_id = f"natural-field-{field}"
+        assert "hidden" in parsed.elements_by_id[f"{element_id}-row"]
+        assert "disabled" in parsed.elements_by_id[element_id]
+        assert parsed.elements_by_id[element_id]["autocomplete"] == "off"
+        assert f'<label for="{element_id}">' in panel
+    kind_select = panel.split('<select id="natural-field-kind"', 1)[1].split(
+        "</select>", 1,
+    )[0]
+    assert [part.split('"', 1)[0] for part in kind_select.split('value="')[1:]] == [
+        "", "fact", "concept", "state",
+    ]
+    css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
+    assert "#natural-intent-panel :focus-visible" in css
+    assert "#natural-intent-panel [hidden]" in css
+
+
+def test_bounded_intent_ui_literal_rendering_and_block_b_boundary() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    natural_ui = script[
+        script.index("// Sprint 41 Block B:"):
+        script.index("function setRequestPending(pending)")
+    ]
+    assert "prepareBoundedNaturalLanguageIntent(" in natural_ui
+    assert "if (!row.hidden && !input.disabled)" in natural_ui
+    assert "commandInput.value = result.command" in natural_ui
+    assert ".textContent =" in natural_ui
+    for forbidden in (
+        "innerHTML", "insertAdjacentHTML", "document.write", "fetch(",
+        "localStorage", "sessionStorage", "indexedDB", ".submit(",
+        ".requestSubmit(", "dispatchEvent(", "clearGuidedCorrelationForReplacement",
+        "invalidateGuided", "naturalIntentInput.addEventListener",
+    ):
+        assert forbidden not in natural_ui
+    assert "naturalProposal = null" in natural_ui
+    assert "!naturalProposal.manuallyEdited" in natural_ui
+    assert "commandInput.value === naturalProposal.generatedCommand" in natural_ui
+    assert "naturalProposal.manuallyEdited = true" in script
+    assert "updateNaturalIntentControls();" in script[
+        script.index("function setRequestPending(pending)"):
+        script.index('operationInput.addEventListener("change"')
+    ]
+
+
+def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Sprint 41 Block B verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_bounded_natural_language_intent_ui.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 0
+    assert evidence["forbiddenAccesses"] == evidence["formSubmissions"] == 0
+    assert evidence["nativeBrowserVerified"] is False
+    assert evidence["nativeKeyboardVerified"] is False
+    assert evidence["preparationCalls"] > 0
+    assert {
+        "structure", "outside-form", "button-semantics", "initial",
+        "real-entrypoint", "capture-clarification", "clarification-controls",
+        "no-default-metadata", "explicit-action", "capture-prepared",
+        "final-fields", "prepared-editor", "reject-available", "reject-discard",
+        "reject-untouched", "unrelated-controls", "generic-clarification",
+        "generic-prepared", "recall", "recall-kind", "visible-explicit-only",
+        "explicit-read", "reject-manual", "reject-manual-state", "reject-edit-back",
+        "reject-different-editor", "nonprepared-preservation", "no-hidden-command",
+        "reject-nonprepared", "invalid-feedback", "conflict-feedback",
+        "literal-rendering", "pending-lock", "pending-no-queue", "pending-restore",
+        "zero-requests", "zero-submit", "no-provider-storage",
+    } == set(evidence["categories"])

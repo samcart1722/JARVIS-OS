@@ -1101,6 +1101,103 @@ function updateAssistanceFields() {
   }
 }
 
+// Sprint 41 Block B: explicit preparation/rejection only. Full stale-input and
+// Sprint 40 correlation integration belong to Block C.
+const naturalIntentInput = document.querySelector("#natural-intent-input");
+const naturalPrepareButton = document.querySelector("#natural-intent-prepare");
+const naturalRejectButton = document.querySelector("#natural-intent-reject");
+const naturalIntentStatus = document.querySelector("#natural-intent-status");
+const naturalIntentResult = document.querySelector("#natural-intent-result");
+const naturalFieldNames = [
+  "record_id", "kind", "key", "value", "source_type", "source_reference", "list_id", "item",
+];
+const naturalFields = Object.fromEntries(naturalFieldNames.map((field) => {
+  const id = `natural-field-${field.replaceAll("_", "-")}`;
+  return [field, { input: document.querySelector(`#${id}`), row: document.querySelector(`#${id}-row`) }];
+}));
+const naturalOutputs = Object.fromEntries([
+  "outcome", "detected-intent", "extracted-fields", "final-fields", "missing-fields",
+  "invalid-fields", "conflicting-fields", "reason", "clarification",
+].map((name) => [name, document.querySelector(`#natural-intent-${name}`)]));
+let naturalProposal = null;
+
+function updateNaturalIntentControls() {
+  naturalIntentInput.disabled = requestPending;
+  naturalPrepareButton.disabled = requestPending;
+  naturalRejectButton.disabled = requestPending || naturalProposal === null;
+  for (const { input, row } of Object.values(naturalFields)) {
+    input.disabled = requestPending || row.hidden;
+  }
+}
+
+function showNaturalClarificationFields(result) {
+  const needed = new Set(result?.outcome === "clarification_required"
+    ? [...result.missingFields, ...result.invalidFields, ...result.conflictingFields] : []);
+  if (result?.intent === "RECALL_KNOWLEDGE") needed.add("kind");
+  for (const [field, { input, row }] of Object.entries(naturalFields)) {
+    row.hidden = !needed.has(field);
+    if (row.hidden) input.value = "";
+  }
+  updateNaturalIntentControls();
+}
+
+function renderNaturalIntentResult(result) {
+  naturalIntentResult.hidden = false;
+  naturalOutputs.outcome.textContent = result.outcome;
+  naturalOutputs["detected-intent"].textContent = result.intent || "—";
+  naturalOutputs["extracted-fields"].textContent = JSON.stringify(result.extractedFields, null, 2);
+  naturalOutputs["final-fields"].textContent = JSON.stringify(result.fields, null, 2);
+  naturalOutputs["missing-fields"].textContent = result.missingFields.join(", ") || "—";
+  naturalOutputs["invalid-fields"].textContent = result.invalidFields.join(", ") || "—";
+  naturalOutputs["conflicting-fields"].textContent = result.conflictingFields.join(", ") || "—";
+  naturalOutputs.reason.textContent = result.reason || "—";
+  naturalOutputs.clarification.textContent = result.clarification || "";
+  const messages = {
+    prepared: "Prepared for review. Review or edit the command; explicit Send remains required.",
+    clarification_required: "Clarification required. Complete the indicated fields and Interpret / Prepare again. No new command prepared.",
+    unsupported: "Unsupported by the bounded preparer. No new command prepared.",
+  };
+  naturalIntentStatus.textContent = messages[result.outcome];
+  showNaturalClarificationFields(result);
+}
+
+naturalPrepareButton.addEventListener("click", () => {
+  if (requestPending) return;
+  const explicitFields = {};
+  for (const [field, { input, row }] of Object.entries(naturalFields)) {
+    if (!row.hidden && !input.disabled) explicitFields[field] = input.value;
+  }
+  const result = prepareBoundedNaturalLanguageIntent(naturalIntentInput.value, explicitFields);
+  naturalProposal = { result, generatedCommand: result.command, manuallyEdited: false };
+  if (result.outcome === "prepared") {
+    commandInput.value = result.command;
+    commandState.textContent = "Natural-language command prepared. Review or edit; explicit Send remains required.";
+    updatePreparationButton();
+  }
+  renderNaturalIntentResult(result);
+});
+
+naturalRejectButton.addEventListener("click", () => {
+  if (requestPending || naturalProposal === null) return;
+  if (naturalProposal.result.outcome === "prepared") {
+    if (!naturalProposal.manuallyEdited && commandInput.value === naturalProposal.generatedCommand) {
+      commandInput.value = "";
+      commandState.textContent = "Natural-language proposal rejected. No command prepared.";
+    } else {
+      commandState.textContent = "Manual text retained. Send uses the exact text in this editor.";
+    }
+  }
+  naturalProposal = null;
+  naturalIntentResult.hidden = true;
+  for (const output of Object.values(naturalOutputs)) output.textContent = "";
+  for (const { input } of Object.values(naturalFields)) input.value = "";
+  showNaturalClarificationFields(null);
+  naturalIntentStatus.textContent = "Proposal rejected. No natural-language proposal is active.";
+  updatePreparationButton();
+});
+
+showNaturalClarificationFields(null);
+
 function setRequestPending(pending) {
   requestPending = pending;
   sendButton.disabled = pending;
@@ -1118,6 +1215,7 @@ function setRequestPending(pending) {
   }
   updateAssistanceFields();
   updateFollowUpControls();
+  updateNaturalIntentControls();
 }
 
 operationInput.addEventListener("change", () => {
@@ -1144,6 +1242,8 @@ assistance.addEventListener("input", (event) => {
 
 commandInput.addEventListener("input", () => {
   if (requestPending) return;
+  // Sticky even after edit-back-to-original, solely for Reject proposal.
+  if (naturalProposal?.result.outcome === "prepared") naturalProposal.manuallyEdited = true;
   if (["follow-up", "verify"].includes(guidedState.correlation?.stage)) {
     invalidateGuidedStage(guidedState.correlation.stage);
   }
