@@ -1,6 +1,25 @@
 # Technical Debt
 
-## Current post-Sprint 39 classification
+## Current Sprint 41 planning classification
+
+Sprint 40 is formally closed and its guided capture/recall/follow-up/verify
+experience is released; its post-closure cleanup and canonical truth are complete.
+Sprint 41 planning is STARTED, scope SELECTED, with CONTRACT + BASELINE ONLY
+AUTHORIZED. Feature implementation is NOT YET AUTHORIZED.
+
+The next selected Demo v1 usefulness gap is accepting bounded Spanish human
+intent before explicit command execution. Existing deterministic interpretation,
+typed intents, gateway correlation and downstream authority already provide the
+execution path. Pure browser preparation needs no new backend capability,
+endpoint, schema, permission or model. Inspection identified no fundamental
+technical blocker for this narrowed scope; this is not implementation evidence.
+Contract review must fix the exact corpus, explicit missing-field handling,
+provenance/list selection, literal delimiter representability, Unicode behavior,
+stale-editor invalidation and Sprint 40 coexistence. Real-interpreter parity and
+native-browser evidence remain future implementation gates, not completed tests.
+Historical acceptance debt below remains historical; it is not silently resolved.
+
+## Historical post-Sprint 39 / Sprint 40 planning classification
 
 Sprint 39 is FORMALLY CLOSED and branch cleanup is complete.
 `NATIVE ACCEPTANCE NOT EXECUTED` for Sprint 39 browse-after remains explicit

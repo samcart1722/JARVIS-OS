@@ -1,6 +1,36 @@
 # Decisions and Guardrails
 
-## Current Sprint 39 closure and Sprint 40 planning guardrails
+## Current Sprint 41 planning guardrails
+
+Governed Bounded Natural-Language Intent Preparation v1 is SELECTED;
+planning is STARTED. The user's explicit authorization covers CONTRACT +
+BASELINE ONLY. Feature implementation is NOT YET AUTHORIZED: candidate review,
+freeze and separate implementation authorization are required.
+Sprint 40 remains formally closed and historical, including verified cleanup
+and final canonical-truth correction at
+`4f3de7b56001340aba1f39be812eb9b630a07960`.
+
+- Preparation is deterministic browser-only and model-free; no requests,
+  persistence, repository reads, provider/readiness/fallback calls or
+  authorization decisions.
+- Preparation is neither execution nor proof of persistence/success, and grants
+  no authority. No hidden command may execute; exact editor text at Send wins.
+- Mandatory fields, record IDs, provenance and list destinations cannot be
+  silently invented. Recall is exact FIND, not semantic retrieval.
+- Existing fallback semantics, downstream identity/workspace/membership/action
+  permissions and Sprint 40 guided/result correlation remain preserved.
+- Non-goals: autonomy, implicit Send, multi-step planning, agent loops,
+  persistent conversation, semantic/vector retrieval, knowledge edit/delete,
+  automatic provenance/IDs, implicit lists or data discovery before Send.
+- Also excluded: calendar/email/browser actions, external connectors, Hermes,
+  Spatial implementation, HealthBridge, production authentication redesign,
+  new workspace/permission authority, schema migrations, backend endpoints,
+  provider-specific architecture, unrestricted agents, generic multilingual
+  NLU and model-assisted interpretation in Sprint 41.
+- Sprint 42 is not authorized. Any model-assisted successor is only a candidate;
+  it creates no scope commitment and model use is not mandatory.
+
+## Historical Sprint 39 closure and Sprint 40 planning guardrails
 
 Sprint 39 is FORMALLY CLOSED at
 `4704f526edb1e15d692bb961691d8f8457217128`; working-branch cleanup is complete.

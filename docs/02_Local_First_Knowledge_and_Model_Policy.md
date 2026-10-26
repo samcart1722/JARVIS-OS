@@ -1,5 +1,20 @@
 # Local-First Knowledge and Model Policy
 
+## Sprint 41 planning boundary - no model enablement
+
+Sprint 41 planning is STARTED with scope SELECTED: Governed Bounded
+Natural-Language Intent Preparation v1. Only baseline and contract lifecycle
+are AUTHORIZED; feature implementation is NOT YET AUTHORIZED.
+The candidate is pure deterministic browser preparation: no repository reads,
+application requests, persistence, provider/readiness calls, model calls or
+cognitive fallback. Existing local-first order remains deterministic capability,
+LUXIOM-owned knowledge/memory, local model when useful, external model only
+under explicit policy/authorization. Sprint 41 requires no model.
+Provenance and record IDs remain explicit user inputs; lists require an explicit
+destination. Exact-key FIND must not be presented as semantic retrieval.
+Send and downstream governance remain unchanged. This selects future scope,
+not implemented behavior. Sprint 40 remains formally closed and historical.
+
 ## Sprint 38 governed metadata-browse policy
 
 Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`
