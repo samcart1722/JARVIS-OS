@@ -1215,10 +1215,10 @@ def test_bounded_intent_ui_structure_and_accessible_controls() -> None:
     assert "#natural-intent-panel [hidden]" in css
 
 
-def test_bounded_intent_ui_literal_rendering_and_block_b_boundary() -> None:
+def test_bounded_intent_ui_literal_rendering_and_block_c_boundary() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     natural_ui = script[
-        script.index("// Sprint 41 Block B:"):
+        script.index("// Sprint 41 browser-only proposal lifecycle;"):
         script.index("function setRequestPending(pending)")
     ]
     assert "prepareBoundedNaturalLanguageIntent(" in natural_ui
@@ -1228,14 +1228,44 @@ def test_bounded_intent_ui_literal_rendering_and_block_b_boundary() -> None:
     for forbidden in (
         "innerHTML", "insertAdjacentHTML", "document.write", "fetch(",
         "localStorage", "sessionStorage", "indexedDB", ".submit(",
-        ".requestSubmit(", "dispatchEvent(", "clearGuidedCorrelationForReplacement",
-        "invalidateGuided", "naturalIntentInput.addEventListener",
+        ".requestSubmit(", "dispatchEvent(", "invalidateGuidedStage(",
     ):
         assert forbidden not in natural_ui
     assert "naturalProposal = null" in natural_ui
     assert "!naturalProposal.manuallyEdited" in natural_ui
     assert "commandInput.value === naturalProposal.generatedCommand" in natural_ui
     assert "naturalProposal.manuallyEdited = true" in script
+    assert 'naturalIntentInput.addEventListener("input"' in natural_ui
+    assert 'input.addEventListener("input", changed)' in natural_ui
+    assert 'input.addEventListener("change", changed)' in natural_ui
+    assert 'if (!row.hidden && !input.disabled)' in natural_ui
+    assert 'markNaturalProposalStale("manual")' in script
+    assert 'setAttribute("data-natural-state", "stale")' in natural_ui
+    prepared = natural_ui[natural_ui.index('if (result.outcome === "prepared")'):]
+    assert prepared.index("clearGuidedCorrelationForReplacement();") < (
+        prepared.index("clearDraftResults();")
+    ) < prepared.index("commandInput.value = result.command;")
+    submit = script[script.index('form.addEventListener("submit"'):]
+    assert "text: commandInput.value" in submit
+    assert "prepareBoundedNaturalLanguageIntent(" not in submit
+    assert submit.index("if (!csrfToken)") < submit.index("submitNaturalProposal();")
+    assert submit.index("submitNaturalProposal();") < (
+        submit.index('fetch("/local/command"')
+    )
+    assert '"Governed Send could not start; see Result. Editor retained."' in submit
+    assert "Governed request settled; see Result" in submit
+    # Every successful non-natural writer is guarded; natural write and Reject
+    # have their own fresh/dismissal semantics.
+    for writer in (
+        'commandInput.value = `list read ${listId}`;',
+        "commandInput.value = prepared.command;",
+        "commandInput.value = preparedCommand;",
+    ):
+        assert "markNaturalProposalReplaced();\n  " + writer in script or (
+            "markNaturalProposalReplaced();\n    " + writer in script
+        )
+    css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
+    assert '[data-natural-state="stale"]' in css and "dashed" in css
     assert "updateNaturalIntentControls();" in script[
         script.index("function setRequestPending(pending)"):
         script.index('operationInput.addEventListener("change"')
@@ -1244,7 +1274,7 @@ def test_bounded_intent_ui_literal_rendering_and_block_b_boundary() -> None:
 
 def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
     node = shutil.which("node")
-    assert node is not None, "Node is required for Sprint 41 Block B verification"
+    assert node is not None, "Node is required for Sprint 41 UI lifecycle verification"
     completed = subprocess.run(
         [node, "tests/browser/local_bounded_natural_language_intent_ui.js"],
         check=True, capture_output=True, encoding="utf-8", timeout=30,
@@ -1268,4 +1298,22 @@ def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
         "reject-nonprepared", "invalid-feedback", "conflict-feedback",
         "literal-rendering", "pending-lock", "pending-no-queue", "pending-restore",
         "zero-requests", "zero-submit", "no-provider-storage",
-    } == set(evidence["categories"])
+    } <= set(evidence["categories"])
+    assert {
+        "natural-input-stale", "semantic-custody", "reprepare-current",
+        "optional-kind-stale", "clarification-stale", "unsupported-stale",
+        "ignored-hidden-disabled", "manual-editor-stale", "manual-edit-back-stale",
+        "reject-stale-manual", "reject-stale-untouched", "guided-clearing",
+        "guided-dependents", "guided-nonreplacement", "nonreplacement-result-custody",
+        "guided-completed-history", "no-invented-guide-transition", "draft-clearing",
+        "replacement-matrix", "reject-replacement", "invalidation-zero-requests",
+        "send-exact-editor", "send-no-reinterpret", "send-envelope",
+        "submitted-state", "pending-event-custody", "settled-state",
+        "pending-restored-after-send", "authoritative-result",
+        "reject-submitted-zero-requests", "reject-submitted-editor",
+        "submitted-stale-manual", "csrf-start-failure",
+    } <= set(evidence["categories"])
+    assert evidence["preparationInvalidationRequests"] == 0
+    assert evidence["mockedFetchCalls"] == 5
+    # Five explicit mocked Sends and one explicit Send prevented by missing CSRF.
+    assert evidence["explicitSubmissions"] == 6

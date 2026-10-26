@@ -1101,8 +1101,7 @@ function updateAssistanceFields() {
   }
 }
 
-// Sprint 41 Block B: explicit preparation/rejection only. Full stale-input and
-// Sprint 40 correlation integration belong to Block C.
+// Sprint 41 browser-only proposal lifecycle; execution remains governed by Send.
 const naturalIntentInput = document.querySelector("#natural-intent-input");
 const naturalPrepareButton = document.querySelector("#natural-intent-prepare");
 const naturalRejectButton = document.querySelector("#natural-intent-reject");
@@ -1120,6 +1119,47 @@ const naturalOutputs = Object.fromEntries([
   "invalid-fields", "conflicting-fields", "reason", "clarification",
 ].map((name) => [name, document.querySelector(`#natural-intent-${name}`)]));
 let naturalProposal = null;
+
+function markNaturalProposalStale(cause) {
+  if (requestPending || naturalProposal === null) return;
+  naturalProposal.stale = true;
+  naturalProposal.uiState = "stale";
+  naturalIntentResult.setAttribute("data-natural-state", "stale");
+  const reasons = {
+    inputs: "Inputs changed.",
+    manual: "The command editor was manually edited.",
+    replacement: "Another preparation replaced the command editor.",
+  };
+  naturalIntentStatus.textContent = "Proposal is stale. " + reasons[cause]
+    + " Re-Interpret / Prepare is required to make the proposal current."
+    + " Editor retained; Send still uses the exact visible editor text.";
+}
+
+function markNaturalProposalReplaced() {
+  if (naturalProposal?.result.outcome === "prepared") {
+    markNaturalProposalStale("replacement");
+  }
+}
+
+function submitNaturalProposal() {
+  if (naturalProposal === null) return;
+  if (naturalProposal.result.outcome === "prepared"
+    && commandInput.value !== naturalProposal.generatedCommand) markNaturalProposalReplaced();
+  naturalProposal.uiState = "submitted";
+  naturalIntentResult.setAttribute("data-natural-state", "submitted");
+  naturalIntentStatus.textContent = naturalProposal.stale || naturalProposal.manuallyEdited
+    ? "The stale/manual editor text was submitted exactly as visible through governed Send. See Result for the authoritative outcome."
+    : "The exact visible editor was submitted through governed Send. Preparation does not determine the outcome; see Result.";
+}
+
+naturalIntentInput.addEventListener("input", () => markNaturalProposalStale("inputs"));
+for (const { input, row } of Object.values(naturalFields)) {
+  const changed = () => {
+    if (!row.hidden && !input.disabled) markNaturalProposalStale("inputs");
+  };
+  input.addEventListener("input", changed);
+  input.addEventListener("change", changed);
+}
 
 function updateNaturalIntentControls() {
   naturalIntentInput.disabled = requestPending;
@@ -1143,6 +1183,7 @@ function showNaturalClarificationFields(result) {
 
 function renderNaturalIntentResult(result) {
   naturalIntentResult.hidden = false;
+  naturalIntentResult.setAttribute("data-natural-state", "current");
   naturalOutputs.outcome.textContent = result.outcome;
   naturalOutputs["detected-intent"].textContent = result.intent || "—";
   naturalOutputs["extracted-fields"].textContent = JSON.stringify(result.extractedFields, null, 2);
@@ -1168,12 +1209,17 @@ naturalPrepareButton.addEventListener("click", () => {
     if (!row.hidden && !input.disabled) explicitFields[field] = input.value;
   }
   const result = prepareBoundedNaturalLanguageIntent(naturalIntentInput.value, explicitFields);
-  naturalProposal = { result, generatedCommand: result.command, manuallyEdited: false };
   if (result.outcome === "prepared") {
+    clearGuidedCorrelationForReplacement();
+    clearDraftResults();
     commandInput.value = result.command;
     commandState.textContent = "Natural-language command prepared. Review or edit; explicit Send remains required.";
     updatePreparationButton();
   }
+  naturalProposal = {
+    result, generatedCommand: result.command, manuallyEdited: false,
+    stale: false, uiState: "current",
+  };
   renderNaturalIntentResult(result);
 });
 
@@ -1189,6 +1235,7 @@ naturalRejectButton.addEventListener("click", () => {
   }
   naturalProposal = null;
   naturalIntentResult.hidden = true;
+  naturalIntentResult.setAttribute("data-natural-state", "inactive");
   for (const output of Object.values(naturalOutputs)) output.textContent = "";
   for (const { input } of Object.values(naturalFields)) input.value = "";
   showNaturalClarificationFields(null);
@@ -1242,8 +1289,11 @@ assistance.addEventListener("input", (event) => {
 
 commandInput.addEventListener("input", () => {
   if (requestPending) return;
-  // Sticky even after edit-back-to-original, solely for Reject proposal.
-  if (naturalProposal?.result.outcome === "prepared") naturalProposal.manuallyEdited = true;
+  // Sticky even after edit-back-to-original: the visible editor is authoritative.
+  if (naturalProposal?.result.outcome === "prepared") {
+    naturalProposal.manuallyEdited = true;
+    markNaturalProposalStale("manual");
+  }
   if (["follow-up", "verify"].includes(guidedState.correlation?.stage)) {
     invalidateGuidedStage(guidedState.correlation.stage);
   }
@@ -2835,6 +2885,7 @@ verifyPrepareButton.addEventListener("click", () => {
   clearGuidedCorrelationForReplacement();
   clearDraftResults();
   const { listId, expectedItem } = guidedState.retainedFollowUp;
+  markNaturalProposalReplaced();
   commandInput.value = `list read ${listId}`;
   preparationError.textContent = "";
   preparationStatus.textContent = "Verification prepared. No operation has been executed.";
@@ -2887,6 +2938,7 @@ followUpPrepareButton.addEventListener("click", () => {
       followUpListInput.value, followUpItemInput.value,
     );
     clearGuidedCorrelationForReplacement();
+    markNaturalProposalReplaced();
     commandInput.value = prepared.command;
     preparationError.textContent = "";
     preparationStatus.textContent = "Follow-up command prepared. No operation has been executed.";
@@ -2914,6 +2966,7 @@ function prepareEditorCommand(operation, fields) {
   try {
     const preparedCommand = prepareKnowledgeCommand(operation, fields);
     clearGuidedCorrelationForReplacement();
+    markNaturalProposalReplaced();
     commandInput.value = preparedCommand;
     preparationStatus.textContent = `${operation === "read" ? "READ command" : "Command"} prepared. ${replaced ? "Previous editor command replaced. " : ""}No operation has been executed.`;
     commandState.textContent = "Review or edit the prepared command, then explicitly Send.";
@@ -2967,6 +3020,9 @@ form.addEventListener("submit", async (event) => {
       "The request could not start. The guided step remains incomplete.",
     );
     renderLocalFailure();
+    if (naturalProposal !== null) {
+      naturalIntentStatus.textContent = "Governed Send could not start; see Result. Editor retained.";
+    }
     return;
   }
 
@@ -2979,6 +3035,7 @@ form.addEventListener("submit", async (event) => {
   });
   proofInput.value = "";
 
+  submitNaturalProposal();
   setRequestPending(true);
 
   try {
@@ -3000,5 +3057,8 @@ form.addEventListener("submit", async (event) => {
     renderLocalFailure();
   } finally {
     setRequestPending(false);
+    if (naturalProposal?.uiState === "submitted") {
+      naturalIntentStatus.textContent = "Governed request settled; see Result for the authoritative execution outcome.";
+    }
   }
 });

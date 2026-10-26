@@ -204,6 +204,16 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+#natural-intent-result[data-natural-state="stale"] {
+  border-left: 3px dashed #fbbf24;
+  padding-left: 0.75rem;
+}
+
+#natural-intent-result[data-natural-state="submitted"] {
+  border-left: 3px double #7dd3fc;
+  padding-left: 0.75rem;
+}
+
 #natural-intent-panel :focus-visible {
   outline: 2px solid #7dd3fc;
   outline-offset: 3px;
