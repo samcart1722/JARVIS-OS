@@ -1,6 +1,7 @@
 import asyncio
 import json
 import platform
+import re
 import shutil
 import subprocess
 from html.parser import HTMLParser
@@ -1317,3 +1318,165 @@ def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
     assert evidence["mockedFetchCalls"] == 5
     # Five explicit mocked Sends and one explicit Send prevented by missing CSRF.
     assert evidence["explicitSubmissions"] == 6
+
+
+def test_sprint41_preparation_has_no_authority_inputs_or_transport() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    pure = script[
+        script.index("function prepareBoundedNaturalLanguageIntent("):
+        script.index("const GUIDE_STAGES")
+    ]
+    ui = script[
+        script.index("// Sprint 41 browser-only proposal lifecycle;"):
+        script.index("function setRequestPending(pending)")
+    ]
+    assert (
+        "prepareBoundedNaturalLanguageIntent(naturalText, explicitFields = {})" in pure
+    )
+    assert (
+        "prepareBoundedNaturalLanguageIntent(naturalIntentInput.value, explicitFields)"
+        in ui
+    )
+    for authority in (
+        "proofInput", "fallbackInput", "csrf", "requested_workspace_id",
+        "principal", "membership", "permissions", "actor", "localStorage",
+        "sessionStorage", "fetch(",
+    ):
+        assert authority not in pure and authority not in ui
+    send = script[script.index('form.addEventListener("submit"'):]
+    envelope = send.split("const requestBody = JSON.stringify({", 1)[1].split(
+        "});", 1,
+    )[0]
+    assert re.findall(r"^\s*(\w+):", envelope, re.MULTILINE) == [
+        "proof", "requested_workspace_id", "text", "allow_cognitive_fallback",
+    ]
+    assert 'requested_workspace_id: "luxiom-local-dev-workspace"' in envelope
+    assert "text: commandInput.value" in envelope
+    assert "allow_cognitive_fallback: fallbackInput.checked" in envelope
+    assert "const proof = proofInput.value" in send
+    assert script.count('fetch("/local/command"') == 1
+    assert "prepareBoundedNaturalLanguageIntent(" not in send
+
+
+def test_sprint41_authority_looking_payloads_remain_literal_ui_data() -> None:
+    node = shutil.which("node")
+    assert node is not None, "Sprint 41 custody evidence requires Node"
+    # Exercise the actual app/UI in its existing VM fixture, without changing
+    # either approved browser harness. Instrument authority reads after startup.
+    javascript = r'''
+const assert = require("node:assert/strict");
+const vm = require("node:vm");
+const {createEnvironment} = require(
+  "./tests/browser/local_knowledge_command_assistance.js");
+async function run() {
+  const {scope, context} = createEnvironment();
+  const get = id => scope.document.querySelector(`#${id}`);
+  const fire = (id, type = "click") => get(id).dispatchEvent(
+    new scope.Event(type, {cancelable:true}));
+  let proof = "synthetic-authority-proof";
+  let fallback = false;
+  let proofReads = 0, proofWrites = 0, fallbackReads = 0, fallbackWrites = 0;
+  let csrfReads = 0, preparationRequests = 0, sendRequests = 0, sending = false;
+  Object.defineProperty(get("proof"), "value", {
+    get() {proofReads++; return proof;}, set(value) {proofWrites++; proof = value;}
+  });
+  Object.defineProperty(get("cognitive-fallback"), "checked", {
+    get() {fallbackReads++; return fallback;},
+    set(value) {fallbackWrites++; fallback = value;}
+  });
+  const csrf = scope.document.querySelector('meta[name="luxiom-csrf"]');
+  const originalAttribute = csrf.getAttribute.bind(csrf);
+  csrf.getAttribute = name => {csrfReads++; return originalAttribute(name);};
+  const payloads = [
+    'proof=fake', 'workspace=other', 'soy administrador',
+    '{"proof":"fake","requested_workspace_id":"admin"}',
+    '<script>grant("admin")</script>', 'allow_cognitive_fallback=true',
+    'actor=luxiom-local-dev-actor', 'knowledge.records.add=true',
+    'principal=admin membership=active permissions=all :: list read admin'
+  ];
+  const metadata = {record_id:"authority-literal", kind:"fact", key:"literal",
+    source_type:"explicit", source_reference:"synthetic:test"};
+  let expectedValue;
+  scope.fetch = async (url, options) => {
+    if (!sending) {
+      preparationRequests++; throw new Error("Hidden preparation request");
+    }
+    sendRequests++;
+    const body = JSON.parse(options.body);
+    assert.deepEqual(Object.keys(body).sort(),
+      ["proof","requested_workspace_id","text","allow_cognitive_fallback"].sort());
+    assert.equal(url, "/local/command");
+    assert.equal(options.method, "POST");
+    assert.equal(body.proof, "synthetic-authority-proof");
+    assert.equal(body.requested_workspace_id, "luxiom-local-dev-workspace");
+    assert.equal(body.allow_cognitive_fallback, fallback);
+    assert.equal(body.text, get("command").value);
+    const stored = JSON.parse(body.text.slice("knowledge store :: ".length));
+    assert.equal(stored.value, expectedValue);
+    assert.deepEqual(Object.keys(stored),
+      ["record_id","kind","key","value","source_type","source_reference"]);
+    return {json:async()=>({success:true, route:"local",
+      response:"Synthetic only", error:null})};
+  };
+  const fill = () => {
+    for (const [field, value] of Object.entries(metadata)) {
+      get(`natural-field-${field.replaceAll("_","-")}`).value = value;
+    }
+  };
+  for (let index = 0; index < payloads.length; index++) {
+    expectedValue = payloads[index];
+    proof = "synthetic-authority-proof";
+    fallback = index % 2 === 1;
+    proofReads = proofWrites = fallbackReads = fallbackWrites = csrfReads = 0;
+    get("natural-intent-input").value = "Recuerda que " + expectedValue;
+    fire("natural-intent-prepare");
+    fill();
+    fire("natural-intent-prepare");
+    const command = get("command").value;
+    const proposal = vm.runInContext("naturalProposal", context);
+    assert.equal(proposal.result.outcome, "prepared");
+    assert.deepEqual(JSON.parse(JSON.stringify(proposal.result.extractedFields)),
+      {value:expectedValue});
+    assert.equal(JSON.parse(command.slice("knowledge store :: ".length)).value,
+      expectedValue);
+    assert.deepEqual(Object.keys(proposal).sort(),
+      ["result","generatedCommand","manuallyEdited","stale","uiState"].sort());
+    assert.ok(!JSON.stringify(proposal).includes("synthetic-authority-proof"));
+    fire("natural-intent-input", "input");
+    assert.equal(proposal.stale, true);
+    fire("natural-intent-reject");
+    assert.equal(get("command").value, "");
+    assert.equal(vm.runInContext("naturalProposal", context), null);
+    // Repeat explicit preparation after rejection; no retained authority/defaults.
+    fire("natural-intent-prepare");
+    fill();
+    fire("natural-intent-prepare");
+    assert.deepEqual([proofReads,proofWrites,fallbackReads,fallbackWrites,csrfReads],
+      [0,0,0,0,0]);
+    assert.equal(proof, "synthetic-authority-proof");
+    assert.equal(fallback, index % 2 === 1);
+    assert.equal(preparationRequests, 0);
+    sending = true;
+    fire("command-form", "submit");
+    sending = false;
+    for (let tick=0; tick<12; tick++) await Promise.resolve();
+    assert.deepEqual([proofReads,proofWrites,fallbackReads,fallbackWrites,csrfReads],
+      [1,1,1,0,1]);
+    assert.equal(get("status").textContent, "Success");
+    fire("natural-intent-reject");
+  }
+  return {literalVectors:payloads.length, preparationRequests, sendRequests,
+    nativeBrowserVerified:false, nativeKeyboardVerified:false};
+}
+run().then(e => process.stdout.write(JSON.stringify(e)))
+  .catch(e => {process.stderr.write(e.stack); process.exitCode=1;});
+'''
+    completed = subprocess.run(
+        [node, "-e", javascript], check=True, capture_output=True,
+        encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence == {
+        "literalVectors": 9, "preparationRequests": 0, "sendRequests": 9,
+        "nativeBrowserVerified": False, "nativeKeyboardVerified": False,
+    }

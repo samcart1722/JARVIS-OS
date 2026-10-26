@@ -1,5 +1,8 @@
 import ast
+import json
 import pickle
+import shutil
+import subprocess
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, cast
@@ -1781,3 +1784,130 @@ def test_gateway_browse_after_rejects_query_subclass():
 
     with pytest.raises(TypeError, match="browse"):
         _execute_successful_local(OtherQuery("PRIVATE_ANCHOR"), _browse_result())
+
+
+@pytest.fixture(scope="module")
+def sprint41_gateway_commands():
+    from app.cognition.interpretation.interpreter import (
+        DeterministicLocalCommandInterpreter,
+    )
+
+    node = shutil.which("node")
+    assert node is not None, "Sprint 41 gateway evidence requires Node"
+    evidence = json.loads(subprocess.run(
+        [node, "tests/browser/local_bounded_natural_language_intent_preparation.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    ).stdout)
+    expected = {
+        "CAPTURE_KNOWLEDGE": StoreKnowledgeRecordCommand,
+        "RECALL_KNOWLEDGE": FindKnowledgeRecordsQuery,
+        "ADD_FOLLOW_UP": AddListItemsCommand,
+        "READ_FOLLOW_UP": ReadListItemsQuery,
+    }
+    commands = {}
+    for family, intent_type in expected.items():
+        candidates = [vector["command"] for vector in evidence["vectors"]
+                      if vector["intent"] == family]
+        assert candidates, family
+        command = min(candidates, key=lambda text: (len(text), text))
+        result = DeterministicLocalCommandInterpreter().interpret(
+            command, WorkspaceIdentity("workspace"),
+        )
+        assert result.status is LocalCommandInterpretationStatus.INTERPRETED
+        assert type(result.intent) is intent_type
+        commands[family] = command
+    assert set(commands) == set(expected)
+    return commands
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+@pytest.mark.parametrize("family", (
+    "CAPTURE_KNOWLEDGE", "RECALL_KNOWLEDGE", "ADD_FOLLOW_UP", "READ_FOLLOW_UP",
+))
+@pytest.mark.parametrize(("terminal", "expected"), (
+    ("authentication", LocalCommandApplicationErrorCode.ACCESS_DENIED),
+    ("mapping", LocalCommandApplicationErrorCode.ACCESS_DENIED),
+    ("workspace", LocalCommandApplicationErrorCode.INVALID_REQUEST),
+    (MEMBERSHIP_NOT_FOUND, LocalCommandApplicationErrorCode.ACCESS_DENIED),
+    (MEMBERSHIP_INACTIVE, LocalCommandApplicationErrorCode.ACCESS_DENIED),
+    (MEMBERSHIP_RESOLUTION_FAILED,
+     LocalCommandApplicationErrorCode.SERVICE_UNAVAILABLE),
+))
+def test_sprint41_prepared_text_preserves_authority_terminals_and_order(
+    sprint41_gateway_commands, family, fallback, terminal, expected,
+):
+    from unittest.mock import Mock
+
+    from app.cognition.routing.models import CognitiveFallbackAuthorization
+    from app.principal_authentication.routing import (
+        AuthenticatedLocalCommandRoutingService,
+    )
+
+    command = sprint41_gateway_commands[family]
+    events = []
+    authenticator, mapper, membership, text_router = (Mock() for _ in range(4))
+
+    def authenticate(proof):
+        events.append("authentication")
+        assert proof.proof == "super-secret-proof"
+        return (_authentication_success() if terminal != "authentication" else
+                PrincipalAuthenticationResult(False, error_code=(
+                    PrincipalAuthenticationErrorCode.AUTHENTICATION_FAILED
+                )))
+
+    def map_actor(principal):
+        events.append("mapping")
+        assert principal == PrincipalIdentity("principal")
+        return (_mapping_success() if terminal != "mapping" else
+                PrincipalActorMappingResult(False, error_code=(
+                    PrincipalActorMappingErrorCode.PRINCIPAL_MAPPING_FAILED
+                )))
+
+    def decide(actor, workspace):
+        events.append("membership")
+        assert actor == ActorIdentity("actor")
+        assert workspace == WorkspaceIdentity("workspace")
+        return MembershipDecision(False, error_code=terminal)
+
+    authenticator.authenticate.side_effect = authenticate
+    mapper.map.side_effect = map_actor
+    membership.decide.side_effect = decide
+    service = AuthenticatedLocalCommandRoutingService(
+        authenticator, mapper, membership, text_router,
+    )
+    if terminal == "workspace":
+        # The application request already rejects malformed workspace IDs.
+        # Exercise the real routing selector's opaque-input boundary, then its
+        # existing typed gateway terminal mapping; no alternate execution path.
+        routed = service.route(AuthenticatedLocalCommandRequest(
+            LocalAuthenticationProof("super-secret-proof"), None, command,
+            CognitiveFallbackAuthorization(fallback),
+        ))
+        assert routed.workspace_selection_result.error_code is (
+            AuthenticatedWorkspaceSelectionErrorCode.WORKSPACE_SELECTION_INVALID
+        )
+        assert routed.membership_decision is None and routed.text_routing_result is None
+        recording = RecordingRoutingService(routed)
+        result = _gateway(recording).execute(_request(
+            text=command, allow_cognitive_fallback=fallback,
+        ))
+        assert recording.requests[0].text == command
+    else:
+        result = LocalCommandApplicationGateway(service).execute(_request(
+            text=command, allow_cognitive_fallback=fallback,
+        ))
+    expected_events = ["authentication"]
+    if terminal != "authentication":
+        expected_events.append("mapping")
+    if terminal not in ("authentication", "mapping", "workspace"):
+        expected_events.append("membership")
+    assert events == expected_events
+    assert not result.success and result.route is None
+    assert result.response is None and result.projection is None
+    assert _application_error_code(result) is expected
+    text_router.route.assert_not_called()  # No interpretation/local/model rescue.
+    if "mapping" not in expected_events:
+        mapper.map.assert_not_called()
+    if "membership" not in expected_events:
+        membership.decide.assert_not_called()
+    assert command not in repr(result)
