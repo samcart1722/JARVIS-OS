@@ -1,9 +1,16 @@
 # Sprint 41 — Governed Bounded Natural-Language Intent Preparation v1
-## Frozen Behavior Contract Candidate v1
+## Behavior Contract v1
 
-Status: Candidate for freeze
+Status: FROZEN UPON MERGE OF THE CONTRACT FREEZE PR
 
 Implementation: NOT YET AUTHORIZED
+
+SECOND INDEPENDENT CONTRACT REVIEW: APPROVED
+
+Reviewed candidate tip: `3a3d1a2c9a5b32ed64f32834c0cf19ed49958ca8`
+
+Refined candidate SHA-256:
+`53BF833A40F06D1B5C73545734E2F0DD8E7929914434458AF6071AF8CFE84D1D`
 
 Schema migration: None
 
@@ -17,11 +24,14 @@ Model/provider use: None
 
 ## 1. Authority and checkpoint
 
-This document proposes behavior for review and freeze; it does not claim that
-the capability exists or that the contract is already frozen. The user's
-authorization covers planning-baseline synchronization and behavior-contract
-preparation/freeze lifecycle only. Feature work requires candidate review,
-contract freeze and separate explicit implementation authorization.
+The second independent contract review APPROVED the refined candidate above,
+with no additional contract blocker identified. This document does not claim
+that the capability is implemented or that freeze precedes merge.
+The user's authorization covers the contract freeze PR lifecycle. Normal merge
+of the contract freeze PR from `docs/sprint-41-behavior-contract`, titled
+`docs: freeze Sprint 41 behavior contract`, freezes this behavior contract.
+That merge does NOT authorize feature implementation; implementation requires
+a separate explicit authorization after freeze.
 
 Planning baseline commit: `73a11e884db9fa22b4a3c1c0ec9ee46c97bccfe8`.
 Baseline PR: #72, MERGED through normal two-parent merge
@@ -525,8 +535,8 @@ No automatic provenance, record IDs, implicit/default list, automatic discovery
 or data reads during interpretation, new command grammar, escaping redesign,
 generic multilingual NLU or model-assisted interpretation in Sprint 41.
 
-Next gate: independent review of this pushed candidate, before any contract PR.
-This branch must remain pushed and unmerged without a PR at this execution's
-end. Candidate review and contract freeze precede a separate explicit feature
-implementation authorization. Neither baseline merge nor candidate publication
-grants that authorization or starts Sprint 42.
+Lifecycle gate: normal merge of the reviewed contract freeze PR satisfies the
+freeze condition above. After merge, the next gate is separate explicit user
+authorization for feature implementation; Block A must not start before it.
+Neither baseline merge nor contract freeze grants implementation authorization
+or starts Sprint 42.
