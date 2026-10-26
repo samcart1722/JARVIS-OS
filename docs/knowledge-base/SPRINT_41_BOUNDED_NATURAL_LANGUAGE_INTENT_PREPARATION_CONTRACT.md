@@ -159,13 +159,36 @@ Apply these gates in order; a later match cannot override an earlier rejection:
 3. Whole quoted/example instructions or explanatory prefixes are Unsupported
    (`unsupported_request`): `"Recuerda que ..."` and `Por ejemplo: Recuerda que ...`
    do not match. Quotes/HTML/JSON inside a matched payload remain literal data.
-4. Multiple supported actions are Unsupported (`multiple_actions`), never a
-   partial Prepared or a guessed first action. For this bounded corpus, reserve
-   the connectors ` y `, ` luego `, ` después `, ` entonces ` and `; ` when followed
-   by one of `recuerda`, `guarda`, `anota`, `agrega`, `añade`, `agrégalo`, `añádelo`,
-   `muéstrame` or `qué` plus a space, using keyword comparison above. Reject these
-   combinations even within payload, conservatively. `Recuerda X y agrégalo a la
-   lista Y` is Unsupported. Unlisted combined-request forms have no support promise.
+4. Recognized multi-action constructions matching the frozen boundary + action
+   introducer detector are Unsupported (`multiple_actions`), never a partial
+   Prepared or a guessed first action. Boundaries are exactly ` y `,
+   ` y también `, ` luego `, ` después `, ` entonces `, `; `, `. `, `! `, `? `,
+   and a line break (LF, CRLF or CR). A line break may be followed by zero or
+   more ASCII spaces/tabs before the introducer. Other boundaries require the
+   exact displayed ASCII spaces. Introducers are exactly `recuerda`, `guarda`,
+   `anota`, `agrega`, `añade`, `agrégalo`, `añádelo`, `muéstrame` and `qué`,
+   followed by one ASCII space. Permit an optional `¿` immediately before `qué`.
+   Apply the existing keyword-comparison rule to boundaries and introducers;
+   preserve all original payload text. The introducer is a bounded lexical
+   guard, not a request to parse or execute a second action.
+
+   A boundary/introducer pair counts only outside quoted spans. For this
+   detector only, quoted spans are balanced non-nested ASCII double quotes
+   (`"..."`) or curly double quotes (`“...”`). An ASCII quote preceded by an odd
+   consecutive backslash count is escaped and is not a quote delimiter.
+   An unmatched quote is ordinary text for this detector; no general quoting
+   or sentence parser is claimed. Quoted contents are literal data, never
+   rescanned as action authority. Whole quoted/example requests still follow
+   gate 3. Recognized top-level pairs can occur within a broad Capture payload;
+   they must be rejected before that payload can become Prepared.
+
+   Explicit examples returning Unsupported (`multiple_actions`):
+   `Recuerda que X. Agrega Y a la lista Z`,
+   `Recuerda que X; agrega Y a la lista Z`,
+   `Recuerda que X y agrega Y a la lista Z`, and the two-line request
+   `Recuerda que X` followed by a line break and `Agrega Y a la lista Z`.
+   Sprint 41 claims no general sentence or multi-intent understanding beyond
+   this detector. No second action is ever prepared or executed implicitly.
 5. Pronoun/context resolution is excluded. Anaphoric request verbs such as
    `agrégalo` are outside the corpus. Payload containing standalone `esto`, `eso`,
    `aquello`, `ello`, `él`, `ella`, `ellos` or `ellas` is Unsupported
@@ -315,9 +338,20 @@ or send it. Send remains the existing manual execution path and may still send
 the visible editor after explicit user review; stale is not new authorization.
 
 ClarificationRequired/Unsupported leave editor text unchanged and explicitly
-say no new command was prepared. Rejection dismisses the proposal without
-sending or persistence. If the editor still exactly equals the rejected prepared
-command, clear it; if manually edited, preserve the text and mark it manual.
+say no new command was prepared. The required `Reject proposal` control dismisses
+the active preparation state without requests, persistence or execution:
+
+- For Prepared, clear the editor only if it still exactly contains the active
+  generated command and has not been manually edited since preparation.
+- If manually edited since preparation, preserve the user's current editor
+  text, even if edited back to the generated text. Discard/invalidate proposal
+  metadata and mark the retained editor content manual, not current proposal
+  output. If the editor otherwise differs, preserve and mark it manual as well.
+- For ClarificationRequired or Unsupported, dismiss the explanation/preparation
+  state without altering any unrelated pre-existing manual editor command.
+
+Rejection never Sends, calls fetch/backend, mutates knowledge/list storage,
+triggers cognitive fallback or restores a hidden command later.
 Never retain a hidden executable proposal. Input/prepare/reject controls cannot
 submit the command form. While a governed request is pending, lock new preparation
 and proposal replacement consistently with existing controls; never queue Send.
@@ -355,14 +389,22 @@ rendering, delimiter validation and explicit review. Imperative wording grants
 no authority. Never execute browser/shell code from input.
 
 Minimum UI: one labelled natural-language textarea, one Interpret / Prepare
-button, visible intent/extracted fields/missing fields, explicit clarification
-controls and the exact command in the existing editor when Prepared. Existing
-operation-specific controls may be reused for explicit completion. Add no whole
+button, one REQUIRED `Reject proposal` control, visible intent/extracted
+fields/missing fields, explicit clarification controls and the exact command
+in the existing editor when Prepared. `Reject proposal` must be `type="button"`
+or a semantic equivalent that cannot submit the command form, distinct from
+Interpret / Prepare and Send, and available whenever there is an active proposal
+or preparation state, including a stale proposal or clarification/unsupported
+explanation. It performs zero requests, persistence and execution as section 14
+requires. Existing operation-specific controls may be reused for explicit
+completion. Add no whole
 UI redesign, external UI dependency or remote assets.
 Require keyboard-only navigation, visible focus, label association, appropriate
 status announcements and keyboard button activation. Interpret/Prepare and Send
 must be visually and semantically distinct, with no implicit submit from
-preparation controls. Status must distinguish proposed, stale and executed data.
+preparation controls. `Reject proposal` must be keyboard-reachable, have visible
+focus and a clear accessible label/state, and support keyboard activation.
+Status must distinguish proposed, stale and executed data.
 
 ## 18. Automated acceptance required after separate authorization
 
@@ -379,8 +421,22 @@ does not claim that any new feature test has run or passed:
    semantic recall claim or automatic READ.
 5. Explicit-list ADD and READ; generic pending forms require list_id; explicit
    controls cannot supply hidden retained defaults or silently resolve conflicts.
-6. Negation, quoted/example instructions, multiple actions, pronouns, conditional
-   requests, unsupported text, empty/whitespace payloads and ambiguous separators.
+6. Negation, quoted/example instructions, recognized multi-action constructions,
+   pronouns, conditional requests, unsupported text, empty/whitespace payloads
+   and ambiguous separators. For every boundary in gate 4 and every listed
+   introducer, require Unsupported (`multiple_actions`) for a top-level pair
+   within `Recuerda que X<boundary><introducer> Y`. Include ` y también `,
+   punctuation boundaries, LF/CRLF/CR, line indentation, keyword-case variants
+   and optional `¿` before `qué`. Explicit required vectors:
+   `Recuerda que X. Agrega Y a la lista Z`;
+   `Recuerda que X; agrega Y a la lista Z`;
+   `Recuerda que X y agrega Y a la lista Z`;
+   and `Recuerda que X` + LF + `Agrega Y a la lista Z`.
+   Quoted boundary/introducer pairs must not trigger this detector; test balanced
+   ASCII/curly double quotes, escaped ASCII quotes and unmatched quotes under
+   its exact rules. Unlisted boundaries/introducers must not be labelled
+   `multiple_actions` by a broader inferred sentence rule. No vector may cause
+   an implicit second action or any request.
 7. Hostile literal HTML/script/JSON/commands, quotes/backslashes/newlines,
    Unicode/combining-text preservation and Python-compatible whitespace edges.
 8. `|` item and `::` list-ID rejection without splitting/escaping; no extra JSON
@@ -397,6 +453,14 @@ does not claim that any new feature test has run or passed:
 14. Full governed-suite regression excluding the ENTIRE foreign
     `tests/unit/reasoning/` tree before collection. Never import/execute/read its
     foreign file; custody permits only Get-FileHash on that file.
+15. Required `Reject proposal` control, separate non-submit semantics and all
+    rejection paths: Prepared with untouched generated editor clears that
+    command; Prepared after manual edit preserves editor text and marks it
+    manual (including edit-back-to-original); ClarificationRequired dismissal;
+    Unsupported dismissal. The latter two preserve unrelated manual editor
+    text. Every path must discard active proposal metadata, cause zero requests,
+    persistence or execution, and never restore a hidden command. Verify
+    keyboard reachability/activation, visible focus and accessible label/state.
 
 ## 19. Native Windows browser acceptance required later
 
@@ -422,6 +486,11 @@ are automated evidence, not substitutes for native acceptance. Required scenario
 16. Wrong proof or missing/revoked permission fails normally.
 17. Existing Sprint 40 guided workflow still works.
 18. Keyboard-only path, focus and announcements work.
+19. Activate `Reject proposal` explicitly: untouched Prepared clears its generated
+    command; manually edited Prepared preserves manual text; clarification and
+    unsupported explanations dismiss without changing unrelated manual text.
+    All four paths produce zero application requests, persistence and execution.
+    Demonstrate keyboard access, visible focus and clear accessible label/state.
 
 No native scenario or feature test is authorized by this candidate commit.
 
