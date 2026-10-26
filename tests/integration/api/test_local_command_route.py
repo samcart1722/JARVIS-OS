@@ -1,6 +1,8 @@
 """Transport-boundary tests for authenticated local commands."""
 import asyncio
 import json
+import shutil
+import subprocess
 from typing import Any, cast
 
 import pytest
@@ -1994,3 +1996,243 @@ def test_http_browse_after_projection_rejects_private_fields(field):
         LocalCommandHttpKnowledgeBrowseAfterProjection(
             records=(), truncated=False, **{field: "PRIVATE_SENTINEL"}
         )
+
+
+@pytest.fixture(scope="module")
+def sprint41_http_vectors():
+    from app.cognition.interpretation.interpreter import (
+        DeterministicLocalCommandInterpreter,
+    )
+    from app.cognition.local_resolution.models import (
+        AddListItemsCommand,
+        FindKnowledgeRecordsQuery,
+        ReadListItemsQuery,
+        StoreKnowledgeRecordCommand,
+    )
+    from app.operations.local_interactive_runtime import DEVELOPMENT_WORKSPACE
+
+    node = shutil.which("node")
+    assert node is not None, "Sprint 41 authority tests require Node"
+    evidence = json.loads(subprocess.run(
+        [node, "tests/browser/local_bounded_natural_language_intent_preparation.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    ).stdout)
+    assert evidence["actualRequests"] == evidence["forbiddenAccesses"] == 0
+    criteria = {
+        "CAPTURE_KNOWLEDGE": {"record_id": "record-41", "kind": "fact",
+                              "value": "MedSupply entrega los martes."},
+        "RECALL_KNOWLEDGE": {"key": "MedSupply"},
+        "ADD_FOLLOW_UP": {"list_id": "tareas", "item": "llamar a MedSupply"},
+        "READ_FOLLOW_UP": {"list_id": "tareas"},
+    }
+    types = dict(zip(criteria, (StoreKnowledgeRecordCommand, FindKnowledgeRecordsQuery,
+                               AddListItemsCommand, ReadListItemsQuery), strict=True))
+    selected = {}
+    for family, required in criteria.items():
+        matches = [vector for vector in evidence["vectors"]
+                   if vector["intent"] == family
+                   and all(vector["fields"].get(k) == v for k, v in required.items())
+                   and (family != "RECALL_KNOWLEDGE"
+                        or "kind" not in vector["fields"])]
+        assert matches, family
+        # Semantic criteria, then exact command ordering; never list-position IDs.
+        vector = min(matches, key=lambda item: item["command"])
+        result = DeterministicLocalCommandInterpreter().interpret(
+            vector["command"], DEVELOPMENT_WORKSPACE,
+        )
+        assert result.status.value == "interpreted"
+        assert type(result.intent) is types[family]
+        fields = vector["fields"]
+        intent = result.intent
+        if isinstance(intent, StoreKnowledgeRecordCommand):
+            assert intent.record.workspace == DEVELOPMENT_WORKSPACE
+            for name in ("record_id", "key", "value"):
+                assert getattr(intent.record, name) == fields[name].strip()
+            assert intent.record.kind.value == fields["kind"]
+            for name in ("source_type", "source_reference"):
+                assert getattr(intent.record.provenance, name) == fields[name].strip()
+        elif isinstance(intent, FindKnowledgeRecordsQuery):
+            assert intent.key == fields["key"].strip() and intent.kind is None
+        elif isinstance(intent, AddListItemsCommand):
+            assert intent.list_id == fields["list_id"]
+            assert intent.items == (fields["item"].strip(),)
+        else:
+            assert intent.list_id == fields["list_id"]
+        selected[family] = vector
+    assert set(selected) == set(criteria)
+    return selected
+
+
+@pytest.mark.parametrize("fallback", (False, True))
+@pytest.mark.parametrize("family", (
+    "CAPTURE_KNOWLEDGE", "RECALL_KNOWLEDGE", "ADD_FOLLOW_UP", "READ_FOLLOW_UP",
+))
+def test_sprint41_prepared_http_live_action_revocation(
+    browse_http_runtime, sprint41_http_vectors, family, fallback,
+):
+    from contextlib import ExitStack
+    from unittest.mock import patch
+
+    from app.cognition.local_resolution.permissions import (
+        KNOWLEDGE_RECORDS_ADD,
+        KNOWLEDGE_RECORDS_READ,
+        LIST_ITEMS_ADD,
+        LIST_ITEMS_READ,
+    )
+    from app.infrastructure.local_storage.sqlite_storage import (
+        SQLitePermissionGrantRepository,
+    )
+    from app.operations.local_interactive_runtime import (
+        DEVELOPMENT_ACTOR,
+        DEVELOPMENT_WORKSPACE,
+    )
+
+    instance, storage, post = browse_http_runtime
+    vector = sprint41_http_vectors[family]
+    command = vector["command"]
+    permission, repository, method, operation = {
+        "CAPTURE_KNOWLEDGE": (KNOWLEDGE_RECORDS_ADD,
+                              instance.local_knowledge_repository, "store", "store"),
+        "RECALL_KNOWLEDGE": (
+            KNOWLEDGE_RECORDS_READ, instance.local_knowledge_repository,
+            "find_by_key", "find",
+        ),
+        "ADD_FOLLOW_UP": (LIST_ITEMS_ADD, instance.local_list_repository, "add", "add"),
+        "READ_FOLLOW_UP": (
+            LIST_ITEMS_READ, instance.local_list_repository, "read", "read",
+        ),
+    }[family]
+    gateway = instance.local_command_application_gateway
+    with ExitStack() as stack:
+        forbidden_ports = (
+            (instance.cognitive_engine, "process"), (instance.ollama_client, "chat"),
+            (instance.provider_readiness_probe, "check"),
+        )
+        forbidden = [stack.enter_context(patch.object(target, name))
+                     for target, name in forbidden_ports]
+        forbidden += [stack.enter_context(patch(name)) for name in (
+            "requests.get", "requests.post",
+        )]
+        interpreter = stack.enter_context(patch.object(
+            instance.local_command_interpreter, "interpret",
+            wraps=instance.local_command_interpreter.interpret,
+        ))
+        resolver = stack.enter_context(patch.object(
+            instance.local_first_resolver, "resolve",
+            wraps=instance.local_first_resolver.resolve,
+        ))
+        if family == "RECALL_KNOWLEDGE":
+            assert post(sprint41_http_vectors["CAPTURE_KNOWLEDGE"]["command"])[0] == 200
+        if family == "READ_FOLLOW_UP":
+            assert post(sprint41_http_vectors["ADD_FOLLOW_UP"]["command"])[0] == 200
+        data = stack.enter_context(patch.object(
+            repository, method, wraps=getattr(repository, method),
+        ))
+        status, success = post(command, fallback)
+        assert status == 200 and success["success"] is True
+        assert success["route"] == "local" and success["error"] is None
+        projection = success["projection"]
+        assert projection["operation"] == operation
+        assert projection["kind"] == (
+            "knowledge" if "KNOWLEDGE" in family else "list"
+        )
+        fields = vector["fields"]
+        if operation == "store":
+            assert projection == {
+                "kind": "knowledge", "operation": "store", "created": True,
+                "record": {key: fields[key] for key in (
+                    "record_id", "kind", "key", "value",
+                )},
+            }
+        elif operation == "find":
+            record = sprint41_http_vectors["CAPTURE_KNOWLEDGE"]["fields"]
+            assert projection == {
+                "kind": "knowledge", "operation": "find", "truncated": False,
+                "records": [{key: record[key] for key in (
+                    "record_id", "kind", "key", "value",
+                )}],
+            }
+        elif operation == "add":
+            assert projection == {"kind": "list", "operation": "add",
+                                  "list_id": fields["list_id"],
+                                  "added": [fields["item"]],
+                                  "already_present": [], "items": [fields["item"]]}
+        else:
+            added = sprint41_http_vectors["ADD_FOLLOW_UP"]["fields"]["item"]
+            assert projection == {"kind": "list", "operation": "read",
+                                  "list_id": fields["list_id"], "items": [added]}
+        data.assert_called_once()
+        data.reset_mock()
+        interpreter.reset_mock()
+        resolver.reset_mock()
+        # Separate SQLite connection, same live database; the runtime/gateway and
+        # exact previously successful command remain unchanged across revocation.
+        grants = SQLitePermissionGrantRepository(storage)
+        grants.revoke(
+            DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, permission,
+        )
+        assert not grants.is_granted(
+            DEVELOPMENT_ACTOR, DEVELOPMENT_WORKSPACE, permission,
+        )
+        assert instance.local_command_application_gateway is gateway
+        status, denied = post(command, fallback)
+        assert status == 403 and denied["error"]["code"] == "local_permission_denied"
+        assert denied["success"] is False and denied["route"] == "local"
+        assert denied["response"] is None and "projection" not in denied
+        data.assert_not_called()
+        interpreter.assert_called_once()
+        resolver.assert_called_once()
+        serialized = json.dumps(denied)
+        for private in ("MedSupply", "tareas", "record-41", "test:41", "provenance",
+                        "source_type", "source_reference", DEVELOPMENT_ACTOR.actor_id,
+                        DEVELOPMENT_WORKSPACE.workspace_id, "temporary-browse-proof"):
+            assert private not in serialized
+        # A revoked write grant does not revoke the independently granted read.
+        other = {"CAPTURE_KNOWLEDGE": "RECALL_KNOWLEDGE",
+                 "ADD_FOLLOW_UP": "READ_FOLLOW_UP"}.get(family)
+        if other:
+            assert post(sprint41_http_vectors[other]["command"], fallback)[0] == 200
+        for port in forbidden:
+            port.assert_not_called()
+
+
+@pytest.mark.parametrize("family", (
+    "CAPTURE_KNOWLEDGE", "RECALL_KNOWLEDGE", "ADD_FOLLOW_UP", "READ_FOLLOW_UP",
+))
+def test_sprint41_prepared_bad_proof_stops_real_http_pipeline(
+    browse_http_runtime, sprint41_http_vectors, family,
+):
+    from contextlib import ExitStack
+    from unittest.mock import patch
+
+    from app.operations.local_interactive_runtime import DEVELOPMENT_WORKSPACE
+
+    instance, _, _ = browse_http_runtime
+    with ExitStack() as stack:
+        downstream_ports = (
+            (type(instance.principal_actor_mapper), "map"),
+            (instance.membership_decision_service, "decide"),
+            (instance.local_command_interpreter, "interpret"),
+            (instance.local_first_resolver, "resolve"),
+            (instance.local_knowledge_repository, "store"),
+            (instance.local_knowledge_repository, "find_by_key"),
+            (instance.local_list_repository, "add"),
+            (instance.local_list_repository, "read"),
+            (instance.cognitive_engine, "process"), (instance.ollama_client, "chat"),
+            (instance.provider_readiness_probe, "check"),
+        )
+        downstream = [stack.enter_context(patch.object(target, name))
+                      for target, name in downstream_ports]
+        downstream += [stack.enter_context(patch(name)) for name in (
+            "requests.get", "requests.post",
+        )]
+        status, denied = _post_local_command(_payload(
+            proof="incorrect-sprint41-proof",
+            requested_workspace_id=DEVELOPMENT_WORKSPACE.workspace_id,
+            text=sprint41_http_vectors[family]["command"],
+            allow_cognitive_fallback=True,
+        ))
+        assert status == 403 and denied["error"]["code"] == "access_denied"
+        assert denied["route"] is None and "projection" not in denied
+        for port in downstream:
+            port.assert_not_called()

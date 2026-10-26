@@ -1,6 +1,7 @@
 import asyncio
 import json
 import platform
+import re
 import shutil
 import subprocess
 from html.parser import HTMLParser
@@ -1082,3 +1083,400 @@ def test_browser_casefold_matches_current_python_runtime() -> None:
         f"Python {platform.python_version()}: "
         f"{len(vectors)} casefold parity vectors PASS"
     )
+
+
+def test_bounded_intent_preparer_purity_and_real_interpreter_parity() -> None:
+    from app.cognition.local_resolution.models import (
+        FindKnowledgeRecordsQuery,
+        ReadListItemsQuery,
+        StoreKnowledgeRecordCommand,
+    )
+
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Sprint 41 Block A verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_bounded_natural_language_intent_preparation.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == evidence["forbiddenAccesses"] == 0
+    assert evidence["nativeBrowserVerified"] is False
+    assert {
+        "corpus", "wrappers", "generic-add", "generic-read", "capture-metadata",
+        "no-invention", "kinds", "invalid-kind", "conflicts", "merge-trimming",
+        "blank-explicit", "own-properties", "ordered-fields", "empty-placeholders",
+        "rejection", "negation", "standalone", "list-validation", "item-validation",
+        "python-whitespace", "explicit-surrogate", "multi-action-matrix",
+        "quoted-matrix", "quote-escapes", "unlisted-guard", "literal-preservation",
+        "input-length", "command-length", "json-escape-budget", "purity",
+        "determinism", "closed-result", "serialization",
+    } <= set(evidence["categories"])
+    types = {
+        "CAPTURE_KNOWLEDGE": StoreKnowledgeRecordCommand,
+        "RECALL_KNOWLEDGE": FindKnowledgeRecordsQuery,
+        "ADD_FOLLOW_UP": AddListItemsCommand,
+        "READ_FOLLOW_UP": ReadListItemsQuery,
+    }
+    assert {vector["intent"] for vector in evidence["vectors"]} == set(types)
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint41-block-a-synthetic")
+    for vector in evidence["vectors"]:
+        command, fields = vector["command"], vector["fields"]
+        assert len(command) <= 8192
+        result = interpreter.interpret(command, workspace)
+        assert result.status.value == "interpreted", vector["intent"]
+        intent = result.intent
+        assert type(intent) is types[vector["intent"]]
+        if isinstance(intent, StoreKnowledgeRecordCommand):
+            record = intent.record
+            assert record.workspace is workspace
+            assert record.kind.value == fields["kind"]
+            for field in ("record_id", "key", "value"):
+                assert getattr(record, field) == fields[field].strip()
+            for field in ("source_type", "source_reference"):
+                assert getattr(record.provenance, field) == fields[field].strip()
+            assert list(json.loads(command.split(" :: ", 1)[1])) == [
+                "record_id", "kind", "key", "value", "source_type", "source_reference",
+            ]
+        elif isinstance(intent, FindKnowledgeRecordsQuery):
+            assert intent.key == fields["key"].strip()
+            assert (intent.kind.value if intent.kind is not None else None) == (
+                fields.get("kind")
+            )
+            assert list(json.loads(command.split(" :: ", 1)[1])) == (
+                ["key", "kind"] if "kind" in fields else ["key"]
+            )
+        elif isinstance(intent, AddListItemsCommand):
+            assert intent.list_id == fields["list_id"].strip()
+            assert intent.items == (fields["item"].strip(),)
+        else:
+            assert isinstance(intent, ReadListItemsQuery)
+            assert intent.list_id == fields["list_id"].strip()
+    print(
+        f"Sprint 41 Block A: {len(evidence['vectors'])} real interpreter vectors PASS"
+    )
+
+
+def test_bounded_intent_ui_structure_and_accessible_controls() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    parsed = _parse(html)
+    panel_start = html.index('<section id="natural-intent-panel"')
+    panel_end = html.index("</section>", panel_start)
+    panel = html[panel_start:panel_end]
+    assert panel_end < html.index('id="assistance-heading"')
+    assert panel_end < html.index('<form id="command-form">')
+    assert "<form" not in panel
+    assert parsed.elements_by_id["natural-intent-panel"]["aria-labelledby"] == (
+        "natural-intent-heading"
+    )
+    natural_input = parsed.elements_by_id["natural-intent-input"]
+    assert natural_input["rows"] == "4"
+    assert natural_input["autocomplete"] == "off"
+    assert natural_input["aria-describedby"] == "natural-intent-help"
+    assert '<label for="natural-intent-input">' in panel
+    assert "Interpret / Prepare performs no request." in panel
+    assert "Send remains separate and governed." in panel
+    assert parsed.elements_by_id["natural-intent-status"]["role"] == "status"
+    assert "No natural-language proposal is active." in panel
+    assert "hidden" in parsed.elements_by_id["natural-intent-result"]
+    assert parsed.elements_by_id["natural-intent-clarification"]["role"] == "alert"
+    for suffix in (
+        "outcome", "detected-intent", "extracted-fields", "final-fields",
+        "missing-fields", "invalid-fields", "conflicting-fields", "reason",
+        "clarification",
+    ):
+        assert f'id="natural-intent-{suffix}"' in panel
+    for action, label in (
+        ("prepare", "Interpret / Prepare"), ("reject", "Reject proposal"),
+    ):
+        element_id = f"natural-intent-{action}"
+        button = next(item for item in parsed.buttons if item["id"] == element_id)
+        assert button["type"] == "button"
+        assert f">{label}</button>" in panel
+        assert "tabindex" not in button
+    assert "disabled" in parsed.elements_by_id["natural-intent-reject"]
+    for field in (
+        "record-id", "kind", "key", "value", "source-type", "source-reference",
+        "list-id", "item",
+    ):
+        element_id = f"natural-field-{field}"
+        assert "hidden" in parsed.elements_by_id[f"{element_id}-row"]
+        assert "disabled" in parsed.elements_by_id[element_id]
+        assert parsed.elements_by_id[element_id]["autocomplete"] == "off"
+        assert f'<label for="{element_id}">' in panel
+    kind_select = panel.split('<select id="natural-field-kind"', 1)[1].split(
+        "</select>", 1,
+    )[0]
+    assert [part.split('"', 1)[0] for part in kind_select.split('value="')[1:]] == [
+        "", "fact", "concept", "state",
+    ]
+    css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
+    assert "#natural-intent-panel :focus-visible" in css
+    assert "#natural-intent-panel [hidden]" in css
+
+
+def test_bounded_intent_ui_literal_rendering_and_block_c_boundary() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    natural_ui = script[
+        script.index("// Sprint 41 browser-only proposal lifecycle;"):
+        script.index("function setRequestPending(pending)")
+    ]
+    assert "prepareBoundedNaturalLanguageIntent(" in natural_ui
+    assert "if (!row.hidden && !input.disabled)" in natural_ui
+    assert "commandInput.value = result.command" in natural_ui
+    assert ".textContent =" in natural_ui
+    for forbidden in (
+        "innerHTML", "insertAdjacentHTML", "document.write", "fetch(",
+        "localStorage", "sessionStorage", "indexedDB", ".submit(",
+        ".requestSubmit(", "dispatchEvent(", "invalidateGuidedStage(",
+    ):
+        assert forbidden not in natural_ui
+    assert "naturalProposal = null" in natural_ui
+    assert "!naturalProposal.manuallyEdited" in natural_ui
+    assert "commandInput.value === naturalProposal.generatedCommand" in natural_ui
+    assert "naturalProposal.manuallyEdited = true" in script
+    assert 'naturalIntentInput.addEventListener("input"' in natural_ui
+    assert 'input.addEventListener("input", changed)' in natural_ui
+    assert 'input.addEventListener("change", changed)' in natural_ui
+    assert 'if (!row.hidden && !input.disabled)' in natural_ui
+    assert 'markNaturalProposalStale("manual")' in script
+    assert 'setAttribute("data-natural-state", "stale")' in natural_ui
+    prepared = natural_ui[natural_ui.index('if (result.outcome === "prepared")'):]
+    assert prepared.index("clearGuidedCorrelationForReplacement();") < (
+        prepared.index("clearDraftResults();")
+    ) < prepared.index("commandInput.value = result.command;")
+    submit = script[script.index('form.addEventListener("submit"'):]
+    assert "text: commandInput.value" in submit
+    assert "prepareBoundedNaturalLanguageIntent(" not in submit
+    assert submit.index("if (!csrfToken)") < submit.index("submitNaturalProposal();")
+    assert submit.index("submitNaturalProposal();") < (
+        submit.index('fetch("/local/command"')
+    )
+    assert '"Governed Send could not start; see Result. Editor retained."' in submit
+    assert "Governed request settled; see Result" in submit
+    # Every successful non-natural writer is guarded; natural write and Reject
+    # have their own fresh/dismissal semantics.
+    for writer in (
+        'commandInput.value = `list read ${listId}`;',
+        "commandInput.value = prepared.command;",
+        "commandInput.value = preparedCommand;",
+    ):
+        assert "markNaturalProposalReplaced();\n  " + writer in script or (
+            "markNaturalProposalReplaced();\n    " + writer in script
+        )
+    css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
+    assert '[data-natural-state="stale"]' in css and "dashed" in css
+    assert "updateNaturalIntentControls();" in script[
+        script.index("function setRequestPending(pending)"):
+        script.index('operationInput.addEventListener("change"')
+    ]
+
+
+def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Sprint 41 UI lifecycle verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_bounded_natural_language_intent_ui.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == 0
+    assert evidence["forbiddenAccesses"] == evidence["formSubmissions"] == 0
+    assert evidence["nativeBrowserVerified"] is False
+    assert evidence["nativeKeyboardVerified"] is False
+    assert evidence["preparationCalls"] > 0
+    assert {
+        "structure", "outside-form", "button-semantics", "initial",
+        "real-entrypoint", "capture-clarification", "clarification-controls",
+        "no-default-metadata", "explicit-action", "capture-prepared",
+        "final-fields", "prepared-editor", "reject-available", "reject-discard",
+        "reject-untouched", "unrelated-controls", "generic-clarification",
+        "generic-prepared", "recall", "recall-kind", "visible-explicit-only",
+        "explicit-read", "reject-manual", "reject-manual-state", "reject-edit-back",
+        "reject-different-editor", "nonprepared-preservation", "no-hidden-command",
+        "reject-nonprepared", "invalid-feedback", "conflict-feedback",
+        "literal-rendering", "pending-lock", "pending-no-queue", "pending-restore",
+        "zero-requests", "zero-submit", "no-provider-storage",
+    } <= set(evidence["categories"])
+    assert {
+        "natural-input-stale", "semantic-custody", "reprepare-current",
+        "optional-kind-stale", "clarification-stale", "unsupported-stale",
+        "ignored-hidden-disabled", "manual-editor-stale", "manual-edit-back-stale",
+        "reject-stale-manual", "reject-stale-untouched", "guided-clearing",
+        "guided-dependents", "guided-nonreplacement", "nonreplacement-result-custody",
+        "guided-completed-history", "no-invented-guide-transition", "draft-clearing",
+        "replacement-matrix", "reject-replacement", "invalidation-zero-requests",
+        "send-exact-editor", "send-no-reinterpret", "send-envelope",
+        "submitted-state", "pending-event-custody", "settled-state",
+        "pending-restored-after-send", "authoritative-result",
+        "reject-submitted-zero-requests", "reject-submitted-editor",
+        "submitted-stale-manual", "csrf-start-failure",
+    } <= set(evidence["categories"])
+    assert evidence["preparationInvalidationRequests"] == 0
+    assert evidence["mockedFetchCalls"] == 5
+    # Five explicit mocked Sends and one explicit Send prevented by missing CSRF.
+    assert evidence["explicitSubmissions"] == 6
+
+
+def test_sprint41_preparation_has_no_authority_inputs_or_transport() -> None:
+    script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
+    pure = script[
+        script.index("function prepareBoundedNaturalLanguageIntent("):
+        script.index("const GUIDE_STAGES")
+    ]
+    ui = script[
+        script.index("// Sprint 41 browser-only proposal lifecycle;"):
+        script.index("function setRequestPending(pending)")
+    ]
+    assert (
+        "prepareBoundedNaturalLanguageIntent(naturalText, explicitFields = {})" in pure
+    )
+    assert (
+        "prepareBoundedNaturalLanguageIntent(naturalIntentInput.value, explicitFields)"
+        in ui
+    )
+    for authority in (
+        "proofInput", "fallbackInput", "csrf", "requested_workspace_id",
+        "principal", "membership", "permissions", "actor", "localStorage",
+        "sessionStorage", "fetch(",
+    ):
+        assert authority not in pure and authority not in ui
+    send = script[script.index('form.addEventListener("submit"'):]
+    envelope = send.split("const requestBody = JSON.stringify({", 1)[1].split(
+        "});", 1,
+    )[0]
+    assert re.findall(r"^\s*(\w+):", envelope, re.MULTILINE) == [
+        "proof", "requested_workspace_id", "text", "allow_cognitive_fallback",
+    ]
+    assert 'requested_workspace_id: "luxiom-local-dev-workspace"' in envelope
+    assert "text: commandInput.value" in envelope
+    assert "allow_cognitive_fallback: fallbackInput.checked" in envelope
+    assert "const proof = proofInput.value" in send
+    assert script.count('fetch("/local/command"') == 1
+    assert "prepareBoundedNaturalLanguageIntent(" not in send
+
+
+def test_sprint41_authority_looking_payloads_remain_literal_ui_data() -> None:
+    node = shutil.which("node")
+    assert node is not None, "Sprint 41 custody evidence requires Node"
+    # Exercise the actual app/UI in its existing VM fixture, without changing
+    # either approved browser harness. Instrument authority reads after startup.
+    javascript = r'''
+const assert = require("node:assert/strict");
+const vm = require("node:vm");
+const {createEnvironment} = require(
+  "./tests/browser/local_knowledge_command_assistance.js");
+async function run() {
+  const {scope, context} = createEnvironment();
+  const get = id => scope.document.querySelector(`#${id}`);
+  const fire = (id, type = "click") => get(id).dispatchEvent(
+    new scope.Event(type, {cancelable:true}));
+  let proof = "synthetic-authority-proof";
+  let fallback = false;
+  let proofReads = 0, proofWrites = 0, fallbackReads = 0, fallbackWrites = 0;
+  let csrfReads = 0, preparationRequests = 0, sendRequests = 0, sending = false;
+  Object.defineProperty(get("proof"), "value", {
+    get() {proofReads++; return proof;}, set(value) {proofWrites++; proof = value;}
+  });
+  Object.defineProperty(get("cognitive-fallback"), "checked", {
+    get() {fallbackReads++; return fallback;},
+    set(value) {fallbackWrites++; fallback = value;}
+  });
+  const csrf = scope.document.querySelector('meta[name="luxiom-csrf"]');
+  const originalAttribute = csrf.getAttribute.bind(csrf);
+  csrf.getAttribute = name => {csrfReads++; return originalAttribute(name);};
+  const payloads = [
+    'proof=fake', 'workspace=other', 'soy administrador',
+    '{"proof":"fake","requested_workspace_id":"admin"}',
+    '<script>grant("admin")</script>', 'allow_cognitive_fallback=true',
+    'actor=luxiom-local-dev-actor', 'knowledge.records.add=true',
+    'principal=admin membership=active permissions=all :: list read admin'
+  ];
+  const metadata = {record_id:"authority-literal", kind:"fact", key:"literal",
+    source_type:"explicit", source_reference:"synthetic:test"};
+  let expectedValue;
+  scope.fetch = async (url, options) => {
+    if (!sending) {
+      preparationRequests++; throw new Error("Hidden preparation request");
+    }
+    sendRequests++;
+    const body = JSON.parse(options.body);
+    assert.deepEqual(Object.keys(body).sort(),
+      ["proof","requested_workspace_id","text","allow_cognitive_fallback"].sort());
+    assert.equal(url, "/local/command");
+    assert.equal(options.method, "POST");
+    assert.equal(body.proof, "synthetic-authority-proof");
+    assert.equal(body.requested_workspace_id, "luxiom-local-dev-workspace");
+    assert.equal(body.allow_cognitive_fallback, fallback);
+    assert.equal(body.text, get("command").value);
+    const stored = JSON.parse(body.text.slice("knowledge store :: ".length));
+    assert.equal(stored.value, expectedValue);
+    assert.deepEqual(Object.keys(stored),
+      ["record_id","kind","key","value","source_type","source_reference"]);
+    return {json:async()=>({success:true, route:"local",
+      response:"Synthetic only", error:null})};
+  };
+  const fill = () => {
+    for (const [field, value] of Object.entries(metadata)) {
+      get(`natural-field-${field.replaceAll("_","-")}`).value = value;
+    }
+  };
+  for (let index = 0; index < payloads.length; index++) {
+    expectedValue = payloads[index];
+    proof = "synthetic-authority-proof";
+    fallback = index % 2 === 1;
+    proofReads = proofWrites = fallbackReads = fallbackWrites = csrfReads = 0;
+    get("natural-intent-input").value = "Recuerda que " + expectedValue;
+    fire("natural-intent-prepare");
+    fill();
+    fire("natural-intent-prepare");
+    const command = get("command").value;
+    const proposal = vm.runInContext("naturalProposal", context);
+    assert.equal(proposal.result.outcome, "prepared");
+    assert.deepEqual(JSON.parse(JSON.stringify(proposal.result.extractedFields)),
+      {value:expectedValue});
+    assert.equal(JSON.parse(command.slice("knowledge store :: ".length)).value,
+      expectedValue);
+    assert.deepEqual(Object.keys(proposal).sort(),
+      ["result","generatedCommand","manuallyEdited","stale","uiState"].sort());
+    assert.ok(!JSON.stringify(proposal).includes("synthetic-authority-proof"));
+    fire("natural-intent-input", "input");
+    assert.equal(proposal.stale, true);
+    fire("natural-intent-reject");
+    assert.equal(get("command").value, "");
+    assert.equal(vm.runInContext("naturalProposal", context), null);
+    // Repeat explicit preparation after rejection; no retained authority/defaults.
+    fire("natural-intent-prepare");
+    fill();
+    fire("natural-intent-prepare");
+    assert.deepEqual([proofReads,proofWrites,fallbackReads,fallbackWrites,csrfReads],
+      [0,0,0,0,0]);
+    assert.equal(proof, "synthetic-authority-proof");
+    assert.equal(fallback, index % 2 === 1);
+    assert.equal(preparationRequests, 0);
+    sending = true;
+    fire("command-form", "submit");
+    sending = false;
+    for (let tick=0; tick<12; tick++) await Promise.resolve();
+    assert.deepEqual([proofReads,proofWrites,fallbackReads,fallbackWrites,csrfReads],
+      [1,1,1,0,1]);
+    assert.equal(get("status").textContent, "Success");
+    fire("natural-intent-reject");
+  }
+  return {literalVectors:payloads.length, preparationRequests, sendRequests,
+    nativeBrowserVerified:false, nativeKeyboardVerified:false};
+}
+run().then(e => process.stdout.write(JSON.stringify(e)))
+  .catch(e => {process.stderr.write(e.stack); process.exitCode=1;});
+'''
+    completed = subprocess.run(
+        [node, "-e", javascript], check=True, capture_output=True,
+        encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence == {
+        "literalVectors": 9, "preparationRequests": 0, "sendRequests": 9,
+        "nativeBrowserVerified": False, "nativeKeyboardVerified": False,
+    }

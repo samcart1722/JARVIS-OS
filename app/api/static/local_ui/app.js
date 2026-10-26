@@ -50,6 +50,198 @@ function prepareKnowledgeCommand(operation, fields) {
   return command;
 }
 
+// Sprint 41 Block A: callable preparation only; no browser state or authority.
+function boundedKeywordText(text) {
+  return text.replace(/[A-ZÁÉÍÓÚÜÑ]/gu, (letter) =>
+    String.fromCodePoint(letter.codePointAt(0) + 32));
+}
+
+function boundedHasSurrogate(text) {
+  return Array.from(text).some((character) => {
+    const point = character.codePointAt(0);
+    return point >= 0xd800 && point <= 0xdfff;
+  });
+}
+
+function boundedStandalone(text, words) {
+  return new RegExp(`(^|[^\\p{L}\\p{N}])(${words})(?=$|[^\\p{L}\\p{N}])`, "u")
+    .test(text);
+}
+
+function boundedMultipleActions(text) {
+  // Only balanced, non-nested spans suppress the lexical guard. Unmatched
+  // openers remain ordinary text. Odd backslash counts escape ASCII quotes.
+  const spans = [];
+  let opener = null;
+  let start = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"') {
+      let slashes = 0;
+      for (let at = index - 1; at >= 0 && text[at] === "\\"; at -= 1) slashes += 1;
+      if (slashes % 2) continue;
+    }
+    if (opener === null && (character === '"' || character === "“")) {
+      opener = character;
+      start = index;
+    } else if ((opener === '"' && character === '"')
+      || (opener === "“" && character === "”")) {
+      spans.push([start, index]);
+      opener = null;
+    }
+  }
+  const pairs = /( y también | y | luego | después | entonces |; |\. |! |\? |\r\n[ \t]*|[\r\n][ \t]*)(recuerda|guarda|anota|agrega|añade|agrégalo|añádelo|muéstrame|¿?qué) /gu;
+  return Array.from(text.matchAll(pairs)).some((match) =>
+    !spans.some(([left, right]) => match.index <= right
+      && match.index + match[0].length > left));
+}
+
+// Recognition retains original slices; keyword mapping is length preserving.
+function recognizeBoundedNaturalLanguageIntent(text) {
+  const compared = boundedKeywordText(text);
+  const prefixes = [
+    ["recuerda que", "CAPTURE_KNOWLEDGE", "value"],
+    ["guarda que", "CAPTURE_KNOWLEDGE", "value"],
+    ["anota que", "CAPTURE_KNOWLEDGE", "value"],
+    ["qué te dije sobre", "RECALL_KNOWLEDGE", "key"],
+    ["qué sabes de", "RECALL_KNOWLEDGE", "key"],
+    ["qué hay en la lista", "READ_FOLLOW_UP", "list_id"],
+    ["muéstrame la lista", "READ_FOLLOW_UP", "list_id"],
+  ];
+  const question = compared.startsWith("¿") ? text.slice(1) : text;
+  const unwrapped = question.endsWith("?") ? question.slice(0, -1) : question;
+  for (const [prefix, intent, field] of prefixes) {
+    const candidate = prefix.startsWith("qué") ? unwrapped : text;
+    const lower = boundedKeywordText(candidate);
+    if (lower === prefix || lower.startsWith(prefix + " ")) {
+      const payload = candidate.slice(prefix.length + 1);
+      if (intent === "RECALL_KNOWLEDGE"
+        && /^[¿?]|[¿?]$/u.test(stripKnowledgeWhitespace(payload))) {
+        return null;
+      }
+      return { intent, extractedFields: { [field]: payload } };
+    }
+  }
+  if (boundedKeywordText(unwrapped) === "qué tengo pendiente") {
+    return { intent: "READ_FOLLOW_UP", extractedFields: {} };
+  }
+  for (const prefix of ["agrega ", "añade "]) {
+    if (!compared.startsWith(prefix)) continue;
+    const body = text.slice(prefix.length);
+    const lower = boundedKeywordText(body);
+    const separators = Array.from(lower.matchAll(/ a la lista | a mis pendientes$/gu));
+    // Outer strip removes the final separator space for an empty list ID.
+    if (lower.endsWith(" a la lista")) {
+      separators.push({ index: lower.length - " a la lista".length, 0: " a la lista" });
+    }
+    if (separators.length > 1) return { reason: "ambiguous_structure" };
+    if (separators.length !== 1) continue;
+    const separator = separators[0];
+    const item = body.slice(0, separator.index);
+    if (separator[0] === " a mis pendientes") {
+      if (separator.index + separator[0].length !== body.length) continue;
+      return { intent: "ADD_FOLLOW_UP", extractedFields: { item } };
+    }
+    return { intent: "ADD_FOLLOW_UP", extractedFields: {
+      item, list_id: body.slice(separator.index + separator[0].length),
+    } };
+  }
+  return null;
+}
+
+function prepareBoundedNaturalLanguageIntent(naturalText, explicitFields = {}) {
+  const result = {
+    outcome: "unsupported", intent: null, extractedFields: {}, fields: {},
+    missingFields: [], invalidFields: [], conflictingFields: [],
+    reason: null, clarification: null, command: null,
+  };
+  const unsupported = (reason) => ({
+    ...result, outcome: "unsupported", intent: null, command: null,
+    missingFields: [], invalidFields: [], conflictingFields: [], reason,
+    clarification: "Solicitud fuera del contrato acotado; no se preparó un comando.",
+  });
+  if (typeof naturalText !== "string" || boundedHasSurrogate(naturalText)
+    || Array.from(naturalText).length > 8192
+    || KNOWLEDGE_WHITESPACE_ONLY.test(naturalText)) return unsupported("invalid_input");
+  const text = stripKnowledgeWhitespace(naturalText);
+  const lower = boundedKeywordText(text);
+  const candidate = recognizeBoundedNaturalLanguageIntent(text);
+  if (boundedStandalone(lower, "si|cuando") && candidate?.intent) {
+    return unsupported("conditional_request");
+  }
+  // Anchored recognition excludes top-level negation, quotes and examples.
+  if (/^(no|si|cuando)(?=$|[^\p{L}\p{N}])/u.test(lower)
+    || /^["“]/u.test(lower) || lower.startsWith("por ejemplo:")) {
+    return unsupported("unsupported_request");
+  }
+  if (boundedMultipleActions(lower)) return unsupported("multiple_actions");
+  if (boundedStandalone(lower, "esto|eso|aquello|ello|él|ella|ellos|ellas")) {
+    return unsupported("context_reference");
+  }
+  if (!candidate?.intent) return unsupported(candidate?.reason || "unsupported_request");
+  result.intent = candidate.intent;
+  result.extractedFields = candidate.extractedFields;
+  const orders = {
+    CAPTURE_KNOWLEDGE: KNOWLEDGE_FIELDS.store,
+    RECALL_KNOWLEDGE: ["key", "kind"],
+    ADD_FOLLOW_UP: ["list_id", "item"],
+    READ_FOLLOW_UP: ["list_id"],
+  };
+  const ownFields = explicitFields !== null && typeof explicitFields === "object"
+    ? explicitFields : {};
+  for (const field of orders[result.intent]) {
+    const extracted = Object.hasOwn(result.extractedFields, field)
+      ? stripKnowledgeWhitespace(result.extractedFields[field]) : "";
+    const supplied = Object.hasOwn(ownFields, field) ? ownFields[field] : "";
+    const explicit = typeof supplied === "string" ? stripKnowledgeWhitespace(supplied) : supplied;
+    if (typeof explicit !== "string") {
+      result.invalidFields.push(field);
+      continue;
+    }
+    if (extracted && explicit && extracted !== explicit) {
+      result.conflictingFields.push(field);
+      continue;
+    }
+    const value = explicit || extracted;
+    if (!value) {
+      if (!(result.intent === "RECALL_KNOWLEDGE" && field === "kind")) {
+        result.missingFields.push(field);
+      }
+      continue;
+    }
+    const whitespace = /[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/u;
+    if (boundedHasSurrogate(value)
+      || (field === "kind" && !["fact", "concept", "state"].includes(value))
+      || (field === "list_id" && (whitespace.test(value) || value.includes("::")))
+      || (field === "item" && value.includes("|"))) {
+      result.invalidFields.push(field);
+      continue;
+    }
+    result.fields[field] = value;
+  }
+  if (result.missingFields.length || result.invalidFields.length || result.conflictingFields.length) {
+    return { ...result, outcome: "clarification_required",
+      clarification: "Completa o corrige los campos indicados; no se preparó un comando." };
+  }
+  try {
+    if (result.intent === "CAPTURE_KNOWLEDGE") {
+      result.command = prepareKnowledgeCommand("store", result.fields);
+    } else if (result.intent === "RECALL_KNOWLEDGE") {
+      result.command = prepareKnowledgeCommand("find", { ...result.fields, kind: result.fields.kind || "" });
+    } else if (result.intent === "ADD_FOLLOW_UP") {
+      result.command = prepareFollowUpCommand(result.fields.list_id, result.fields.item).command;
+    } else {
+      result.command = `list read ${result.fields.list_id}`;
+    }
+    if (boundedHasSurrogate(result.command) || Array.from(result.command).length > 8192) {
+      return unsupported("unrepresentable");
+    }
+  } catch {
+    return unsupported("unrepresentable");
+  }
+  return { ...result, outcome: "prepared" };
+}
+
 const GUIDE_STAGES = Object.freeze([
   "capture",
   "recall",
@@ -909,6 +1101,150 @@ function updateAssistanceFields() {
   }
 }
 
+// Sprint 41 browser-only proposal lifecycle; execution remains governed by Send.
+const naturalIntentInput = document.querySelector("#natural-intent-input");
+const naturalPrepareButton = document.querySelector("#natural-intent-prepare");
+const naturalRejectButton = document.querySelector("#natural-intent-reject");
+const naturalIntentStatus = document.querySelector("#natural-intent-status");
+const naturalIntentResult = document.querySelector("#natural-intent-result");
+const naturalFieldNames = [
+  "record_id", "kind", "key", "value", "source_type", "source_reference", "list_id", "item",
+];
+const naturalFields = Object.fromEntries(naturalFieldNames.map((field) => {
+  const id = `natural-field-${field.replaceAll("_", "-")}`;
+  return [field, { input: document.querySelector(`#${id}`), row: document.querySelector(`#${id}-row`) }];
+}));
+const naturalOutputs = Object.fromEntries([
+  "outcome", "detected-intent", "extracted-fields", "final-fields", "missing-fields",
+  "invalid-fields", "conflicting-fields", "reason", "clarification",
+].map((name) => [name, document.querySelector(`#natural-intent-${name}`)]));
+let naturalProposal = null;
+
+function markNaturalProposalStale(cause) {
+  if (requestPending || naturalProposal === null) return;
+  naturalProposal.stale = true;
+  naturalProposal.uiState = "stale";
+  naturalIntentResult.setAttribute("data-natural-state", "stale");
+  const reasons = {
+    inputs: "Inputs changed.",
+    manual: "The command editor was manually edited.",
+    replacement: "Another preparation replaced the command editor.",
+  };
+  naturalIntentStatus.textContent = "Proposal is stale. " + reasons[cause]
+    + " Re-Interpret / Prepare is required to make the proposal current."
+    + " Editor retained; Send still uses the exact visible editor text.";
+}
+
+function markNaturalProposalReplaced() {
+  if (naturalProposal?.result.outcome === "prepared") {
+    markNaturalProposalStale("replacement");
+  }
+}
+
+function submitNaturalProposal() {
+  if (naturalProposal === null) return;
+  if (naturalProposal.result.outcome === "prepared"
+    && commandInput.value !== naturalProposal.generatedCommand) markNaturalProposalReplaced();
+  naturalProposal.uiState = "submitted";
+  naturalIntentResult.setAttribute("data-natural-state", "submitted");
+  naturalIntentStatus.textContent = naturalProposal.stale || naturalProposal.manuallyEdited
+    ? "The stale/manual editor text was submitted exactly as visible through governed Send. See Result for the authoritative outcome."
+    : "The exact visible editor was submitted through governed Send. Preparation does not determine the outcome; see Result.";
+}
+
+naturalIntentInput.addEventListener("input", () => markNaturalProposalStale("inputs"));
+for (const { input, row } of Object.values(naturalFields)) {
+  const changed = () => {
+    if (!row.hidden && !input.disabled) markNaturalProposalStale("inputs");
+  };
+  input.addEventListener("input", changed);
+  input.addEventListener("change", changed);
+}
+
+function updateNaturalIntentControls() {
+  naturalIntentInput.disabled = requestPending;
+  naturalPrepareButton.disabled = requestPending;
+  naturalRejectButton.disabled = requestPending || naturalProposal === null;
+  for (const { input, row } of Object.values(naturalFields)) {
+    input.disabled = requestPending || row.hidden;
+  }
+}
+
+function showNaturalClarificationFields(result) {
+  const needed = new Set(result?.outcome === "clarification_required"
+    ? [...result.missingFields, ...result.invalidFields, ...result.conflictingFields] : []);
+  if (result?.intent === "RECALL_KNOWLEDGE") needed.add("kind");
+  for (const [field, { input, row }] of Object.entries(naturalFields)) {
+    row.hidden = !needed.has(field);
+    if (row.hidden) input.value = "";
+  }
+  updateNaturalIntentControls();
+}
+
+function renderNaturalIntentResult(result) {
+  naturalIntentResult.hidden = false;
+  naturalIntentResult.setAttribute("data-natural-state", "current");
+  naturalOutputs.outcome.textContent = result.outcome;
+  naturalOutputs["detected-intent"].textContent = result.intent || "—";
+  naturalOutputs["extracted-fields"].textContent = JSON.stringify(result.extractedFields, null, 2);
+  naturalOutputs["final-fields"].textContent = JSON.stringify(result.fields, null, 2);
+  naturalOutputs["missing-fields"].textContent = result.missingFields.join(", ") || "—";
+  naturalOutputs["invalid-fields"].textContent = result.invalidFields.join(", ") || "—";
+  naturalOutputs["conflicting-fields"].textContent = result.conflictingFields.join(", ") || "—";
+  naturalOutputs.reason.textContent = result.reason || "—";
+  naturalOutputs.clarification.textContent = result.clarification || "";
+  const messages = {
+    prepared: "Prepared for review. Review or edit the command; explicit Send remains required.",
+    clarification_required: "Clarification required. Complete the indicated fields and Interpret / Prepare again. No new command prepared.",
+    unsupported: "Unsupported by the bounded preparer. No new command prepared.",
+  };
+  naturalIntentStatus.textContent = messages[result.outcome];
+  showNaturalClarificationFields(result);
+}
+
+naturalPrepareButton.addEventListener("click", () => {
+  if (requestPending) return;
+  const explicitFields = {};
+  for (const [field, { input, row }] of Object.entries(naturalFields)) {
+    if (!row.hidden && !input.disabled) explicitFields[field] = input.value;
+  }
+  const result = prepareBoundedNaturalLanguageIntent(naturalIntentInput.value, explicitFields);
+  if (result.outcome === "prepared") {
+    clearGuidedCorrelationForReplacement();
+    clearDraftResults();
+    commandInput.value = result.command;
+    commandState.textContent = "Natural-language command prepared. Review or edit; explicit Send remains required.";
+    updatePreparationButton();
+  }
+  naturalProposal = {
+    result, generatedCommand: result.command, manuallyEdited: false,
+    stale: false, uiState: "current",
+  };
+  renderNaturalIntentResult(result);
+});
+
+naturalRejectButton.addEventListener("click", () => {
+  if (requestPending || naturalProposal === null) return;
+  if (naturalProposal.result.outcome === "prepared") {
+    if (!naturalProposal.manuallyEdited && commandInput.value === naturalProposal.generatedCommand) {
+      commandInput.value = "";
+      commandState.textContent = "Natural-language proposal rejected. No command prepared.";
+    } else {
+      commandState.textContent = "Manual text retained. Send uses the exact text in this editor.";
+    }
+  }
+  naturalProposal = null;
+  naturalIntentResult.hidden = true;
+  naturalIntentResult.setAttribute("data-natural-state", "inactive");
+  for (const output of Object.values(naturalOutputs)) output.textContent = "";
+  for (const { input } of Object.values(naturalFields)) input.value = "";
+  showNaturalClarificationFields(null);
+  naturalIntentStatus.textContent = "Proposal rejected. No natural-language proposal is active.";
+  updatePreparationButton();
+});
+
+showNaturalClarificationFields(null);
+
 function setRequestPending(pending) {
   requestPending = pending;
   sendButton.disabled = pending;
@@ -926,6 +1262,7 @@ function setRequestPending(pending) {
   }
   updateAssistanceFields();
   updateFollowUpControls();
+  updateNaturalIntentControls();
 }
 
 operationInput.addEventListener("change", () => {
@@ -952,6 +1289,11 @@ assistance.addEventListener("input", (event) => {
 
 commandInput.addEventListener("input", () => {
   if (requestPending) return;
+  // Sticky even after edit-back-to-original: the visible editor is authoritative.
+  if (naturalProposal?.result.outcome === "prepared") {
+    naturalProposal.manuallyEdited = true;
+    markNaturalProposalStale("manual");
+  }
   if (["follow-up", "verify"].includes(guidedState.correlation?.stage)) {
     invalidateGuidedStage(guidedState.correlation.stage);
   }
@@ -2543,6 +2885,7 @@ verifyPrepareButton.addEventListener("click", () => {
   clearGuidedCorrelationForReplacement();
   clearDraftResults();
   const { listId, expectedItem } = guidedState.retainedFollowUp;
+  markNaturalProposalReplaced();
   commandInput.value = `list read ${listId}`;
   preparationError.textContent = "";
   preparationStatus.textContent = "Verification prepared. No operation has been executed.";
@@ -2595,6 +2938,7 @@ followUpPrepareButton.addEventListener("click", () => {
       followUpListInput.value, followUpItemInput.value,
     );
     clearGuidedCorrelationForReplacement();
+    markNaturalProposalReplaced();
     commandInput.value = prepared.command;
     preparationError.textContent = "";
     preparationStatus.textContent = "Follow-up command prepared. No operation has been executed.";
@@ -2622,6 +2966,7 @@ function prepareEditorCommand(operation, fields) {
   try {
     const preparedCommand = prepareKnowledgeCommand(operation, fields);
     clearGuidedCorrelationForReplacement();
+    markNaturalProposalReplaced();
     commandInput.value = preparedCommand;
     preparationStatus.textContent = `${operation === "read" ? "READ command" : "Command"} prepared. ${replaced ? "Previous editor command replaced. " : ""}No operation has been executed.`;
     commandState.textContent = "Review or edit the prepared command, then explicitly Send.";
@@ -2675,6 +3020,9 @@ form.addEventListener("submit", async (event) => {
       "The request could not start. The guided step remains incomplete.",
     );
     renderLocalFailure();
+    if (naturalProposal !== null) {
+      naturalIntentStatus.textContent = "Governed Send could not start; see Result. Editor retained.";
+    }
     return;
   }
 
@@ -2687,6 +3035,7 @@ form.addEventListener("submit", async (event) => {
   });
   proofInput.value = "";
 
+  submitNaturalProposal();
   setRequestPending(true);
 
   try {
@@ -2708,5 +3057,8 @@ form.addEventListener("submit", async (event) => {
     renderLocalFailure();
   } finally {
     setRequestPending(false);
+    if (naturalProposal?.uiState === "submitted") {
+      naturalIntentStatus.textContent = "Governed request settled; see Result for the authoritative execution outcome.";
+    }
   }
 });
