@@ -1,6 +1,31 @@
 # Current State
 
-## Current governed release state — Sprint 39
+## Current planning state - Sprint 41
+
+Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1:
+PLANNING STARTED; SCOPE SELECTED; CONTRACT + BASELINE AUTHORIZED ONLY;
+FEATURE IMPLEMENTATION NOT YET AUTHORIZED. Candidate review, freeze and separate
+implementation authorization must precede feature work. This is the first
+sprint explicitly on the LUXIOM Demo v1 product-usefulness path.
+
+The selected candidate prepares one knowledge/list operation from bounded
+Spanish input, using CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP or
+READ_FOLLOW_UP. It is not implemented. Browser preparation must be deterministic
+and model-free, with zero application requests, repository reads, persistence,
+provider/readiness/fallback calls and authorization decisions. Exact editor text
+at explicit Send remains authoritative; mandatory fields, provenance and list
+destinations cannot be silently invented. Existing gateway correlation,
+workspace/membership/permission checks and Sprint 40 guided workflow remain.
+No new backend capability, endpoint, permission or schema is needed.
+
+Sprint 40 remains FORMALLY CLOSED, MERGED, TAGGED, BACKED UP, RECOVERY VERIFIED,
+with post-closure branch cleanup COMPLETE and canonical truth FULLY SYNCHRONIZED
+at `4f3de7b56001340aba1f39be812eb9b630a07960`. Its immutable release remains
+`governed-sprint-40-complete` at `3a3b607d94e359a1410f29da894882424fadb6f6`.
+Historical Sprint 39 release and Sprint 40 planning checkpoints follow;
+their then-current authorization statements do not describe Sprint 41.
+
+## Historical Sprint 39 release and Sprint 40 planning checkpoint
 
 Sprint 39 — `Authorized Local Knowledge Browse Continuation v1` — is FORMALLY
 CLOSED. Implementation PR #62 merged through normal two-parent merge

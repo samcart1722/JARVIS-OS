@@ -1,5 +1,23 @@
 # Runtime Architecture
 
+## Sprint 41 selected preparation boundary - not implemented
+
+Planning is STARTED and scope SELECTED for Governed Bounded Natural-Language
+Intent Preparation v1. Contract + baseline lifecycle only is AUTHORIZED;
+FEATURE IMPLEMENTATION IS NOT YET AUTHORIZED.
+The narrowed candidate belongs in pure browser assistance before the existing
+editor. Interpret/Prepare must make zero requests, repository reads, persistence,
+provider/readiness calls, cognitive fallback calls or authorization decisions.
+No endpoint, capability, schema or permission is added.
+The existing deterministic parser and typed knowledge/list intents remain the
+execution contracts. The application gateway owns semantic intent/result
+correlation; authentication, mapping, workspace, membership and action permission
+remain downstream of explicit Send. Send uses exact current editor text.
+Local model infrastructure exists, but the interactive runtime has reasoning
+disabled and this candidate requires no model. The Sprint 40 guided workflow
+must coexist with preparation without fabricated results or retained authority.
+This section records scope constraints, not a runtime change.
+
 ## Sprint 38 governed local knowledge browse flow
 
 Authorized local knowledge browse v1 adds explicit `knowledge browse :: {}`

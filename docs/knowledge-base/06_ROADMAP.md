@@ -1,6 +1,32 @@
 # Roadmap
 
-## Current boundary — Sprint 40 planning
+## Current boundary - Sprint 41 planning
+
+Sprint 40 is FORMALLY CLOSED with post-closure cleanup COMPLETE and canonical
+truth FULLY SYNCHRONIZED at `4f3de7b56001340aba1f39be812eb9b630a07960`;
+its release/tag/backup/recovery remain historical and immutable.
+
+Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1 is SELECTED.
+PLANNING STARTED; CONTRACT + BASELINE AUTHORIZED ONLY; FEATURE IMPLEMENTATION
+NOT YET AUTHORIZED. Review of a behavior-contract candidate, freeze and separate
+explicit implementation authorization are prerequisites to feature work.
+This is the first sprint explicitly on the LUXIOM Demo v1 product-usefulness path.
+
+Objective: prepare one existing governed operation from bounded everyday Spanish,
+with visible intent, fields, missing information and an editable exact command.
+Families are CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP and READ_FOLLOW_UP.
+The selected approach is deterministic bounded browser preparation, model-free,
+with zero requests, persistence, repository reads, provider/readiness/fallback
+calls or authorization decisions before explicit Send. Existing editor authority,
+gateway, checks, projections and Sprint 40 guided workflow remain preserved.
+The capability is not implemented; no backend endpoint/schema/permission is added.
+
+Possible Sprint 42 successor: Local Model-Assisted Intent Preparation v1,
+candidate only, NOT AUTHORIZED and not a scope commitment. Its possible purpose
+would be broader interpretation coverage under the same preparation/execution
+boundary; no model use is mandatory or enabled by this planning baseline.
+
+## Historical boundary - Sprint 40 planning
 
 Sprint 39 — `Authorized Local Knowledge Browse Continuation v1` — is FORMALLY
 CLOSED. PR #62, release-truth PR #63 and formal-closure PR #64 are merged.

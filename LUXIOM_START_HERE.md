@@ -1,6 +1,45 @@
 # Luxiom — Start Here
 
-## Current release truth - Sprint 40
+## Current planning truth - Sprint 41
+
+Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1.
+PLANNING STARTED; SCOPE SELECTED; CONTRACT + BASELINE AUTHORIZED ONLY.
+The user explicitly authorized planning-baseline synchronization and the
+behavior-contract preparation/freeze lifecycle. FEATURE IMPLEMENTATION IS NOT
+YET AUTHORIZED; candidate review, freeze and separate explicit implementation
+authorization must precede feature work.
+
+Objective: allow a user to express one bounded everyday intent in Spanish and
+have LUXIOM deterministically prepare one existing governed knowledge or list
+operation, visible and editable before explicit Send, without granting authority
+or executing anything during interpretation. Families: CAPTURE_KNOWLEDGE,
+RECALL_KNOWLEDGE, ADD_FOLLOW_UP and READ_FOLLOW_UP. This is the first sprint
+explicitly on the LUXIOM Demo v1 product-usefulness path; it is not implemented.
+
+The selected strategy is DETERMINISTIC BOUNDED PREPARATION ONLY, model-free for
+Sprint 41. Pure browser preparation must perform zero application requests,
+persistence, repository reads, provider/readiness calls, cognitive fallback calls
+or authorization decisions. Exact visible editor contents at explicit Send
+remain authoritative. No mandatory field, provenance or list destination may
+be silently invented. Recall uses exact-key FIND, not semantic search.
+Existing fallback semantics and the Sprint 40 guided workflow remain preserved.
+
+The completed read-only inspection found existing deterministic interpretation,
+typed knowledge/list intents and gateway-owned semantic correlation.
+Workspace/membership/permission authority remains downstream. Local model
+infrastructure exists but is not required; the interactive runtime does not use
+that model path for this task. No backend capability, schema, endpoint or
+permission is required for the narrowed candidate; no fundamental technical
+blocker was identified. Preparation proves neither execution, persistence nor
+success and cannot execute a hidden command.
+
+Sprint 40 remains FORMALLY CLOSED, MERGED, TAGGED, BACKED UP, RECOVERY VERIFIED,
+with post-closure branch cleanup COMPLETE and canonical truth FULLY SYNCHRONIZED
+at correction merge `4f3de7b56001340aba1f39be812eb9b630a07960`.
+Its immutable identities and history below remain unchanged.
+Sprint 42 has no authorization or scope commitment.
+
+## Historical release truth - Sprint 40
 
 Guided Local Capture–Recall–Action Experience v1 implementation is complete.
 Sprint 40 is MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED.
@@ -24,9 +63,9 @@ implementation PR #67 MERGED through normal two-parent merge, post-merge
 validation on master PASS, annotated release tag created and verified,
 authoritative backup, recovery proof from the bundle, release-truth
 synchronization commit and release-truth PR #68 MERGED at the commit above.
-Sprint 41 is NOT started and is NOT authorized merely by Sprint 40 closure or
-completion of its cleanup. Sprint 41 scope remains to be selected through a
-separate governed planning lifecycle.
+At that Sprint 40 closure/cleanup checkpoint, Sprint 41 was NOT started and
+NOT authorized; its scope required a separate governed planning lifecycle.
+The subsequent explicit Sprint 41 planning authorization is recorded above.
 
 Implementation base: `3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad`.
 Implementation HEAD: `f42edd8bd0c06769eb09a01be6321c110c0520aa`.
