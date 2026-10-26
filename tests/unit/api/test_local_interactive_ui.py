@@ -1082,3 +1082,76 @@ def test_browser_casefold_matches_current_python_runtime() -> None:
         f"Python {platform.python_version()}: "
         f"{len(vectors)} casefold parity vectors PASS"
     )
+
+
+def test_bounded_intent_preparer_purity_and_real_interpreter_parity() -> None:
+    from app.cognition.local_resolution.models import (
+        FindKnowledgeRecordsQuery,
+        ReadListItemsQuery,
+        StoreKnowledgeRecordCommand,
+    )
+
+    node = shutil.which("node")
+    assert node is not None, "Node is required for Sprint 41 Block A verification"
+    completed = subprocess.run(
+        [node, "tests/browser/local_bounded_natural_language_intent_preparation.js"],
+        check=True, capture_output=True, encoding="utf-8", timeout=30,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == evidence["forbiddenAccesses"] == 0
+    assert evidence["nativeBrowserVerified"] is False
+    assert {
+        "corpus", "wrappers", "generic-add", "generic-read", "capture-metadata",
+        "no-invention", "kinds", "invalid-kind", "conflicts", "merge-trimming",
+        "blank-explicit", "own-properties", "ordered-fields", "empty-placeholders",
+        "rejection", "negation", "standalone", "list-validation", "item-validation",
+        "python-whitespace", "explicit-surrogate", "multi-action-matrix",
+        "quoted-matrix", "quote-escapes", "unlisted-guard", "literal-preservation",
+        "input-length", "command-length", "json-escape-budget", "purity",
+        "determinism", "closed-result", "serialization",
+    } <= set(evidence["categories"])
+    types = {
+        "CAPTURE_KNOWLEDGE": StoreKnowledgeRecordCommand,
+        "RECALL_KNOWLEDGE": FindKnowledgeRecordsQuery,
+        "ADD_FOLLOW_UP": AddListItemsCommand,
+        "READ_FOLLOW_UP": ReadListItemsQuery,
+    }
+    assert {vector["intent"] for vector in evidence["vectors"]} == set(types)
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint41-block-a-synthetic")
+    for vector in evidence["vectors"]:
+        command, fields = vector["command"], vector["fields"]
+        assert len(command) <= 8192
+        result = interpreter.interpret(command, workspace)
+        assert result.status.value == "interpreted", vector["intent"]
+        intent = result.intent
+        assert type(intent) is types[vector["intent"]]
+        if isinstance(intent, StoreKnowledgeRecordCommand):
+            record = intent.record
+            assert record.workspace is workspace
+            assert record.kind.value == fields["kind"]
+            for field in ("record_id", "key", "value"):
+                assert getattr(record, field) == fields[field].strip()
+            for field in ("source_type", "source_reference"):
+                assert getattr(record.provenance, field) == fields[field].strip()
+            assert list(json.loads(command.split(" :: ", 1)[1])) == [
+                "record_id", "kind", "key", "value", "source_type", "source_reference",
+            ]
+        elif isinstance(intent, FindKnowledgeRecordsQuery):
+            assert intent.key == fields["key"].strip()
+            assert (intent.kind.value if intent.kind is not None else None) == (
+                fields.get("kind")
+            )
+            assert list(json.loads(command.split(" :: ", 1)[1])) == (
+                ["key", "kind"] if "kind" in fields else ["key"]
+            )
+        elif isinstance(intent, AddListItemsCommand):
+            assert intent.list_id == fields["list_id"].strip()
+            assert intent.items == (fields["item"].strip(),)
+        else:
+            assert isinstance(intent, ReadListItemsQuery)
+            assert intent.list_id == fields["list_id"].strip()
+    print(
+        f"Sprint 41 Block A: {len(evidence['vectors'])} real interpreter vectors PASS"
+    )

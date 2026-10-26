@@ -50,6 +50,198 @@ function prepareKnowledgeCommand(operation, fields) {
   return command;
 }
 
+// Sprint 41 Block A: callable preparation only; no browser state or authority.
+function boundedKeywordText(text) {
+  return text.replace(/[A-ZÁÉÍÓÚÜÑ]/gu, (letter) =>
+    String.fromCodePoint(letter.codePointAt(0) + 32));
+}
+
+function boundedHasSurrogate(text) {
+  return Array.from(text).some((character) => {
+    const point = character.codePointAt(0);
+    return point >= 0xd800 && point <= 0xdfff;
+  });
+}
+
+function boundedStandalone(text, words) {
+  return new RegExp(`(^|[^\\p{L}\\p{N}])(${words})(?=$|[^\\p{L}\\p{N}])`, "u")
+    .test(text);
+}
+
+function boundedMultipleActions(text) {
+  // Only balanced, non-nested spans suppress the lexical guard. Unmatched
+  // openers remain ordinary text. Odd backslash counts escape ASCII quotes.
+  const spans = [];
+  let opener = null;
+  let start = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"') {
+      let slashes = 0;
+      for (let at = index - 1; at >= 0 && text[at] === "\\"; at -= 1) slashes += 1;
+      if (slashes % 2) continue;
+    }
+    if (opener === null && (character === '"' || character === "“")) {
+      opener = character;
+      start = index;
+    } else if ((opener === '"' && character === '"')
+      || (opener === "“" && character === "”")) {
+      spans.push([start, index]);
+      opener = null;
+    }
+  }
+  const pairs = /( y también | y | luego | después | entonces |; |\. |! |\? |\r\n[ \t]*|[\r\n][ \t]*)(recuerda|guarda|anota|agrega|añade|agrégalo|añádelo|muéstrame|¿?qué) /gu;
+  return Array.from(text.matchAll(pairs)).some((match) =>
+    !spans.some(([left, right]) => match.index <= right
+      && match.index + match[0].length > left));
+}
+
+// Recognition retains original slices; keyword mapping is length preserving.
+function recognizeBoundedNaturalLanguageIntent(text) {
+  const compared = boundedKeywordText(text);
+  const prefixes = [
+    ["recuerda que", "CAPTURE_KNOWLEDGE", "value"],
+    ["guarda que", "CAPTURE_KNOWLEDGE", "value"],
+    ["anota que", "CAPTURE_KNOWLEDGE", "value"],
+    ["qué te dije sobre", "RECALL_KNOWLEDGE", "key"],
+    ["qué sabes de", "RECALL_KNOWLEDGE", "key"],
+    ["qué hay en la lista", "READ_FOLLOW_UP", "list_id"],
+    ["muéstrame la lista", "READ_FOLLOW_UP", "list_id"],
+  ];
+  const question = compared.startsWith("¿") ? text.slice(1) : text;
+  const unwrapped = question.endsWith("?") ? question.slice(0, -1) : question;
+  for (const [prefix, intent, field] of prefixes) {
+    const candidate = prefix.startsWith("qué") ? unwrapped : text;
+    const lower = boundedKeywordText(candidate);
+    if (lower === prefix || lower.startsWith(prefix + " ")) {
+      const payload = candidate.slice(prefix.length + 1);
+      if (intent === "RECALL_KNOWLEDGE"
+        && /^[¿?]|[¿?]$/u.test(stripKnowledgeWhitespace(payload))) {
+        return null;
+      }
+      return { intent, extractedFields: { [field]: payload } };
+    }
+  }
+  if (boundedKeywordText(unwrapped) === "qué tengo pendiente") {
+    return { intent: "READ_FOLLOW_UP", extractedFields: {} };
+  }
+  for (const prefix of ["agrega ", "añade "]) {
+    if (!compared.startsWith(prefix)) continue;
+    const body = text.slice(prefix.length);
+    const lower = boundedKeywordText(body);
+    const separators = Array.from(lower.matchAll(/ a la lista | a mis pendientes$/gu));
+    // Outer strip removes the final separator space for an empty list ID.
+    if (lower.endsWith(" a la lista")) {
+      separators.push({ index: lower.length - " a la lista".length, 0: " a la lista" });
+    }
+    if (separators.length > 1) return { reason: "ambiguous_structure" };
+    if (separators.length !== 1) continue;
+    const separator = separators[0];
+    const item = body.slice(0, separator.index);
+    if (separator[0] === " a mis pendientes") {
+      if (separator.index + separator[0].length !== body.length) continue;
+      return { intent: "ADD_FOLLOW_UP", extractedFields: { item } };
+    }
+    return { intent: "ADD_FOLLOW_UP", extractedFields: {
+      item, list_id: body.slice(separator.index + separator[0].length),
+    } };
+  }
+  return null;
+}
+
+function prepareBoundedNaturalLanguageIntent(naturalText, explicitFields = {}) {
+  const result = {
+    outcome: "unsupported", intent: null, extractedFields: {}, fields: {},
+    missingFields: [], invalidFields: [], conflictingFields: [],
+    reason: null, clarification: null, command: null,
+  };
+  const unsupported = (reason) => ({
+    ...result, outcome: "unsupported", intent: null, command: null,
+    missingFields: [], invalidFields: [], conflictingFields: [], reason,
+    clarification: "Solicitud fuera del contrato acotado; no se preparó un comando.",
+  });
+  if (typeof naturalText !== "string" || boundedHasSurrogate(naturalText)
+    || Array.from(naturalText).length > 8192
+    || KNOWLEDGE_WHITESPACE_ONLY.test(naturalText)) return unsupported("invalid_input");
+  const text = stripKnowledgeWhitespace(naturalText);
+  const lower = boundedKeywordText(text);
+  const candidate = recognizeBoundedNaturalLanguageIntent(text);
+  if (boundedStandalone(lower, "si|cuando") && candidate?.intent) {
+    return unsupported("conditional_request");
+  }
+  // Anchored recognition excludes top-level negation, quotes and examples.
+  if (/^(no|si|cuando)(?=$|[^\p{L}\p{N}])/u.test(lower)
+    || /^["“]/u.test(lower) || lower.startsWith("por ejemplo:")) {
+    return unsupported("unsupported_request");
+  }
+  if (boundedMultipleActions(lower)) return unsupported("multiple_actions");
+  if (boundedStandalone(lower, "esto|eso|aquello|ello|él|ella|ellos|ellas")) {
+    return unsupported("context_reference");
+  }
+  if (!candidate?.intent) return unsupported(candidate?.reason || "unsupported_request");
+  result.intent = candidate.intent;
+  result.extractedFields = candidate.extractedFields;
+  const orders = {
+    CAPTURE_KNOWLEDGE: KNOWLEDGE_FIELDS.store,
+    RECALL_KNOWLEDGE: ["key", "kind"],
+    ADD_FOLLOW_UP: ["list_id", "item"],
+    READ_FOLLOW_UP: ["list_id"],
+  };
+  const ownFields = explicitFields !== null && typeof explicitFields === "object"
+    ? explicitFields : {};
+  for (const field of orders[result.intent]) {
+    const extracted = Object.hasOwn(result.extractedFields, field)
+      ? stripKnowledgeWhitespace(result.extractedFields[field]) : "";
+    const supplied = Object.hasOwn(ownFields, field) ? ownFields[field] : "";
+    const explicit = typeof supplied === "string" ? stripKnowledgeWhitespace(supplied) : supplied;
+    if (typeof explicit !== "string") {
+      result.invalidFields.push(field);
+      continue;
+    }
+    if (extracted && explicit && extracted !== explicit) {
+      result.conflictingFields.push(field);
+      continue;
+    }
+    const value = explicit || extracted;
+    if (!value) {
+      if (!(result.intent === "RECALL_KNOWLEDGE" && field === "kind")) {
+        result.missingFields.push(field);
+      }
+      continue;
+    }
+    const whitespace = /[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/u;
+    if (boundedHasSurrogate(value)
+      || (field === "kind" && !["fact", "concept", "state"].includes(value))
+      || (field === "list_id" && (whitespace.test(value) || value.includes("::")))
+      || (field === "item" && value.includes("|"))) {
+      result.invalidFields.push(field);
+      continue;
+    }
+    result.fields[field] = value;
+  }
+  if (result.missingFields.length || result.invalidFields.length || result.conflictingFields.length) {
+    return { ...result, outcome: "clarification_required",
+      clarification: "Completa o corrige los campos indicados; no se preparó un comando." };
+  }
+  try {
+    if (result.intent === "CAPTURE_KNOWLEDGE") {
+      result.command = prepareKnowledgeCommand("store", result.fields);
+    } else if (result.intent === "RECALL_KNOWLEDGE") {
+      result.command = prepareKnowledgeCommand("find", { ...result.fields, kind: result.fields.kind || "" });
+    } else if (result.intent === "ADD_FOLLOW_UP") {
+      result.command = prepareFollowUpCommand(result.fields.list_id, result.fields.item).command;
+    } else {
+      result.command = `list read ${result.fields.list_id}`;
+    }
+    if (boundedHasSurrogate(result.command) || Array.from(result.command).length > 8192) {
+      return unsupported("unrepresentable");
+    }
+  } catch {
+    return unsupported("unrepresentable");
+  }
+  return { ...result, outcome: "prepared" };
+}
+
 const GUIDE_STAGES = Object.freeze([
   "capture",
   "recall",
