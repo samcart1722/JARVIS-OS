@@ -4,8 +4,15 @@
 
 Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1.
 IMPLEMENTATION COMPLETE; MERGED; TAGGED; BACKED UP; RECOVERY VERIFIED.
-NOT YET FORMALLY CLOSED: the separate formal-closure lifecycle follows this
-release-truth synchronization. Sprint 42: NOT STARTED / NOT AUTHORIZED; no scope
+FORMALLY CLOSED. All closure prerequisites are complete: contract frozen;
+Blocks A-D independently approved; E1 native acceptance PASS; final independent
+review APPROVED; implementation PR normally merged; post-merge validation PASS;
+immutable annotated tag verified; backup and recovery PASS; release truth
+synchronized and MERGED through PR #75 at
+`1bbc3425d11b7182fda9b6ab61cf19383fd8ab1e` (ordered parents
+`de191a93c710e50509a738747490a38530f6d43a`, `fafe8ed24975d030e4bd86a63ec48cf0f764fd59`).
+Branch cleanup remains a post-closure governed housekeeping operation and is not
+a retroactive prerequisite for closure. Sprint 42: NOT STARTED / NOT AUTHORIZED; no scope
 has been selected or committed.
 
 The authorized feature prepares one bounded Spanish request as CAPTURE_KNOWLEDGE,
