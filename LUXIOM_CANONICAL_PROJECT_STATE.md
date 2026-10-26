@@ -11,9 +11,33 @@ immutable annotated tag verified; backup and recovery PASS; release truth
 synchronized and MERGED through PR #75 at
 `1bbc3425d11b7182fda9b6ab61cf19383fd8ab1e` (ordered parents
 `de191a93c710e50509a738747490a38530f6d43a`, `fafe8ed24975d030e4bd86a63ec48cf0f764fd59`).
-Branch cleanup remains a post-closure governed housekeeping operation and is not
-a retroactive prerequisite for closure. Sprint 42: NOT STARTED / NOT AUTHORIZED; no scope
-has been selected or committed.
+Formal closure was MERGED through PR #76 at
+`a99b760370f4e162927a9423dc6245ce0d7f8c85` (ordered parents
+`1bbc3425d11b7182fda9b6ab61cf19383fd8ab1e`, `0fbe2753c9a8fe8cf9c7a9387f8d7cdc932887c9`).
+
+### Completed post-closure branch cleanup
+
+Sprint 41 working-branch cleanup COMPLETE. Cleanup is governed post-closure
+housekeeping, not a retroactive prerequisite for formal closure.
+
+- `feat/sprint-41-bounded-natural-language-intent-preparation`: verified tip `be30aa6611a964f2d985eb97f05d323643888aa8`,
+  associated PR #74 MERGED; safely deleted locally and remotely.
+- `docs/sprint-41-release-truth`: verified tip `fafe8ed24975d030e4bd86a63ec48cf0f764fd59`,
+  associated PR #75 MERGED; safely deleted locally and remotely.
+- `docs/sprint-41-formal-closure`: verified tip `0fbe2753c9a8fe8cf9c7a9387f8d7cdc932887c9`,
+  associated PR #76 MERGED; safely deleted locally and remotely.
+- Historical `docs/sprint-41-planning-baseline` and
+  `docs/sprint-41-behavior-contract` had already been safely deleted and remain absent.
+- Each deleted tip had a MERGED associated PR, was an ancestor of both local
+  master and origin/master, had zero commits unique from master and no open PR.
+- Deletion used only `git branch -d` and `git push origin --delete`, followed by
+  `git fetch --prune origin`; no force and no unrelated branches touched.
+- After prune, zero Sprint 41 working branches remained at the cleanup checkpoint.
+- The documentation branch carrying this cleanup record is administrative and is
+  not part of the Sprint 41 working-branch set. Its later safe deletion after PR
+  merge does not alter Sprint 41 closure or the recorded cleanup checkpoint.
+
+Sprint 42: NOT STARTED / NOT AUTHORIZED; no scope has been selected or committed.
 
 The authorized feature prepares one bounded Spanish request as CAPTURE_KNOWLEDGE,
 RECALL_KNOWLEDGE, ADD_FOLLOW_UP or READ_FOLLOW_UP. Preparation is deterministic,
