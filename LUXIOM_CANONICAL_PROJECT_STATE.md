@@ -116,8 +116,11 @@ remote deletion used only `git push origin --delete`. No `git branch -D`, force
 deletion or force push was used. No non-Sprint-40 branches were touched.
 After `git fetch --prune origin`, zero local and zero origin Sprint 40 branches
 remained at that cleanup checkpoint. No merged Sprint 40 branches remain pending
-cleanup. This subsequent documentation-only cleanup-record branch is separate
-from those deleted branches; this record has not yet been merged.
+cleanup. The cleanup record was MERGED through PR #70 at normal two-parent merge
+`392e8d225f977d6cc1b198bd0efecb5e79523988`. Its temporary branch
+`docs/sprint-40-branch-cleanup-record` was subsequently deleted locally and
+remotely without force; after prune, zero local and zero origin Sprint 40
+branches remained.
 
 Before and after cleanup, branch master, HEAD and origin/master remained at
 `26304970f092eab8838b077da0276d2b7b76ca9a`. Staged and tracked diffs were empty;

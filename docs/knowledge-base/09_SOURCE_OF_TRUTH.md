@@ -116,8 +116,11 @@ remote deletion used only `git push origin --delete`. No `git branch -D`, force
 deletion or force push was used. No non-Sprint-40 branches were touched.
 After `git fetch --prune origin`, zero local and zero origin Sprint 40 branches
 remained at that cleanup checkpoint. No merged Sprint 40 branches remain pending
-cleanup. This subsequent documentation-only cleanup-record branch is separate
-from those deleted branches; this record has not yet been merged.
+cleanup. The cleanup record was MERGED through PR #70 at normal two-parent merge
+`392e8d225f977d6cc1b198bd0efecb5e79523988`. Its temporary branch
+`docs/sprint-40-branch-cleanup-record` was subsequently deleted locally and
+remotely without force; after prune, zero local and zero origin Sprint 40
+branches remained.
 
 Before and after cleanup, branch master, HEAD and origin/master remained at
 `26304970f092eab8838b077da0276d2b7b76ca9a`. Staged and tracked diffs were empty;
@@ -308,8 +311,9 @@ MERGED + TAGGED + BACKED UP + RECOVERY VERIFIED. Its release commit is
 through formal-closure PR #69 merge `26304970f092eab8838b077da0276d2b7b76ca9a`,
 incorporating commit `8ab5a726cc01e954fc9e9aa6d7180540824e0169`. Post-closure
 branch cleanup is COMPLETE as recorded above; no merged Sprint 40 branches
-remain pending cleanup. This later cleanup record is not yet merged and does
-not establish or condition the already-completed formal closure. The immutable
+remain pending cleanup. This later cleanup record was MERGED through PR #70 at
+`392e8d225f977d6cc1b198bd0efecb5e79523988` and does not establish or condition
+the already-completed formal closure. The immutable
 tag `governed-sprint-40-complete` remains at the original release commit.
 Sprint 41 is NOT started or authorized by this cleanup; its scope remains to be
 selected through a separate governed planning lifecycle.
