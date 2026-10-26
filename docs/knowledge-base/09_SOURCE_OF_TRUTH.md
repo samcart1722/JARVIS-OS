@@ -1,43 +1,85 @@
 # Source of Truth
 
-## Current planning truth - Sprint 41
+## Current release truth - Sprint 41
 
 Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1.
-PLANNING STARTED; SCOPE SELECTED; CONTRACT + BASELINE AUTHORIZED ONLY.
-The user explicitly authorized planning-baseline synchronization and the
-behavior-contract preparation/freeze lifecycle. FEATURE IMPLEMENTATION IS NOT
-YET AUTHORIZED; candidate review, freeze and separate explicit implementation
-authorization must precede feature work.
+IMPLEMENTATION COMPLETE; MERGED; TAGGED; BACKED UP; RECOVERY VERIFIED.
+NOT YET FORMALLY CLOSED: the separate formal-closure lifecycle follows this
+release-truth synchronization. Sprint 42: NOT STARTED / NOT AUTHORIZED; no scope
+has been selected or committed.
 
-Objective: allow a user to express one bounded everyday intent in Spanish and
-have LUXIOM deterministically prepare one existing governed knowledge or list
-operation, visible and editable before explicit Send, without granting authority
-or executing anything during interpretation. Families: CAPTURE_KNOWLEDGE,
-RECALL_KNOWLEDGE, ADD_FOLLOW_UP and READ_FOLLOW_UP. This is the first sprint
-explicitly on the LUXIOM Demo v1 product-usefulness path; it is not implemented.
+The authorized feature prepares one bounded Spanish request as CAPTURE_KNOWLEDGE,
+RECALL_KNOWLEDGE, ADD_FOLLOW_UP or READ_FOLLOW_UP. Preparation is deterministic,
+model-free and browser-only, grants no authority and performs zero application
+requests. Commands remain visible/editable; explicit Send is the sole execution
+boundary and transmits the exact editor text through the existing governed path.
+Metadata and list destinations require explicit input; Recall is exact-key FIND.
+No backend production, endpoint, schema/migration, permission implementation,
+provider/model enablement, dependency or authority expansion occurred. Existing
+fallback semantics and the Sprint 40 guided workflow remain preserved.
 
-The selected strategy is DETERMINISTIC BOUNDED PREPARATION ONLY, model-free for
-Sprint 41. Pure browser preparation must perform zero application requests,
-persistence, repository reads, provider/readiness calls, cognitive fallback calls
-or authorization decisions. Exact visible editor contents at explicit Send
-remain authoritative. No mandatory field, provenance or list destination may
-be silently invented. Recall uses exact-key FIND, not semantic search.
-Existing fallback semantics and the Sprint 40 guided workflow remain preserved.
+### Immutable implementation and acceptance custody
 
-The completed read-only inspection found existing deterministic interpretation,
-typed knowledge/list intents and gateway-owned semantic correlation.
-Workspace/membership/permission authority remains downstream. Local model
-infrastructure exists but is not required; the interactive runtime does not use
-that model path for this task. No backend capability, schema, endpoint or
-permission is required for the narrowed candidate; no fundamental technical
-blocker was identified. Preparation proves neither execution, persistence nor
-success and cannot execute a hidden command.
+- Planning baseline: MERGED. Behavior contract: FROZEN through PR #73.
+- Blocks A-D: IMPLEMENTED + INDEPENDENTLY APPROVED.
+- E1 native acceptance/final validation: PASS; final independent review APPROVED
+  at `be30aa6611a964f2d985eb97f05d323643888aa8`;
+  `SPRINT_41_FINAL_INDEPENDENT_REVIEW_APPROVED`.
+- Implementation base: `a0ba052c235b60acd44ad20777fd4251f7bbb3c9`.
+- Reviewed feature head: `be30aa6611a964f2d985eb97f05d323643888aa8` (five commits).
+- Implementation PR: [#74](https://github.com/samcart1722/JARVIS-OS/pull/74),
+  MERGED through a normal two-parent merge; exactly nine reviewed files.
+- Immutable release merge: `de191a93c710e50509a738747490a38530f6d43a`.
+- Ordered parent 1: `a0ba052c235b60acd44ad20777fd4251f7bbb3c9`.
+- Ordered parent 2: `be30aa6611a964f2d985eb97f05d323643888aa8`.
+- Reviewed feature tree = release tree = tagged tree:
+  `cc2c2c1637a71d9f949e08eb84e9eb767b917730`; TREE EQUALITY PASS.
+- Annotated tag: `governed-sprint-41-complete`; type `tag`.
+- Tag object: `7a9f9e91e62b2b2618f3b68a9107fc1b2d0f66b3`.
+- Tag peel: `de191a93c710e50509a738747490a38530f6d43a`.
+- Exact annotation: Governed Sprint 41 complete: Governed Bounded Natural-Language Intent Preparation v1.
+  This tag remains on the implementation release, never later documentation.
+- Native Windows Edge stable 156.0.4314.42, headed: Scenarios 1-19 PASS;
+  `nativeBrowserVerified=true`; `nativeKeyboardVerified=true`.
+- E1 evidence: `docs/knowledge-base/SPRINT_41_NATIVE_ACCEPTANCE_AND_FINAL_VALIDATION.md`,
+  commit `be30aa6611a964f2d985eb97f05d323643888aa8`; its historical E1 hard stop
+  was satisfied by the approved independent review and authorized E2 lifecycle.
+- Post-merge Node: all nine harness invocations PASS (6045, 912, 406, 66, 141,
+  14, 24, 134 and 199 checks); DOM doubles retain native flags false.
+- Post-merge focused Python: 697 passed. Full governed pytest: 2294 passed,
+  0 failed, 0 skipped, 0 xfailed, exit 0 (51.08 seconds); foreign tree excluded
+  before collection, isolated external basetemp, DEBUG=false only in process.
+- Global Ruff PASS with foreign exclusion; Node syntax PASS for app.js and all
+  tracked browser harnesses (seven files); git diff --check PASS.
+- Post-merge logs: `C:\Users\Lenovo YOGA\AppData\Local\Temp\luxiom-sprint41-e2-20261026-132325`.
+- Frozen contract SHA-256:
+  `04F2673918F55B382262A6C4C90797A2842ED8C2CC3A9E4447A19E48DB70792C`.
+- Foreign exact file: `tests/unit/reasoning/entities/test_user_request.py`;
+  untracked and untouched; only Get-FileHash permitted, no collection/lint/staging.
+  SHA-256: `45CF806561DB59828555A0A14DB7C5106B309F3F0B2122C68E5F0C37FBD3C49C`.
 
-Sprint 40 remains FORMALLY CLOSED, MERGED, TAGGED, BACKED UP, RECOVERY VERIFIED,
-with post-closure branch cleanup COMPLETE and canonical truth FULLY SYNCHRONIZED
-at correction merge `4f3de7b56001340aba1f39be812eb9b630a07960`.
-Its immutable identities and history below remain unchanged.
-Sprint 42 has no authorization or scope commitment.
+### Verified release backup and recovery
+
+- Backup directory: `C:\Users\Lenovo YOGA\Desktop\LUXIOM_BACKUPS\SPRINT_41\20261026-132502`.
+- Full-history/all-ref bundle: `JARVIS-OS_SPRINT_41_FULL_REPOSITORY.bundle`.
+  SHA-256: `EF20349D3B9F310F24152AFEB45C9DA1C9E93F6DB8DC9F323E9A005E8FFECAC7`.
+- Release Git archive: `JARVIS-OS_SPRINT_41_RELEASE_SOURCE.zip`.
+  SHA-256: `F5C52F63702C82F4EABB041C4C58130E6743F288834EA8A7A690C8D190E25EB4`.
+- Backup-side `BACKUP_SHA256_MANIFEST.txt` and `RELEASE_CUSTODY.json` record custody.
+- Recovery directory: `C:\Users\Lenovo YOGA\Desktop\LUXIOM_BACKUPS\SPRINT_41\20261026-132502-RECOVERY`;
+  cloned FROM THE BUNDLE, not the live repository.
+- Bundle verification PASS; recovered git fsck --full exit 0 (only non-corrupt
+  dangling historical objects reported); recovered master equals the release,
+  annotated tag object/peel and ordered parents match; recovered worktree clean.
+- Recovered release tree = live release tree = reviewed tree; TREE EQUALITY PASS.
+- ZIP inventory and all 580 file bytes match Git blobs exactly; archive used
+  core.autocrlf=false. Current untracked foreign path is absent from the ZIP.
+  Current foreign file was never staged or intentionally added; no claim is made
+  that the all-history bundle lacks historical objects for any path.
+- `SPRINT_41_BACKUP_AND_RECOVERY_VERIFIED`.
+
+Sprint 40 remains FORMALLY CLOSED with completed cleanup and synchronized truth;
+its immutable tag/history and historical evidence below remain unchanged.
 
 ## Historical release truth - Sprint 40
 
@@ -65,7 +107,7 @@ authoritative backup, recovery proof from the bundle, release-truth
 synchronization commit and release-truth PR #68 MERGED at the commit above.
 At that Sprint 40 closure/cleanup checkpoint, Sprint 41 was NOT started and
 NOT authorized; its scope required a separate governed planning lifecycle.
-The subsequent explicit Sprint 41 planning authorization is recorded above.
+Subsequent Sprint 41 authorization and release state are recorded above.
 
 Implementation base: `3db3fa5f0d89c6ed5960bb602ad2269325b4b3ad`.
 Implementation HEAD: `f42edd8bd0c06769eb09a01be6321c110c0520aa`.
@@ -354,9 +396,9 @@ remain pending cleanup. This later cleanup record was MERGED through PR #70 at
 `392e8d225f977d6cc1b198bd0efecb5e79523988` and does not establish or condition
 the already-completed formal closure. The immutable
 tag `governed-sprint-40-complete` remains at the original release commit.
-That cleanup did not start or authorize Sprint 41. Subsequent explicit user
-authorization starts Sprint 41 planning with scope selected, limited to contract
-and baseline lifecycle as recorded above; implementation is NOT YET AUTHORIZED.
+That historical cleanup did not itself start or authorize Sprint 41. Later
+explicit authorizations governed Sprint 41 planning, implementation and release;
+its current release state is recorded above.
 
 ### Historical documentation reviews - not an operational checkpoint
 
