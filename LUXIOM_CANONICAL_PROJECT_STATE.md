@@ -52,18 +52,29 @@ contract-faithful under the prior ambiguous contract wording. Reported local
 implementation-gate evidence: 574 Block A tests PASS, 246 interpretation tests PASS,
 Ruff PASS; not a fresh independent/remote rerun. No tests or lint run in this gate.
 
-Amendment 01 is **FROZEN — PENDING INDEPENDENT REVIEW — NOT YET EFFECTIVE** on
-`docs/sprint-42-contract-amendment-01`, from exact master
-`cfa15be46d860747ae066f0cafc1a6c5151081e8`.
+Amendment 01 is **INDEPENDENTLY APPROVED, NORMALLY MERGED AND EFFECTIVE**.
+Independent verdict: `SPRINT_42_AMENDMENT_01_INDEPENDENTLY_APPROVED`.
+PR [#81](https://github.com/samcart1722/JARVIS-OS/pull/81) normal merge:
+`28696bc927e197e0fc986c09fc346598bb7fe0bf`; ordered parents:
+
+1. `cfa15be46d860747ae066f0cafc1a6c5151081e8`.
+2. `939d3ee3cfe026762ba54cee7b34a28ff9a0f0eb`.
+
+Approved amendment-head tree = merged tree:
+`066ab02dbe9e2f186f9bd8250ff116e9f5254e99`; TREE EQUALITY PASS.
+The merged amendment branch was safely deleted locally/remotely after ancestry
+verification and proof of zero unique commits; no force or history rewriting.
 Path: `docs/knowledge-base/SPRINT_42_BEHAVIOR_CONTRACT_AMENDMENT_01_POSITIVE_ELIGIBILITY_AND_ROLE_SEMANTICS.md`.
 Amendment Git blob: `2fc4adcb69b0ba227b0fe84e1d3e0801abb5142e`.
 Canonical amendment SHA-256 over exact raw Git blob bytes:
 `CFCAE1E348676D6367BA4F287FED2B52490ACF22D74074B8068FA0DA5BE24761`.
-Original contract identity above remains immutable; this amendment overlays ONLY
-identified eligibility/role/gate-composition clauses after independent approval and
-governed merge. Every other original provision remains authoritative.
+The effective combined contract is the immutable original frozen contract PLUS
+Amendment 01 ONLY for its explicitly identified eligibility/role/gate-composition
+overlay clauses. Every other original provision remains authoritative. Both texts
+remain unchanged; the amendment's frozen pre-merge status is retained as immutable
+artifact text, while this verdict/merge record establishes current effectivity.
 
-Clarified future rule: valid/bounded original input, no frozen Sprint 41 intent/
+Effective contract rule (awaiting A2 alignment): valid/bounded input, no Sprint 41 intent/
 clarification match and every frozen protected guard false yields
 eligible_unrecognized with reason safe_unrecognized. This permits one opt-in local
 classification attempt, not supported-intent recognition or execution authority.
@@ -79,14 +90,19 @@ CAPTURE/RECALL proof remains closed schema + literal grounding + absence of
 authority, with semantic roles proposed by the model and visible user review.
 ADD/READ retain strict original-text terminal destination evidence. Eligibility and
 candidate validation remain separate required gates for the exact same input.
-These clarifications are NOT yet effective and are NOT implemented in this branch.
+These clarifications are now contractually effective; Block A remains on its prior
+fail-closed implementation. Block A2 implementation has NOT begun.
+Block A remains approved fail-closed at b3aa7a31faa681e0ec9694781b385a08008b8c35 and remains unmerged.
 
-**Block A2 NOT AUTHORIZED. Block B NOT AUTHORIZED.** Block B stays prohibited until
-Amendment 01 is effective and separately authorized A2 alignment is implemented,
-tested and independently approved. No new implementation commit, endpoint, UI,
-source/test/dependency/config change or model installation/download/generation here.
-Next gate: independent Amendment 01 review. Later A2 requires separate explicit
-user authorization; this documentation amendment grants none.
+BLOCK A2 IS NOT YET AUTHORIZED
+BLOCK B IS NOT AUTHORIZED
+
+Block B remains prohibited pending separately authorized A2 alignment, its tests
+and independent review approval. This effectivity-truth gate changes no source,
+tests, dependencies or configuration and performs no model installation/download/
+generation. Next implementation gate: explicit user authorization for Block A2,
+after this effectivity-truth PR is reviewed/merged. This documentation gate grants
+no A2 or Block B authorization.
 
 Frozen scope retains exactly CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP and
 READ_FOLLOW_UP. Deterministic first; optional session-only/default-OFF local model
@@ -111,7 +127,7 @@ Sprint 41 remains **FORMALLY CLOSED**, merged/tagged/backed up/recovery verified
 with completed cleanup; immutable object/peel/tree and historical release truth
 are unchanged. Sprint 40 remains formally closed. No Sprint 42 source/test/dependency
 changes or model installation/download/generation occurred in these documentation gates.
-HARD STOP after opening the Amendment 01 PR; do not merge it or start A2/Block B under this authorization.
+HARD STOP after opening the effectivity-truth PR; do not merge it, modify Block A or start A2/Block B under this authorization.
 
 ## Current release truth - Sprint 41
 
