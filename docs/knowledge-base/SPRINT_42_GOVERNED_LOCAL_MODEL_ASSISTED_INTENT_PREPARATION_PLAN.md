@@ -75,13 +75,49 @@ Pre-read SHA-256 matched historical:
 | Attributes | Archive |
 
 `git ls-files --others --exclude-standard` lists the exact path; check-ignore
-returns no matching rule. `git log --all -- <path>` finds
-`9e5eba78380536353965df6a95721f16e7f19ed8` (2026-07-23) and
-`daa369876e641ae02efc2ef83c47a7ca87eb92f7` (2026-07-28).
-`git rev-list --all --objects` contains that path/blob
-`85601faa2850695c35a5e47d685963468959c616`; read-only git hash-object of the
-current file yields the SAME blob ID. Both exact path and blob have historical
-Git provenance although the file is untracked in current master.
+returns no matching rule. Correction after independent review of PR #78:
+path history, object reachability and attributable provenance are distinct.
+
+Remote GitHub tree metadata for commit
+`9e5eba78380536353965df6a95721f16e7f19ed8` proves the exact foreign path was an
+EMPTY placeholder, blob `e69de29bb2d1d6434b8b29ae775ad8c2e48c5391`, size 0.
+Local ls-tree agrees, including at `cc6cb8409e879209fabaa1e0cb2c9a5c54d244bb`.
+At 9e5eba7 the populated related 49-line test instead occupied
+`tests/unit/cognition/reasoning/domain/entities/test_user_request.py`, blob
+`1b9b1d973fab9f8e6f465cab682a96f5b865a666`, size 1041 bytes. GitHub commit
+metadata and local full-history raw log show
+`daa369876e641ae02efc2ef83c47a7ca87eb92f7` REMOVES the empty exact path.
+These facts do not establish provenance of the populated untracked contents.
+
+The Gate 0 observation identified the current populated blob as
+`85601faa2850695c35a5e47d685963468959c616`. Reconciliation did NOT reopen its
+contents or use cat-file -p. `git cat-file -t` confirms blob type;
+`git rev-list --all --objects` lists it at the exact path, but BOTH ordinary and
+full-history `git log --all --find-object=85601faa...` return NO commits.
+Per-ref object reachability and ls-tree identify these eight LOCAL-ONLY refs,
+each containing that blob at `tests/unit/reasoning/entities/test_user_request.py`:
+
+| Exact local ref | Tree object (not a commit) |
+|---|---|
+| refs/codex/turn-diffs/captures/1793217342443/62fc1066-e16a-4e58-9e2c-2cddc2924572/base | a6260cdb159f7b74719e42c566e5810c989474c5 |
+| refs/codex/turn-diffs/checkpoints/13d7025dfc49a10cf6c78954d45dbe64/4eac15e9cd085537937cde0ad59fecf1/1792771599714/5a31eefe-0d3a-44ba-9c62-ed585643c159 | 60298164f4c5cf0b89cbd43d4d5cd8f6fa7dfe05 |
+| refs/codex/turn-diffs/checkpoints/436cb29138a28255fcd934945b60fff9/4c6074657dbac48adb567c59a3d9e3d5/1792776979870/91737050-bec0-4f8f-ab5e-14e288c39045 | d98969468fbe40c78d64235939eeccefe139b395 |
+| refs/codex/turn-diffs/checkpoints/5b7b7385c8c59b1b0f4f123e5e798e69/d7e25df6cc1523f812a1655b60ffb97b/1793216899413/6ecae166-56c7-4360-83f7-1fb4034de24a | a6260cdb159f7b74719e42c566e5810c989474c5 |
+| refs/codex/turn-diffs/checkpoints/7624af072acf02a28f07c6ae586e824b/6ee23bf7be5aab90f1eff4f9f122859e/1793032557807/155cae43-233c-4ac4-9090-5542088f9035 | 44ede36e0f0bd76733ef99cbdee35df7e7bbcb20 |
+| refs/codex/turn-diffs/checkpoints/cea7a6caa7ee63d31a83e116087cf4fa/6f9c18440adb61ff0cfa36220e5b0ccb/1792772298402/686dd5e9-d8de-4c14-82bb-1ef65585e7d9 | 0976e3408eeee868909fc5bca42b0a695da9b292 |
+| refs/codex/turn-diffs/checkpoints/e75608ac16284e88c4e9de0caf932c28/954f272400b6c4d051e3bd99a281dd63/1792770775892/0a71f926-055c-4716-b312-c71ffbfeeec1 | 0976e3408eeee868909fc5bca42b0a695da9b292 |
+| refs/codex/turn-diffs/checkpoints/ee5d990c6dd0e41ca31223f26b160a74/4896ae5bbee7957d6037f746f043a185/1793043192558/6f7f281a-de8e-4e23-a42f-c99504fb644c | 0dffea5a51eb883a54575a8766b1b2876808ac1f |
+
+Reachability category: **B. reachable only through local refs not present on
+GitHub**, as observed during reconciliation. None of the matching refs points to
+a commit; no named branch/tag/commit history containing this blob was identified.
+`git ls-remote origin` advertises none of these refs. This is local snapshot
+retention evidence only, not proof of authorship, original creation or governed
+historical inclusion. No GitHub commit/ref/blob relationship for the populated
+foreign path is established. The former exact-historical-blob claim is withdrawn.
+
+The following textual findings are retained ONLY from the authorized Gate 0 read;
+no foreign text was read again during this correction.
 
 Controlled plain-text read findings:
 
@@ -103,9 +139,17 @@ Controlled plain-text read findings:
   active preparation contract; current-state documentation places historical
   app/reasoning outside the active cognitive path.
 
-Classification, exactly one: **A. LEGITIMATE_UNTRACKED_PROJECT_TEST**.
-Evidence: exact historical blob and matching surviving production symbols.
-This is provenance classification, not authorization to collect/incorporate it.
+Corrected classification, exactly one: **E. INSUFFICIENT_EVIDENCE**.
+Content is strongly consistent with a legitimate legacy LUXIOM test and its
+referenced production entity still exists, but exact attributable provenance of
+the populated untracked blob is not established. Remote history proves the exact
+path existed only as an empty placeholder in the inspected commits, while a
+populated related test existed under a different cognition path. Local-only tree
+snapshots retain the populated blob but establish no originating historical
+commit or authorship. The current master UserRequest entity was reconfirmed by
+read-only governed-source inspection; compatible purpose supports project relevance,
+not exact provenance. This supersedes Gate 0 classification A and grants no
+authorization to collect/incorporate the file.
 No execution, import, module loading, pytest collection, lint, staging, moving,
 copying into governed source, modification or deletion occurred.
 Post-read SHA-256 equals the pre-read/historical hash exactly:
