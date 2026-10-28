@@ -31,7 +31,7 @@ its future merge substitutes for explicit implementation authorization.
 | Original clause | Limited amendment |
 |---|---|
 | Section 3, otherwise-safe unrecognized eligibility and unknown/uncertain default | Sections 4-6 below define a positive guard-complement decision, not intent recognition |
-| Section 4, unknown/uncertain safety/structural framing | Frozen guards/precedence retained; semantic non-recognition alone is not a safety failure |
+| Section 4, additional apparent negation and unknown/uncertain safety/structural framing | Sections 5.1 and 6 operationalize exact bounded negation and explicit structural guards; no undefined catch-all or semantic non-recognition veto |
 | Section 8, independent semantic role proof for CAPTURE/RECALL | Sections 9-10 below define schema, grounding and absence-of-authority proof; provider proposes semantics |
 | Section 8, ADD/READ roles | Section 11 retains strict structural destination evidence and pre-destination item grounding |
 | Sections 9, 10, 14-17, relationship of eligibility, validation, proposal and execution | Sections 12-15 clarify composition only; existing command/transport/authority rules do not change |
@@ -79,22 +79,35 @@ protected when ANY of the following applies:
   Unicode code points in original input, or isolated surrogate.
 - Frozen Sprint 41 deterministic intent/Prepared recognition OR recognizable
   ClarificationRequired, including missing/invalid explicit-field cases.
-- Leading bounded top-level no, si or cuando; standalone frozen si/cuando guard.
+- Leading bounded si or cuando; standalone frozen si/cuando conditional guard.
 - Whole-request ASCII/curly quotation framing or Por ejemplo: framing.
 - Frozen multiple-action detector or frozen context-reference words.
 - Ambiguous destination structure, direct bounded knowledge namespace or direct
   bounded list namespace (including malformed commands).
-- Any other deterministic condition classified as protected by the existing frozen
-  Sprint 41 safety precedence; unresolved safety/structural evidence stays protected.
+- The exact otherwise-unrecognized negation guard in section 5.1 below.
+- Any other EXACT deterministic guard explicitly frozen in the original contract
+  or this amendment, not an inferred or undefined unclear-framing detector.
 
-Do not reorder or weaken invalid-input, condition, framing, multi-action, context,
-destination, recognition or direct-command protections. Original contract section 4
-and Sprint 41 sections 5-7 continue to define keyword mapping, exact outer whitespace,
-question wrappers, standalone boundaries, destination ambiguity, multi-action
-boundaries/introducers and quoted-span suppression. No new synonyms, broad negation
-vocabulary, scoring, fuzzy classifier, embeddings or language-model eligibility
-calls are introduced. Direct namespace protection remains whitespace/end bounded.
+Run the original deterministic preparation/safety path first in its frozen
+precedence. Prepared or ClarificationRequired stops with PROTECTED / ZERO model
+calls. In particular, Recuerda que No entrega remains an existing deterministic
+request; do NOT apply the new unrecognized-negation scan to its recognized payload.
+Only after no Sprint 41 intent/clarification is handled does section 5.1 apply.
+Earlier stronger explicit frozen guards retain precedence and their reasons.
+For otherwise-unrecognized leading no, section 5.1 is the operational negation
+rule and reason negation_guard; do not short-circuit that case with a separate
+unsupported_request label solely because no is leading. Protection is unchanged.
+
+Do not weaken invalid-input, condition, framing, multi-action, context, destination,
+recognition or direct-command protections. Original contract section 4 and Sprint 41
+sections 5-7 continue to define keyword mapping, exact outer whitespace, question
+wrappers, standalone boundaries, destination ambiguity, multi-action boundaries/
+introducers and quote suppression. Direct namespaces remain whitespace/end bounded.
 A prior unsupported_request reason alone still cannot authorize model use.
+The exact new negation lexicon is a SAFETY guard, not an intent/paraphrase corpus,
+synonym expansion or model classifier. No scoring, fuzzy matching, stemming,
+embeddings, semantic-negation model, locale rules, accent removal, Unicode
+normalization or language-model eligibility call is introduced.
 
 Only when ALL three conditions hold:
 
@@ -107,16 +120,61 @@ No positive synonym list or new deterministic intent corpus is required. Browser
 and server must independently apply the same effective frozen semantics; a browser
 eligible=true flag or a caller-supplied reason is never trusted.
 
+### 5.1. Exact bounded negation safety for otherwise-unrecognized requests
+
+After no Sprint 41 deterministic intent/clarification matched, protect an
+otherwise-unrecognized request if it contains ANY standalone marker from EXACTLY:
+`no`, `nunca`, `jamás`, `tampoco`.
+
+Additionally protect when its edge-trimmed text begins with EXACTLY one of the
+bounded negative/inhibitory phrases: `evita`, `omite`, `ignora`, `deja de`.
+For deja de, the two words require exactly ONE ASCII space U+0020 between them.
+Do not add other markers or phrases in Sprint 42 v1 under this correction.
+
+Compare using the existing frozen length-preserving keyword mapping ONLY (ASCII
+A-Z and ÁÉÍÓÚÜÑ to their lowercase counterparts). For a standalone marker, each
+side must be input start/end OR a character that is neither a Unicode letter nor
+a Unicode number. For a leading phrase, input start follows frozen edge trimming,
+and the character after the complete phrase must be end-of-input OR neither a
+Unicode letter nor a Unicode number. For deja de this boundary is tested after
+the final de; its internal separator stays exactly U+0020. These are the existing
+bounded separator semantics, not substring, locale or fuzzy matching. No quote-span
+exemption applies to this contains-any-marker guard; original multi-action quote
+suppression remains specific to that detector.
+
+When no earlier stronger explicit frozen rule already rejected the input, every
+match above yields protected with stable reason `negation_guard` and ZERO provider
+calls. Absence of a match is NOT proof of semantic positivity; it merely means
+this exact guard is false and the other eligibility gates still apply.
+
+After this amendment becomes effective, the original clause "Additional apparent
+negation ... is uncertain/protected" is operationalized for the positive eligibility
+gate by this exact bounded negation guard. Sprint 42 v1 makes NO claim of general
+Spanish negation understanding. Negation outside this frozen guard is not
+recognized as negation by the deterministic eligibility layer. The bounded provider
+may still return unsupported. A semantically wrong supported proposal remains
+non-authoritative, visible/editable and subject to explicit Send and the original
+downstream authority checks.
+
 ## 6. Unknown/uncertain safety versus semantic non-recognition
 
-The original phrase "Unknown/uncertain cases are protected" now means:
-**Unknown/uncertain SAFETY OR STRUCTURAL cases remain protected.**
-Mere semantic non-recognition is NOT itself a safety ambiguity. A bounded request
-whose intent is unknown to the deterministic Sprint 41 recognizer, but whose safety/
-structure passes every frozen protected guard, is eligible_unrecognized. It remains
-semantically unknown until the local model returns a closed candidate or unsupported.
-Do not create a second lexical intent recognizer to decide whether to ask the model;
-do not use this clarification to bypass any frozen safety guard.
+The original phrase "Unknown/uncertain cases are protected" means unknown/uncertain
+SAFETY OR STRUCTURAL cases defined by the EXACT frozen deterministic guards.
+For Amendment 01 / Sprint 42 v1, unclear safety/structural framing means ONLY:
+invalid input/bounds/surrogate; recognized Sprint 41 intent or clarification;
+conditional guard; section 5.1 bounded negation; whole-request quotation/example
+framing; frozen multi-action detector; context-reference guard; ambiguous destination;
+direct knowledge/list namespace; and any other EXACT deterministic guard explicitly
+frozen in the original contract or this amendment.
+
+There is NO additional undefined catch-all detector named unclear framing.
+Mere unfamiliar wording or semantic non-recognition is NOT unclear framing and
+cannot itself force protected. Unknown/uncertain safety/structure must be tied to
+an explicit frozen guard, not intuition or a new vocabulary/semantic recognizer.
+Once every explicit safety/structural guard is false, valid/bounded text with no
+Sprint 41 recognition/clarification becomes eligible_unrecognized / safe_unrecognized.
+It remains semantically unknown until the model returns its closed candidate or
+unsupported. No second deterministic intent recognizer is introduced.
 
 ## 7. Deterministic first and consent remain absolute
 
@@ -154,6 +212,30 @@ Protected examples remain protected: No conserves café; Cuando consulta la list
 Compras; whole quoted/example requests; frozen multi-action/context-reference
 requests; direct knowledge ... or list ...; and recognized deterministic Sprint 41
 requests such as Recuerda que X, Qué sabes de K or Agrega X a la lista L.
+
+### 8.1. Bounded negation safety examples — not intent templates
+
+With no earlier stronger frozen rule, these otherwise-unrecognized requests all
+produce protected / negation_guard / ZERO provider calls:
+
+| Original text | Frozen safety evidence |
+|---|---|
+| Nunca recuerdes X | standalone nunca |
+| Jamás guardes X | standalone jamás |
+| Tampoco conserves X | standalone tampoco |
+| No quiero que recuerdes X | standalone no (including leading no) |
+| Evita guardar X | bounded leading evita |
+| Omite recordar X | bounded leading omite |
+| Ignora conservar X | bounded leading ignora |
+| Deja de guardar X | bounded leading deja de with one ASCII space |
+
+Boundary examples notable, nunca2, jamásX, tampoco9, evitable, omitente, ignorado
+and dejadero MUST NOT match this guard merely by substring. They remain governed
+by the other eligibility rules and become safe_unrecognized if no other guard
+applies. Likewise the internal space/end boundary of deja de is exact, not a stem.
+These examples are safety tests only, never additions to intent recognition.
+Recuerda que No entrega stays on the recognized deterministic path with ZERO
+model calls; its payload does not undergo this otherwise-unrecognized scan.
 
 ## 9. Clarified model-assisted CAPTURE semantics
 

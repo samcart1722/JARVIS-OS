@@ -56,9 +56,9 @@ Amendment 01 is **FROZEN — PENDING INDEPENDENT REVIEW — NOT YET EFFECTIVE** 
 `docs/sprint-42-contract-amendment-01`, from exact master
 `cfa15be46d860747ae066f0cafc1a6c5151081e8`.
 Path: `docs/knowledge-base/SPRINT_42_BEHAVIOR_CONTRACT_AMENDMENT_01_POSITIVE_ELIGIBILITY_AND_ROLE_SEMANTICS.md`.
-Amendment Git blob: `e8b974a8fe9bc4375f5c13c0c5578cc7a31bc767`.
+Amendment Git blob: `2fc4adcb69b0ba227b0fe84e1d3e0801abb5142e`.
 Canonical amendment SHA-256 over exact raw Git blob bytes:
-`4DE990C854024E6C51A2333523734F8EB2019566B546823099F9CE0246516652`.
+`CFCAE1E348676D6367BA4F287FED2B52490ACF22D74074B8068FA0DA5BE24761`.
 Original contract identity above remains immutable; this amendment overlays ONLY
 identified eligibility/role/gate-composition clauses after independent approval and
 governed merge. Every other original provision remains authoritative.
@@ -67,8 +67,15 @@ Clarified future rule: valid/bounded original input, no frozen Sprint 41 intent/
 clarification match and every frozen protected guard false yields
 eligible_unrecognized with reason safe_unrecognized. This permits one opt-in local
 classification attempt, not supported-intent recognition or execution authority.
-Unknown/uncertain SAFETY/STRUCTURE remains protected; semantic non-recognition alone
-does not. CAPTURE/RECALL proof is closed schema + literal grounding + absence of
+Unknown/uncertain SAFETY/STRUCTURE is limited to explicitly frozen deterministic
+guards; semantic non-recognition alone is not unclear framing. After no Sprint 41
+recognition/clarification, the bounded safety lexicon no/nunca/jamás/tampoco and
+leading evita/omite/ignora/deja de yields protected / negation_guard (unless an
+earlier stronger frozen guard applies). It uses frozen keyword mapping and Unicode
+letter/number boundaries; deja de has one ASCII internal space. The correction
+operationalizes additional apparent negation and removes the undefined unclear-
+framing catch-all; no general Spanish negation understanding is claimed.
+CAPTURE/RECALL proof remains closed schema + literal grounding + absence of
 authority, with semantic roles proposed by the model and visible user review.
 ADD/READ retain strict original-text terminal destination evidence. Eligibility and
 candidate validation remain separate required gates for the exact same input.
