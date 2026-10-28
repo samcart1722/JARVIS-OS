@@ -1,5 +1,49 @@
 # Luxiom Canonical Project State
 
+## Current planning truth - Sprint 42
+
+Scope: **Sprint 42 - Governed Local Model-Assisted Intent Preparation v1**.
+Planning baseline independently approved: SPRINT_42_PLANNING_BASELINE_APPROVED.
+Planning PR [#78](https://github.com/samcart1722/JARVIS-OS/pull/78) MERGED normally at
+`cdce8a09273b209dc310f442f19fe87ec998d119`, ordered parents
+`42e66d67248dd11ffceaad534f2462fb85e25d53` and
+`f89384cbf20e4f0ac52670a5c0c16d74fcd39909`.
+Merged planning tree: `32e895959d4e35a0dc92b31586e422685774f824`.
+Planning branch safely deleted locally/remotely after ancestry verification.
+
+Behavior contract: **FROZEN on docs/sprint-42-behavior-contract for its contract PR,
+pending independent review; not yet approved or merged**.
+Contract: `docs/knowledge-base/SPRINT_42_GOVERNED_LOCAL_MODEL_ASSISTED_INTENT_PREPARATION_CONTRACT.md`.
+Contract SHA-256:
+`338A81AA5C8B225207A771E7C1E3D9A477DBC71190860BE16E7FA47AFA395B06`.
+**IMPLEMENTATION NOT AUTHORIZED.** Separate explicit authorization is required
+AFTER independent review of this contract PR. No implementation block has started.
+
+Frozen scope retains exactly CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP and
+READ_FOLLOW_UP. Deterministic first; optional session-only/default-OFF local model
+assistance only for independently validated eligible unrecognized paraphrases;
+closed schema, literal source grounding, deterministic command construction,
+visible/editable editor and explicit Send. Separate future POST
+/local/intent-preparation is non-executing; existing /local/command, request envelope,
+authentication/workspace/membership/permission path and cognitive fallback remain
+unchanged. Generic runtime reasoning stays REASONING_ENABLED=False. Future requests
+dependency declaration is frozen for implementation only; no dependency edit now.
+
+Foreign tree `tests/unit/reasoning/`: **E. INSUFFICIENT_EVIDENCE**; outside Sprint 42,
+untracked/unstaged/unmodified, no add/delete decision. Protected custody restored:
+no content reread, execution/import, collection, lint, staging, moving or deletion.
+Only hash checks permitted; entire tree excluded before governed collection/lint.
+Known-file SHA-256:
+`45CF806561DB59828555A0A14DB7C5106B309F3F0B2122C68E5F0C37FBD3C49C`.
+Corrected planning Section D distinguishes remote empty-path history/related test
+at another path from local-only snapshot trees; populated provenance is unestablished.
+
+Sprint 41 remains **FORMALLY CLOSED**, merged/tagged/backed up/recovery verified,
+with completed cleanup; immutable object/peel/tree and historical release truth
+are unchanged. Sprint 40 remains formally closed. No Sprint 42 source/test/dependency
+changes or model installation/download/generation occurred in this contract gate.
+Next gate: independent contract review; HARD STOP after opening the contract PR.
+
 ## Current release truth - Sprint 41
 
 Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1.
@@ -37,7 +81,7 @@ housekeeping, not a retroactive prerequisite for formal closure.
   not part of the Sprint 41 working-branch set. Its later safe deletion after PR
   merge does not alter Sprint 41 closure or the recorded cleanup checkpoint.
 
-Sprint 42: NOT STARTED / NOT AUTHORIZED; no scope has been selected or committed.
+Sprint 42 current planning/contract authorization is recorded above; Sprint 41 release truth below remains unchanged.
 
 The authorized feature prepares one bounded Spanish request as CAPTURE_KNOWLEDGE,
 RECALL_KNOWLEDGE, ADD_FOLLOW_UP or READ_FOLLOW_UP. Preparation is deterministic,
