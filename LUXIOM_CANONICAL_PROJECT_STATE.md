@@ -38,10 +38,55 @@ The prior checkout-hash gate stop was resolved by raw-byte blob/tree verificatio
 without rewriting the contract, normalizing its checkout, changing Git configuration
 or adding attributes. The CRLF checkout hash is diagnostic only, not contract identity.
 
-SPRINT 42 IMPLEMENTATION IS NOT YET AUTHORIZED
-No implementation block has started.
-Next gate: explicit user authorization for Sprint 42 implementation Block A.
-No implementation branch exists; this approval-truth branch is documentation only.
+### Block A and Amendment 01 current gate
+
+Block A was explicitly authorized: `SPRINT_42_BLOCK_A_IMPLEMENTATION_AUTHORIZED`.
+Branch: `feat/sprint-42-governed-local-model-assisted-intent-preparation`.
+Preserved local/remote tip: `b3aa7a31faa681e0ec9694781b385a08008b8c35`.
+Parent: `cfa15be46d860747ae066f0cafc1a6c5151081e8`.
+Independent review verdict: `SPRINT_42_BLOCK_A_APPROVED_FAIL_CLOSED`.
+Block A remains **UNMERGED; NO IMPLEMENTATION PR**. Its 13 new core/test files and
+original commit are untouched by this documentation gate. Its conservative
+assess_eligibility() currently produces no positive eligible case, judged safe and
+contract-faithful under the prior ambiguous contract wording. Reported local
+implementation-gate evidence: 574 Block A tests PASS, 246 interpretation tests PASS,
+Ruff PASS; not a fresh independent/remote rerun. No tests or lint run in this gate.
+
+Amendment 01 is **FROZEN — PENDING INDEPENDENT REVIEW — NOT YET EFFECTIVE** on
+`docs/sprint-42-contract-amendment-01`, from exact master
+`cfa15be46d860747ae066f0cafc1a6c5151081e8`.
+Path: `docs/knowledge-base/SPRINT_42_BEHAVIOR_CONTRACT_AMENDMENT_01_POSITIVE_ELIGIBILITY_AND_ROLE_SEMANTICS.md`.
+Amendment Git blob: `2fc4adcb69b0ba227b0fe84e1d3e0801abb5142e`.
+Canonical amendment SHA-256 over exact raw Git blob bytes:
+`CFCAE1E348676D6367BA4F287FED2B52490ACF22D74074B8068FA0DA5BE24761`.
+Original contract identity above remains immutable; this amendment overlays ONLY
+identified eligibility/role/gate-composition clauses after independent approval and
+governed merge. Every other original provision remains authoritative.
+
+Clarified future rule: valid/bounded original input, no frozen Sprint 41 intent/
+clarification match and every frozen protected guard false yields
+eligible_unrecognized with reason safe_unrecognized. This permits one opt-in local
+classification attempt, not supported-intent recognition or execution authority.
+Unknown/uncertain SAFETY/STRUCTURE is limited to explicitly frozen deterministic
+guards; semantic non-recognition alone is not unclear framing. After no Sprint 41
+recognition/clarification, the bounded safety lexicon no/nunca/jamás/tampoco and
+leading evita/omite/ignora/deja de yields protected / negation_guard (unless an
+earlier stronger frozen guard applies). It uses frozen keyword mapping and Unicode
+letter/number boundaries; deja de has one ASCII internal space. The correction
+operationalizes additional apparent negation and removes the undefined unclear-
+framing catch-all; no general Spanish negation understanding is claimed.
+CAPTURE/RECALL proof remains closed schema + literal grounding + absence of
+authority, with semantic roles proposed by the model and visible user review.
+ADD/READ retain strict original-text terminal destination evidence. Eligibility and
+candidate validation remain separate required gates for the exact same input.
+These clarifications are NOT yet effective and are NOT implemented in this branch.
+
+**Block A2 NOT AUTHORIZED. Block B NOT AUTHORIZED.** Block B stays prohibited until
+Amendment 01 is effective and separately authorized A2 alignment is implemented,
+tested and independently approved. No new implementation commit, endpoint, UI,
+source/test/dependency/config change or model installation/download/generation here.
+Next gate: independent Amendment 01 review. Later A2 requires separate explicit
+user authorization; this documentation amendment grants none.
 
 Frozen scope retains exactly CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP and
 READ_FOLLOW_UP. Deterministic first; optional session-only/default-OFF local model
@@ -66,7 +111,7 @@ Sprint 41 remains **FORMALLY CLOSED**, merged/tagged/backed up/recovery verified
 with completed cleanup; immutable object/peel/tree and historical release truth
 are unchanged. Sprint 40 remains formally closed. No Sprint 42 source/test/dependency
 changes or model installation/download/generation occurred in these documentation gates.
-HARD STOP after opening the approval-truth PR; do not merge it under this authorization.
+HARD STOP after opening the Amendment 01 PR; do not merge it or start A2/Block B under this authorization.
 
 ## Current release truth - Sprint 41
 
