@@ -11,13 +11,37 @@ Planning PR [#78](https://github.com/samcart1722/JARVIS-OS/pull/78) MERGED norma
 Merged planning tree: `32e895959d4e35a0dc92b31586e422685774f824`.
 Planning branch safely deleted locally/remotely after ancestry verification.
 
-Behavior contract: **FROZEN on docs/sprint-42-behavior-contract for its contract PR,
-pending independent review; not yet approved or merged**.
+Behavior contract: **FROZEN, INDEPENDENTLY APPROVED AND NORMALLY MERGED** through
+PR [#79](https://github.com/samcart1722/JARVIS-OS/pull/79).
+Independent review verdict: `SPRINT_42_BEHAVIOR_CONTRACT_INDEPENDENTLY_APPROVED`.
+Merge: `676a52f901f9ba453755ec9a35cb9214fd24af3d`; ordered parents:
+
+1. `cdce8a09273b209dc310f442f19fe87ec998d119`.
+2. `7ce2c4ad0d7e65933014246e2825706f66a84e37`.
+
+Approved contract-commit tree = merged tree:
+`52ab55a92151a8daca37e57ed0798da2fecc7481`; TREE EQUALITY PASS.
+Merged contract branch safely deleted locally/remotely after ancestry verification
+and proof of zero unique commits outside master; no force or history rewriting.
 Contract: `docs/knowledge-base/SPRINT_42_GOVERNED_LOCAL_MODEL_ASSISTED_INTENT_PREPARATION_CONTRACT.md`.
-Contract SHA-256:
+Contract Git blob at both approved commit and merge:
+`37e2e5880cb4f93594e5ad31501c6213566be1be`.
+Canonical contract SHA-256, verified from raw Git bytes at both checkpoints:
 `338A81AA5C8B225207A771E7C1E3D9A477DBC71190860BE16E7FA47AFA395B06`.
-**IMPLEMENTATION NOT AUTHORIZED.** Separate explicit authorization is required
-AFTER independent review of this contract PR. No implementation block has started.
+
+The contract SHA-256 is defined over the exact committed Git blob bytes.
+Working-tree hashes may differ under checkout EOL conversion such as
+core.autocrlf=true; blob/tree identity plus the raw Git-blob SHA-256 are authoritative.
+For governed repository documents subject to checkout transformations, canonical
+SHA-256 means the exact Git blob bytes, not checkout-materialized file bytes.
+The prior checkout-hash gate stop was resolved by raw-byte blob/tree verification,
+without rewriting the contract, normalizing its checkout, changing Git configuration
+or adding attributes. The CRLF checkout hash is diagnostic only, not contract identity.
+
+SPRINT 42 IMPLEMENTATION IS NOT YET AUTHORIZED
+No implementation block has started.
+Next gate: explicit user authorization for Sprint 42 implementation Block A.
+No implementation branch exists; this approval-truth branch is documentation only.
 
 Frozen scope retains exactly CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP and
 READ_FOLLOW_UP. Deterministic first; optional session-only/default-OFF local model
@@ -41,8 +65,8 @@ at another path from local-only snapshot trees; populated provenance is unestabl
 Sprint 41 remains **FORMALLY CLOSED**, merged/tagged/backed up/recovery verified,
 with completed cleanup; immutable object/peel/tree and historical release truth
 are unchanged. Sprint 40 remains formally closed. No Sprint 42 source/test/dependency
-changes or model installation/download/generation occurred in this contract gate.
-Next gate: independent contract review; HARD STOP after opening the contract PR.
+changes or model installation/download/generation occurred in these documentation gates.
+HARD STOP after opening the approval-truth PR; do not merge it under this authorization.
 
 ## Current release truth - Sprint 41
 
