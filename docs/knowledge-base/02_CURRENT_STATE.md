@@ -1,29 +1,48 @@
 # Current State
 
-## Current planning state - Sprint 41
+## Current planning truth - Sprint 42
 
-Sprint 41 - Governed Bounded Natural-Language Intent Preparation v1:
-PLANNING STARTED; SCOPE SELECTED; CONTRACT + BASELINE AUTHORIZED ONLY;
-FEATURE IMPLEMENTATION NOT YET AUTHORIZED. Candidate review, freeze and separate
-implementation authorization must precede feature work. This is the first
-sprint explicitly on the LUXIOM Demo v1 product-usefulness path.
+Scope: **Sprint 42 - Governed Local Model-Assisted Intent Preparation v1**.
+Planning baseline independently approved: SPRINT_42_PLANNING_BASELINE_APPROVED.
+Planning PR [#78](https://github.com/samcart1722/JARVIS-OS/pull/78) MERGED normally at
+`cdce8a09273b209dc310f442f19fe87ec998d119`, ordered parents
+`42e66d67248dd11ffceaad534f2462fb85e25d53` and
+`f89384cbf20e4f0ac52670a5c0c16d74fcd39909`.
+Merged planning tree: `32e895959d4e35a0dc92b31586e422685774f824`.
+Planning branch safely deleted locally/remotely after ancestry verification.
 
-The selected candidate prepares one knowledge/list operation from bounded
-Spanish input, using CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP or
-READ_FOLLOW_UP. It is not implemented. Browser preparation must be deterministic
-and model-free, with zero application requests, repository reads, persistence,
-provider/readiness/fallback calls and authorization decisions. Exact editor text
-at explicit Send remains authoritative; mandatory fields, provenance and list
-destinations cannot be silently invented. Existing gateway correlation,
-workspace/membership/permission checks and Sprint 40 guided workflow remain.
-No new backend capability, endpoint, permission or schema is needed.
+Behavior contract: **FROZEN on docs/sprint-42-behavior-contract for its contract PR,
+pending independent review; not yet approved or merged**.
+Contract: `docs/knowledge-base/SPRINT_42_GOVERNED_LOCAL_MODEL_ASSISTED_INTENT_PREPARATION_CONTRACT.md`.
+Contract SHA-256:
+`338A81AA5C8B225207A771E7C1E3D9A477DBC71190860BE16E7FA47AFA395B06`.
+**IMPLEMENTATION NOT AUTHORIZED.** Separate explicit authorization is required
+AFTER independent review of this contract PR. No implementation block has started.
 
-Sprint 40 remains FORMALLY CLOSED, MERGED, TAGGED, BACKED UP, RECOVERY VERIFIED,
-with post-closure branch cleanup COMPLETE and canonical truth FULLY SYNCHRONIZED
-at `4f3de7b56001340aba1f39be812eb9b630a07960`. Its immutable release remains
-`governed-sprint-40-complete` at `3a3b607d94e359a1410f29da894882424fadb6f6`.
-Historical Sprint 39 release and Sprint 40 planning checkpoints follow;
-their then-current authorization statements do not describe Sprint 41.
+Frozen scope retains exactly CAPTURE_KNOWLEDGE, RECALL_KNOWLEDGE, ADD_FOLLOW_UP and
+READ_FOLLOW_UP. Deterministic first; optional session-only/default-OFF local model
+assistance only for independently validated eligible unrecognized paraphrases;
+closed schema, literal source grounding, deterministic command construction,
+visible/editable editor and explicit Send. Separate future POST
+/local/intent-preparation is non-executing; existing /local/command, request envelope,
+authentication/workspace/membership/permission path and cognitive fallback remain
+unchanged. Generic runtime reasoning stays REASONING_ENABLED=False. Future requests
+dependency declaration is frozen for implementation only; no dependency edit now.
+
+Foreign tree `tests/unit/reasoning/`: **E. INSUFFICIENT_EVIDENCE**; outside Sprint 42,
+untracked/unstaged/unmodified, no add/delete decision. Protected custody restored:
+no content reread, execution/import, collection, lint, staging, moving or deletion.
+Only hash checks permitted; entire tree excluded before governed collection/lint.
+Known-file SHA-256:
+`45CF806561DB59828555A0A14DB7C5106B309F3F0B2122C68E5F0C37FBD3C49C`.
+Corrected planning Section D distinguishes remote empty-path history/related test
+at another path from local-only snapshot trees; populated provenance is unestablished.
+
+Sprint 41 remains **FORMALLY CLOSED**, merged/tagged/backed up/recovery verified,
+with completed cleanup; immutable object/peel/tree and historical release truth
+are unchanged. Sprint 40 remains formally closed. No Sprint 42 source/test/dependency
+changes or model installation/download/generation occurred in this contract gate.
+Next gate: independent contract review; HARD STOP after opening the contract PR.
 
 ## Historical Sprint 39 release and Sprint 40 planning checkpoint
 
