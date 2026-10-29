@@ -4,8 +4,10 @@ from dataclasses import fields
 
 import pytest
 
+from app.cognition.intent_preparation.eligibility import assess_eligibility
 from app.cognition.intent_preparation.models import (
     Candidate,
+    EligibilityDecision,
     Intent,
     ProviderOutcome,
     ValidationStatus,
@@ -205,3 +207,63 @@ def test_grounded_command_like_capture_payload_remains_inert_semantic_data() -> 
     assert result.status is ValidationStatus.COMPLETE
     assert result.candidate == candidate
     assert not hasattr(result, "command")
+
+
+@pytest.mark.parametrize(
+    "original,intent,name,value",
+    (
+        ("Nunca conserves café", Intent.CAPTURE_KNOWLEDGE, "value", "café"),
+        ("Recuerda que café", Intent.CAPTURE_KNOWLEDGE, "value", "café"),
+        ("Nunca busques Tema Ágil", Intent.RECALL_KNOWLEDGE, "key", "Tema Ágil"),
+        ("Qué sabes de Tema Ágil", Intent.RECALL_KNOWLEDGE, "key", "Tema Ágil"),
+        ("No incorpora pan a la lista Compras", Intent.ADD_FOLLOW_UP, "item", "pan"),
+        ("No consulta la lista Compras", Intent.READ_FOLLOW_UP, "list_id", "Compras"),
+    ),
+)
+def test_complete_candidate_cannot_substitute_for_original_input_eligibility(
+    original, intent, name, value
+):
+    fields_to_validate = {name: value}
+    if intent is Intent.ADD_FOLLOW_UP:
+        fields_to_validate["list_id"] = "Compras"
+    before = assess_eligibility(original)
+    result = validate_candidate(supported(intent, **fields_to_validate), original)
+    assert result.status is ValidationStatus.COMPLETE
+    assert before.decision is EligibilityDecision.PROTECTED
+    assert assess_eligibility(original) == before
+    assert not {"eligible", "authorized", "trusted", "executable", "command"} & {
+        field.name for field in fields(result)
+    }
+
+
+@pytest.mark.parametrize(
+    "intent,name,original,value",
+    (
+        (Intent.CAPTURE_KNOWLEDGE, "value", "Conserva café", "café"),
+        (Intent.RECALL_KNOWLEDGE, "key", "Busca Tema Ágil", "Tema Ágil"),
+    ),
+)
+def test_eligibility_does_not_replace_grounding_of_the_exact_original_input(
+    intent, name, original, value
+):
+    candidate = supported(intent, **{name: value})
+    assert assess_eligibility(original).decision is (
+        EligibilityDecision.ELIGIBLE_UNRECOGNIZED
+    )
+    assert validate_candidate(candidate, original).status is ValidationStatus.COMPLETE
+    other_original = "Hola"
+    assert assess_eligibility(other_original).decision is (
+        EligibilityDecision.ELIGIBLE_UNRECOGNIZED
+    )
+    result = validate_candidate(candidate, other_original)
+    assert result.status is ValidationStatus.REJECTED
+    assert result.reason == "non_grounded_field"
+
+
+def test_eligible_unknown_intent_may_receive_closed_unsupported_without_authority():
+    original = "Hola"
+    assert assess_eligibility(original).reason == "safe_unrecognized"
+    result = validate_candidate(Candidate(ProviderOutcome.UNSUPPORTED, None), original)
+    assert result.status is ValidationStatus.REJECTED
+    assert result.reason == "unsupported"
+    assert result.candidate is None

@@ -1,8 +1,7 @@
-"""Pure Sprint 41 safety parity and conservative Sprint 42 eligibility.
+"""Pure Sprint 41 safety parity with Amendment 01 positive eligibility.
 
-The approved contracts freeze no positive paraphrase-recognition vocabulary.
-Consequently every currently decidable input is protected, and otherwise unknown
-text remains protected rather than granting model access from a reason string.
+Eligibility is the complement of the frozen recognition and safety guards, not
+intent recognition, candidate acceptance or execution authority.
 """
 
 import re
@@ -24,6 +23,8 @@ _CONTEXT_WORDS = frozenset(
     ("esto", "eso", "aquello", "ello", "él", "ella", "ellos", "ellas")
 )
 _CONDITIONAL_WORDS = frozenset(("si", "cuando"))
+_NEGATION_WORDS = frozenset(("no", "nunca", "jamás", "tampoco"))
+_INHIBITORY_PREFIXES = ("evita", "omite", "ignora", "deja de")
 _MULTIPLE_ACTIONS = re.compile(
     r"( y también | y | luego | después | entonces |; |\. |! |\? |"
     r"\r\n[ \t]*|[\r\n][ \t]*)"
@@ -183,17 +184,21 @@ def _recognition_reason(recognized: _Recognition) -> str:
 
 
 def assess_eligibility(text: object) -> EligibilityResult:
-    """Independently protect recognized/safety/unknown input; grant no authority.
+    """Decide only whether the original text passes every frozen guard.
 
     No caller-supplied reason, recognition flag or eligibility assertion is used.
-    Positive eligibility needs a separately frozen deterministic rule; the closed
-    eligible_unrecognized domain value is intentionally not produced in Block A.
+    A safe unrecognized request may still have no supported semantic intent.
+    Consent, candidate validation and execution remain separate boundaries.
     """
     reason = _protected_reason(text)
-    return EligibilityResult(EligibilityDecision.PROTECTED, reason)
+    if reason is not None:
+        return EligibilityResult(EligibilityDecision.PROTECTED, reason)
+    return EligibilityResult(
+        EligibilityDecision.ELIGIBLE_UNRECOGNIZED, "safe_unrecognized"
+    )
 
 
-def _protected_reason(text: object) -> str:
+def _protected_reason(text: object) -> str | None:
     if not is_bounded_input(text):
         return "invalid_input"
     assert isinstance(text, str)
@@ -204,7 +209,7 @@ def _protected_reason(text: object) -> str:
     # Preserve Sprint 41 precedence: recognized conditional payload wins first.
     if isinstance(recognized, _Recognition) and conditional:
         return "conditional_request"
-    if _starts_bounded(compared, ("no", "si", "cuando")) or (
+    if _starts_bounded(compared, ("si", "cuando")) or (
         compared.startswith(('"', "“", "por ejemplo:"))
     ):
         return "unsupported_request"
@@ -229,4 +234,23 @@ def _protected_reason(text: object) -> str:
     # Sprint 42 also protects conditions outside the recognized positive corpus.
     if conditional:
         return "conditional_request"
-    return "unproven_paraphrase"
+    # Apply the existing ADD/READ destination ambiguity structures even when the
+    # surrounding verb is unrecognized. This adds no intent-recognition corpus.
+    add_destinations = len(tuple(_DESTINATIONS.finditer(compared)))
+    add_destinations += int(compared.endswith(" a la lista"))
+    # Match READ's existing independently optional question wrappers only.
+    read_source = compared[1:] if compared.startswith("¿") else compared
+    if read_source.endswith("?"):
+        read_source = read_source[:-1]
+    read_destinations = len(
+        tuple(re.finditer(r"(?<![^ ])la lista(?= |$)", read_source))
+    )
+    if add_destinations > 1 or read_destinations > 1:
+        return "ambiguous_structure"
+    # Amendment 01 section 5.1: no quote exemption and exactly one ASCII space
+    # within deja de. Recognized payloads have already returned above.
+    if _has_standalone(compared, _NEGATION_WORDS) or _starts_bounded(
+        compared, _INHIBITORY_PREFIXES
+    ):
+        return "negation_guard"
+    return None

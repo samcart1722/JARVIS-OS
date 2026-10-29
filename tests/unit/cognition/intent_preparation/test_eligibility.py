@@ -1,4 +1,4 @@
-"""Frozen corpus/safety parity; no positive paraphrase behavior is invented."""
+"""Frozen safety parity and Amendment 01 guard-complement eligibility."""
 
 from itertools import product
 
@@ -110,9 +110,6 @@ def test_code_point_budget_includes_original_outer_whitespace():
 @pytest.mark.parametrize(
     "text",
     (
-        "No recuerdes que X",
-        "NO",
-        "no!",
         "Si recuerda que X",
         "si",
         "SI",
@@ -122,7 +119,7 @@ def test_code_point_budget_includes_original_outer_whitespace():
         "cuando(X)",
     ),
 )
-def test_bounded_top_level_negation_and_conditions_are_protected(text):
+def test_bounded_top_level_conditions_are_protected(text):
     assert_protected(text, "unsupported_request")
 
 
@@ -130,7 +127,7 @@ def test_bounded_top_level_negation_and_conditions_are_protected(text):
     "text", ("notable", "noche", "sin", "silencio", "cuando2", "si²", "noél")
 )
 def test_bounded_prefix_does_not_broaden_into_other_words(text):
-    assert_protected(text, "unproven_paraphrase")
+    assert_eligible(text)
 
 
 @pytest.mark.parametrize(
@@ -317,7 +314,7 @@ def test_direct_namespace_even_malformed_is_protected(namespace, suffix):
 
 @pytest.mark.parametrize("text", ("knowledgeable", "listing", "knowledge: x", "list-x"))
 def test_namespace_is_bounded_by_whitespace_or_end_only(text):
-    assert_protected(text, "unproven_paraphrase")
+    assert_eligible(text)
 
 
 @pytest.mark.parametrize(
@@ -339,17 +336,219 @@ def test_namespace_is_bounded_by_whitespace_or_end_only(text):
         "¿Muéstrame la lista L?",
         "¿Recuerda que X?",
         "Dime qué sabes de K",
-        "texto no demostrado",
         "\ufeffQué sabes de K\u200b",
     ),
 )
-def test_uncertain_or_unlisted_text_never_invents_positive_eligibility(text):
-    assert_protected(text, "unproven_paraphrase")
+def test_semantic_non_recognition_alone_does_not_protect_text(text):
+    assert_eligible(text)
 
 
-def test_safety_precedence_matches_sprint_41_before_unknown_default():
+def test_safety_precedence_keeps_stronger_guards_before_unrecognized_negation():
     assert_protected("Recuerda que si X y agrega Y", "conditional_request")
     assert_protected('"Recuerda que esto y agrega Y"', "unsupported_request")
     assert_protected("Recuerda que esto y agrega Y", "multiple_actions")
     assert_protected("Agrega esto a la lista L a la lista Q", "context_reference")
-    assert_protected("No X y agrega Y", "unsupported_request")
+    assert_protected("No X y agrega Y", "multiple_actions")
+
+
+def assert_eligible(text: str) -> None:
+    result = assess_eligibility(text)
+    assert result.decision is EligibilityDecision.ELIGIBLE_UNRECOGNIZED
+    assert result.reason == "safe_unrecognized"
+    assert assess_eligibility(text) == result
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "Conserva café molido",
+        "Busca Tema Ágil",
+        "Incorpora pan a la lista Compras",
+        "Consulta la lista Compras",
+        "Hola",
+    ),
+)
+def test_amendment_examples_are_eligible_without_recognizing_an_intent(text):
+    # Amendment 01 sections 4-8: these illustrate guard complement, not templates.
+    assert_eligible(text)
+
+
+@pytest.mark.parametrize("edge", tuple(EDGE_WHITESPACE))
+def test_positive_eligibility_uses_frozen_outer_whitespace(edge):
+    assert_eligible(f"{edge}Hola{edge}")
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "Nunca recuerdes X",
+        "Jamás guardes X",
+        "Tampoco conserves X",
+        "No quiero que recuerdes X",
+        "Evita guardar X",
+        "Omite recordar X",
+        "Ignora conservar X",
+        "Deja de guardar X",
+        "No recuerdes que X",
+        "NO",
+        "no!",
+        "texto no demostrado",
+        'Conserva la palabra "nunca"',
+        "Conserva la palabra “jamás”",
+    ),
+)
+def test_amendment_unrecognized_negation_is_protected(text):
+    assert_protected(text, "negation_guard")
+
+
+@pytest.mark.parametrize("word", ("no", "nunca", "jamás", "tampoco"))
+@pytest.mark.parametrize("boundary", ("", " ", "_", "-", "(", "\u0301"))
+def test_negation_standalone_boundaries_use_unicode_letters_and_numbers(word, boundary):
+    assert_protected(f"Conserva {boundary}{word.upper()}{boundary}", "negation_guard")
+
+
+@pytest.mark.parametrize("word", ("no", "nunca", "jamás", "tampoco"))
+@pytest.mark.parametrize("adjacent", ("X", "é", "𝒜", "2", "²", "𝟙"))
+@pytest.mark.parametrize("side", ("left", "right"))
+def test_negation_does_not_match_inside_unicode_letter_or_number_words(
+    word, adjacent, side
+):
+    value = adjacent + word if side == "left" else word + adjacent
+    assert_eligible(f"Conserva {value}")
+
+
+@pytest.mark.parametrize("phrase", ("evita", "omite", "ignora", "deja de"))
+@pytest.mark.parametrize("suffix", ("", " X", ":X", "_X", "(X)", "\u0301X"))
+def test_inhibitory_phrases_use_bounded_leading_matching(phrase, suffix):
+    assert_protected(f"\u3000{phrase.upper()}{suffix}\u0085", "negation_guard")
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "notable",
+        "nunca2",
+        "jamásX",
+        "tampoco9",
+        "evitable",
+        "omitente",
+        "ignorado",
+        "dejadero",
+        "deja de2",
+        "deja deX",
+        "deja  de guardar X",
+        "deja\tde guardar X",
+        "deja\u00a0de guardar X",
+        "deja\nde guardar X",
+        "Conserva evita guardar X",
+        "Conserva omite recordar X",
+        "Conserva ignora conservar X",
+        "Conserva deja de guardar X",
+        "jamas guardes X",
+        "jama\u0301s guardes X",
+        "sin",
+        "ni",
+    ),
+)
+def test_no_stems_normalization_or_additional_negation_vocabulary(text):
+    assert_eligible(text)
+
+
+@pytest.mark.parametrize("word", ("No", "Nunca", "Jamás", "Tampoco"))
+def test_recognized_capture_payload_is_not_scanned_for_unrecognized_negation(word):
+    assert_protected(f"Recuerda que {word} entrega", "deterministic_recognized")
+
+
+@pytest.mark.parametrize(
+    "text,reason",
+    (
+        ("Nunca esto", "context_reference"),
+        ("Nunca X y agrega Y", "multiple_actions"),
+        ('"Nunca conserves X"', "unsupported_request"),
+        ("Por ejemplo: Nunca conserves X", "unsupported_request"),
+        ("Nunca conserva X si Y", "conditional_request"),
+        ("knowledge no", "direct_command_namespace"),
+        ("list nunca", "direct_command_namespace"),
+        ("Recuerda que no", "deterministic_recognized"),
+        ("Agrega no a mis pendientes", "deterministic_clarification"),
+    ),
+)
+def test_existing_guards_and_recognition_precede_new_negation(text, reason):
+    assert_protected(text, reason)
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "Incorpora pan a la lista Compras a la lista Hogar",
+        "Incorpora pan a la lista Compras a mis pendientes",
+        "Incorpora pan a la lista Compras a la lista",
+        "Consulta la lista Compras y la lista Hogar",
+    ),
+)
+def test_unrecognized_verbs_cannot_bypass_frozen_destination_ambiguity(text):
+    assert_protected(text, "ambiguous_structure")
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        'Conserva " y agrega pan"',
+        "Conserva “ y agrega pan”",
+    ),
+)
+def test_quoted_multi_action_suppression_can_reach_positive_eligibility(text):
+    assert_eligible(text)
+
+
+def test_original_code_point_limit_applies_before_positive_eligibility():
+    assert_eligible("😀" * 8192)
+    assert_protected("😀" * 8193, "invalid_input")
+    assert_protected(" " + "😀" * 8192, "invalid_input")
+
+
+@pytest.mark.parametrize("left,right", tuple(product(("", "¿"), ("", "?"))))
+def test_read_destination_ambiguity_preserves_optional_question_wrappers(left, right):
+    assert_protected(
+        f"{left}la lista Compras y la lista Hogar{right}", "ambiguous_structure"
+    )
+
+
+@pytest.mark.parametrize("left,right", tuple(product(("", "¿"), ("", "?"))))
+def test_single_read_destination_remains_eligible_with_question_wrappers(left, right):
+    assert_eligible(f"{left}la lista Compras{right}")
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "¿¿la lista Compras y la lista Hogar?",
+        "texto¿la lista Compras y la lista Hogar?",
+        "?la lista Compras y la lista Hogar?",
+        "¿la\tlista Compras y la lista Hogar?",
+        "¿la listas Compras y la lista Hogar?",
+    ),
+)
+def test_read_wrapper_correction_does_not_broaden_destination_boundaries(text):
+    assert_eligible(text)
+
+
+@pytest.mark.parametrize(
+    "text,reason",
+    (
+        ("¿la lista Compras y la lista?", "ambiguous_structure"),
+        ("\u3000¿LA LISTA Compras y LA LISTA Hogar?\u0085", "ambiguous_structure"),
+        ('"¿la lista Compras y la lista Hogar?"', "unsupported_request"),
+        ("Por ejemplo: ¿la lista Compras y la lista Hogar?", "unsupported_request"),
+        ("¿la lista Compras y la lista Hogar? y agrega pan", "multiple_actions"),
+        ("¿la lista Compras y la lista Hogar esto?", "context_reference"),
+        ("¿la lista Compras y la lista Hogar si X?", "conditional_request"),
+        (
+            "Recuerda que ¿la lista Compras y la lista Hogar?",
+            "deterministic_recognized",
+        ),
+        ("knowledge ¿la lista Compras y la lista Hogar?", "direct_command_namespace"),
+    ),
+)
+def test_read_destination_wrapper_correction_preserves_frozen_precedence(text, reason):
+    assert_protected(text, reason)
