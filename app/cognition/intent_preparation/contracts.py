@@ -12,3 +12,11 @@ class IntentPreparationProvider(Protocol):
         and deterministic validation complete. This port invokes no provider here.
         """
         ...
+
+
+class PreparationProviderUnavailable(RuntimeError):
+    """Sanitized absent local service/model/configuration outcome."""
+
+
+class PreparationProviderFailure(RuntimeError):
+    """Sanitized bounded local-provider failure."""

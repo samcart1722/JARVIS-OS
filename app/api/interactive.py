@@ -7,8 +7,14 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.api.routes.intent_preparation import create_intent_preparation_router
 from app.api.routes.local_command import router as local_command_router
 from app.api.routes.local_ui import create_local_ui_router
+from app.cognition.intent_preparation.contracts import IntentPreparationProvider
+from app.cognition.intent_preparation.service import IntentPreparationService
+from app.cognition.providers.ollama_intent_preparation import (
+    OllamaIntentPreparationProvider,
+)
 from app.operations.local_interactive_runtime import LocalInteractiveRuntime
 
 _GATEWAY_STATE_KEY = "local_command_application_gateway"
@@ -78,7 +84,10 @@ class _StrictInteractiveTransportPolicy:
             await self._reject(scope, receive, send, 400)
             return
 
-        if scope["method"] == "POST" and scope["path"] == "/local/command":
+        if scope["method"] == "POST" and scope["path"] in (
+            "/local/command",
+            "/local/intent-preparation",
+        ):
             if _single_header(scope, b"origin") != ORIGIN_VALUE:
                 await self._reject(scope, receive, send, 403)
                 return
@@ -90,9 +99,8 @@ class _StrictInteractiveTransportPolicy:
             supplied_csrf = _single_header(scope, b"x-luxiom-csrf")
             try:
                 expected_csrf = self._runtime.csrf_token
-                csrf_matches = (
-                    supplied_csrf is not None
-                    and compare_digest(supplied_csrf, expected_csrf)
+                csrf_matches = supplied_csrf is not None and compare_digest(
+                    supplied_csrf, expected_csrf
                 )
             except Exception:
                 csrf_matches = False
@@ -118,6 +126,10 @@ class _StrictInteractiveTransportPolicy:
 
 def create_local_interactive_app(
     runtime: LocalInteractiveRuntime,
+    *,
+    intent_preparation_provider: IntentPreparationProvider | None = None,
+    intent_preparation_url: str | None = None,
+    intent_preparation_model: str | None = None,
 ) -> FastAPI:
     """Create an inert interactive app whose lifespan owns one runtime."""
 
@@ -134,6 +146,14 @@ def create_local_interactive_app(
 
     app = FastAPI(lifespan=lifespan)
     app.add_middleware(_StrictInteractiveTransportPolicy, runtime=runtime)
+    provider = intent_preparation_provider
+    if provider is None:
+        provider = OllamaIntentPreparationProvider(
+            intent_preparation_url, intent_preparation_model
+        )
+    app.include_router(
+        create_intent_preparation_router(IntentPreparationService(provider))
+    )
     app.include_router(local_command_router)
     app.include_router(create_local_ui_router(lambda: runtime.csrf_token))
     return app

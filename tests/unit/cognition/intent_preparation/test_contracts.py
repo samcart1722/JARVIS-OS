@@ -35,7 +35,7 @@ def test_specialized_provider_is_minimal_structural_protocol() -> None:
 def test_core_package_imports_only_standard_library_and_its_own_capability() -> None:
     package = Path(__file__).resolve().parents[4] / "app/cognition/intent_preparation"
     sources = sorted(package.glob("*.py"))
-    assert len(sources) == 7
+    assert len(sources) == 8
     for source in sources:
         tree = ast.parse(source.read_text(encoding="utf-8-sig"))
         for node in ast.walk(tree):
