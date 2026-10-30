@@ -80,9 +80,7 @@ async def _request(
     }
     await app(scope, receive, cast(Any, send))
     start = next(
-        message
-        for message in messages
-        if message["type"] == "http.response.start"
+        message for message in messages if message["type"] == "http.response.start"
     )
     response_headers = {
         cast(bytes, name).decode().lower(): cast(bytes, value).decode()
@@ -324,9 +322,7 @@ def test_ui_document_is_csp_compatible_and_has_minimal_controls(
     assert "provenance" not in results.lower()
     assert "source_type" not in results
     assert "source_reference" not in results
-    assert {"status", "route", "response", "error"} <= set(
-        parsed.elements_by_id
-    )
+    assert {"status", "route", "response", "error"} <= set(parsed.elements_by_id)
     assert "http://" not in document
     assert "https://" not in document
 
@@ -345,7 +341,8 @@ def test_static_sources_follow_browser_security_contract() -> None:
     assert 'fetch("/local/command"' in script
     assert "allow_cognitive_fallback: fallbackInput.checked" in script
     assert script.index("JSON.stringify") < script.index('proofInput.value = ""')
-    assert script.index('proofInput.value = ""') < script.index("fetch(")
+    send = script[script.index('form.addEventListener("submit"') :]
+    assert send.index('proofInput.value = ""') < send.index("fetch(")
     assert ".textContent" in script
     assert "document.createElement" in script
     assert "replaceChildren" in script
@@ -375,9 +372,7 @@ def test_knowledge_assistance_is_separate_from_explicit_send() -> None:
     helper = html.split('id="knowledge-assistance"', 1)[1].split(
         '<form id="command-form">', 1
     )[0]
-    command_form = html.split('<form id="command-form">', 1)[1].split(
-        "</form>", 1
-    )[0]
+    command_form = html.split('<form id="command-form">', 1)[1].split("</form>", 1)[0]
     assert 'id="prepare-command" type="button"' in helper
     assert "assist-" not in command_form
     assert 'id="send-command" type="submit"' in command_form
@@ -441,18 +436,32 @@ def test_browse_ui_vectors_match_real_interpreter_without_id_rewriting() -> None
         pytest.skip("Installed Node required for actual UI JavaScript verification")
     completed = subprocess.run(
         [node, "tests/browser/local_knowledge_browse.js"],
-        check=True, capture_output=True, encoding="utf-8", timeout=30,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["environment"] == "node-dom-double"
     assert evidence["actualRequests"] == 0
     assert {
-        "preparation", "replacement", "states", "literal-metadata", "selection",
-        "limits", "error-preservation", "stale-results", "no-fetch", "send",
-        "pending", "regression", "invalid-projection",
+        "preparation",
+        "replacement",
+        "states",
+        "literal-metadata",
+        "selection",
+        "limits",
+        "error-preservation",
+        "stale-results",
+        "no-fetch",
+        "send",
+        "pending",
+        "regression",
+        "invalid-projection",
     } <= set(evidence["categories"])
     assert {vector["operation"] for vector in evidence["vectors"]} == {
-        "browse", "read",
+        "browse",
+        "read",
     }
     interpreter = DeterministicLocalCommandInterpreter()
     for vector in evidence["vectors"]:
@@ -474,8 +483,8 @@ def test_browse_preparation_controls_do_not_submit_or_add_assets() -> None:
     assert html.index('id="prepare-browse"') < html.index('<form id="command-form">')
     assert 'button.type = "button"' in script
     assert "prepareGuidedRecallRead(recordId)" in script
-    assert 'text: commandInput.value' in script
-    assert 'const recordId = record.record_id' in script
+    assert "text: commandInput.value" in script
+    assert "const recordId = record.record_id" in script
     assert "No knowledge records in this workspace." in script
     assert (
         "Showing up to 50 records by ID. More records exist; "
@@ -486,8 +495,9 @@ def test_browse_preparation_controls_do_not_submit_or_add_assets() -> None:
 def test_list_projection_script_has_closed_safe_rendering_contract() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     rendering = script[
-        script.index("function renderListProjection"):
-        script.index("function isKnowledgeRecord")
+        script.index("function renderListProjection") : script.index(
+            "function isKnowledgeRecord"
+        )
     ]
 
     assert 'projection?.kind !== "list"' in rendering
@@ -516,9 +526,7 @@ def test_projection_hidden_state_overrides_visible_grid_layout() -> None:
     )
     visible_position = css.index(visible_rule)
     hidden_position = css.index(hidden_selector)
-    hidden_rule = css[
-        hidden_position:css.index("}", hidden_position)
-    ]
+    hidden_rule = css[hidden_position : css.index("}", hidden_position)]
 
     assert hidden_position > visible_position
     assert "display: none;" in hidden_rule
@@ -534,29 +542,31 @@ def test_all_projections_are_cleared_before_submit_can_exit_or_fetch() -> None:
 
     assert submit < prevent < clear < csrf < fetch
     draft_clearing = script[
-        script.index("function clearDraftResults"):
-        script.index("function updatePreparationButton")
+        script.index("function clearDraftResults") : script.index(
+            "function updatePreparationButton"
+        )
     ]
     assert "clearAllProjections();" in draft_clearing
     assert "function clearAllProjections() {" in script
     clear_all = script[
-        script.index("function clearAllProjections() {"):
-        script.index("function renderCollection")
+        script.index("function clearAllProjections() {") : script.index(
+            "function renderCollection"
+        )
     ]
     assert "clearListProjection();" in clear_all
     assert "clearKnowledgeProjection();" in clear_all
     assert "function renderLocalFailure() {\n  clearAllProjections();" in script
     assert (
-        "function renderListProjection(projection) {\n"
-        "  clearListProjection();"
+        "function renderListProjection(projection) {\n  clearListProjection();"
     ) in script
 
 
 def test_knowledge_projection_has_closed_literal_rendering_contract() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     rendering = script[
-        script.index("function isKnowledgeRecord"):
-        script.index("function renderResult")
+        script.index("function isKnowledgeRecord") : script.index(
+            "function renderResult"
+        )
     ]
 
     assert 'projection?.kind !== "knowledge"' in rendering
@@ -571,8 +581,7 @@ def test_knowledge_projection_has_closed_literal_rendering_contract() -> None:
     assert 'knowledgeOperation.textContent = "Find"' in rendering
     assert 'knowledgeOperation.textContent = "Found"' not in rendering
     assert (
-        'knowledgeCreated.textContent = projection.created ? "Yes" : "No"'
-        in rendering
+        'knowledgeCreated.textContent = projection.created ? "Yes" : "No"' in rendering
     )
     assert "knowledgeCreated.textContent = String(projection.created)" not in rendering
     assert 'knowledgeCreated.textContent = ""' in rendering
@@ -592,8 +601,9 @@ def test_empty_truncated_and_stale_knowledge_states_are_explicit() -> None:
     html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     clearing = script[
-        script.index("function clearKnowledgeProjection"):
-        script.index("function clearAllProjections")
+        script.index("function clearKnowledgeProjection") : script.index(
+            "function clearAllProjections"
+        )
     ]
 
     assert "No matching knowledge records." in html
@@ -609,8 +619,9 @@ def test_empty_truncated_and_stale_knowledge_states_are_explicit() -> None:
 def test_result_dispatch_clears_then_isolates_projection_families() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     rendering = script[
-        script.index("function renderResult"):
-        script.index("function renderLocalFailure")
+        script.index("function renderResult") : script.index(
+            "function renderLocalFailure"
+        )
     ]
 
     assert rendering.index("clearAllProjections();") < rendering.index(
@@ -764,7 +775,10 @@ def test_guided_follow_up_harness_and_interpreter_parity() -> None:
         pytest.skip("Installed Node required for Sprint 40 UI verification")
     completed = subprocess.run(
         [node, "tests/browser/local_guided_capture_recall_action.js", "--follow-up"],
-        check=True, capture_output=True, encoding="utf-8", timeout=30,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["passed"] == 134
@@ -772,13 +786,36 @@ def test_guided_follow_up_harness_and_interpreter_parity() -> None:
     assert evidence["mockedFetchCalls"] == evidence["explicitSubmissions"] == 28
     assert evidence["nativeBrowserVerified"] is False
     assert {
-        "precondition", "preparation", "delimiter-collision", "item-separator",
-        "list-id-whitespace", "blank", "unicode", "whitespace", "pending",
-        "added", "already-present", "manual-edit", "retry", "replacement",
-        "malformed", "wrong-list", "absent-item", "exact-spelling", "failure",
-        "unrelated", "wrong-operation", "network-failure", "reset",
-        "no-hidden-send", "exact-editor", "prepared-edit", "operation-replacement",
-        "types", "length", "unicode-rejection",
+        "precondition",
+        "preparation",
+        "delimiter-collision",
+        "item-separator",
+        "list-id-whitespace",
+        "blank",
+        "unicode",
+        "whitespace",
+        "pending",
+        "added",
+        "already-present",
+        "manual-edit",
+        "retry",
+        "replacement",
+        "malformed",
+        "wrong-list",
+        "absent-item",
+        "exact-spelling",
+        "failure",
+        "unrelated",
+        "wrong-operation",
+        "network-failure",
+        "reset",
+        "no-hidden-send",
+        "exact-editor",
+        "prepared-edit",
+        "operation-replacement",
+        "types",
+        "length",
+        "unicode-rejection",
     } == set(evidence["categories"])
 
     interpreter = DeterministicLocalCommandInterpreter()
@@ -792,7 +829,8 @@ def test_guided_follow_up_harness_and_interpreter_parity() -> None:
 
     # The first :: wins: without the UI guard the intended ID and item change.
     collision = interpreter.interpret(
-        "list add project::tasks :: Call pharmacy tomorrow", workspace,
+        "list add project::tasks :: Call pharmacy tomorrow",
+        workspace,
     )
     assert isinstance(collision.intent, AddListItemsCommand)
     assert collision.intent.list_id == "project"
@@ -955,18 +993,33 @@ def test_browse_after_ui_harness_and_real_interpreter_parity() -> None:
     assert node is not None, "Node is required for Sprint 39 Block E verification"
     completed = subprocess.run(
         [node, "tests/browser/local_knowledge_browse_after.js"],
-        check=True, capture_output=True, encoding="utf-8", timeout=30,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["environment"] == "node-dom-double"
     assert evidence["actualRequests"] == 0
     assert evidence["nativeKeyboardVerified"] is False
     assert {
-        "initial-browse", "explicit-send", "continuation-render", "next-page",
-        "prepare-no-fetch", "keyboard-focus", "stale-controls", "final-page",
-        "read-continuation", "flow-101", "empty", "unicode-escaping",
-        "length-boundaries", "failure-preservation", "pending",
-        "disconnect-recovery", "visibility",
+        "initial-browse",
+        "explicit-send",
+        "continuation-render",
+        "next-page",
+        "prepare-no-fetch",
+        "keyboard-focus",
+        "stale-controls",
+        "final-page",
+        "read-continuation",
+        "flow-101",
+        "empty",
+        "unicode-escaping",
+        "length-boundaries",
+        "failure-preservation",
+        "pending",
+        "disconnect-recovery",
+        "visibility",
     } == set(evidence["categories"])
     interpreter = DeterministicLocalCommandInterpreter()
     lengths = set()
@@ -989,14 +1042,15 @@ def test_browse_after_uses_existing_accessible_preparation_boundary() -> None:
     assert 'id="preparation-status" role="status"' in html
     assert 'id="preparation-error" role="alert"' in html
     action = script[
-        script.index("function renderNextPageAction"):
-        script.index("function clearDraftResults")
+        script.index("function renderNextPageAction") : script.index(
+            "function clearDraftResults"
+        )
     ]
     assert 'button.type = "button"' in action
-    assert 'const anchor = records[records.length - 1].record_id' in action
-    assert 'prepareGuidedRecallQuery(' in action
+    assert "const anchor = records[records.length - 1].record_id" in action
+    assert "prepareGuidedRecallQuery(" in action
     assert '"browse-after"' in action
-    assert '{ after_record_id: anchor }' in action
+    assert "{ after_record_id: anchor }" in action
     assert "fetch(" not in action
     assert "keydown" not in action and "keyup" not in action
     assert ".trim(" not in script and ".normalize(" not in script
@@ -1010,7 +1064,10 @@ def test_guided_verify_harness_and_real_interpreter_parity() -> None:
     assert node is not None, "Node is required for Block D verification"
     completed = subprocess.run(
         [node, "tests/browser/local_guided_capture_recall_action.js", "--verify"],
-        check=True, capture_output=True, encoding="utf-8", timeout=30,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["passed"] == 199
@@ -1019,18 +1076,41 @@ def test_guided_verify_harness_and_real_interpreter_parity() -> None:
     assert evidence["nativeBrowserVerified"] is False
     assert evidence["nativeKeyboardVerified"] is False
     assert {
-        "precondition", "no-hidden-send", "exact-editor", "retained-context",
-        "preparation", "stale-projection", "pending", "ascii", "completion",
-        "stable", "missing-item", "wrong-list", "failure", "malformed",
-        "unrelated", "wrong-operation", "network-failure", "manual-edit",
-        "retry", "dependent-invalidation", "sharp-s", "sigma", "ligature",
-        "dotted-i", "negative", "no-trimming", "no-normalization",
-        "replacement", "reset",
+        "precondition",
+        "no-hidden-send",
+        "exact-editor",
+        "retained-context",
+        "preparation",
+        "stale-projection",
+        "pending",
+        "ascii",
+        "completion",
+        "stable",
+        "missing-item",
+        "wrong-list",
+        "failure",
+        "malformed",
+        "unrelated",
+        "wrong-operation",
+        "network-failure",
+        "manual-edit",
+        "retry",
+        "dependent-invalidation",
+        "sharp-s",
+        "sigma",
+        "ligature",
+        "dotted-i",
+        "negative",
+        "no-trimming",
+        "no-normalization",
+        "replacement",
+        "reset",
     } == set(evidence["categories"])
     interpreter = DeterministicLocalCommandInterpreter()
     for vector in evidence["vectors"]:
         result = interpreter.interpret(
-            vector["command"], WorkspaceIdentity("sprint40-block-d-test-only"),
+            vector["command"],
+            WorkspaceIdentity("sprint40-block-d-test-only"),
         )
         assert result.status.value == "interpreted"
         assert isinstance(result.intent, ReadListItemsQuery)
@@ -1048,19 +1128,30 @@ def test_browser_casefold_matches_current_python_runtime() -> None:
     # Derive the complete non-identity mapping from this interpreter, including
     # supplementary planes. This also rejects extra mappings for identity points.
     mapping = {
-        str(point): chr(point).casefold() for point in range(0x110000)
+        str(point): chr(point).casefold()
+        for point in range(0x110000)
         if chr(point).casefold() != chr(point)
     }
     vectors = [
-        ("GRAPES", "grapes"), ("Stra\u00dfe", "STRASSE"),
-        ("\u03a3", "\u03c2"), ("\u03c2", "\u03c3"),
-        ("o\ufb03ce", "OFFICE"), ("\u0130", "i\u0307"),
-        ("\u212a", "k"), ("\u1e9e", "ss"),
-        ("\U00010400", "\U00010428"), ("\u13a0", "\uab70"),
-        ("\u00e9", "e\u0301"), ("grape", "grapes"),
-        (" grapes", "grapes"), ("grapes\n", "grapes"),
-        ("I", "\u0131"), ("\u0130", "i"), ("", ""),
-        ("\ud800", "\ud800"), ("\U0001f347", "\U0001f347"),
+        ("GRAPES", "grapes"),
+        ("Stra\u00dfe", "STRASSE"),
+        ("\u03a3", "\u03c2"),
+        ("\u03c2", "\u03c3"),
+        ("o\ufb03ce", "OFFICE"),
+        ("\u0130", "i\u0307"),
+        ("\u212a", "k"),
+        ("\u1e9e", "ss"),
+        ("\U00010400", "\U00010428"),
+        ("\u13a0", "\uab70"),
+        ("\u00e9", "e\u0301"),
+        ("grape", "grapes"),
+        (" grapes", "grapes"),
+        ("grapes\n", "grapes"),
+        ("I", "\u0131"),
+        ("\u0130", "i"),
+        ("", ""),
+        ("\ud800", "\ud800"),
+        ("\U0001f347", "\U0001f347"),
         ("\ufeffgrapes", "grapes"),
     ]
     for point, folded in mapping.items():
@@ -1068,10 +1159,16 @@ def test_browser_casefold_matches_current_python_runtime() -> None:
     node = shutil.which("node")
     assert node is not None, "Node is required for Python/browser casefold parity"
     completed = subprocess.run(
-        [node, "tests/browser/local_guided_capture_recall_action.js",
-         "--casefold-parity"],
-        input=json.dumps(vectors, ensure_ascii=True), check=True,
-        capture_output=True, encoding="utf-8", timeout=30,
+        [
+            node,
+            "tests/browser/local_guided_capture_recall_action.js",
+            "--casefold-parity",
+        ],
+        input=json.dumps(vectors, ensure_ascii=True),
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["mapping"] == mapping
@@ -1096,21 +1193,49 @@ def test_bounded_intent_preparer_purity_and_real_interpreter_parity() -> None:
     assert node is not None, "Node is required for Sprint 41 Block A verification"
     completed = subprocess.run(
         [node, "tests/browser/local_bounded_natural_language_intent_preparation.js"],
-        check=True, capture_output=True, encoding="utf-8", timeout=30,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["environment"] == "node-dom-double"
     assert evidence["actualRequests"] == evidence["forbiddenAccesses"] == 0
     assert evidence["nativeBrowserVerified"] is False
     assert {
-        "corpus", "wrappers", "generic-add", "generic-read", "capture-metadata",
-        "no-invention", "kinds", "invalid-kind", "conflicts", "merge-trimming",
-        "blank-explicit", "own-properties", "ordered-fields", "empty-placeholders",
-        "rejection", "negation", "standalone", "list-validation", "item-validation",
-        "python-whitespace", "explicit-surrogate", "multi-action-matrix",
-        "quoted-matrix", "quote-escapes", "unlisted-guard", "literal-preservation",
-        "input-length", "command-length", "json-escape-budget", "purity",
-        "determinism", "closed-result", "serialization",
+        "corpus",
+        "wrappers",
+        "generic-add",
+        "generic-read",
+        "capture-metadata",
+        "no-invention",
+        "kinds",
+        "invalid-kind",
+        "conflicts",
+        "merge-trimming",
+        "blank-explicit",
+        "own-properties",
+        "ordered-fields",
+        "empty-placeholders",
+        "rejection",
+        "negation",
+        "standalone",
+        "list-validation",
+        "item-validation",
+        "python-whitespace",
+        "explicit-surrogate",
+        "multi-action-matrix",
+        "quoted-matrix",
+        "quote-escapes",
+        "unlisted-guard",
+        "literal-preservation",
+        "input-length",
+        "command-length",
+        "json-escape-budget",
+        "purity",
+        "determinism",
+        "closed-result",
+        "serialization",
     } <= set(evidence["categories"])
     types = {
         "CAPTURE_KNOWLEDGE": StoreKnowledgeRecordCommand,
@@ -1137,7 +1262,12 @@ def test_bounded_intent_preparer_purity_and_real_interpreter_parity() -> None:
             for field in ("source_type", "source_reference"):
                 assert getattr(record.provenance, field) == fields[field].strip()
             assert list(json.loads(command.split(" :: ", 1)[1])) == [
-                "record_id", "kind", "key", "value", "source_type", "source_reference",
+                "record_id",
+                "kind",
+                "key",
+                "value",
+                "source_type",
+                "source_reference",
             ]
         elif isinstance(intent, FindKnowledgeRecordsQuery):
             assert intent.key == fields["key"].strip()
@@ -1175,20 +1305,27 @@ def test_bounded_intent_ui_structure_and_accessible_controls() -> None:
     assert natural_input["autocomplete"] == "off"
     assert natural_input["aria-describedby"] == "natural-intent-help"
     assert '<label for="natural-intent-input">' in panel
-    assert "Interpret / Prepare performs no request." in panel
+    assert "Deterministic preparation runs first." in panel
     assert "Send remains separate and governed." in panel
     assert parsed.elements_by_id["natural-intent-status"]["role"] == "status"
     assert "No natural-language proposal is active." in panel
     assert "hidden" in parsed.elements_by_id["natural-intent-result"]
     assert parsed.elements_by_id["natural-intent-clarification"]["role"] == "alert"
     for suffix in (
-        "outcome", "detected-intent", "extracted-fields", "final-fields",
-        "missing-fields", "invalid-fields", "conflicting-fields", "reason",
+        "outcome",
+        "detected-intent",
+        "extracted-fields",
+        "final-fields",
+        "missing-fields",
+        "invalid-fields",
+        "conflicting-fields",
+        "reason",
         "clarification",
     ):
         assert f'id="natural-intent-{suffix}"' in panel
     for action, label in (
-        ("prepare", "Interpret / Prepare"), ("reject", "Reject proposal"),
+        ("prepare", "Interpret / Prepare"),
+        ("reject", "Reject proposal"),
     ):
         element_id = f"natural-intent-{action}"
         button = next(item for item in parsed.buttons if item["id"] == element_id)
@@ -1197,8 +1334,14 @@ def test_bounded_intent_ui_structure_and_accessible_controls() -> None:
         assert "tabindex" not in button
     assert "disabled" in parsed.elements_by_id["natural-intent-reject"]
     for field in (
-        "record-id", "kind", "key", "value", "source-type", "source-reference",
-        "list-id", "item",
+        "record-id",
+        "kind",
+        "key",
+        "value",
+        "source-type",
+        "source-reference",
+        "list-id",
+        "item",
     ):
         element_id = f"natural-field-{field}"
         assert "hidden" in parsed.elements_by_id[f"{element_id}-row"]
@@ -1206,32 +1349,47 @@ def test_bounded_intent_ui_structure_and_accessible_controls() -> None:
         assert parsed.elements_by_id[element_id]["autocomplete"] == "off"
         assert f'<label for="{element_id}">' in panel
     kind_select = panel.split('<select id="natural-field-kind"', 1)[1].split(
-        "</select>", 1,
+        "</select>",
+        1,
     )[0]
     assert [part.split('"', 1)[0] for part in kind_select.split('value="')[1:]] == [
-        "", "fact", "concept", "state",
+        "",
+        "fact",
+        "concept",
+        "state",
     ]
     css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
     assert "#natural-intent-panel :focus-visible" in css
     assert "#natural-intent-panel [hidden]" in css
 
 
-def test_bounded_intent_ui_literal_rendering_and_block_c_boundary() -> None:
+def test_bounded_intent_ui_literal_rendering_and_opt_in_boundary() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     natural_ui = script[
-        script.index("// Sprint 41 browser-only proposal lifecycle;"):
-        script.index("function setRequestPending(pending)")
+        script.index("// Sprint 41 browser-only proposal lifecycle;") : script.index(
+            "function setRequestPending(pending)"
+        )
     ]
     assert "prepareBoundedNaturalLanguageIntent(" in natural_ui
     assert "if (!row.hidden && !input.disabled)" in natural_ui
     assert "commandInput.value = result.command" in natural_ui
     assert ".textContent =" in natural_ui
     for forbidden in (
-        "innerHTML", "insertAdjacentHTML", "document.write", "fetch(",
-        "localStorage", "sessionStorage", "indexedDB", ".submit(",
-        ".requestSubmit(", "dispatchEvent(", "invalidateGuidedStage(",
+        "innerHTML",
+        "insertAdjacentHTML",
+        "document.write",
+        "localStorage",
+        "sessionStorage",
+        "indexedDB",
+        ".submit(",
+        ".requestSubmit(",
+        "dispatchEvent(",
+        "invalidateGuidedStage(",
     ):
         assert forbidden not in natural_ui
+    assert natural_ui.count('fetch("/local/intent-preparation"') == 1
+    assert "/local/command" not in natural_ui
+    assert "body: JSON.stringify({ text: original })" in natural_ui
     assert "naturalProposal = null" in natural_ui
     assert "!naturalProposal.manuallyEdited" in natural_ui
     assert "commandInput.value === naturalProposal.generatedCommand" in natural_ui
@@ -1239,14 +1397,16 @@ def test_bounded_intent_ui_literal_rendering_and_block_c_boundary() -> None:
     assert 'naturalIntentInput.addEventListener("input"' in natural_ui
     assert 'input.addEventListener("input", changed)' in natural_ui
     assert 'input.addEventListener("change", changed)' in natural_ui
-    assert 'if (!row.hidden && !input.disabled)' in natural_ui
+    assert "if (!row.hidden && !input.disabled)" in natural_ui
     assert 'markNaturalProposalStale("manual")' in script
     assert 'setAttribute("data-natural-state", "stale")' in natural_ui
-    prepared = natural_ui[natural_ui.index('if (result.outcome === "prepared")'):]
-    assert prepared.index("clearGuidedCorrelationForReplacement();") < (
-        prepared.index("clearDraftResults();")
-    ) < prepared.index("commandInput.value = result.command;")
-    submit = script[script.index('form.addEventListener("submit"'):]
+    prepared = natural_ui[natural_ui.index('if (result.outcome === "prepared")') :]
+    assert (
+        prepared.index("clearGuidedCorrelationForReplacement();")
+        < (prepared.index("clearDraftResults();"))
+        < prepared.index("commandInput.value = result.command;")
+    )
+    submit = script[script.index('form.addEventListener("submit"') :]
     assert "text: commandInput.value" in submit
     assert "prepareBoundedNaturalLanguageIntent(" not in submit
     assert submit.index("if (!csrfToken)") < submit.index("submitNaturalProposal();")
@@ -1258,7 +1418,7 @@ def test_bounded_intent_ui_literal_rendering_and_block_c_boundary() -> None:
     # Every successful non-natural writer is guarded; natural write and Reject
     # have their own fresh/dismissal semantics.
     for writer in (
-        'commandInput.value = `list read ${listId}`;',
+        "commandInput.value = `list read ${listId}`;",
         "commandInput.value = prepared.command;",
         "commandInput.value = preparedCommand;",
     ):
@@ -1267,10 +1427,14 @@ def test_bounded_intent_ui_literal_rendering_and_block_c_boundary() -> None:
         )
     css = (ASSET_ROOT / "styles.css").read_text(encoding="utf-8")
     assert '[data-natural-state="stale"]' in css and "dashed" in css
-    assert "updateNaturalIntentControls();" in script[
-        script.index("function setRequestPending(pending)"):
-        script.index('operationInput.addEventListener("change"')
-    ]
+    assert (
+        "updateNaturalIntentControls();"
+        in script[
+            script.index("function setRequestPending(pending)") : script.index(
+                'operationInput.addEventListener("change"'
+            )
+        ]
+    )
 
 
 def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
@@ -1278,7 +1442,10 @@ def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
     assert node is not None, "Node is required for Sprint 41 UI lifecycle verification"
     completed = subprocess.run(
         [node, "tests/browser/local_bounded_natural_language_intent_ui.js"],
-        check=True, capture_output=True, encoding="utf-8", timeout=30,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence["environment"] == "node-dom-double"
@@ -1288,31 +1455,79 @@ def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
     assert evidence["nativeKeyboardVerified"] is False
     assert evidence["preparationCalls"] > 0
     assert {
-        "structure", "outside-form", "button-semantics", "initial",
-        "real-entrypoint", "capture-clarification", "clarification-controls",
-        "no-default-metadata", "explicit-action", "capture-prepared",
-        "final-fields", "prepared-editor", "reject-available", "reject-discard",
-        "reject-untouched", "unrelated-controls", "generic-clarification",
-        "generic-prepared", "recall", "recall-kind", "visible-explicit-only",
-        "explicit-read", "reject-manual", "reject-manual-state", "reject-edit-back",
-        "reject-different-editor", "nonprepared-preservation", "no-hidden-command",
-        "reject-nonprepared", "invalid-feedback", "conflict-feedback",
-        "literal-rendering", "pending-lock", "pending-no-queue", "pending-restore",
-        "zero-requests", "zero-submit", "no-provider-storage",
+        "structure",
+        "outside-form",
+        "button-semantics",
+        "initial",
+        "real-entrypoint",
+        "capture-clarification",
+        "clarification-controls",
+        "no-default-metadata",
+        "explicit-action",
+        "capture-prepared",
+        "final-fields",
+        "prepared-editor",
+        "reject-available",
+        "reject-discard",
+        "reject-untouched",
+        "unrelated-controls",
+        "generic-clarification",
+        "generic-prepared",
+        "recall",
+        "recall-kind",
+        "visible-explicit-only",
+        "explicit-read",
+        "reject-manual",
+        "reject-manual-state",
+        "reject-edit-back",
+        "reject-different-editor",
+        "nonprepared-preservation",
+        "no-hidden-command",
+        "reject-nonprepared",
+        "invalid-feedback",
+        "conflict-feedback",
+        "literal-rendering",
+        "pending-lock",
+        "pending-no-queue",
+        "pending-restore",
+        "zero-requests",
+        "zero-submit",
+        "no-provider-storage",
     } <= set(evidence["categories"])
     assert {
-        "natural-input-stale", "semantic-custody", "reprepare-current",
-        "optional-kind-stale", "clarification-stale", "unsupported-stale",
-        "ignored-hidden-disabled", "manual-editor-stale", "manual-edit-back-stale",
-        "reject-stale-manual", "reject-stale-untouched", "guided-clearing",
-        "guided-dependents", "guided-nonreplacement", "nonreplacement-result-custody",
-        "guided-completed-history", "no-invented-guide-transition", "draft-clearing",
-        "replacement-matrix", "reject-replacement", "invalidation-zero-requests",
-        "send-exact-editor", "send-no-reinterpret", "send-envelope",
-        "submitted-state", "pending-event-custody", "settled-state",
-        "pending-restored-after-send", "authoritative-result",
-        "reject-submitted-zero-requests", "reject-submitted-editor",
-        "submitted-stale-manual", "csrf-start-failure",
+        "natural-input-stale",
+        "semantic-custody",
+        "reprepare-current",
+        "optional-kind-stale",
+        "clarification-stale",
+        "unsupported-stale",
+        "ignored-hidden-disabled",
+        "manual-editor-stale",
+        "manual-edit-back-stale",
+        "reject-stale-manual",
+        "reject-stale-untouched",
+        "guided-clearing",
+        "guided-dependents",
+        "guided-nonreplacement",
+        "nonreplacement-result-custody",
+        "guided-completed-history",
+        "no-invented-guide-transition",
+        "draft-clearing",
+        "replacement-matrix",
+        "reject-replacement",
+        "invalidation-zero-requests",
+        "send-exact-editor",
+        "send-no-reinterpret",
+        "send-envelope",
+        "submitted-state",
+        "pending-event-custody",
+        "settled-state",
+        "pending-restored-after-send",
+        "authoritative-result",
+        "reject-submitted-zero-requests",
+        "reject-submitted-editor",
+        "submitted-stale-manual",
+        "csrf-start-failure",
     } <= set(evidence["categories"])
     assert evidence["preparationInvalidationRequests"] == 0
     assert evidence["mockedFetchCalls"] == 5
@@ -1323,12 +1538,14 @@ def test_bounded_intent_ui_harness_preparation_rejection_and_pending() -> None:
 def test_sprint41_preparation_has_no_authority_inputs_or_transport() -> None:
     script = (ASSET_ROOT / "app.js").read_text(encoding="utf-8")
     pure = script[
-        script.index("function prepareBoundedNaturalLanguageIntent("):
-        script.index("const GUIDE_STAGES")
+        script.index("function prepareBoundedNaturalLanguageIntent(") : script.index(
+            "const GUIDE_STAGES"
+        )
     ]
     ui = script[
-        script.index("// Sprint 41 browser-only proposal lifecycle;"):
-        script.index("function setRequestPending(pending)")
+        script.index("// Sprint 41 browser-only proposal lifecycle;") : script.index(
+            "function setRequestPending(pending)"
+        )
     ]
     assert (
         "prepareBoundedNaturalLanguageIntent(naturalText, explicitFields = {})" in pure
@@ -1338,17 +1555,29 @@ def test_sprint41_preparation_has_no_authority_inputs_or_transport() -> None:
         in ui
     )
     for authority in (
-        "proofInput", "fallbackInput", "csrf", "requested_workspace_id",
-        "principal", "membership", "permissions", "actor", "localStorage",
-        "sessionStorage", "fetch(",
+        "proofInput",
+        "fallbackInput",
+        "requested_workspace_id",
+        "principal",
+        "membership",
+        "permissions",
+        "actor",
+        "localStorage",
+        "sessionStorage",
     ):
         assert authority not in pure and authority not in ui
-    send = script[script.index('form.addEventListener("submit"'):]
+    assert "csrf" not in pure and "fetch(" not in pure
+    assert ui.count('fetch("/local/intent-preparation"') == 1
+    send = script[script.index('form.addEventListener("submit"') :]
     envelope = send.split("const requestBody = JSON.stringify({", 1)[1].split(
-        "});", 1,
+        "});",
+        1,
     )[0]
     assert re.findall(r"^\s*(\w+):", envelope, re.MULTILINE) == [
-        "proof", "requested_workspace_id", "text", "allow_cognitive_fallback",
+        "proof",
+        "requested_workspace_id",
+        "text",
+        "allow_cognitive_fallback",
     ]
     assert 'requested_workspace_id: "luxiom-local-dev-workspace"' in envelope
     assert "text: commandInput.value" in envelope
@@ -1363,7 +1592,7 @@ def test_sprint41_authority_looking_payloads_remain_literal_ui_data() -> None:
     assert node is not None, "Sprint 41 custody evidence requires Node"
     # Exercise the actual app/UI in its existing VM fixture, without changing
     # either approved browser harness. Instrument authority reads after startup.
-    javascript = r'''
+    javascript = r"""
 const assert = require("node:assert/strict");
 const vm = require("node:vm");
 const {createEnvironment} = require(
@@ -1470,13 +1699,215 @@ async function run() {
 }
 run().then(e => process.stdout.write(JSON.stringify(e)))
   .catch(e => {process.stderr.write(e.stack); process.exitCode=1;});
-'''
+"""
     completed = subprocess.run(
-        [node, "-e", javascript], check=True, capture_output=True,
-        encoding="utf-8", timeout=30,
+        [node, "-e", javascript],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=30,
     )
     evidence = json.loads(completed.stdout)
     assert evidence == {
-        "literalVectors": 9, "preparationRequests": 0, "sendRequests": 9,
-        "nativeBrowserVerified": False, "nativeKeyboardVerified": False,
+        "literalVectors": 9,
+        "preparationRequests": 0,
+        "sendRequests": 9,
+        "nativeBrowserVerified": False,
+        "nativeKeyboardVerified": False,
     }
+
+
+BLOCK_C_GOLDEN = json.loads(
+    Path("tests/browser/local_model_intent_preparation_vectors.json").read_text(
+        encoding="utf-8",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    "vector",
+    BLOCK_C_GOLDEN,
+    ids=[f"block-c-golden-{index}" for index in range(len(BLOCK_C_GOLDEN))],
+)
+def test_block_c_frozen_eligibility_golden(vector: dict[str, Any]) -> None:
+    from app.cognition.intent_preparation.eligibility import assess_eligibility
+
+    actual = assess_eligibility(vector["text"])
+    assert actual.decision.value == vector["decision"]
+    assert actual.reason == vector["reason"]
+
+
+def test_block_c_browser_python_eligibility_and_unicode_parity() -> None:
+    import unicodedata
+
+    from app.cognition.intent_preparation.eligibility import assess_eligibility
+
+    node = shutil.which("node")
+    assert node is not None
+    texts = [vector["text"] for vector in BLOCK_C_GOLDEN]
+    # Exercise both sides of every Unicode category transition as standalone
+    # negation boundaries, including supplementary and browser-new assignments.
+    ranges = []
+    start = None
+    for point in range(0x110001):
+        is_letter_number = point < 0x110000 and unicodedata.category(chr(point))[0] in (
+            "L",
+            "N",
+        )
+        if is_letter_number and start is None:
+            start = point
+        if not is_letter_number and start is not None:
+            ranges.append([start, point - 1])
+            start = None
+    for left, right in ranges:
+        for point in {max(0, left - 1), left, right, min(0x10FFFF, right + 1)}:
+            character = chr(point)
+            texts.extend((character + "no" + character, "si" + character))
+    completed = subprocess.run(
+        [node, "tests/browser/local_model_intent_preparation_ui.js", "--parity"],
+        input=json.dumps(texts, ensure_ascii=True),
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=60,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["forbiddenAccesses"] == 0
+    assert evidence["ranges"] == ranges
+    assert len(evidence["classifications"]) == len(texts)
+    for text, actual in zip(texts, evidence["classifications"], strict=True):
+        python = assess_eligibility(text)
+        assert actual == {
+            "decision": python.decision.value,
+            "reason": python.reason,
+        }, repr(text)
+    assert evidence["keywordText"] == ("abcdefghijklmnopqrstuvwxyzáéíóúüñİK")
+    print(
+        f"Block C: {len(texts)} browser/Python eligibility vectors and "
+        "1114112 Unicode category points PASS",
+    )
+
+
+def test_block_c_consent_structure_and_accessibility() -> None:
+    html = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    parsed = _parse(html)
+    consent = parsed.elements_by_id["local-model-consent"]
+    assert consent["type"] == "checkbox"
+    assert consent["autocomplete"] == "off"
+    assert "checked" not in consent
+    assert consent["aria-describedby"] == (
+        "local-model-consent-help local-model-consent-status"
+    )
+    assert '<label class="checkbox" for="local-model-consent">' in html
+    assert "Allow local model assistance" in html
+    assert html.index('id="local-model-consent"') < html.index(
+        '<form id="command-form">',
+    )
+    assert parsed.elements_by_id["local-model-consent-status"]["role"] == "status"
+    assert "local interpretation assistance only" in html
+    assert "grants no execution authority" in html
+    assert "resets on refresh" in html
+    assert "natural-intent-provenance" in parsed.elements_by_id
+
+
+def test_block_c_real_ui_async_lifecycle_and_interpreter_parity() -> None:
+    from app.cognition.local_resolution.models import (
+        FindKnowledgeRecordsQuery,
+        ReadListItemsQuery,
+        StoreKnowledgeRecordCommand,
+    )
+
+    node = shutil.which("node")
+    assert node is not None
+    completed = subprocess.run(
+        [node, "tests/browser/local_model_intent_preparation_ui.js"],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=60,
+    )
+    evidence = json.loads(completed.stdout)
+    assert evidence["environment"] == "node-dom-double"
+    assert evidence["actualRequests"] == evidence["forbiddenAccesses"] == 0
+    assert evidence["implicitSubmissions"] == 0
+    assert evidence["nativeBrowserVerified"] is False
+    assert evidence["nativeKeyboardVerified"] is False
+    assert evidence["goldenVectors"] == len(BLOCK_C_GOLDEN)
+    assert evidence["passed"] > 400
+    assert {
+        "default-off",
+        "startup-no-request",
+        "session-reset",
+        "no-persistence",
+        "deterministic-first",
+        "deterministic-prepared",
+        "deterministic-clarification",
+        "protected-zero-calls",
+        "eligible-off",
+        "one-request",
+        "duplicate-no-request",
+        "text-only",
+        "transport",
+        "literal-provenance",
+        "capture-metadata",
+        "clarification-editor-retained",
+        "recall-exact-key",
+        "recall-kind",
+        "list-builders",
+        "explicit-conflict",
+        "failure-state",
+        "closed-malformed",
+        "wire-failure",
+        "partial-clarification",
+        "list-source-constraints",
+        "reject-untouched",
+        "reject-manual",
+        "reject-edit-back",
+        "stale-natural-edit-back",
+        "stale-manual-edit-back",
+        "stale-consent",
+        "stale-reject",
+        "stale-replacement",
+        "stale-new-interpretation",
+        "no-queued-request",
+        "pending-slot-cleanup",
+        "late-body-correlation",
+        "send-exact-editor-envelope",
+        "no-reinterpret-on-send",
+        "zero-authority-access",
+        "zero-implicit-send",
+    } <= set(evidence["categories"])
+    types = {
+        "CAPTURE_KNOWLEDGE": StoreKnowledgeRecordCommand,
+        "RECALL_KNOWLEDGE": FindKnowledgeRecordsQuery,
+        "ADD_FOLLOW_UP": AddListItemsCommand,
+        "READ_FOLLOW_UP": ReadListItemsQuery,
+    }
+    assert {vector["intent"] for vector in evidence["vectors"]} == set(types)
+    interpreter = DeterministicLocalCommandInterpreter()
+    workspace = WorkspaceIdentity("sprint42-block-c-synthetic")
+    for vector in evidence["vectors"]:
+        command, fields = vector["command"], vector["fields"]
+        assert len(command) <= 8192
+        result = interpreter.interpret(command, workspace)
+        assert result.status.value == "interpreted", vector["name"]
+        intent = result.intent
+        assert type(intent) is types[vector["intent"]]
+        if isinstance(intent, StoreKnowledgeRecordCommand):
+            assert intent.record.workspace is workspace
+            assert intent.record.kind.value == fields["kind"]
+            for name in ("record_id", "key", "value"):
+                assert getattr(intent.record, name) == fields[name]
+            for name in ("source_type", "source_reference"):
+                assert getattr(intent.record.provenance, name) == fields[name]
+        elif isinstance(intent, FindKnowledgeRecordsQuery):
+            assert intent.key == fields["key"]
+            assert (intent.kind.value if intent.kind is not None else None) == (
+                fields.get("kind")
+            )
+        elif isinstance(intent, AddListItemsCommand):
+            assert intent.list_id == fields["list_id"]
+            assert intent.items == (fields["item"],)
+        else:
+            assert intent.list_id == fields["list_id"]
+    print(f"Block C: {evidence['passed']} async UI checks PASS")

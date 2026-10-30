@@ -89,9 +89,7 @@ async def _request(
     await app(scope, receive, cast(Any, send))
 
     start = next(
-        message
-        for message in messages
-        if message["type"] == "http.response.start"
+        message for message in messages if message["type"] == "http.response.start"
     )
     response_body = b"".join(
         cast(bytes, message.get("body", b""))
@@ -110,9 +108,7 @@ async def _post(
     headers: dict[str, str] | None = None,
 ) -> tuple[int, dict[str, object]]:
     request_headers = (
-        {"content-type": "application/json"}
-        if headers is None
-        else dict(headers)
+        {"content-type": "application/json"} if headers is None else dict(headers)
     )
     return await _request(
         app,
@@ -171,10 +167,12 @@ def test_factory_is_no_io_keeps_runtime_new_and_builds_separate_surface(
     luxiom_paths = {
         path: tuple(sorted(methods))
         for path, methods in app.openapi()["paths"].items()
-        if path.startswith(("/local", "/brain", "/knowledge"))
-        or path == "/health"
+        if path.startswith(("/local", "/brain", "/knowledge")) or path == "/health"
     }
-    assert luxiom_paths == {("/local/command"): ("post",)}
+    assert luxiom_paths == {
+        "/local/command": ("post",),
+        "/local/intent-preparation": ("post",),
+    }
 
 
 def test_lifespan_starts_once_injects_exact_gateway_and_cleans_up() -> None:
@@ -452,9 +450,7 @@ def test_real_runtime_http_add_read_wrong_proof_and_shutdown(
 
 
 def test_public_results_allow_only_closed_projection_not_generic_payloads() -> None:
-    application_fields = {
-        field.name for field in fields(LocalCommandApplicationResult)
-    }
+    application_fields = {field.name for field in fields(LocalCommandApplicationResult)}
     http_fields = set(LocalCommandHttpResponse.model_fields)
     prohibited = {
         "payload",

@@ -90,11 +90,20 @@
       <h2 id="natural-intent-heading">Natural-language preparation</h2>
       <p id="natural-intent-help">Use one deliberately bounded Spanish request, such as
         “Recuerda que MedSupply entrega los martes.” or “Qué sabes de MedSupply”.
-        Interpret / Prepare performs no request. The generated command stays visible
-        and editable below; Send remains separate and governed.</p>
+        Deterministic preparation runs first. With optional local assistance enabled,
+        one eligible unrecognized request may be sent for interpretation only.
+        The proposed command stays visible and editable below; Send remains separate and governed.</p>
       <label for="natural-intent-input">Spanish request</label>
       <textarea id="natural-intent-input" rows="4" autocomplete="off"
         aria-describedby="natural-intent-help"></textarea>
+      <label class="checkbox" for="local-model-consent">
+        <input id="local-model-consent" type="checkbox" autocomplete="off"
+          aria-describedby="local-model-consent-help local-model-consent-status">
+        Allow local model assistance
+      </label>
+      <p id="local-model-consent-help">Default OFF; resets on refresh. Consent permits
+        local interpretation assistance only and grants no execution authority.</p>
+      <p id="local-model-consent-status" role="status">Local model assistance is OFF for this page session.</p>
       <div id="natural-intent-fields">
         <div id="natural-field-record-id-row" hidden>
           <label for="natural-field-record-id">Record ID</label>
@@ -142,6 +151,7 @@
       <div id="natural-intent-result" hidden>
         <h3>Preparation for review</h3>
         <dl>
+          <div class="projection-row"><dt>Preparation provenance</dt><dd id="natural-intent-provenance"></dd></div>
           <div class="projection-row"><dt>Outcome</dt><dd id="natural-intent-outcome"></dd></div>
           <div class="projection-row"><dt>Intent</dt><dd id="natural-intent-detected-intent"></dd></div>
           <div class="projection-row"><dt>Extracted fields</dt><dd id="natural-intent-extracted-fields"></dd></div>
