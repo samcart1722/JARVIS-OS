@@ -1,6 +1,32 @@
 # Roadmap
 
-## Current boundary - Sprint 41 planning
+## Transición vigente — 2026-11-02
+
+Sprint 42: **PARTIAL_CLOSURE / ACCEPTANCE_DEBT_OPEN**, cierre administrativo
+autorizado; registro documental propuesto para revisión, aún sin incorporación canónica.
+La última release funcional registrada sigue siendo Sprint 41.
+PR [#84](https://github.com/samcart1722/JARVIS-OS/pull/84): **OPEN / DRAFT / UNMERGED**,
+head remoto 64424733989e8a73544b83150eb437ab5970fc64.
+Sprint 43: **PLANNING_ONLY / CANDIDATE_FOR_EVALUATION**; implementación no autorizada.
+
+Nuevo candidato para evaluación Sprint 43: filtro literal temporal de ID/clave en la página BROWSE/BROWSE-AFTER ya recibida. Mejora local al navegador sin modelo ni consultas adicionales. No era un alcance aprobado del roadmap. Infraestructura y deuda del modelo se planifican por separado.
+
+Evidencia separada por alcance: JavaScript 10,640 PASS; Ruff 477 archivos PASS;
+Python histórico CORR02 3,939 PASS. No son una regresión Python integral CORR03.
+MODEL04 4B PASS solo en conjunto conocido; **MODEL05 CHANGES_REQUIRED**.
+El nuevo prompt CORR03 no ha sido probado con inferencias reales. Python integral,
+semántica, evaluación MODEL05, Edge e integración Git permanecen pendientes.
+
+- [Registro de cierre parcial](SPRINT_42_PARTIAL_CLOSURE_RECORD.md).
+- [Backlog diferido e infraestructura separada](SPRINT_42_DEFERRED_ACCEPTANCE_BACKLOG.md).
+- [Propuesta Sprint 43, solo evaluación](SPRINT_43_LOCAL_BROWSE_FILTER_EVALUATION_PLAN.md).
+- [Plan de revisión e integración documental posterior](SPRINT_42_43_DOCUMENTATION_INTEGRATION_PLAN.md).
+
+Los estados de flujo y autorizaciones de los checkpoints anteriores conservados
+debajo son históricos. Sus hechos inmutables de release siguen vigentes; no
+reemplazan esta actualización de planificación ni autorizan acciones nuevas.
+
+## Historical checkpoint (pre-transition) - Current boundary - Sprint 41 planning
 
 Sprint 40 is FORMALLY CLOSED with post-closure cleanup COMPLETE and canonical
 truth FULLY SYNCHRONIZED at `4f3de7b56001340aba1f39be812eb9b630a07960`;

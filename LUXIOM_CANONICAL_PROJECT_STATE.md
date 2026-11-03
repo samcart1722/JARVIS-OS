@@ -1,6 +1,32 @@
 # Luxiom Canonical Project State
 
-## Current planning truth - Sprint 42
+## Transición vigente — 2026-11-02
+
+Sprint 42: **PARTIAL_CLOSURE / ACCEPTANCE_DEBT_OPEN**, cierre administrativo
+autorizado; registro documental propuesto para revisión, aún sin incorporación canónica.
+La última release funcional registrada sigue siendo Sprint 41.
+PR [#84](https://github.com/samcart1722/JARVIS-OS/pull/84): **OPEN / DRAFT / UNMERGED**,
+head remoto 64424733989e8a73544b83150eb437ab5970fc64.
+Sprint 43: **PLANNING_ONLY / CANDIDATE_FOR_EVALUATION**; implementación no autorizada.
+
+Implementación A/A2/B/C/D en #84; CORR03 comprometido solo localmente. Master sigue en 02557dc6a22c84913205b96c580f9752dc889d5e; las correcciones no están integradas. El checkpoint anterior de A2/B es histórico.
+
+Evidencia separada por alcance: JavaScript 10,640 PASS; Ruff 477 archivos PASS;
+Python histórico CORR02 3,939 PASS. No son una regresión Python integral CORR03.
+MODEL04 4B PASS solo en conjunto conocido; **MODEL05 CHANGES_REQUIRED**.
+El nuevo prompt CORR03 no ha sido probado con inferencias reales. Python integral,
+semántica, evaluación MODEL05, Edge e integración Git permanecen pendientes.
+
+- [Registro de cierre parcial](docs/knowledge-base/SPRINT_42_PARTIAL_CLOSURE_RECORD.md).
+- [Backlog diferido e infraestructura separada](docs/knowledge-base/SPRINT_42_DEFERRED_ACCEPTANCE_BACKLOG.md).
+- [Propuesta Sprint 43, solo evaluación](docs/knowledge-base/SPRINT_43_LOCAL_BROWSE_FILTER_EVALUATION_PLAN.md).
+- [Plan de revisión e integración documental posterior](docs/knowledge-base/SPRINT_42_43_DOCUMENTATION_INTEGRATION_PLAN.md).
+
+Los estados de flujo y autorizaciones de los checkpoints anteriores conservados
+debajo son históricos. Sus hechos inmutables de release siguen vigentes; no
+reemplazan esta actualización de planificación ni autorizan acciones nuevas.
+
+## Historical checkpoint (pre-transition) - Current planning truth - Sprint 42
 
 Scope: **Sprint 42 - Governed Local Model-Assisted Intent Preparation v1**.
 Planning baseline independently approved: SPRINT_42_PLANNING_BASELINE_APPROVED.

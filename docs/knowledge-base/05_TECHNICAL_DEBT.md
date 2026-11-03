@@ -1,6 +1,32 @@
 # Technical Debt
 
-## Current Sprint 41 planning classification
+## Transición vigente — 2026-11-02
+
+Sprint 42: **PARTIAL_CLOSURE / ACCEPTANCE_DEBT_OPEN**, cierre administrativo
+autorizado; registro documental propuesto para revisión, aún sin incorporación canónica.
+La última release funcional registrada sigue siendo Sprint 41.
+PR [#84](https://github.com/samcart1722/JARVIS-OS/pull/84): **OPEN / DRAFT / UNMERGED**,
+head remoto 64424733989e8a73544b83150eb437ab5970fc64.
+Sprint 43: **PLANNING_ONLY / CANDIDATE_FOR_EVALUATION**; implementación no autorizada.
+
+S42-AD-01/02/03/04/05 registran Python, semántica, MODEL05, Edge e integración Git pendientes. INF-HARNESS-01 es infraestructura separada. Sin sprint/owner/fecha asignados; no trasladar automáticamente todo a Sprint 43 ni cerrar deuda histórica anterior.
+
+Evidencia separada por alcance: JavaScript 10,640 PASS; Ruff 477 archivos PASS;
+Python histórico CORR02 3,939 PASS. No son una regresión Python integral CORR03.
+MODEL04 4B PASS solo en conjunto conocido; **MODEL05 CHANGES_REQUIRED**.
+El nuevo prompt CORR03 no ha sido probado con inferencias reales. Python integral,
+semántica, evaluación MODEL05, Edge e integración Git permanecen pendientes.
+
+- [Registro de cierre parcial](SPRINT_42_PARTIAL_CLOSURE_RECORD.md).
+- [Backlog diferido e infraestructura separada](SPRINT_42_DEFERRED_ACCEPTANCE_BACKLOG.md).
+- [Propuesta Sprint 43, solo evaluación](SPRINT_43_LOCAL_BROWSE_FILTER_EVALUATION_PLAN.md).
+- [Plan de revisión e integración documental posterior](SPRINT_42_43_DOCUMENTATION_INTEGRATION_PLAN.md).
+
+Los estados de flujo y autorizaciones de los checkpoints anteriores conservados
+debajo son históricos. Sus hechos inmutables de release siguen vigentes; no
+reemplazan esta actualización de planificación ni autorizan acciones nuevas.
+
+## Historical checkpoint (pre-transition) - Current Sprint 41 planning classification
 
 Sprint 40 is formally closed and its guided capture/recall/follow-up/verify
 experience is released; its post-closure cleanup and canonical truth are complete.
