@@ -36,6 +36,7 @@ def test_uvicorn_is_the_only_new_direct_runtime_dependency() -> None:
         "pydantic",
         "pydantic-settings",
         "uvicorn",
+        "requests>=2.32,<3",  # Approved Sprint 42 Block B loopback adapter.
     ]
 
 
